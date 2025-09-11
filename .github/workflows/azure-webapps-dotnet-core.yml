@@ -24,9 +24,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'   # or match your local dev version
+          node-version: '20'
 
-      # Install frontend dependencies (includes Sass if in package.json)
       - name: Install npm dependencies
         run: npm install
 
@@ -43,11 +42,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      - name: Restore NuGet packages
+        run: dotnet restore
+
       - name: Build with dotnet
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release
 
       - name: Publish with dotnet
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp --no-restore
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
