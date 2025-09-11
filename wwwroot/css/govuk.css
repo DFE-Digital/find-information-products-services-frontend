@@ -1,0 +1,55 @@
+/* GOV.UK Frontend 5.11.1 - Custom overrides for FIPS Frontend */
+
+/* Import GOV.UK Frontend base styles */
+@import url('https://assets.publishing.service.gov.uk/static/govuk-frontend-5.11.1.min.css');
+
+/* Custom styles for FIPS Frontend */
+.govuk-header__service-name {
+  font-weight: 700;
+}
+
+.govuk-main-wrapper {
+  padding-top: 0;
+}
+
+/* Product state badges */
+.govuk-tag--new {
+  background-color: #1d70b8;
+}
+
+.govuk-tag--active {
+  background-color: #00703c;
+}
+
+.govuk-tag--rejected {
+  background-color: #d4351c;
+}
+
+.govuk-tag--removed {
+  background-color: #626a6e;
+}
+
+/* Table styling */
+.govuk-table__header {
+  font-weight: 700;
+}
+
+/* Form styling */
+.govuk-form-group {
+  margin-bottom: 20px;
+}
+
+/* Button spacing */
+.govuk-button + .govuk-button {
+  margin-left: 10px;
+}
+
+/* Error summary */
+.govuk-error-summary {
+  margin-bottom: 30px;
+}
+
+/* Back link */
+.govuk-back-link {
+  margin-bottom: 20px;
+}

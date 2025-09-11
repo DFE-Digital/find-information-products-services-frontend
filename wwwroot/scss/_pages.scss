@@ -1,0 +1,12 @@
+.dfe-page {
+
+  &--main-top-border {
+      border-top: 2px solid $govuk-border-colour;
+      padding-top: 20px;
+  }
+
+  &--aside-top-border {
+      border-top: 2px solid  $govuk-brand-colour;
+      padding-top: 20px;
+  }
+}

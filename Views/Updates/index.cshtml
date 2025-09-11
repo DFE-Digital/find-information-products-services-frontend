@@ -1,0 +1,52 @@
+@model UpdatesViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    @if (Model.PageContent != null)
+    {
+        <h1 class="govuk-heading-xl">@Model.PageContent.Title</h1>
+        
+        @if (!string.IsNullOrEmpty(Model.PageContent.MetaDescription))
+        {
+            <p class="govuk-body-l">@Model.PageContent.MetaDescription</p>
+        }
+        
+      
+        @if (!string.IsNullOrEmpty(Model.ProcessedBody))
+        {
+            <div>
+                @Html.Raw(Model.ProcessedBody)
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.PageContent?.Body))
+        {
+            <div>
+                <p class="govuk-body"><strong>Fallback - showing raw markdown:</strong></p>
+                <pre>@Model.PageContent.Body</pre>
+            </div>
+        }
+    }
+   
+  </div>
+  
+  <div class="govuk-grid-column-one-third">
+    <aside class="govuk-aside" role="complementary">
+      @if (!string.IsNullOrEmpty(Model.ProcessedRelatedContent))
+      {
+        @Html.Raw(Model.ProcessedRelatedContent)
+      }
+      else
+      {
+        <h2 class="govuk-heading-m">Get help</h2>
+        <p class="govuk-body">If you need help using this service, you can:</p>
+        <ul class="govuk-list">
+          <li><a href="/contact" class="govuk-link">Contact us</a></li>
+          <li><a href="/help" class="govuk-link">View help and support</a></li>
+          <li><a href="/feedback" class="govuk-link">Give feedback</a></li>
+        </ul>
+      }
+    </aside>
+  </div>
+</div>

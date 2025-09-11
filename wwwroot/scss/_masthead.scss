@@ -1,0 +1,44 @@
+.dfe-masthead{
+  background-color: #f4f8fb;
+  padding: 50px 0 50px 0;
+  margin-bottom: 20px;
+
+  &--title, &--content {
+      color: $govuk-text-colour;
+  }
+
+  &--content {
+      margin-bottom: 0;
+  }
+
+  &--with-links {
+      padding-top: 0px;
+
+      .govuk-back-link, .govuk-breadcrumbs {
+          margin-bottom: 40px;
+      }
+  }
+
+  .govuk-table{
+      margin-bottom: 0;
+  }
+
+
+  &--home{
+      background-color: $govuk-brand-colour;
+  }
+
+  &--home-title{
+      color: govuk-colour("white")
+  }
+
+  &--home-content{
+      color: govuk-colour("white")
+  }
+
+  &--home .govuk-button-group, &--home .govuk-link, &--home .govuk-button {
+      margin-bottom: 0px;
+  }
+
+
+}

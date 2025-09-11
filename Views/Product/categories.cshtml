@@ -1,0 +1,153 @@
+@model FipsFrontend.Models.ProductCategoriesViewModel
+@{
+    ViewData["Title"] = $"{Model.Product.Title} - Categories";
+}
+
+@section BeforeContent {
+    <div class="dfe-masthead dfe-masthead--with-links">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/products" class="govuk-back-link">Back to products</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        @Model.Product.Title
+                    </h1>
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Phase</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Group</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Contacts</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">UniqueID: </span>
+                                    <span title="@Model.Product.FipsId">@(Model.Product.FipsId?.Substring(0, Math.Min(6, Model.Product.FipsId?.Length ?? 0)))</span>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">Phase: </span>
+                                    @{
+                                        var phaseCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+                                    }
+                                    @if (phaseCategory != null)
+                                    {
+                                        <strong class="govuk-tag govuk-tag--blue">@phaseCategory.Name</strong>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">Group: </span>
+                                    @{
+                                        var businessAreaCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+                                    }
+                                    @if (businessAreaCategory != null)
+                                    {
+                                        @businessAreaCategory.Name
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (Model.Product.ProductContacts?.Any() == true)
+                                    {
+                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                    }
+                                    else
+                                    {
+                                        <span>0 contacts</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+        <nav aria-label="Components Menu" class="dfe-vertical-nav">
+            <button type="button" class="dfe-vertical-nav__toggle dfe-js-vertical-nav-toggle" aria-controls="side-navigation" hidden="" aria-expanded="false">
+                Product navigation
+            </button>
+            <ul class="dfe-vertical-nav__section" id="side-navigation">
+                <li class="dfe-vertical-nav__section-item">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId">Overview</a>
+                </li>
+                <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId/categories">Categories</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+
+    <div class="govuk-grid-column-two-thirds">
+        
+        @if (Model.CategoryInfo.Any())
+        {
+            @foreach (var categoryInfo in Model.CategoryInfo)
+            {
+                <div class="govuk-!-margin-bottom-6">
+                    <h2 class="govuk-heading-m govuk-!-margin-bottom-3">@categoryInfo.CategoryTypeName</h2>
+                    
+                    @if (categoryInfo.CategoryValueNames.Any())
+                    {
+                        @for (int i = 0; i < categoryInfo.CategoryValueNames.Count; i++)
+                        {
+                            <div class="govuk-grid-row govuk-!-margin-bottom-3">
+                                <div class="govuk-grid-column-one-third">
+                                    <div class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+                                        @categoryInfo.CategoryValueNames[i]
+                                    </div>
+                                </div>
+                                <div class="govuk-grid-column-two-thirds">
+                                    <div class="govuk-body">
+                                        <a href="/products?@GetFilterParameter(categoryInfo.CategoryTypeName, categoryInfo.CategoryValueSlugs[i])" class="govuk-link govuk-!-margin-right-4" rel="noopener noreferrer">
+                                            Other products
+                                        </a>
+                                        <a href="/categories/@categoryInfo.CategoryTypeSlug" class="govuk-link" rel="noopener noreferrer">
+                                            View description
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="govuk-body-s govuk-!-margin-bottom-0">No values assigned</p>
+                    }
+                </div>
+                
+                @if (categoryInfo != Model.CategoryInfo.Last())
+                {
+                    <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-6">
+                }
+            }
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p>No categories are currently assigned to this product.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    public string GetFilterParameter(string categoryTypeName, string slug)
+    {
+        return categoryTypeName.ToLower() switch
+        {
+            "phase" => $"phase={slug}",
+            "channel" => $"channel={slug}",
+            "type" => $"type={slug}",
+            "group" => $"group={slug}",
+            "user group" => $"userGroup={slug}",
+            _ => $"category={slug}"
+        };
+    }
+}

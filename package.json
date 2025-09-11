@@ -1,0 +1,17 @@
+{
+  "name": "fips-frontend",
+  "version": "1.0.0",
+  "description": "FIPS Frontend SCSS Build",
+  "scripts": {
+    "build-css": "sass wwwroot/scss:wwwroot/css --style=compressed --source-map",
+    "watch-css": "sass wwwroot/scss:wwwroot/css --watch --style=expanded --source-map",
+    "build": "npm run build-css",
+    "dev": "npm run watch-css"
+  },
+  "devDependencies": {
+    "@ministryofjustice/frontend": "^5.1.5",
+    "accessible-autocomplete": "^3.0.1",
+    "govuk-frontend": "^5.11.2",
+    "sass": "^1.69.5"
+  }
+}

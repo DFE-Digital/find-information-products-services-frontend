@@ -1,0 +1,138 @@
+@model FipsFrontend.Models.ProductViewModel
+@{
+    ViewData["Title"] = Model.Product.Title;
+}
+
+@section BeforeContent {
+    <div class="dfe-masthead dfe-masthead--with-links">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/products" class="govuk-back-link">Back to products</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        @Model.Product.Title
+                    </h1>
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Phase</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Group</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Contacts</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">UniqueID: </span>
+                                    <span title="@Model.Product.FipsId">@(Model.Product.FipsId?.Substring(0, Math.Min(6, Model.Product.FipsId?.Length ?? 0)))</span>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">Phase: </span>
+                                    @{
+                                        var phaseCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+                                    }
+                                    @if (phaseCategory != null)
+                                    {
+                                        <strong class="govuk-tag govuk-tag--blue">@phaseCategory.Name</strong>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">Group: </span>
+                                    @{
+                                        var businessAreaCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+                                    }
+                                    @if (businessAreaCategory != null)
+                                    {
+                                        @businessAreaCategory.Name
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (Model.Product.ProductContacts?.Any() == true)
+                                    {
+                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                    }
+                                    else
+                                    {
+                                        <span>0 contacts</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+        <nav aria-label="Components Menu" class="dfe-vertical-nav">
+            <button type="button" class="dfe-vertical-nav__toggle dfe-js-vertical-nav-toggle" aria-controls="side-navigation" hidden="" aria-expanded="false">
+                Product navigation
+            </button>
+            <ul class="dfe-vertical-nav__section" id="side-navigation">
+                <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId">Overview</a>
+                </li>
+                <li class="dfe-vertical-nav__section-item">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId/categories">Categories</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="govuk-grid-column-two-thirds">
+       
+     
+
+        <h2 class="govuk-heading-m">Description</h2>
+        
+        @if (!string.IsNullOrEmpty(Model.Product.LongDescription))
+        {
+            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.Product.LongDescription</pre>
+        }
+        else if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
+        {
+            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.Product.ShortDescription</pre>
+        }
+
+        <h2 class="govuk-heading-m" id="contacts">Responsibilities and contacts</h2>
+
+        @if (Model.Product.ProductContacts?.Any() == true)
+        {
+            <dl class="govuk-summary-list">
+                @foreach (var contact in Model.Product.ProductContacts)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            @if (!string.IsNullOrEmpty(contact.Role))
+                            {
+                                @contact.Role
+                            }
+                            else
+                            {
+                                @contact.Name
+                            }
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @if (!string.IsNullOrEmpty(contact.Email))
+                            {
+                                <a href="mailto:@contact.Email" class="govuk-link" rel="noopener noreferrer">@contact.Name</a>
+                            }
+                            else
+                            {
+                                @contact.Name
+                            }
+                        </dd>
+                    </div>
+                }
+            </dl>
+        }
+        else
+        {
+            <p class="govuk-body">No contact information available.</p>
+        }
+    </div>
+</div>

@@ -1,0 +1,115 @@
+// Card component styles
+.dfe-card-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: govuk-spacing(6);
+  align-items: stretch;
+}
+
+.dfe-card {
+  border: 3px solid $govuk-border-colour;
+  padding: govuk-spacing(4);
+  background-color: $govuk-body-background-colour;
+  flex: 0 1 calc((100% - 40px) / 3);
+  min-width: 280px;
+  max-width: 400px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: $govuk-text-colour;
+  box-sizing: border-box;
+
+  @include govuk-media-query($until: tablet) {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  &:link,
+  &:visited {
+    color: $govuk-text-colour;
+    text-decoration: none;
+  }
+
+  &:hover {
+    background-color: #f4f8fb;
+    border-color: $govuk-link-colour;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  &:focus {
+    outline: $govuk-focus-width solid $govuk-focus-colour;
+    background-color: $govuk-body-background-colour;
+    border-color: $govuk-text-colour;
+    text-decoration: none;
+    box-shadow: inset 0 0 0 $govuk-focus-width $govuk-focus-colour;
+  }
+
+  &:active {
+    background-color: #e6f0f7;
+    border-color: $govuk-link-colour;
+  }
+}
+
+.dfe-card-title {
+  @include govuk-font(19, $weight: bold);
+  margin-bottom: govuk-spacing(2);
+  margin-top: 0;
+
+  .dfe-card:hover &,
+  .dfe-card:focus & {
+    text-decoration: underline;
+    color: $govuk-link-colour;
+  }
+}
+
+.dfe-card-content {
+  @include govuk-font(16);
+  margin-bottom: 0;
+  margin-top: 0;
+  color: $govuk-secondary-text-colour;
+  flex-grow: 1;
+}
+
+.dfe-card-meta {
+  font-size: 1rem;
+  color: $govuk-secondary-text-colour;
+  padding-top: govuk-spacing(3);
+  margin-bottom: 0;
+  margin-top: auto;
+}
+
+// Support for cards that aren't links themselves
+.dfe-card:not(a) {
+  cursor: default;
+  
+  &:hover {
+    background-color: $govuk-body-background-colour;
+    border-color: $govuk-border-colour;
+    cursor: default;
+  }
+  
+  &:focus {
+    outline: none;
+    background-color: $govuk-body-background-colour;
+    border-color: $govuk-border-colour;
+    box-shadow: none;
+  }
+}
+
+// Action link at bottom of card content
+.dfe-card-action {
+  margin-top: govuk-spacing(3);
+  
+  a {
+    @include govuk-link-common;
+    @include govuk-link-style-default;
+    font-weight: bold;
+    
+    &:focus {
+      @include govuk-focused-text;
+    }
+  }
+}

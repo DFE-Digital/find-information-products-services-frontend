@@ -1,0 +1,726 @@
+@model FipsFrontend.Models.ProductsViewModel
+
+@{
+    ViewData["Title"] = Model.PageTitle;
+}
+
+@section BeforeContent {
+<div class="dfe-masthead">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        @ViewData["Title"]
+                    </h1>
+               
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+        
+        <!-- MOJ Filter Component -->
+        <form method="get" action="/products">
+            
+            <div class="moj-filter" data-module="moj-filter">
+                <div class="moj-filter__header">
+                    <div class="moj-filter__header-title">
+                        <h2 class="govuk-heading-m">Filter</h2>
+                    </div>
+                    <div class="moj-filter__header-action">
+                        @if (Model.SelectedFilters.Any())
+                        {
+                            <p><a class="govuk-link govuk-link--no-visited-state" href="/products">Clear filters</a></p>
+                        }
+                    </div>
+                </div>
+
+                <div class="moj-filter__content">
+                    
+                    @if (Model.SelectedFilters.Any())
+                    {
+                        <div class="moj-filter__selected">
+                            <div class="moj-filter__selected-heading">
+                                <div class="moj-filter__heading-title">
+                                    <h2 class="govuk-heading-m">Selected filters</h2>
+                                </div>
+                                <div class="moj-filter__heading-action">
+                                    <p><a class="govuk-link govuk-link--no-visited-state" href="/products">Clear filters</a></p>
+                                </div>
+                            </div>
+
+                            @foreach (var filterGroup in Model.SelectedFilters.GroupBy(f => f.Category))
+                            {
+                                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">@filterGroup.Key</h3>
+                                <ul class="moj-filter-tags">
+                                    @foreach (var filter in filterGroup)
+                                    {
+                                        <li><a class="moj-filter__tag" href="@filter.RemoveUrl"><span class="govuk-visually-hidden">Remove this filter</span> @filter.DisplayText</a></li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    }
+
+                    <div class="moj-filter__options">
+                        
+                        <button type="submit" class="govuk-button" data-module="govuk-button">
+                            Apply filters
+                        </button>
+
+                        <!-- Product name search -->
+                        <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--s" for="keywords">
+                                Product name
+                            </label>
+                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Model.Keywords">
+                        </div>
+
+                        <!-- User groups autocomplete -->
+                        <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--s" for="user-autocomplete">
+                                User groups
+                            </label>
+                            <div id="user-autocomplete-container">
+                                <!-- This will be replaced by accessible-autocomplete -->
+                            </div>
+
+                            <!-- Selected users will appear here as checkboxes -->
+                            <div id="selected-users-container" style="margin-top: 15px; display: none;">
+                                <fieldset class="govuk-fieldset">
+                                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--xs">
+                                        Selected user types
+                                    </legend>
+                                    <div class="govuk-checkboxes govuk-checkboxes--small" id="selected-users-list">
+                                        <!-- Selected users will be dynamically added here -->
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
+                        <!-- Phase filter -->
+                        @if (Model.PhaseOptions != null && Model.PhaseOptions.Any())
+                        {
+                            <div class="moj-filter-group">
+                                <button type="button" 
+                                        class="filter-toggle-button" 
+                                        data-target="phase-filter" 
+                                        aria-expanded="false" 
+                                        aria-controls="phase-filter"
+                                        aria-describedby="phase-filter-description">
+                                    Phase
+                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
+                                </button>
+                                <div id="phase-filter-description" class="govuk-visually-hidden">
+                                    Click to show or hide Phase filter options
+                                </div>
+                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="phase-filter" data-module="govuk-checkboxes" style="display: none;" aria-hidden="true">
+                                    @foreach (var phase in Model.PhaseOptions)
+                                    {
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="phase-@phase.Value.ToLower().Replace(" ", "-")" name="phase" type="checkbox" value="@phase.Value" @(phase.IsSelected ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="phase-@phase.Value.ToLower().Replace(" ", "-")">
+                                                @phase.Text
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Channel filter -->
+                        @if (Model.ChannelOptions != null && Model.ChannelOptions.Any())
+                        {
+                            <div class="moj-filter-group">
+                                <button type="button" 
+                                        class="filter-toggle-button" 
+                                        data-target="channel-filter" 
+                                        aria-expanded="false" 
+                                        aria-controls="channel-filter"
+                                        aria-describedby="channel-filter-description">
+                                    Channel
+                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
+                                </button>
+                                <div id="channel-filter-description" class="govuk-visually-hidden">
+                                    Click to show or hide Channel filter options
+                                </div>
+                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="channel-filter" data-module="govuk-checkboxes" style="display: none;" aria-hidden="true">
+                                    @foreach (var channel in Model.ChannelOptions)
+                                    {
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="channel-@channel.Value.ToLower().Replace(" ", "-")" name="channel" type="checkbox" value="@channel.Value" @(channel.IsSelected ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="channel-@channel.Value.ToLower().Replace(" ", "-")">
+                                                @channel.Text
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Group filter -->
+                        @if (Model.GroupOptions != null && Model.GroupOptions.Any())
+                        {
+                            <div class="moj-filter-group">
+                                <button type="button" 
+                                        class="filter-toggle-button" 
+                                        data-target="group-filter" 
+                                        aria-expanded="false" 
+                                        aria-controls="group-filter"
+                                        aria-describedby="group-filter-description">
+                                    Group
+                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
+                                </button>
+                                <div id="group-filter-description" class="govuk-visually-hidden">
+                                    Click to show or hide Group filter options
+                                </div>
+                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="group-filter" data-module="govuk-checkboxes" style="display: none;" aria-hidden="true">
+                                    @foreach (var group in Model.GroupOptions)
+                                    {
+                                        var isOperationsInfrastructure = group.Value.Equals("Operations and Infrastructure", StringComparison.OrdinalIgnoreCase);
+                                        var hasSubgroups = isOperationsInfrastructure && group.SubOptions?.Any() == true;
+                                        
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" 
+                                                   id="group-@group.Value.ToLower().Replace(" ", "-")" 
+                                                   name="group" 
+                                                   type="checkbox" 
+                                                   value="@group.Value" 
+                                                   @(group.IsSelected ? "checked" : "")
+                                                   @(hasSubgroups ? $"aria-controls=\"conditional-group-{group.Value.ToLower().Replace(" ", "-")}\" aria-expanded=\"false\"" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="group-@group.Value.ToLower().Replace(" ", "-")">
+                                                @group.Text
+                                            </label>
+                                        </div>
+                                        
+                                        @if (hasSubgroups && group.SubOptions != null)
+                                        {
+                                            <div class="govuk-checkboxes__conditional govuk-checkboxes__conditional--hidden" id="conditional-group-@group.Value.ToLower().Replace(" ", "-")">
+                                                <div class="govuk-form-group">
+                                                    <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" data-module="govuk-checkboxes">
+                                                        @foreach (var subgroup in group.SubOptions)
+                                                        {
+                                                            <div class="govuk-checkboxes__item">
+                                                                <input class="govuk-checkboxes__input" 
+                                                                       id="subgroup-@subgroup.Value.ToLower().Replace(" ", "-")" 
+                                                                       name="subgroup" 
+                                                                       type="checkbox" 
+                                                                       value="@subgroup.Value" 
+                                                                       @(subgroup.IsSelected ? "checked" : "")>
+                                                                <label class="govuk-label govuk-checkboxes__label" for="subgroup-@subgroup.Value.ToLower().Replace(" ", "-")">
+                                                                    @subgroup.Text
+                                                                </label>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Type filter -->
+                        @if (Model.TypeOptions != null && Model.TypeOptions.Any())
+                        {
+                            <div class="moj-filter-group">
+                                <button type="button" 
+                                        class="filter-toggle-button" 
+                                        data-target="type-filter" 
+                                        aria-expanded="false" 
+                                        aria-controls="type-filter"
+                                        aria-describedby="type-filter-description">
+                                    Type
+                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
+                                </button>
+                                <div id="type-filter-description" class="govuk-visually-hidden">
+                                    Click to show or hide Type filter options
+                                </div>
+                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="type-filter" data-module="govuk-checkboxes" style="display: none;" aria-hidden="true">
+                                    @foreach (var type in Model.TypeOptions)
+                                    {
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="type-@type.Value.ToLower().Replace(" ", "-")" name="type" type="checkbox" value="@type.Value" @(type.IsSelected ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="type-@type.Value.ToLower().Replace(" ", "-")">
+                                                @type.Text
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="govuk-grid-column-two-thirds">
+
+        <!-- Results Summary -->
+        <div class="govuk-!-margin-bottom-4">
+            <p class="govuk-body">
+                Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount products and services
+                @if (Model.FilteredCount != Model.TotalCount)
+                {
+                    <text>(filtered from @Model.TotalCount total)</text>
+                }
+            </p>
+        </div>
+
+        <!-- Products Grid -->
+        @if (Model.Products.Any())
+        {
+            <ul class="dfe-chevron-card__list">
+                @foreach (var product in Model.Products)
+                {
+                   
+                    <li class="dfe-chevron-card">
+                        <div class="dfe-chevron-card__wrapper">
+                            <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
+                                <a class="govuk-link govuk-link--no-visited-state" href="/product/@product.FipsId">
+                                    @product.Title
+                                </a>
+                            </h3>
+                            <p class="dfe-chevron-card__description govuk-body govuk-body-s">
+                                @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                {
+                                    @(product.ShortDescription.Length > 100 ? product.ShortDescription.Substring(0, 100) + "..." : product.ShortDescription)
+                                }
+                                else
+                                {
+                                    <text>No description available</text>
+                                }
+                            </p>
+
+                            <!-- Meta information -->
+                            <div class="govuk-!-margin-top-2">
+                                <span class="govuk-tag govuk-tag--grey govuk-!-font-size-16">FIPS-@product.FipsId</span>
+                                @{
+                                    var phaseCategoryValue = product.CategoryValues?.FirstOrDefault(cv => 
+                                        cv.CategoryType?.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+                                    var phaseDisplay = phaseCategoryValue?.Name ?? "No phase";
+                                }
+                                @if (phaseDisplay != "No phase")
+                                {
+                                    <span class="govuk-tag govuk-tag--blue govuk-!-font-size-16">@phaseDisplay</span>
+                                }
+                                else
+                                {
+                                <span class="govuk-tag govuk-tag--red govuk-!-font-size-16">@phaseDisplay</span>
+                                }
+                            </div>
+
+                            <a class="dfe-chevron-card__link" href="/product/@product.FipsId" aria-hidden="true" tabindex="-1">
+                                <span class="govuk-visually-hidden">@product.Title</span>
+                            </a>
+                        </div>
+                    </li>
+                }
+            </ul>
+            
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="govuk-pagination" aria-label="Pagination">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <div class="govuk-pagination__prev">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
+                                keywords = Model.Keywords,
+                                phase = Model.SelectedPhases,
+                                group = Model.SelectedGroups,
+                                subgroup = Model.SelectedSubgroups,
+                                channel = Model.SelectedChannels,
+                                type = Model.SelectedTypes,
+                                cmdbStatus = Model.SelectedCmdbStatuses,
+                                parent = Model.SelectedCmdbGroups,
+                                userGroup = Model.SelectedUserGroups,
+                                page = Model.CurrentPage - 1
+                            })" rel="prev">
+                                <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                    <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+                                </svg>
+                                <span class="govuk-pagination__link-title">
+                                    Previous<span class="govuk-visually-hidden"> page</span>
+                                </span>
+                            </a>
+                        </div>
+                    }
+                    
+                    <ul class="govuk-pagination__list">
+                        @{
+                            var startPage = Math.Max(1, Model.CurrentPage - 2);
+                            var endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                            
+                            // Always show first page if not in range
+                            if (startPage > 1)
+                            {
+                                <li class="govuk-pagination__item">
+                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
+                                        keywords = Model.Keywords,
+                                        phase = Model.SelectedPhases,
+                                        group = Model.SelectedGroups,
+                                        subgroup = Model.SelectedSubgroups,
+                                        channel = Model.SelectedChannels,
+                                        type = Model.SelectedTypes,
+                                        cmdbStatus = Model.SelectedCmdbStatuses,
+                                        parent = Model.SelectedCmdbGroups,
+                                        userGroup = Model.SelectedUserGroups,
+                                        page = 1
+                                    })" aria-label="Page 1">
+                                        1
+                                    </a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                                }
+                            }
+                            
+                            // Show pages in range
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="govuk-pagination__item @(i == Model.CurrentPage ? "govuk-pagination__item--current" : "")">
+                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
+                                        keywords = Model.Keywords,
+                                        phase = Model.SelectedPhases,
+                                        group = Model.SelectedGroups,
+                                        subgroup = Model.SelectedSubgroups,
+                                        channel = Model.SelectedChannels,
+                                        type = Model.SelectedTypes,
+                                        cmdbStatus = Model.SelectedCmdbStatuses,
+                                        parent = Model.SelectedCmdbGroups,
+                                        userGroup = Model.SelectedUserGroups,
+                                        page = i
+                                    })" aria-label="Page @i" @(i == Model.CurrentPage ? "aria-current=\"page\"" : "")>
+                                        @i
+                                    </a>
+                                </li>
+                            }
+                            
+                            // Always show last page if not in range
+                            if (endPage < Model.TotalPages)
+                            {
+                                @if (endPage < Model.TotalPages - 1)
+                                {
+                                    <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                                }
+                                <li class="govuk-pagination__item">
+                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
+                                        keywords = Model.Keywords,
+                                        phase = Model.SelectedPhases,
+                                        group = Model.SelectedGroups,
+                                        subgroup = Model.SelectedSubgroups,
+                                        channel = Model.SelectedChannels,
+                                        type = Model.SelectedTypes,
+                                        cmdbStatus = Model.SelectedCmdbStatuses,
+                                        parent = Model.SelectedCmdbGroups,
+                                        userGroup = Model.SelectedUserGroups,
+                                        page = Model.TotalPages
+                                    })" aria-label="Page @Model.TotalPages">
+                                        @Model.TotalPages
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    
+                    @if (Model.HasNextPage)
+                    {
+                        <div class="govuk-pagination__next">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
+                                keywords = Model.Keywords,
+                                phase = Model.SelectedPhases,
+                                group = Model.SelectedGroups,
+                                subgroup = Model.SelectedSubgroups,
+                                channel = Model.SelectedChannels,
+                                type = Model.SelectedTypes,
+                                cmdbStatus = Model.SelectedCmdbStatuses,
+                                parent = Model.SelectedCmdbGroups,
+                                userGroup = Model.SelectedUserGroups,
+                                page = Model.CurrentPage + 1
+                            })" rel="next">
+                                <span class="govuk-pagination__link-title">
+                                    Next<span class="govuk-visually-hidden"> page</span>
+                                </span>
+                                <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                    <path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    }
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p class="govuk-body">No products found matching your filters.</p>
+                @if (Model.SelectedFilters.Any())
+                {
+                    <p class="govuk-body"><a href="/products" class="govuk-link">Clear all filters</a> to see all products.</p>
+                }
+                else
+                {
+                    <p class="govuk-body"><a asp-action="Create" class="govuk-link">Add the first product</a>.</p>
+                }
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                    // User groups data passed from controller (hierarchical)
+                    const userGroupsData = @Html.Raw(Json.Serialize(Model.UserGroupOptions.Select(u => {
+                        // Remove the count from the text to get the clean name
+                        var cleanName = u.Text.Replace(" (" + u.Count + ")", "");
+                        
+                        // Check if this has a parent by looking for the pattern "Name (Parent Name)"
+                        // This is how the controller formats it when there's a parent
+                        var hasParent = cleanName.Contains(" (") && cleanName.EndsWith(")");
+                        var childName = cleanName;
+                        var parentName = "";
+                        
+                        if (hasParent) {
+                            // Find the last " (" to split on, since names can contain parentheses
+                            var lastParenIndex = cleanName.LastIndexOf(" (");
+                            if (lastParenIndex > 0) {
+                                childName = cleanName.Substring(0, lastParenIndex);
+                                parentName = cleanName.Substring(lastParenIndex + 2).Replace(")", "");
+                            }
+                        }
+                        
+                        return new { 
+                            id = u.Value, 
+                            label = childName, // Main text is just the child name
+                            childName = childName,
+                            parentName = parentName,
+                            isChild = hasParent,
+                            searchText = cleanName.ToLower(),
+                            count = u.Count
+                        };
+                    }))) || [];
+            
+            console.log('User groups data loaded:', userGroupsData.length, 'items');
+            
+            // Array to store selected users
+            let selectedUsers = [];
+            
+            // Parse existing selections from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const existingUsers = urlParams.getAll('userGroup');
+            if (existingUsers.length > 0) {
+                existingUsers.forEach(userId => {
+                    const user = userGroupsData.find(u => u.id === userId);
+                    if (user) {
+                        selectedUsers.push(user);
+                    }
+                });
+                updateSelectedUsersDisplay();
+            }
+            
+            // Function to update the displayed selected users
+            function updateSelectedUsersDisplay() {
+                const container = document.getElementById('selected-users-container');
+                const list = document.getElementById('selected-users-list');
+                
+                if (selectedUsers.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+                
+                container.style.display = 'block';
+                list.innerHTML = '';
+                
+                selectedUsers.forEach((user, index) => {
+                    const checkboxItem = document.createElement('div');
+                    checkboxItem.className = 'govuk-checkboxes__item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.className = 'govuk-checkboxes__input';
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'userGroup';
+                    checkbox.value = user.id;
+                    checkbox.id = 'user-' + index;
+                    checkbox.checked = true;
+                    
+                    const label = document.createElement('label');
+                    label.className = 'govuk-label govuk-checkboxes__label';
+                    label.setAttribute('for', 'user-' + index);
+                    label.textContent = user.label;
+                    
+                    checkboxItem.appendChild(checkbox);
+                    checkboxItem.appendChild(label);
+                    list.appendChild(checkboxItem);
+                });
+            }
+            
+            // Function to add a user to the selected list
+            function addUser(user) {
+                // Check if user is already selected
+                const alreadySelected = selectedUsers.some(u => u.id === user.id);
+                if (!alreadySelected) {
+                    selectedUsers.push(user);
+                    updateSelectedUsersDisplay();
+                }
+            }
+
+            // Custom search function that filters by labels
+            function source(query, populateResults) {
+                if (!query || query.length < 2) {
+                    populateResults([]);
+                    return;
+                }
+                
+                const searchTerm = query.toLowerCase();
+                const filteredResults = userGroupsData.filter(function(item) {
+                    // Exclude already selected users
+                    const alreadySelected = selectedUsers.some(u => u.id === item.id);
+                    if (alreadySelected) return false;
+                    
+                    return item.searchText.includes(searchTerm);
+                }).sort(function(a, b) {
+                    // Sort alphabetically by label
+                    return a.label.localeCompare(b.label);
+                });
+                
+                const results = filteredResults.slice(0, 15); // Limit to 15 results
+                populateResults(results);
+            }
+            
+            // Check if accessible autocomplete is available
+            if (typeof accessibleAutocomplete === 'undefined') {
+                console.error('Accessible autocomplete library not loaded');
+                // Create fallback input
+                const container = document.getElementById('user-autocomplete-container');
+                container.innerHTML = '<input class="govuk-input" type="text" id="user-fallback" name="userGroup" placeholder="Start typing to search user groups...">';
+                return;
+            }
+            
+            try {
+                // Initialize accessible autocomplete
+                accessibleAutocomplete({
+                    element: document.querySelector('#user-autocomplete-container'),
+                    id: 'user-autocomplete',
+                    name: 'user-display', // Different name to avoid conflict
+                    source: source,
+                    minLength: 2,
+                            templates: {
+                                inputValue: function(suggestion) {
+                                    return suggestion && suggestion.label ? suggestion.label : suggestion;
+                                },
+                                suggestion: function(suggestion) {
+                                    if (suggestion && suggestion.label) {
+                                        if (suggestion.isChild && suggestion.parentName) {
+                                            // Show child name as main text, parent as meta
+                                            return `<div class="autocomplete-suggestion">
+                                                <div class="autocomplete-child-name">${suggestion.childName}</div>
+                                                <div class="autocomplete-parent-name">${suggestion.parentName}</div>
+                                            </div>`;
+                                        } else {
+                                            // Show just the main text, no meta
+                                            return `<div class="autocomplete-suggestion">
+                                                <div class="autocomplete-parent-name">${suggestion.label}</div>
+                                            </div>`;
+                                        }
+                                    }
+                                    return suggestion;
+                                }
+                            },
+                    onConfirm: function(confirmed) {
+                        if (confirmed && confirmed.id) {
+                            addUser(confirmed);
+                            // Clear input and keep dropdown open
+                            setTimeout(function() {
+                                const input = document.querySelector('#user-autocomplete');
+                                if (input) {
+                                    input.value = '';
+                                    input.focus();
+                                    // Trigger a new search with empty value to close dropdown
+                                    const event = new Event('input', { bubbles: true });
+                                    input.dispatchEvent(event);
+                                }
+                            }, 100);
+                        } else if (typeof confirmed === 'string') {
+                            // Handle case where user types something that doesn't match
+                            const match = userGroupsData.find(function(user) {
+                                return user.label.toLowerCase() === confirmed.toLowerCase();
+                            });
+                            if (match) {
+                                addUser(match);
+                                // Clear input and keep dropdown open
+                                setTimeout(function() {
+                                    const input = document.querySelector('#user-autocomplete');
+                                    if (input) {
+                                        input.value = '';
+                                        input.focus();
+                                        const event = new Event('input', { bubbles: true });
+                                        input.dispatchEvent(event);
+                                    }
+                                }, 100);
+                            }
+                        }
+                    },
+                    showNoOptionsFound: true,
+                    showAllValues: false,
+                    displayMenu: 'overlay',
+                    placeholder: ''
+                });
+            } catch (error) {
+                console.error('Error initializing autocomplete:', error);
+                // Create fallback input on error
+                const container = document.getElementById('user-autocomplete-container');
+                container.innerHTML = '<input class="govuk-input" type="text" id="user-fallback" name="userGroup" placeholder="Start typing to search user groups...">';
+            }
+
+            // Initialize MOJ filter
+            if (typeof moj !== 'undefined' && moj.Modules && moj.Modules.Filter) {
+                new moj.Modules.Filter();
+            }
+
+            // Initialize filter toggles
+            document.querySelectorAll('.filter-toggle-button').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const target = document.getElementById(targetId);
+                    
+                    if (target) {
+                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                        
+                        if (isExpanded) {
+                            // Collapse
+                            target.style.display = 'none';
+                            target.setAttribute('aria-hidden', 'true');
+                            this.setAttribute('aria-expanded', 'false');
+                        } else {
+                            // Expand
+                            target.style.display = 'block';
+                            target.setAttribute('aria-hidden', 'false');
+                            this.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                });
+
+                // Handle keyboard navigation
+                button.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        this.click();
+                    }
+                });
+            });
+        });
+    </script>
+}

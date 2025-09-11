@@ -1,0 +1,125 @@
+@model CategoriesDetailViewModel
+@{ ViewData["Title"] = Model.PageTitle; }
+
+@section BeforeContent {
+<div class="govuk-width-container">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+        @if (Model.ParentCategory != null)
+        {
+            
+                <a href="/categories/@Model.CategoryType.Slug" class="govuk-back-link">Back to @Model.CategoryType.Name</a>
+         
+        }
+        else
+        {
+           
+                <a href="/categories" class="govuk-back-link">Back to all categories</a>
+          
+        }
+        </div>
+    </div>
+</div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+       
+        <span class="govuk-caption-l">@Model.Group</span>
+        <h1 class="govuk-heading-xl">@ViewData["Title"]</h1>
+        @if (!string.IsNullOrEmpty(Model.PageDescription))
+        {
+            <p class="govuk-body-l">@Model.PageDescription</p>
+        }
+
+        @if (Model.ParentCategory != null)
+        {
+            <!-- Parent category card -->
+            <ul class="dfe-chevron-card__list">
+                <li class="dfe-chevron-card">
+                    <div class="dfe-chevron-card__wrapper">
+                        <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
+                            <a class="govuk-link govuk-link--no-visited-state" href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)">
+                                @Model.ParentCategory.Name
+                            </a>
+                        </h2>
+                        <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
+                        
+                        <a class="dfe-chevron-card__link" href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)" aria-hidden="true" tabindex="-1">
+                            <span class="govuk-visually-hidden">@Model.ParentCategory.Name</span>
+                        </a>
+                      
+                    </div>  
+                    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+                </li>
+            </ul>
+
+            <h2 class="govuk-heading-m">Sub-categories</h2>
+            <p class="govuk-body">Sub categories within this category.</p>
+        }
+
+        @if (Model.CategoryValues.Any())
+        {
+            <ul class="dfe-chevron-card__list">
+                @foreach (var categoryValue in Model.CategoryValues)
+                {
+                    <li class="dfe-chevron-card">
+                        <div class="dfe-chevron-card__wrapper">
+                            @if (Model.CategoryType.MultiLevel && categoryValue.Children?.Any() == true)
+                            {
+                                <!-- Multi-level category with children - use chevron card -->
+                                <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
+                                    <a class="govuk-link govuk-link--no-visited-state" href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug">
+                                        @categoryValue.Name
+                                    </a>
+                                </h2>
+                                <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryValue.Children.Count sub-categories</p>
+                                
+                                <a class="dfe-chevron-card__link" href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug" aria-hidden="true" tabindex="-1">
+                                    <span class="govuk-visually-hidden">@categoryValue.Name</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <!-- Leaf category - link to products with filter -->
+                                <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
+                                    <a class="govuk-link govuk-link--no-visited-state" href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)">
+                                        @categoryValue.Name
+                                    </a>
+                                </h2>
+                                <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
+                                
+                                <a class="dfe-chevron-card__link" href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)" aria-hidden="true" tabindex="-1">
+                                    <span class="govuk-visually-hidden">@categoryValue.Name</span>
+                                </a>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p>No items are currently available in this category.</p>
+            </div>
+        }
+
+
+    </div>
+</div>
+
+@functions {
+    private string GetFilterParameter(string categoryTypeName, string slug)
+    {
+        return categoryTypeName.ToLower() switch
+        {
+            "phase" => $"phase={slug}",
+            "channel" => $"channel={slug}",
+            "type" => $"type={slug}",
+            "group" => $"group={slug}",
+            "user group" => $"userGroup={slug}",
+            _ => $"category={slug}"
+        };
+    }
+}
