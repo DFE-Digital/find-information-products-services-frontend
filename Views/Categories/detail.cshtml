@@ -39,13 +39,27 @@
                 <li class="dfe-chevron-card">
                     <div class="dfe-chevron-card__wrapper">
                         <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
-                            <a class="govuk-link govuk-link--no-visited-state" href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)">
+                            <a class="govuk-link govuk-link--no-visited-state category-filter-link" 
+                               href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)"
+                               data-category-name="@Html.Encode(Model.ParentCategory.Name)"
+                               data-category-slug="@Model.ParentCategory.Slug"
+                               data-category-type="@Model.CategoryType.Name"
+                               data-filter-type="@Model.CategoryType.Name.ToLower()"
+                               data-action="view_products">
                                 @Model.ParentCategory.Name
                             </a>
                         </h2>
                         <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
                         
-                        <a class="dfe-chevron-card__link" href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)" aria-hidden="true" tabindex="-1">
+                        <a class="dfe-chevron-card__link category-filter-link" 
+                           href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)" 
+                           aria-hidden="true" 
+                           tabindex="-1"
+                           data-category-name="@Html.Encode(Model.ParentCategory.Name)"
+                           data-category-slug="@Model.ParentCategory.Slug"
+                           data-category-type="@Model.CategoryType.Name"
+                           data-filter-type="@Model.CategoryType.Name.ToLower()"
+                           data-action="view_products">
                             <span class="govuk-visually-hidden">@Model.ParentCategory.Name</span>
                         </a>
                       
@@ -69,13 +83,25 @@
                             {
                                 <!-- Multi-level category with children - use chevron card -->
                                 <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
-                                    <a class="govuk-link govuk-link--no-visited-state" href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug">
+                                    <a class="govuk-link govuk-link--no-visited-state category-link" 
+                                       href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug"
+                                       data-category-name="@Html.Encode(categoryValue.Name)"
+                                       data-category-slug="@categoryValue.Slug"
+                                       data-category-type="@Model.CategoryType.Name"
+                                       data-action="view_subcategory">
                                         @categoryValue.Name
                                     </a>
                                 </h2>
                                 <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryValue.Children.Count sub-categories</p>
                                 
-                                <a class="dfe-chevron-card__link" href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug" aria-hidden="true" tabindex="-1">
+                                <a class="dfe-chevron-card__link category-link" 
+                                   href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug" 
+                                   aria-hidden="true" 
+                                   tabindex="-1"
+                                   data-category-name="@Html.Encode(categoryValue.Name)"
+                                   data-category-slug="@categoryValue.Slug"
+                                   data-category-type="@Model.CategoryType.Name"
+                                   data-action="view_subcategory">
                                     <span class="govuk-visually-hidden">@categoryValue.Name</span>
                                 </a>
                             }
@@ -83,13 +109,27 @@
                             {
                                 <!-- Leaf category - link to products with filter -->
                                 <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
-                                    <a class="govuk-link govuk-link--no-visited-state" href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)">
+                                    <a class="govuk-link govuk-link--no-visited-state category-filter-link" 
+                                       href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)"
+                                       data-category-name="@Html.Encode(categoryValue.Name)"
+                                       data-category-slug="@categoryValue.Slug"
+                                       data-category-type="@Model.CategoryType.Name"
+                                       data-filter-type="@Model.CategoryType.Name.ToLower()"
+                                       data-action="view_products">
                                         @categoryValue.Name
                                     </a>
                                 </h2>
                                 <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
                                 
-                                <a class="dfe-chevron-card__link" href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)" aria-hidden="true" tabindex="-1">
+                                <a class="dfe-chevron-card__link category-filter-link" 
+                                   href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)" 
+                                   aria-hidden="true" 
+                                   tabindex="-1"
+                                   data-category-name="@Html.Encode(categoryValue.Name)"
+                                   data-category-slug="@categoryValue.Slug"
+                                   data-category-type="@Model.CategoryType.Name"
+                                   data-filter-type="@Model.CategoryType.Name.ToLower()"
+                                   data-action="view_products">
                                     <span class="govuk-visually-hidden">@categoryValue.Name</span>
                                 </a>
                             }
@@ -122,4 +162,81 @@
             _ => $"category={slug}"
         };
     }
+}
+
+@section Scripts {
+    <script>
+        // Google Analytics Event Tracking Functions
+        function trackGAEvent(eventName, parameters = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, parameters);
+            } else if (typeof ga !== 'undefined') {
+                ga('send', 'event', parameters.category || 'User Interaction', eventName, parameters.label || '', parameters.value || 0);
+            }
+            console.log('GA Event:', eventName, parameters);
+        }
+
+        function trackCategoryClick(categoryName, categorySlug, categoryType, action = 'view') {
+            trackGAEvent('category_' + action, {
+                event_category: 'Category Navigation',
+                category_name: categoryName,
+                category_slug: categorySlug,
+                category_type: categoryType,
+                event_label: categoryName,
+                custom_parameter_1: categorySlug,
+                custom_parameter_2: categoryType
+            });
+        }
+
+        function trackCategoryFilter(categoryName, categorySlug, filterType, action = 'applied') {
+            trackGAEvent('category_filter_' + action, {
+                event_category: 'Category Filter',
+                category_name: categoryName,
+                category_slug: categorySlug,
+                filter_type: filterType,
+                event_label: filterType + ': ' + categoryName,
+                custom_parameter_1: categorySlug,
+                custom_parameter_2: filterType
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Category navigation link tracking (for subcategories)
+            document.querySelectorAll('.category-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const categoryName = this.getAttribute('data-category-name');
+                    const categorySlug = this.getAttribute('data-category-slug');
+                    const categoryType = this.getAttribute('data-category-type');
+                    const action = this.getAttribute('data-action') || 'view';
+                    
+                    trackCategoryClick(categoryName, categorySlug, categoryType, action);
+                });
+            });
+
+            // Category filter link tracking (for product filtering)
+            document.querySelectorAll('.category-filter-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const categoryName = this.getAttribute('data-category-name');
+                    const categorySlug = this.getAttribute('data-category-slug');
+                    const categoryType = this.getAttribute('data-category-type');
+                    const filterType = this.getAttribute('data-filter-type');
+                    const action = this.getAttribute('data-action') || 'applied';
+                    
+                    trackCategoryFilter(categoryName, categorySlug, filterType, action);
+                });
+            });
+
+            // Back link tracking
+            document.querySelectorAll('.govuk-back-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const linkText = this.textContent.trim();
+                    trackGAEvent('back_link_click', {
+                        event_category: 'Navigation',
+                        back_link_text: linkText,
+                        event_label: linkText
+                    });
+                });
+            });
+        });
+    </script>
 }

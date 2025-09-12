@@ -76,7 +76,7 @@
                             <label class="govuk-label govuk-label--s" for="keywords">
                                 Product name
                             </label>
-                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Html.Encode(Model.Keywords)">
+                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Html.Encode(Model.Keywords)" data-search-type="product_name">
                         </div>
 
                         <!-- User groups autocomplete -->
@@ -123,7 +123,14 @@
                                     @foreach (var phase in Model.PhaseOptions)
                                     {
                                         <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input" id="phase-@phase.Value.ToLower().Replace(" ", "-")" name="phase" type="checkbox" value="@phase.Value" @(phase.IsSelected ? "checked" : "")>
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="phase-@phase.Value.ToLower().Replace(" ", "-")" 
+                                                   name="phase" 
+                                                   type="checkbox" 
+                                                   value="@phase.Value" 
+                                                   data-filter-type="phase"
+                                                   data-filter-value="@phase.Value"
+                                                   @(phase.IsSelected ? "checked" : "")>
                                             <label class="govuk-label govuk-checkboxes__label" for="phase-@phase.Value.ToLower().Replace(" ", "-")">
                                                 @phase.Text
                                             </label>
@@ -153,7 +160,14 @@
                                     @foreach (var channel in Model.ChannelOptions)
                                     {
                                         <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input" id="channel-@channel.Value.ToLower().Replace(" ", "-")" name="channel" type="checkbox" value="@channel.Value" @(channel.IsSelected ? "checked" : "")>
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="channel-@channel.Value.ToLower().Replace(" ", "-")" 
+                                                   name="channel" 
+                                                   type="checkbox" 
+                                                   value="@channel.Value" 
+                                                   data-filter-type="channel"
+                                                   data-filter-value="@channel.Value"
+                                                   @(channel.IsSelected ? "checked" : "")>
                                             <label class="govuk-label govuk-checkboxes__label" for="channel-@channel.Value.ToLower().Replace(" ", "-")">
                                                 @channel.Text
                                             </label>
@@ -186,11 +200,13 @@
                                         var hasSubgroups = isOperationsInfrastructure && group.SubOptions?.Any() == true;
                                         
                                         <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input" 
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
                                                    id="group-@group.Value.ToLower().Replace(" ", "-")" 
                                                    name="group" 
                                                    type="checkbox" 
                                                    value="@group.Value" 
+                                                   data-filter-type="group"
+                                                   data-filter-value="@group.Value"
                                                    @(group.IsSelected ? "checked" : "")
                                                    @(hasSubgroups ? $"aria-controls=\"conditional-group-{group.Value.ToLower().Replace(" ", "-")}\" aria-expanded=\"false\"" : "")>
                                             <label class="govuk-label govuk-checkboxes__label" for="group-@group.Value.ToLower().Replace(" ", "-")">
@@ -206,11 +222,13 @@
                                                         @foreach (var subgroup in group.SubOptions)
                                                         {
                                                             <div class="govuk-checkboxes__item">
-                                                                <input class="govuk-checkboxes__input" 
+                                                                <input class="govuk-checkboxes__input filter-checkbox" 
                                                                        id="subgroup-@subgroup.Value.ToLower().Replace(" ", "-")" 
                                                                        name="subgroup" 
                                                                        type="checkbox" 
                                                                        value="@subgroup.Value" 
+                                                                       data-filter-type="subgroup"
+                                                                       data-filter-value="@subgroup.Value"
                                                                        @(subgroup.IsSelected ? "checked" : "")>
                                                                 <label class="govuk-label govuk-checkboxes__label" for="subgroup-@subgroup.Value.ToLower().Replace(" ", "-")">
                                                                     @subgroup.Text
@@ -246,7 +264,14 @@
                                     @foreach (var type in Model.TypeOptions)
                                     {
                                         <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input" id="type-@type.Value.ToLower().Replace(" ", "-")" name="type" type="checkbox" value="@type.Value" @(type.IsSelected ? "checked" : "")>
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="type-@type.Value.ToLower().Replace(" ", "-")" 
+                                                   name="type" 
+                                                   type="checkbox" 
+                                                   value="@type.Value" 
+                                                   data-filter-type="type"
+                                                   data-filter-value="@type.Value"
+                                                   @(type.IsSelected ? "checked" : "")>
                                             <label class="govuk-label govuk-checkboxes__label" for="type-@type.Value.ToLower().Replace(" ", "-")">
                                                 @type.Text
                                             </label>
@@ -286,7 +311,11 @@
                     <li class="dfe-chevron-card">
                         <div class="dfe-chevron-card__wrapper">
                             <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
-                                <a class="govuk-link govuk-link--no-visited-state" href="/product/@product.FipsId">
+                                <a class="govuk-link govuk-link--no-visited-state product-link" 
+                                   href="/product/@product.FipsId"
+                                   data-product-title="@Html.Encode(product.Title)"
+                                   data-fips-id="@product.FipsId"
+                                   data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                     @product.Title
                                 </a>
                             </h3>
@@ -319,7 +348,13 @@
                                 }
                             </div>
 
-                            <a class="dfe-chevron-card__link" href="/product/@product.FipsId" aria-hidden="true" tabindex="-1">
+                            <a class="dfe-chevron-card__link product-link" 
+                               href="/product/@product.FipsId" 
+                               aria-hidden="true" 
+                               tabindex="-1"
+                               data-product-title="@Html.Encode(product.Title)"
+                               data-fips-id="@product.FipsId"
+                               data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                 <span class="govuk-visually-hidden">@product.Title</span>
                             </a>
                         </div>
@@ -481,6 +516,58 @@
 
 @section Scripts {
     <script>
+        // Google Analytics Event Tracking Functions
+        function trackGAEvent(eventName, parameters = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, parameters);
+            } else if (typeof ga !== 'undefined') {
+                ga('send', 'event', parameters.category || 'User Interaction', eventName, parameters.label || '', parameters.value || 0);
+            }
+            console.log('GA Event:', eventName, parameters);
+        }
+
+        function trackProductClick(productTitle, fipsId, position, searchTerm = '', activeFilters = []) {
+            trackGAEvent('product_click', {
+                event_category: 'Product Interaction',
+                event_label: productTitle,
+                product_id: fipsId,
+                product_position: position,
+                search_term: searchTerm,
+                active_filters: activeFilters.join(', '),
+                custom_parameter_1: fipsId,
+                custom_parameter_2: position.toString()
+            });
+        }
+
+        function trackFilterApplication(filterType, filterValue, action = 'applied') {
+            trackGAEvent('filter_' + action, {
+                event_category: 'Filter Interaction',
+                filter_type: filterType,
+                filter_value: filterValue,
+                event_label: filterType + ': ' + filterValue
+            });
+        }
+
+        function trackSearch(searchTerm, searchType = 'product_name') {
+            if (searchTerm && searchTerm.trim().length > 0) {
+                trackGAEvent('search', {
+                    event_category: 'Search',
+                    search_term: searchTerm.trim(),
+                    search_type: searchType,
+                    event_label: searchType + ': ' + searchTerm.trim()
+                });
+            }
+        }
+
+        function trackPagination(direction, currentPage, totalPages) {
+            trackGAEvent('pagination_' + direction, {
+                event_category: 'Navigation',
+                current_page: currentPage,
+                total_pages: totalPages,
+                event_label: direction + ' from page ' + currentPage
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
                     // User groups data passed from controller (hierarchical)
                     const userGroupsData = @Html.Raw(Json.Serialize(Model.UserGroupOptions.Select(u => {
@@ -720,6 +807,94 @@
                         this.click();
                     }
                 });
+            });
+
+            // Product link tracking
+            document.querySelectorAll('.product-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const productTitle = this.getAttribute('data-product-title');
+                    const fipsId = this.getAttribute('data-fips-id');
+                    const position = this.getAttribute('data-position');
+                    const searchTerm = document.getElementById('keywords')?.value || '';
+                    
+                    // Get active filters
+                    const activeFilters = [];
+                    document.querySelectorAll('.filter-checkbox:checked').forEach(function(checkbox) {
+                        const filterType = checkbox.getAttribute('data-filter-type');
+                        const filterValue = checkbox.getAttribute('data-filter-value');
+                        if (filterType && filterValue) {
+                            activeFilters.push(filterType + ':' + filterValue);
+                        }
+                    });
+                    
+                    trackProductClick(productTitle, fipsId, position, searchTerm, activeFilters);
+                });
+            });
+
+            // Filter checkbox tracking
+            document.querySelectorAll('.filter-checkbox').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const filterType = this.getAttribute('data-filter-type');
+                    const filterValue = this.getAttribute('data-filter-value');
+                    const action = this.checked ? 'applied' : 'removed';
+                    
+                    trackFilterApplication(filterType, filterValue, action);
+                });
+            });
+
+            // Search input tracking (on form submit)
+            const searchForm = document.querySelector('form[method="get"]');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    const searchInput = document.getElementById('keywords');
+                    if (searchInput && searchInput.value.trim()) {
+                        trackSearch(searchInput.value.trim(), 'product_name');
+                    }
+                });
+            }
+
+            // Pagination tracking
+            document.querySelectorAll('.govuk-pagination__link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    const currentPage = @Model.CurrentPage;
+                    const totalPages = @Model.TotalPages;
+                    
+                    if (this.classList.contains('govuk-pagination__link--prev') || this.textContent.includes('Previous')) {
+                        trackPagination('previous', currentPage, totalPages);
+                    } else if (this.classList.contains('govuk-pagination__link--next') || this.textContent.includes('Next')) {
+                        trackPagination('next', currentPage, totalPages);
+                    } else if (this.textContent.match(/^\d+$/)) {
+                        trackPagination('page_' + this.textContent, currentPage, totalPages);
+                    }
+                });
+            });
+
+            // Clear filters tracking
+            document.querySelectorAll('a[href="/products"]').forEach(function(link) {
+                if (link.textContent.includes('Clear')) {
+                    link.addEventListener('click', function(e) {
+                        trackGAEvent('clear_filters', {
+                            event_category: 'Filter Interaction',
+                            event_label: 'Clear all filters'
+                        });
+                    });
+                }
+            });
+
+            // Track page load with current filters
+            const currentSearchTerm = document.getElementById('keywords')?.value || '';
+            if (currentSearchTerm) {
+                trackSearch(currentSearchTerm, 'product_name');
+            }
+            
+            // Track current active filters on page load
+            document.querySelectorAll('.filter-checkbox:checked').forEach(function(checkbox) {
+                const filterType = checkbox.getAttribute('data-filter-type');
+                const filterValue = checkbox.getAttribute('data-filter-value');
+                if (filterType && filterValue) {
+                    trackFilterApplication(filterType, filterValue, 'loaded');
+                }
             });
         });
     </script>
