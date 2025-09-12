@@ -8,7 +8,7 @@
         @if (Model.ParentCategory != null)
         {
             
-                <a href="/categories/@Model.CategoryType.Slug" class="govuk-back-link">Back to @Model.CategoryType.Name</a>
+                <a href="/categories/@Html.Encode(Model.CategoryType.Slug)" class="govuk-back-link">Back to @Html.Encode(Model.CategoryType.Name)</a>
          
         }
         else

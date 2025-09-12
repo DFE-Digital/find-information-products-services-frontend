@@ -17,16 +17,17 @@ public class HomeController : Controller
         _cmsApiService = cmsApiService;
     }
 
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)] // Cache for 5 minutes
     public async Task<IActionResult> Index()
     {
         try
         {
-            // Get only published products for the count
-            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1");
+            // Get only published products for the count (cache for 5 minutes)
+            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1", TimeSpan.FromMinutes(5));
             var publishedCount = publishedProducts?.Meta?.Pagination?.Total ?? 0;
             
-            // Get published category types count
-            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1");
+            // Get published category types count (cache for 10 minutes)
+            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1", TimeSpan.FromMinutes(10));
             var categoryTypesCount = categoryTypes?.Meta?.Pagination?.Total ?? 0;
             
             var viewModel = new HomeViewModel
@@ -48,6 +49,7 @@ public class HomeController : Controller
         }
     }
 
+    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)] // Cache for 1 hour
     public IActionResult Privacy()
     {
         return View();

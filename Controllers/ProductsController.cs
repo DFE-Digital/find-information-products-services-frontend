@@ -25,48 +25,57 @@ public class ProductsController : Controller
         {
             var viewModel = new ProductsViewModel();
 
-            // First, get the total count of products
-            var countResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=1");
-            var totalCount = countResponse?.Meta?.Pagination?.Total ?? 0;
+            // Load category values for filters using individual API calls for each category type (cache for 15 minutes)
+            var phaseValues = await _cmsApiService.GetCategoryValuesForFilter("Phase", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+            var channelValues = await _cmsApiService.GetCategoryValuesForFilter("Channel", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+            var groupValues = await _cmsApiService.GetCategoryValuesForFilter("Group", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+            var userGroupValues = await _cmsApiService.GetCategoryValuesForFilter("User group", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
 
-            // Now get the specific page of products with proper pagination
+            // Debug logging for category values
+            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, Group={GroupCount}, UserGroup={UserGroupCount}", 
+                phaseValues.Count, channelValues.Count, groupValues.Count, userGroupValues.Count);
+
+            // Build CMS filter query string
+            var filterQuery = BuildCmsFilterQuery(phase, group, subgroup, channel, type, cmdbStatus, parent, userGroup);
+
+            // Get filtered products with count in a single call (cache for 5 minutes)
             var pageSize = 25;
-            var cmsPage = page; // Use the same page number
-            var productsResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(
-               $"products?pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][filters][category_type][name]=Phase&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name"
-            );
+            var cmsPage = page;
+            List<Product> filteredProducts;
+            int filteredTotalCount;
+            int totalCount;
 
-            var allProducts = productsResponse?.Data ?? new List<Product>();
-
-
-            // Load category types and values for filters
-            var categoryTypesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?populate=values");
-            var categoryTypes = categoryTypesResponse?.Data ?? new List<CategoryType>();
-
-            // Get specific category values for each filter type (excluding User group)
-            var phaseValuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?filters[category_type][name]=Phase&populate[category_type]=true");
-            var phaseValues = phaseValuesResponse?.Data ?? new List<CategoryValue>();
-
-            var channelValuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?filters[category_type][name]=Channel&populate[category_type]=true");
-            var channelValues = channelValuesResponse?.Data ?? new List<CategoryValue>();
-
-            var groupValuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?filters[category_type][name]=Group&populate[category_type]=true&populate[parent]=true&populate[children]=true");
-            var groupValues = groupValuesResponse?.Data ?? new List<CategoryValue>();
-
-            // Get user group values specifically with proper populate
-            var userGroupValuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?filters[category_type][name]=User group&populate[category_type]=true&populate[parent]=true&populate[children]=true");
-            var userGroupValues = userGroupValuesResponse?.Data ?? new List<CategoryValue>();
-
-            // If no user group values found, try without filters
-            if (userGroupValues.Count == 0)
+            if (!string.IsNullOrEmpty(keywords))
             {
-                var fallbackCategoryValuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?populate[category_type]=true&populate[parent]=true&populate[children]=true");
-                var fallbackCategoryValues = fallbackCategoryValuesResponse?.Data ?? new List<CategoryValue>();
+                // Search CMS for products matching the keywords with filters and pagination
+                var searchQuery = $"products?filters[title][$containsi]={Uri.EscapeDataString(keywords)}";
+                if (!string.IsNullOrEmpty(filterQuery))
+                {
+                    searchQuery += $"&{filterQuery}";
+                }
+                searchQuery += $"&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][filters][category_type][name]=Phase&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
 
-                // Filter manually for user group values
-                userGroupValues = fallbackCategoryValues
-                    .Where(cv => cv.CategoryType?.Name?.Equals("User group", StringComparison.OrdinalIgnoreCase) == true)
-                    .ToList();
+                var searchResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(searchQuery, TimeSpan.FromMinutes(2));
+                filteredProducts = searchResponse?.Data ?? new List<Product>();
+                filteredTotalCount = searchResponse?.Meta?.Pagination?.Total ?? 0;
+                totalCount = filteredTotalCount; // For search, use filtered count as total
+            }
+            else
+            {
+                // No keywords, apply filters at CMS level
+                var filterQueryWithPagination = $"products?{filterQuery}&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][filters][category_type][name]=Phase&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
+
+                var filteredResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(filterQueryWithPagination, TimeSpan.FromMinutes(5));
+                filteredProducts = filteredResponse?.Data ?? new List<Product>();
+                filteredTotalCount = filteredResponse?.Meta?.Pagination?.Total ?? 0;
+
+                // Get total count separately only if no filters applied
+                totalCount = filteredTotalCount;
+                if (string.IsNullOrEmpty(filterQuery))
+                {
+                    var countResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=1", TimeSpan.FromMinutes(10));
+                    totalCount = countResponse?.Meta?.Pagination?.Total ?? 0;
+                }
             }
 
             // Ensure view model properties are initialized
@@ -79,51 +88,9 @@ public class ProductsController : Controller
             viewModel.UserGroupOptions = new List<FilterOption>();
             viewModel.SelectedFilters = new List<SelectedFilter>();
 
-
-
-            // Build CMS filter query string
-            var filterQuery = BuildCmsFilterQuery(phase, group, subgroup, channel, type, cmdbStatus, parent, userGroup);
-
-            // Apply filters at CMS level for proper pagination
-            List<Product> filteredProducts;
-            int filteredTotalCount;
-
-            if (!string.IsNullOrEmpty(keywords))
-            {
-                // Search CMS for products matching the keywords with filters and pagination
-                var searchQuery = $"products?filters[title][$containsi]={Uri.EscapeDataString(keywords)}";
-                if (!string.IsNullOrEmpty(filterQuery))
-                {
-                    searchQuery += $"&{filterQuery}";
-                }
-                searchQuery += $"&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][filters][category_type][name]=Phase&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
-
-                var searchResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(searchQuery);
-                filteredProducts = searchResponse?.Data ?? new List<Product>();
-                filteredTotalCount = searchResponse?.Meta?.Pagination?.Total ?? 0;
-            }
-            else
-            {
-                // No keywords, apply filters at CMS level
-                var filterQueryWithPagination = $"products?{filterQuery}&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][filters][category_type][name]=Phase&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
-
-                var filteredResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(filterQueryWithPagination);
-                filteredProducts = filteredResponse?.Data ?? new List<Product>();
-                filteredTotalCount = filteredResponse?.Meta?.Pagination?.Total ?? 0;
-            }
-
             // Set up view model
-            viewModel.CategoryTypes = categoryTypes;
-            // Combine all category values for the view model
-            var allCategoryValues = new List<CategoryValue>();
-            allCategoryValues.AddRange(phaseValues);
-            allCategoryValues.AddRange(channelValues);
-            allCategoryValues.AddRange(groupValues);
-            allCategoryValues.AddRange(userGroupValues);
-            viewModel.CategoryValues = allCategoryValues;
-            viewModel.TotalCount = totalCount; // Use the total count from CMS
-            viewModel.FilteredCount = filteredTotalCount; // Use the filtered count from CMS
-
+            viewModel.TotalCount = totalCount;
+            viewModel.FilteredCount = filteredTotalCount;
 
             // Set pagination properties
             viewModel.CurrentPage = Math.Max(1, page);
@@ -145,7 +112,7 @@ public class ProductsController : Controller
             viewModel.SelectedUserGroups = userGroup?.ToList() ?? new List<string>();
 
             // Build filter options
-            await BuildFilterOptions(viewModel, allProducts, categoryTypes, phaseValues, channelValues, groupValues, userGroupValues);
+            await BuildFilterOptions(viewModel, filteredProducts, phaseValues, channelValues, groupValues, userGroupValues);
 
             // Build selected filters for display
             BuildSelectedFilters(viewModel);
@@ -587,7 +554,7 @@ public class ProductsController : Controller
     }
 
     private async Task BuildFilterOptions(ProductsViewModel viewModel, List<Product> allProducts,
-        List<CategoryType> categoryTypes, List<CategoryValue> phaseValues, List<CategoryValue> channelValues,
+        List<CategoryValue> phaseValues, List<CategoryValue> channelValues,
         List<CategoryValue> groupValues, List<CategoryValue> userGroupValues)
     {
         // Use a single bulk API call to get all products with category values for counting
@@ -602,16 +569,10 @@ public class ProductsController : Controller
         // Build phase options from specific phase values
         if (phaseValues.Any())
         {
-            var enabledPhaseValues = phaseValues
-                .Where(cv => cv.Enabled)
-                .OrderBy(cv => cv.SortOrder ?? 0)
-                .ThenBy(cv => cv.Name)
-                .ToList();
-
-            _logger.LogInformation("Found {Count} phase values to process", enabledPhaseValues.Count);
+            _logger.LogInformation("Found {Count} phase values to process", phaseValues.Count);
 
             viewModel.PhaseOptions = new List<FilterOption>();
-            foreach (var pv in enabledPhaseValues)
+            foreach (var pv in phaseValues)
             {
                 // Count products with this phase value locally (much faster)
                 var actualCount = allProductsForCounting.Count(p => p.CategoryValues?.Any(cv =>
@@ -632,16 +593,10 @@ public class ProductsController : Controller
         // Build channel options from specific channel values
         if (channelValues.Any())
         {
-            var enabledChannelValues = channelValues
-                .Where(cv => cv.Enabled)
-                .OrderBy(cv => cv.SortOrder ?? 0)
-                .ThenBy(cv => cv.Name)
-                .ToList();
-
-            _logger.LogInformation("Found {Count} channel values to process", enabledChannelValues.Count);
+            _logger.LogInformation("Channel values: {Count} items", channelValues.Count);
 
             viewModel.ChannelOptions = new List<FilterOption>();
-            foreach (var cv in enabledChannelValues)
+            foreach (var cv in channelValues)
             {
                 // Count products with this channel value locally (much faster)
                 var actualCount = allProductsForCounting.Count(p => p.CategoryValues?.Any(categoryValue =>
@@ -659,19 +614,12 @@ public class ProductsController : Controller
             }
         }
 
-        // Build type options from category type "Type" - get from category-types endpoint since category-values has permission issues
-        var typeCategoryType = categoryTypes.FirstOrDefault(ct => ct.Name.Equals("Type", StringComparison.OrdinalIgnoreCase));
-        _logger.LogInformation("Type category type found: {Found}, Name: {Name}", typeCategoryType != null, typeCategoryType?.Name);
-
-        if (typeCategoryType != null && typeCategoryType.Values?.Any() == true)
+        // Build type options from category type "Type" using individual API call
+        var typeValues = await _cmsApiService.GetCategoryValuesForFilter("Type", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+        
+        if (typeValues.Any())
         {
-            var typeValues = typeCategoryType.Values
-                .Where(cv => cv.Enabled)
-                .OrderBy(cv => cv.SortOrder ?? 0)
-                .ThenBy(cv => cv.Name)
-                .ToList();
-
-            _logger.LogInformation("Found {Count} type values to process from category-types endpoint", typeValues.Count);
+            _logger.LogInformation("Found {Count} type values to process", typeValues.Count);
 
             viewModel.TypeOptions = new List<FilterOption>();
             foreach (var tv in typeValues)
@@ -691,10 +639,6 @@ public class ProductsController : Controller
                 });
             }
         }
-        else
-        {
-            _logger.LogWarning("Type category type not found or has no values in category types: {Types}", string.Join(", ", categoryTypes.Select(ct => ct.Name)));
-        }
 
         // Build CMDB status options (based on product states for now)
         var stateGroups = allProducts.GroupBy(p => p.State).OrderBy(g => g.Key);
@@ -709,15 +653,9 @@ public class ProductsController : Controller
         // Build group options from specific group values
         if (groupValues.Any())
         {
-            var enabledGroupValues = groupValues
-                .Where(cv => cv.Enabled)
-                .OrderBy(cv => cv.SortOrder ?? 0)
-                .ThenBy(cv => cv.Name)
-                .ToList();
+            _logger.LogInformation("Found {Count} group values to process", groupValues.Count);
 
-            _logger.LogInformation("Found {Count} group values to process", enabledGroupValues.Count);
-
-            viewModel.GroupOptions = enabledGroupValues.Select(gv =>
+            viewModel.GroupOptions = groupValues.Select(gv =>
             {
                 var option = new FilterOption
                 {
@@ -757,7 +695,7 @@ public class ProductsController : Controller
         if (userGroupValues.Any())
         {
             viewModel.UserGroupOptions = new List<FilterOption>();
-            foreach (var gv in userGroupValues.Where(cv => cv.Enabled).OrderBy(cv => cv.SortOrder ?? 0).ThenBy(cv => cv.Name))
+            foreach (var gv in userGroupValues)
             {
                 var displayText = gv.Name;
                 var parentInfo = "";

@@ -1,5 +1,8 @@
 using System.Text.Json;
 using System.Text;
+using System.Security.Cryptography;
+using Microsoft.Extensions.Caching.Memory;
+using FipsFrontend.Models;
 
 namespace FipsFrontend.Services;
 
@@ -9,20 +12,49 @@ public class CmsApiService
     private readonly IConfiguration _configuration;
     private readonly ILogger<CmsApiService> _logger;
     private readonly string _baseUrl;
+    private readonly IMemoryCache _cache;
+    private readonly Dictionary<string, CacheItemInfo> _cacheTracking;
+    private readonly object _cacheTrackingLock = new();
 
-    public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger)
+    public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger, IMemoryCache cache)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+        _cache = cache;
+        _cacheTracking = new Dictionary<string, CacheItemInfo>();
         _baseUrl = _configuration["CmsApi:BaseUrl"] ?? "http://localhost:1337/api";
     }
 
-    public async Task<T?> GetAsync<T>(string endpoint)
+    public async Task<T?> GetAsync<T>(string endpoint, TimeSpan? cacheDuration = null)
     {
         try
         {
             var fullUrl = $"{_baseUrl.TrimEnd('/')}/{endpoint.TrimStart('/')}";
+            
+            // Create cache key based on endpoint
+            var cacheKey = $"cms_api_{CreateCacheKey(endpoint)}";
+            
+            // Check cache first for GET requests (if cache duration is specified)
+            if (cacheDuration.HasValue && _cache.TryGetValue(cacheKey, out T? cachedResult))
+            {
+                _logger.LogInformation("Cache hit for endpoint: {Endpoint} with key: {Key}", endpoint, cacheKey);
+                // Update last accessed time in tracking
+                lock (_cacheTrackingLock)
+                {
+                    if (_cacheTracking.ContainsKey(cacheKey))
+                    {
+                        _cacheTracking[cacheKey].LastAccessed = DateTimeOffset.UtcNow;
+                        _cacheTracking[cacheKey].HitCount++;
+                        _logger.LogInformation("Updated cache tracking for key: {Key}, hits: {Hits}", cacheKey, _cacheTracking[cacheKey].HitCount);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Cache hit but no tracking found for key: {Key}", cacheKey);
+                    }
+                }
+                return cachedResult;
+            }
             
             // Use read API key for GET requests
             var readApiKey = _configuration["CmsApi:ReadApiKey"];
@@ -34,11 +66,55 @@ public class CmsApiService
             
             var jsonContent = await response.Content.ReadAsStringAsync();
             
-            
-            return JsonSerializer.Deserialize<T>(jsonContent, new JsonSerializerOptions
+            var result = JsonSerializer.Deserialize<T>(jsonContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+            
+            // Cache the result if cache duration is specified
+            if (cacheDuration.HasValue && result != null)
+            {
+                var expirationTime = DateTimeOffset.UtcNow.Add(cacheDuration.Value);
+                
+                // Track cache entry first with lock
+                lock (_cacheTrackingLock)
+                {
+                    _cacheTracking[cacheKey] = new CacheItemInfo
+                    {
+                        Endpoint = endpoint,
+                        Key = cacheKey,
+                        CreatedAt = DateTimeOffset.UtcNow,
+                        LastAccessed = DateTimeOffset.UtcNow,
+                        ExpiresAt = expirationTime,
+                        Duration = cacheDuration.Value,
+                        HitCount = 0,
+                        Size = EstimateObjectSize(result)
+                    };
+                }
+                
+                // Set cache with callback to track expiration
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = cacheDuration.Value
+                };
+                
+                cacheEntryOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
+                {
+                    var keyStr = key.ToString() ?? string.Empty;
+                    _logger.LogInformation("Cache entry evicted: {Key}, reason: {Reason}, removing from tracking", keyStr, reason);
+                    lock (_cacheTrackingLock)
+                    {
+                        _cacheTracking.Remove(keyStr);
+                    }
+                });
+                
+                _cache.Set(cacheKey, result, cacheEntryOptions);
+                
+                _logger.LogInformation("Cached result for endpoint: {Endpoint} with key: {Key} and duration: {Duration}", endpoint, cacheKey, cacheDuration.Value);
+                _logger.LogInformation("Cache tracking now has {Count} entries", _cacheTracking.Count);
+            }
+            
+            return result;
         }
         catch (Exception ex)
         {
@@ -124,5 +200,137 @@ public class CmsApiService
             _logger.LogError(ex, "Error calling CMS API endpoint: {Endpoint}", endpoint);
             return false;
         }
+    }
+
+    private string CreateCacheKey(string endpoint)
+    {
+        // Create a hash of the endpoint for consistent cache keys
+        using var sha256 = SHA256.Create();
+        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(endpoint));
+        return Convert.ToBase64String(hash).Replace("/", "_").Replace("+", "-").TrimEnd('=');
+    }
+
+    public void ClearCache()
+    {
+        // Clear all CMS API cache entries
+        var keysToRemove = _cacheTracking.Keys.ToList();
+        foreach (var key in keysToRemove)
+        {
+            _cache.Remove(key);
+        }
+        _cacheTracking.Clear();
+        _logger.LogInformation("CMS API cache cleared - {Count} entries removed", keysToRemove.Count);
+    }
+
+    public void ClearCacheForEndpoint(string endpoint)
+    {
+        var cacheKey = $"cms_api_{CreateCacheKey(endpoint)}";
+        _cache.Remove(cacheKey);
+        _cacheTracking.Remove(cacheKey);
+        _logger.LogInformation("CMS API cache cleared for endpoint: {Endpoint}", endpoint);
+    }
+
+    public Dictionary<string, CacheItemInfo> GetCacheInfo()
+    {
+        lock (_cacheTrackingLock)
+        {
+            _logger.LogInformation("GetCacheInfo called - tracking has {Count} entries", _cacheTracking.Count);
+            
+            // Clean up expired entries from tracking
+            CleanupExpiredEntries();
+            
+            _logger.LogInformation("After cleanup - tracking has {Count} entries", _cacheTracking.Count);
+            
+            foreach (var entry in _cacheTracking)
+            {
+                _logger.LogInformation("Cache entry: {Key} -> {Endpoint}, Expires: {ExpiresAt}", 
+                    entry.Key, entry.Value.Endpoint, entry.Value.ExpiresAt);
+            }
+            
+            return new Dictionary<string, CacheItemInfo>(_cacheTracking);
+        }
+    }
+
+    private void CleanupExpiredEntries()
+    {
+        var expiredKeys = _cacheTracking
+            .Where(kvp => kvp.Value.ExpiresAt <= DateTimeOffset.UtcNow)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (var key in expiredKeys)
+        {
+            _cacheTracking.Remove(key);
+        }
+    }
+
+    private string EstimateObjectSize(object obj)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(obj);
+            return $"{json.Length} bytes";
+        }
+        catch
+        {
+            return "Unknown";
+        }
+    }
+
+    // Specialized methods for category data with individual caching
+    public async Task<List<CategoryValue>?> GetCategoryValuesByType(string categoryTypeName, TimeSpan? cacheDuration = null)
+    {
+        var endpoint = $"category-values?filters[category_type][name]={Uri.EscapeDataString(categoryTypeName)}&populate[category_type]=true&populate[parent]=true&populate[children]=true&pagination[pageSize]=10000";
+        var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
+        return response?.Data;
+    }
+
+    public async Task<List<CategoryValue>?> GetAllCategoryValues(TimeSpan? cacheDuration = null)
+    {
+        var endpoint = "category-values?populate[category_type]=true&populate[parent]=true&populate[children]=true&pagination[pageSize]=10000";
+        _logger.LogInformation("Getting all category values from endpoint: {Endpoint}", endpoint);
+        var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
+        _logger.LogInformation("Category values response: {Count} items", response?.Data?.Count ?? 0);
+        
+        // Log channel values specifically for debugging
+        if (response?.Data != null)
+        {
+            var channelValues = response.Data.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList();
+            _logger.LogInformation("Channel values in GetAllCategoryValues: {Count}", channelValues.Count);
+            foreach (var cv in channelValues)
+            {
+                _logger.LogInformation("Channel value: {Name} (Slug: {Slug}, Enabled: {Enabled}, Published: {Published})", 
+                    cv.Name, cv.Slug, cv.Enabled, cv.PublishedAt.HasValue);
+            }
+        }
+        
+        return response?.Data;
+    }
+
+    public async Task<List<CategoryType>?> GetAllCategoryTypes(TimeSpan? cacheDuration = null)
+    {
+        var endpoint = "category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&populate=values&sort=sort_order:asc&pagination[pageSize]=1000";
+        _logger.LogInformation("Getting all category types from endpoint: {Endpoint}", endpoint);
+        var response = await GetAsync<ApiCollectionResponse<CategoryType>>(endpoint, cacheDuration);
+        _logger.LogInformation("Category types response: {Count} items", response?.Data?.Count ?? 0);
+        return response?.Data;
+    }
+
+    public async Task<List<CategoryValue>?> GetCategoryValuesForFilter(string categoryTypeName, TimeSpan? cacheDuration = null)
+    {
+        var endpoint = $"category-values?filters[category_type][name]={Uri.EscapeDataString(categoryTypeName)}&filters[enabled]=true&sort=sort_order:asc&fields[0]=name&fields[1]=slug&pagination[pageSize]=1000";
+        _logger.LogInformation("Getting category values for filter - type: {Type}, endpoint: {Endpoint}", categoryTypeName, endpoint);
+        var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
+        _logger.LogInformation("Category values for {Type}: {Count} items", categoryTypeName, response?.Data?.Count ?? 0);
+        
+        if (response?.Data != null)
+        {
+            foreach (var cv in response.Data)
+            {
+                _logger.LogInformation("Filter value: {Name} (Slug: {Slug})", cv.Name, cv.Slug);
+            }
+        }
+        
+        return response?.Data;
     }
 }

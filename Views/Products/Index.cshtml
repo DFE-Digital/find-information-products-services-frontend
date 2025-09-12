@@ -76,7 +76,7 @@
                             <label class="govuk-label govuk-label--s" for="keywords">
                                 Product name
                             </label>
-                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Model.Keywords">
+                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Html.Encode(Model.Keywords)">
                         </div>
 
                         <!-- User groups autocomplete -->

@@ -17,6 +17,7 @@ public class CategoriesController : Controller
         _cmsApiService = cmsApiService;
     }
 
+    [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)] // Cache for 10 minutes
     public async Task<IActionResult> Index()
     {
         try
@@ -26,15 +27,15 @@ public class CategoriesController : Controller
             _logger.LogInformation("=== CATEGORY TYPES API CALL ===");
             _logger.LogInformation("URL: {Url}", categoryTypesUrl);
             
-            // Get category types first, then populate values separately with proper parent-child relationships
-            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>(categoryTypesUrl);
+            // Get category types first, then populate values separately with proper parent-child relationships (cache for 15 minutes)
+            var categoryTypes = await _cmsApiService.GetAllCategoryTypes(TimeSpan.FromMinutes(15)) ?? new List<CategoryType>();
 
             // Log the raw response
             _logger.LogInformation("=== CATEGORY TYPES API RESPONSE ===");
-            _logger.LogInformation("Status: Success, Count: {Count}", categoryTypes?.Data?.Count ?? 0);
-            if (categoryTypes?.Data != null)
+            _logger.LogInformation("Status: Success, Count: {Count}", categoryTypes.Count);
+            if (categoryTypes.Any())
             {
-                foreach (var ct in categoryTypes.Data)
+                foreach (var ct in categoryTypes)
                 {
                     _logger.LogInformation("Category Type: {Name} (Slug: {Slug}, MultiLevel: {MultiLevel}, Enabled: {Enabled})", 
                         ct.Name, ct.Slug, ct.MultiLevel, ct.Enabled);
@@ -42,9 +43,9 @@ public class CategoriesController : Controller
             }
 
             // Fetch values separately for each category type with proper population
-            if (categoryTypes?.Data != null)
+            if (categoryTypes.Any())
             {
-                foreach (var categoryType in categoryTypes.Data)
+                foreach (var categoryType in categoryTypes)
                 {
                     _logger.LogInformation("=== PROCESSING CATEGORY TYPE: {Name} ===", categoryType.Name);
                     
@@ -89,7 +90,7 @@ public class CategoriesController : Controller
 
             var viewModel = new CategoriesIndexViewModel
             {
-                CategoryTypes = categoryTypes?.Data ?? new List<CategoryType>()
+                CategoryTypes = categoryTypes ?? new List<CategoryType>()
             };
 
 
@@ -122,14 +123,14 @@ public class CategoriesController : Controller
                 _logger.LogInformation("URL: {Url}", categoryTypesUrl);
                 
                 // Get category types first, then populate values separately with proper parent-child relationships
-                var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>(categoryTypesUrl);
+                var categoryTypes = await _cmsApiService.GetAllCategoryTypes(TimeSpan.FromMinutes(15)) ?? new List<CategoryType>();
 
                 // Log the raw response
                 _logger.LogInformation("=== CATEGORY TYPES API RESPONSE ===");
-                _logger.LogInformation("Status: Success, Count: {Count}", categoryTypes?.Data?.Count ?? 0);
-                if (categoryTypes?.Data != null)
+                _logger.LogInformation("Status: Success, Count: {Count}", categoryTypes?.Count ?? 0);
+                if (categoryTypes != null)
                 {
-                    foreach (var ct in categoryTypes.Data)
+                    foreach (var ct in categoryTypes)
                     {
                         _logger.LogInformation("Category Type: {Name} (Slug: {Slug}, MultiLevel: {MultiLevel}, Enabled: {Enabled})", 
                             ct.Name, ct.Slug, ct.MultiLevel, ct.Enabled);
@@ -137,9 +138,9 @@ public class CategoriesController : Controller
                 }
 
                 // Fetch values separately for each category type with proper population
-                if (categoryTypes?.Data != null)
+                if (categoryTypes != null)
                 {
-                    foreach (var ct in categoryTypes.Data)
+                    foreach (var ct in categoryTypes)
                     {
                         _logger.LogInformation("=== PROCESSING CATEGORY TYPE: {Name} ===", ct.Name);
                         
@@ -192,7 +193,7 @@ public class CategoriesController : Controller
 
                 var indexViewModel = new CategoriesIndexViewModel
                 {
-                    CategoryTypes = categoryTypes?.Data ?? new List<CategoryType>()
+                    CategoryTypes = categoryTypes ?? new List<CategoryType>()
                 };
 
                 return View("Index", indexViewModel);

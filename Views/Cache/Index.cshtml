@@ -1,0 +1,218 @@
+@model FipsFrontend.Models.CacheInfoViewModel
+@{
+    ViewData["Title"] = "Cache Management";
+}
+
+@section BeforeContent {
+<div class="dfe-masthead">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                    Cache Management
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Success
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["SuccessMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="govuk-notification-banner" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        There is a problem
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["ErrorMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        <p class="govuk-body">
+            Use the options below to clear cached data. This can be useful when content has been updated in the CMS and you need to see the changes immediately.
+        </p>
+
+        <div class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                <span class="govuk-warning-text__assistive">Warning</span>
+                Clearing cache will temporarily slow down page loads as data needs to be fetched fresh from the CMS.
+            </strong>
+        </div>
+
+        <div class="govuk-form-group">
+            <h2 class="govuk-heading-m">Clear Specific Caches</h2>
+            
+            <div class="govuk-form-group">
+                <form method="post" action="@Url.Action("ClearProductCache", "Cache")" style="display: inline;">
+                    <button type="submit" class="govuk-button govuk-button--secondary">
+                        Clear Product Cache
+                    </button>
+                </form>
+                <p class="govuk-hint">Clears cached product data and search results.</p>
+            </div>
+
+            <div class="govuk-form-group">
+                <form method="post" action="@Url.Action("ClearCategoryCache", "Cache")" style="display: inline;">
+                    <button type="submit" class="govuk-button govuk-button--secondary">
+                        Clear Category Cache
+                    </button>
+                </form>
+                <p class="govuk-hint">Clears cached category types and values data.</p>
+            </div>
+        </div>
+
+        <div class="govuk-form-group">
+            <h2 class="govuk-heading-m">Clear All Caches</h2>
+            
+            <form method="post" action="@Url.Action("ClearAllCache", "Cache")">
+             
+                
+                <button type="submit" class="govuk-button govuk-button--warning">
+                    Clear All Caches
+                </button>
+            </form>
+        </div>
+
+        <div class="govuk-form-group">
+            <h2 class="govuk-heading-m">Current Cache Status</h2>
+            
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number">@Model.TotalEntries</div>
+                        <div class="govuk-stat__label">Total Entries</div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number govuk-stat__number--green">@Model.ActiveEntries</div>
+                        <div class="govuk-stat__label">Active</div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number govuk-stat__number--red">@Model.ExpiredEntries</div>
+                        <div class="govuk-stat__label">Expired</div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number">@Model.TotalHits</div>
+                        <div class="govuk-stat__label">Total Hits</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.CacheEntries.Any())
+        {
+            <div class="govuk-form-group">
+                <h2 class="govuk-heading-m">Cache Entries</h2>
+                
+                <table class="govuk-table">
+                    <thead class="govuk-table__head">
+                        <tr class="govuk-table__row">
+                            <th class="govuk-table__header">Endpoint</th>
+                            <th class="govuk-table__header">Status</th>
+                            <th class="govuk-table__header">Created</th>
+                            <th class="govuk-table__header">Last Accessed</th>
+                            <th class="govuk-table__header">Expires</th>
+                            <th class="govuk-table__header">Hits</th>
+                            <th class="govuk-table__header">Size</th>
+                        </tr>
+                    </thead>
+                    <tbody class="govuk-table__body">
+                        @foreach (var entry in Model.CacheEntries.OrderBy(e => e.Endpoint))
+                        {
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <code class="govuk-code">@Html.Encode(entry.Endpoint)</code>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (entry.IsExpired)
+                                    {
+                                        <strong class="govuk-tag govuk-tag--red">Expired</strong>
+                                    }
+                                    else
+                                    {
+                                        <strong class="govuk-tag govuk-tag--green">Active</strong>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @entry.CreatedAt.ToString("HH:mm:ss")
+                                    <br>
+                                    <span class="govuk-body-s">@entry.CreatedAt.ToString("dd MMM yyyy")</span>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @entry.LastAccessed.ToString("HH:mm:ss")
+                                    <br>
+                                    <span class="govuk-body-s">@entry.LastAccessed.ToString("dd MMM yyyy")</span>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (entry.IsExpired)
+                                    {
+                                        <span class="govuk-body-s govuk-!-colour-red">Expired</span>
+                                    }
+                                    else
+                                    {
+                                        @entry.ExpiresAt.ToString("HH:mm:ss")
+                                        <br>
+                                        <span class="govuk-body-s">@entry.ExpiresAt.ToString("dd MMM yyyy")</span>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @entry.HitCount
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @entry.Size
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p>No cache entries found. Cache entries will appear here as pages are accessed.</p>
+            </div>
+        }
+
+        <div class="govuk-form-group">
+            <h2 class="govuk-heading-m">Cache Strategy</h2>
+            <p class="govuk-body">The application uses the following caching strategy:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li><strong>Home page data:</strong> 5 minutes</li>
+                <li><strong>Category data:</strong> 15 minutes</li>
+                <li><strong>Product data:</strong> 5 minutes</li>
+                <li><strong>Search results:</strong> 2 minutes</li>
+                <li><strong>Response cache:</strong> 5-60 minutes depending on content type</li>
+            </ul>
+        </div>
+    </div>
+</div>
