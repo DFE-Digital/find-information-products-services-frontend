@@ -119,6 +119,32 @@
             }
         }
 
+        // Microsoft Clarity Event Tracking Functions
+        function trackClarityEvent(eventName, parameters = {}) {
+            if (typeof clarity !== 'undefined') {
+                clarity('event', eventName);
+                
+                // Set custom tags for additional context
+                if (parameters.event_category) {
+                    clarity('set', 'event_category', parameters.event_category);
+                }
+                if (parameters.action) {
+                    clarity('set', 'action', parameters.action);
+                }
+                if (parameters.card_type) {
+                    clarity('set', 'card_type', parameters.card_type);
+                }
+                
+                console.log('Clarity Event:', eventName, parameters);
+            }
+        }
+
+        // Combined tracking function
+        function trackEvent(eventName, parameters = {}) {
+            trackGAEvent(eventName, parameters);
+            trackClarityEvent(eventName, parameters);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // CTA button tracking
             document.querySelectorAll('.home-cta-link').forEach(function(link) {
@@ -126,7 +152,7 @@
                     const action = this.getAttribute('data-action');
                     const ctaType = this.getAttribute('data-cta-type');
                     
-                    trackGAEvent('home_cta_click', {
+                    trackEvent('home_cta_click', {
                         event_category: 'Home Page',
                         event_label: action,
                         cta_type: ctaType,
@@ -141,7 +167,7 @@
                     const action = this.getAttribute('data-action');
                     const cardType = this.getAttribute('data-card-type');
                     
-                    trackGAEvent('home_card_click', {
+                    trackEvent('home_card_click', {
                         event_category: 'Home Page',
                         event_label: action,
                         card_type: cardType,
@@ -152,7 +178,7 @@
 
             // Test GA connection on page load
             setTimeout(function() {
-                trackGAEvent('page_view_test', {
+                trackEvent('page_view_test', {
                     event_category: 'Test',
                     event_label: 'Home Page Load',
                     page_title: '@Model.PageTitle',

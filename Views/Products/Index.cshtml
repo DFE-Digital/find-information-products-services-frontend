@@ -539,8 +539,45 @@
             }
         }
 
+        // Microsoft Clarity Event Tracking Functions
+        function trackClarityEvent(eventName, parameters = {}) {
+            console.log('Attempting to track Clarity event:', eventName, parameters);
+            
+            if (typeof clarity !== 'undefined') {
+                // Send the main event
+                clarity('event', eventName);
+                
+                // Set custom tags for additional context
+                if (parameters.event_category) {
+                    clarity('set', 'event_category', parameters.event_category);
+                }
+                if (parameters.event_label) {
+                    clarity('set', 'event_label', parameters.event_label);
+                }
+                if (parameters.product_id) {
+                    clarity('set', 'product_id', parameters.product_id);
+                }
+                if (parameters.filter_type) {
+                    clarity('set', 'filter_type', parameters.filter_type);
+                }
+                if (parameters.search_term) {
+                    clarity('set', 'search_term', parameters.search_term);
+                }
+                
+                console.log('Clarity Event tracked:', eventName, parameters);
+            } else {
+                console.log('Clarity not available');
+            }
+        }
+
+        // Combined tracking function for both GA and Clarity
+        function trackEvent(eventName, parameters = {}) {
+            trackGAEvent(eventName, parameters);
+            trackClarityEvent(eventName, parameters);
+        }
+
         function trackProductClick(productTitle, fipsId, position, searchTerm = '', activeFilters = []) {
-            trackGAEvent('product_click', {
+            trackEvent('product_click', {
                 event_category: 'Product Interaction',
                 event_label: productTitle,
                 product_id: fipsId,
@@ -553,7 +590,7 @@
         }
 
         function trackFilterApplication(filterType, filterValue, action = 'applied') {
-            trackGAEvent('filter_' + action, {
+            trackEvent('filter_' + action, {
                 event_category: 'Filter Interaction',
                 filter_type: filterType,
                 filter_value: filterValue,
@@ -563,7 +600,7 @@
 
         function trackSearch(searchTerm, searchType = 'product_name') {
             if (searchTerm && searchTerm.trim().length > 0) {
-                trackGAEvent('search', {
+                trackEvent('search', {
                     event_category: 'Search',
                     search_term: searchTerm.trim(),
                     search_type: searchType,
@@ -573,7 +610,7 @@
         }
 
         function trackPagination(direction, currentPage, totalPages) {
-            trackGAEvent('pagination_' + direction, {
+            trackEvent('pagination_' + direction, {
                 event_category: 'Navigation',
                 current_page: currentPage,
                 total_pages: totalPages,
@@ -887,7 +924,7 @@
             document.querySelectorAll('a[href="/products"]').forEach(function(link) {
                 if (link.textContent.includes('Clear')) {
                     link.addEventListener('click', function(e) {
-                        trackGAEvent('clear_filters', {
+                        trackEvent('clear_filters', {
                             event_category: 'Filter Interaction',
                             event_label: 'Clear all filters'
                         });
@@ -912,7 +949,7 @@
 
             // Test GA connection on page load
             setTimeout(function() {
-                trackGAEvent('page_view_test', {
+                trackEvent('page_view_test', {
                     event_category: 'Test',
                     event_label: 'Products Index Page Load',
                     page_title: '@Model.PageTitle',

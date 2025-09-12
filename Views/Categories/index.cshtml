@@ -71,8 +71,34 @@
             console.log('GA Event:', eventName, parameters);
         }
 
+        // Microsoft Clarity Event Tracking Functions
+        function trackClarityEvent(eventName, parameters = {}) {
+            if (typeof clarity !== 'undefined') {
+                clarity('event', eventName);
+                
+                // Set custom tags for additional context
+                if (parameters.category_name) {
+                    clarity('set', 'category_name', parameters.category_name);
+                }
+                if (parameters.category_slug) {
+                    clarity('set', 'category_slug', parameters.category_slug);
+                }
+                if (parameters.category_type) {
+                    clarity('set', 'category_type', parameters.category_type);
+                }
+                
+                console.log('Clarity Event:', eventName, parameters);
+            }
+        }
+
+        // Combined tracking function
+        function trackEvent(eventName, parameters = {}) {
+            trackGAEvent(eventName, parameters);
+            trackClarityEvent(eventName, parameters);
+        }
+
         function trackCategoryClick(categoryName, categorySlug, categoryType, action = 'view') {
-            trackGAEvent('category_' + action, {
+            trackEvent('category_' + action, {
                 event_category: 'Category Navigation',
                 category_name: categoryName,
                 category_slug: categorySlug,
