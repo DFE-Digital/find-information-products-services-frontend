@@ -71,11 +71,11 @@ app.Use(async (context, next) =>
     // Content Security Policy
     context.Response.Headers["Content-Security-Policy"] = 
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.clarity.ms; " +
+        "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms; " +
         "style-src 'self' 'unsafe-inline' https://rsms.me; " +
         "img-src 'self' data: https:; " +
         "font-src 'self' data: https://rsms.me; " +
-        "connect-src 'self' https://www.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com; " +
+        "connect-src 'self' https://www.clarity.ms https://a.clarity.ms https://c.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com; " +
         "frame-ancestors 'none'; " +
         "base-uri 'self'; " +
         "form-action 'self'";
