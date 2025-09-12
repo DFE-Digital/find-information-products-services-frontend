@@ -76,7 +76,7 @@
                             <label class="govuk-label govuk-label--s" for="keywords">
                                 Product name
                             </label>
-                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Html.Encode(Model.Keywords)" data-search-type="product_name">
+                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Model.Keywords" data-search-type="product_name">
                         </div>
 
                         <!-- User groups autocomplete -->
@@ -313,7 +313,7 @@
                             <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
                                 <a class="govuk-link govuk-link--no-visited-state product-link" 
                                    href="/product/@product.FipsId"
-                                   data-product-title="@Html.Encode(product.Title)"
+                                   data-product-title="@product.Title"
                                    data-fips-id="@product.FipsId"
                                    data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                     @product.Title
@@ -352,7 +352,7 @@
                                href="/product/@product.FipsId" 
                                aria-hidden="true" 
                                tabindex="-1"
-                               data-product-title="@Html.Encode(product.Title)"
+                               data-product-title="@product.Title"
                                data-fips-id="@product.FipsId"
                                data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                 <span class="govuk-visually-hidden">@product.Title</span>
@@ -518,12 +518,25 @@
     <script>
         // Google Analytics Event Tracking Functions
         function trackGAEvent(eventName, parameters = {}) {
+            console.log('Attempting to track GA event:', eventName, parameters);
+            
             if (typeof gtag !== 'undefined') {
+                console.log('Using gtag for GA4');
                 gtag('event', eventName, parameters);
             } else if (typeof ga !== 'undefined') {
+                console.log('Using ga for Universal Analytics');
                 ga('send', 'event', parameters.category || 'User Interaction', eventName, parameters.label || '', parameters.value || 0);
+            } else {
+                console.error('Google Analytics not loaded - gtag and ga are undefined');
+                console.log('Available globals:', Object.keys(window).filter(key => key.includes('google') || key.includes('gtag') || key.includes('ga')));
             }
-            console.log('GA Event:', eventName, parameters);
+            
+            // Also log to dataLayer for debugging
+            if (window.dataLayer) {
+                console.log('dataLayer exists, current length:', window.dataLayer.length);
+            } else {
+                console.error('dataLayer not found');
+            }
         }
 
         function trackProductClick(productTitle, fipsId, position, searchTerm = '', activeFilters = []) {
@@ -896,6 +909,16 @@
                     trackFilterApplication(filterType, filterValue, 'loaded');
                 }
             });
+
+            // Test GA connection on page load
+            setTimeout(function() {
+                trackGAEvent('page_view_test', {
+                    event_category: 'Test',
+                    event_label: 'Products Index Page Load',
+                    page_title: '@Model.PageTitle',
+                    test_timestamp: new Date().toISOString()
+                });
+            }, 1000);
         });
     </script>
 }

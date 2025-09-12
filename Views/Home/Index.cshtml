@@ -21,8 +21,10 @@
             href="/products"
             role="button"
             draggable="false"
-            class="govuk-button govuk-button--start govuk-button--inverse"
+            class="govuk-button govuk-button--start govuk-button--inverse home-cta-link"
             data-module="govuk-button"
+            data-action="search_products"
+            data-cta-type="primary"
           >
             Search
             <span class="govuk-visually-hidden">products and services</span>
@@ -39,7 +41,7 @@
             </svg>
           </a>
 
-          <a href="/about" class="govuk-link govuk-link--inverse">
+          <a href="/about" class="govuk-link govuk-link--inverse home-cta-link" data-action="about_service" data-cta-type="secondary">
             About this service
           </a>
         </div>
@@ -52,14 +54,14 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
     <div class="dfe-card-group">
-      <a href="/products" class="dfe-card">
+      <a href="/products" class="dfe-card home-card-link" data-action="view_all_products" data-card-type="products">
         <h2 class="dfe-card-title">All products and services</h2>
         <p class="dfe-card-content">
           Search and filter the products and services.
         </p>
         <p class="dfe-card-meta">@Model.PublishedProductsCount products</p>
       </a>
-      <a href="/categories" class="dfe-card">
+      <a href="/categories" class="dfe-card home-card-link" data-action="browse_categories" data-card-type="categories">
         <h2 class="dfe-card-title">Browse categories</h2>
         <p class="dfe-card-content">
           Find products and services by how they are categorised
@@ -75,14 +77,14 @@
     <h2 class="govuk-heading-m">Using this service</h2>
 
     <div class="dfe-card-group">
-      <a href="/data" class="dfe-card">
+      <a href="/data" class="dfe-card home-card-link" data-action="use_data" data-card-type="data">
         <h2 class="dfe-card-title">Use the data</h2>
         <p class="dfe-card-content">
           Find out how to use or download the data in your products and
           services.
         </p>
       </a>
-      <a href="/updates" class="dfe-card">
+      <a href="/updates" class="dfe-card home-card-link" data-action="keep_updated" data-card-type="updates">
         <h2 class="dfe-card-title">Keeping information updated</h2>
         <p class="dfe-card-content">
           How to update information about products listed in this service.
@@ -91,3 +93,72 @@
     </div>
   </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Google Analytics Event Tracking Functions
+        function trackGAEvent(eventName, parameters = {}) {
+            console.log('Attempting to track GA event:', eventName, parameters);
+            
+            if (typeof gtag !== 'undefined') {
+                console.log('Using gtag for GA4');
+                gtag('event', eventName, parameters);
+            } else if (typeof ga !== 'undefined') {
+                console.log('Using ga for Universal Analytics');
+                ga('send', 'event', parameters.category || 'User Interaction', eventName, parameters.label || '', parameters.value || 0);
+            } else {
+                console.error('Google Analytics not loaded - gtag and ga are undefined');
+                console.log('Available globals:', Object.keys(window).filter(key => key.includes('google') || key.includes('gtag') || key.includes('ga')));
+            }
+            
+            // Also log to dataLayer for debugging
+            if (window.dataLayer) {
+                console.log('dataLayer exists, current length:', window.dataLayer.length);
+            } else {
+                console.error('dataLayer not found');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // CTA button tracking
+            document.querySelectorAll('.home-cta-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const action = this.getAttribute('data-action');
+                    const ctaType = this.getAttribute('data-cta-type');
+                    
+                    trackGAEvent('home_cta_click', {
+                        event_category: 'Home Page',
+                        event_label: action,
+                        cta_type: ctaType,
+                        action: action
+                    });
+                });
+            });
+
+            // Card link tracking
+            document.querySelectorAll('.home-card-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const action = this.getAttribute('data-action');
+                    const cardType = this.getAttribute('data-card-type');
+                    
+                    trackGAEvent('home_card_click', {
+                        event_category: 'Home Page',
+                        event_label: action,
+                        card_type: cardType,
+                        action: action
+                    });
+                });
+            });
+
+            // Test GA connection on page load
+            setTimeout(function() {
+                trackGAEvent('page_view_test', {
+                    event_category: 'Test',
+                    event_label: 'Home Page Load',
+                    page_title: '@Model.PageTitle',
+                    test_timestamp: new Date().toISOString()
+                });
+            }, 1000);
+        });
+    </script>
+}

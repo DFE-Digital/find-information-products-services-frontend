@@ -8,7 +8,7 @@
         @if (Model.ParentCategory != null)
         {
             
-                <a href="/categories/@Html.Encode(Model.CategoryType.Slug)" class="govuk-back-link">Back to @Html.Encode(Model.CategoryType.Name)</a>
+                <a href="/categories/@Model.CategoryType.Slug" class="govuk-back-link">Back to @Model.CategoryType.Name</a>
          
         }
         else
@@ -41,7 +41,7 @@
                         <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
                             <a class="govuk-link govuk-link--no-visited-state category-filter-link" 
                                href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)"
-                               data-category-name="@Html.Encode(Model.ParentCategory.Name)"
+                               data-category-name="@Model.ParentCategory.Name"
                                data-category-slug="@Model.ParentCategory.Slug"
                                data-category-type="@Model.CategoryType.Name"
                                data-filter-type="@Model.CategoryType.Name.ToLower()"
@@ -55,7 +55,7 @@
                            href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)" 
                            aria-hidden="true" 
                            tabindex="-1"
-                           data-category-name="@Html.Encode(Model.ParentCategory.Name)"
+                           data-category-name="@Model.ParentCategory.Name"
                            data-category-slug="@Model.ParentCategory.Slug"
                            data-category-type="@Model.CategoryType.Name"
                            data-filter-type="@Model.CategoryType.Name.ToLower()"
@@ -85,7 +85,7 @@
                                 <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
                                     <a class="govuk-link govuk-link--no-visited-state category-link" 
                                        href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug"
-                                       data-category-name="@Html.Encode(categoryValue.Name)"
+                                       data-category-name="@categoryValue.Name"
                                        data-category-slug="@categoryValue.Slug"
                                        data-category-type="@Model.CategoryType.Name"
                                        data-action="view_subcategory">
@@ -98,7 +98,7 @@
                                    href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug" 
                                    aria-hidden="true" 
                                    tabindex="-1"
-                                   data-category-name="@Html.Encode(categoryValue.Name)"
+                                   data-category-name="@categoryValue.Name"
                                    data-category-slug="@categoryValue.Slug"
                                    data-category-type="@Model.CategoryType.Name"
                                    data-action="view_subcategory">
@@ -111,7 +111,7 @@
                                 <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
                                     <a class="govuk-link govuk-link--no-visited-state category-filter-link" 
                                        href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)"
-                                       data-category-name="@Html.Encode(categoryValue.Name)"
+                                       data-category-name="@categoryValue.Name"
                                        data-category-slug="@categoryValue.Slug"
                                        data-category-type="@Model.CategoryType.Name"
                                        data-filter-type="@Model.CategoryType.Name.ToLower()"
@@ -125,7 +125,7 @@
                                    href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)" 
                                    aria-hidden="true" 
                                    tabindex="-1"
-                                   data-category-name="@Html.Encode(categoryValue.Name)"
+                                   data-category-name="@categoryValue.Name"
                                    data-category-slug="@categoryValue.Slug"
                                    data-category-type="@Model.CategoryType.Name"
                                    data-filter-type="@Model.CategoryType.Name.ToLower()"

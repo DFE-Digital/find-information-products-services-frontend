@@ -16,7 +16,7 @@
                             <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
                                 <a class="govuk-link govuk-link--no-visited-state category-link" 
                                    href="/categories/@categoryType.Slug"
-                                   data-category-name="@Html.Encode(categoryType.Name)"
+                                   data-category-name="@categoryType.Name"
                                    data-category-slug="@categoryType.Slug"
                                    data-category-type="category_type">
                                     @categoryType.Name
@@ -40,7 +40,7 @@
                                href="/categories/@categoryType.Slug" 
                                aria-hidden="true" 
                                tabindex="-1"
-                               data-category-name="@Html.Encode(categoryType.Name)"
+                               data-category-name="@categoryType.Name"
                                data-category-slug="@categoryType.Slug"
                                data-category-type="category_type">
                                 <span class="govuk-visually-hidden">@categoryType.Name</span>

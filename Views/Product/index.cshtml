@@ -10,7 +10,7 @@
                 <div class="govuk-grid-column-full">
                     <a href="/products" class="govuk-back-link">Back to products</a>
                     <h1 class="govuk-heading-l dfe-masthead--title">
-                        @Html.Encode(Model.Product.Title)
+                        @Model.Product.Title
                     </h1>
                     <table class="govuk-table">
                         <thead class="govuk-table__head">
@@ -25,7 +25,7 @@
                             <tr class="govuk-table__row">
                                 <td class="govuk-table__cell">
                                     <span class="govuk-visually-hidden">UniqueID: </span>
-                                    <span title="@Html.Encode(Model.Product.FipsId)">@Html.Encode(Model.Product.FipsId?.Substring(0, Math.Min(6, Model.Product.FipsId?.Length ?? 0)))</span>
+                                    <span title="@Model.Product.FipsId">@Model.Product.FipsId?.Substring(0, Math.Min(6, Model.Product.FipsId?.Length ?? 0))</span>
                                 </td>
                                 <td class="govuk-table__cell">
                                     <span class="govuk-visually-hidden">Phase: </span>
@@ -34,7 +34,7 @@
                                     }
                                     @if (phaseCategory != null)
                                     {
-                                        <strong class="govuk-tag govuk-tag--blue">@Html.Encode(phaseCategory.Name)</strong>
+                                        <strong class="govuk-tag govuk-tag--blue">@phaseCategory.Name</strong>
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
@@ -44,7 +44,7 @@
                                     }
                                     @if (businessAreaCategory != null)
                                     {
-                                        @Html.Encode(businessAreaCategory.Name)
+                                        @businessAreaCategory.Name
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
@@ -74,10 +74,10 @@
             </button>
             <ul class="dfe-vertical-nav__section" id="side-navigation">
                 <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Html.Encode(Model.Product.FipsId)">Overview</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId">Overview</a>
                 </li>
                 <li class="dfe-vertical-nav__section-item">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Html.Encode(Model.Product.FipsId)/categories">Categories</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId/categories">Categories</a>
                 </li>
             </ul>
         </nav>
@@ -91,11 +91,11 @@
         
         @if (!string.IsNullOrEmpty(Model.Product.LongDescription))
         {
-            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Html.Encode(Model.Product.LongDescription)</pre>
+            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.Product.LongDescription</pre>
         }
         else if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
         {
-            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Html.Encode(Model.Product.ShortDescription)</pre>
+            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.Product.ShortDescription</pre>
         }
 
         <h2 class="govuk-heading-m" id="contacts">Responsibilities and contacts</h2>
