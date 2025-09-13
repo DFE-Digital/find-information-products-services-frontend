@@ -287,24 +287,57 @@ public class CmsApiService
 
     public async Task<List<CategoryValue>?> GetAllCategoryValues(TimeSpan? cacheDuration = null)
     {
-        var endpoint = "category-values?populate[category_type]=true&populate[parent]=true&populate[children]=true&pagination[pageSize]=10000";
-        _logger.LogInformation("Getting all category values from endpoint: {Endpoint}", endpoint);
-        var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
-        _logger.LogInformation("Category values response: {Count} items", response?.Data?.Count ?? 0);
+        var allResults = new List<CategoryValue>();
+        var page = 1;
+        var pageSize = 100; // Strapi 5 limit
+        var hasMorePages = true;
         
-        // Log channel values specifically for debugging
-        if (response?.Data != null)
+        _logger.LogInformation("Getting all category values (with pagination)");
+        
+        while (hasMorePages)
         {
-            var channelValues = response.Data.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList();
-            _logger.LogInformation("Channel values in GetAllCategoryValues: {Count}", channelValues.Count);
-            foreach (var cv in channelValues)
+            var endpoint = $"category-values?populate[category_type]=true&populate[parent]=true&populate[children]=true&pagination[page]={page}&pagination[pageSize]={pageSize}";
+            _logger.LogInformation("Fetching page {Page} for all category values", page);
+            var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
+            
+            if (response?.Data != null && response.Data.Any())
             {
-                _logger.LogInformation("Channel value: {Name} (Slug: {Slug}, Enabled: {Enabled}, Published: {Published})", 
-                    cv.Name, cv.Slug, cv.Enabled, cv.PublishedAt.HasValue);
+                allResults.AddRange(response.Data);
+                _logger.LogInformation("Page {Page}: Got {Count} items (Total so far: {Total})", page, response.Data.Count, allResults.Count);
+                
+                // Check if there are more pages
+                if (response.Meta?.Pagination != null)
+                {
+                    hasMorePages = page < response.Meta.Pagination.PageCount;
+                    _logger.LogInformation("Pagination info - Page: {Page}/{PageCount}, Total: {Total}", 
+                        page, response.Meta.Pagination.PageCount, response.Meta.Pagination.Total);
+                }
+                else
+                {
+                    // If no pagination info, assume we're done if we got less than pageSize
+                    hasMorePages = response.Data.Count == pageSize;
+                }
+                
+                page++;
+            }
+            else
+            {
+                hasMorePages = false;
             }
         }
         
-        return response?.Data;
+        _logger.LogInformation("Found {Count} total category values (across {Pages} pages)", allResults.Count, page - 1);
+        
+        // Log channel values specifically for debugging
+        var channelValues = allResults.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList();
+        _logger.LogInformation("Channel values in GetAllCategoryValues: {Count}", channelValues.Count);
+        foreach (var cv in channelValues)
+        {
+            _logger.LogInformation("Channel value: {Name} (Slug: {Slug}, Enabled: {Enabled}, Published: {Published})", 
+                cv.Name, cv.Slug, cv.Enabled, cv.PublishedAt.HasValue);
+        }
+        
+        return allResults;
     }
 
     public async Task<List<CategoryType>?> GetAllCategoryTypes(TimeSpan? cacheDuration = null)
@@ -313,24 +346,80 @@ public class CmsApiService
         _logger.LogInformation("Getting all category types from endpoint: {Endpoint}", endpoint);
         var response = await GetAsync<ApiCollectionResponse<CategoryType>>(endpoint, cacheDuration);
         _logger.LogInformation("Category types response: {Count} items", response?.Data?.Count ?? 0);
-        return response?.Data;
-    }
-
-    public async Task<List<CategoryValue>?> GetCategoryValuesForFilter(string categoryTypeName, TimeSpan? cacheDuration = null)
-    {
-        var endpoint = $"category-values?filters[category_type][name]={Uri.EscapeDataString(categoryTypeName)}&filters[enabled]=true&sort=sort_order:asc&fields[0]=name&fields[1]=slug&pagination[pageSize]=1000";
-        _logger.LogInformation("Getting category values for filter - type: {Type}, endpoint: {Endpoint}", categoryTypeName, endpoint);
-        var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
-        _logger.LogInformation("Category values for {Type}: {Count} items", categoryTypeName, response?.Data?.Count ?? 0);
         
+        // Debug: Log all category type names
         if (response?.Data != null)
         {
-            foreach (var cv in response.Data)
+            foreach (var ct in response.Data)
             {
-                _logger.LogInformation("Filter value: {Name} (Slug: {Slug})", cv.Name, cv.Slug);
+                _logger.LogInformation("Category type: {Name}", ct.Name);
             }
         }
         
         return response?.Data;
     }
+
+    public async Task<List<CategoryValue>?> GetCategoryValuesForFilter(string categoryTypeName, TimeSpan? cacheDuration = null)
+    {
+        var allResults = new List<CategoryValue>();
+        var page = 1;
+        var pageSize = 100; // Strapi 5 limit
+        var hasMorePages = true;
+        
+        _logger.LogInformation("Getting category values for filter - type: {Type} (with pagination)", categoryTypeName);
+        
+        while (hasMorePages)
+        {
+            // For User group category type, we need to populate parent and children relationships
+            var endpoint = (categoryTypeName.Equals("User group", StringComparison.OrdinalIgnoreCase) ||
+                           categoryTypeName.Equals("User Group", StringComparison.OrdinalIgnoreCase) ||
+                           categoryTypeName.Equals("Audience", StringComparison.OrdinalIgnoreCase))
+                ? $"category-values?filters[category_type][name]={Uri.EscapeDataString(categoryTypeName)}&sort=sort_order:asc&populate[parent]=true&populate[children]=true&pagination[page]={page}&pagination[pageSize]={pageSize}"
+                : $"category-values?filters[category_type][name]={Uri.EscapeDataString(categoryTypeName)}&sort=sort_order:asc&fields[0]=name&fields[1]=slug&pagination[page]={page}&pagination[pageSize]={pageSize}";
+            
+            _logger.LogInformation("Fetching page {Page} for category type '{Type}'", page, categoryTypeName);
+            var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
+            
+            if (response?.Data != null && response.Data.Any())
+            {
+                allResults.AddRange(response.Data);
+                _logger.LogInformation("Page {Page}: Got {Count} items (Total so far: {Total})", page, response.Data.Count, allResults.Count);
+                
+                // Check if there are more pages
+                if (response.Meta?.Pagination != null)
+                {
+                    hasMorePages = page < response.Meta.Pagination.PageCount;
+                    _logger.LogInformation("Pagination info - Page: {Page}/{PageCount}, Total: {Total}", 
+                        page, response.Meta.Pagination.PageCount, response.Meta.Pagination.Total);
+                }
+                else
+                {
+                    // If no pagination info, assume we're done if we got less than pageSize
+                    hasMorePages = response.Data.Count == pageSize;
+                }
+                
+                page++;
+            }
+            else
+            {
+                hasMorePages = false;
+            }
+        }
+        
+        _logger.LogInformation("Category values for {Type}: {Count} total items (across {Pages} pages)", categoryTypeName, allResults.Count, page - 1);
+        
+        // Debug: Log first few category values to see what we're getting
+        if (allResults.Any())
+        {
+            var firstFew = allResults.Take(3);
+            foreach (var cv in firstFew)
+            {
+                _logger.LogInformation("Sample category value: {Name} (Slug: {Slug}, CategoryType: {CategoryType})", 
+                    cv.Name, cv.Slug, cv.CategoryType?.Name ?? "Unknown");
+            }
+        }
+        
+        return allResults;
+    }
+
 }

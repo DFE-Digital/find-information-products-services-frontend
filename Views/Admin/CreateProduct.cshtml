@@ -1,0 +1,115 @@
+@model ProductFormViewModel
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Create New Product</h1>
+                <p class="govuk-body-l">Add a new product to the FIPS system. All products are created as drafts by default.</p>
+            </div>
+        </div>
+
+        <form method="post" novalidate>
+            @Html.AntiForgeryToken()
+            
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                        <label class="govuk-label" for="Title">
+                            Product Title <span class="govuk-visually-hidden">required</span>
+                        </label>
+                        @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span> @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                               id="Title" name="Title" type="text" value="@Model.Title" required>
+                    </div>
+
+                    <div class="govuk-form-group @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                        <label class="govuk-label" for="ShortDescription">
+                            Short Description <span class="govuk-visually-hidden">required</span>
+                        </label>
+                        @if (ViewData.ModelState["ShortDescription"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span> @ViewData.ModelState["ShortDescription"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <textarea class="govuk-textarea @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                                  id="ShortDescription" name="ShortDescription" rows="3" required>@Model.ShortDescription</textarea>
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="LongDescription">
+                            Long Description
+                        </label>
+                        <textarea class="govuk-textarea" id="LongDescription" name="LongDescription" rows="5">@Model.LongDescription</textarea>
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="FipsId">
+                            FIPS ID
+                        </label>
+                        <input class="govuk-input govuk-input--width-10" id="FipsId" name="FipsId" type="number" value="@Model.FipsId">
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="CmdbSysId">
+                            CMDB System ID
+                        </label>
+                        <input class="govuk-input govuk-input--width-20" id="CmdbSysId" name="CmdbSysId" type="text" value="@Model.CmdbSysId">
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="ProductUrl">
+                            Product URL
+                        </label>
+                        <input class="govuk-input" id="ProductUrl" name="ProductUrl" type="url" value="@Model.ProductUrl">
+                    </div>
+
+                    <div class="govuk-form-group @(ViewData.ModelState["State"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                        <label class="govuk-label" for="State">
+                            Product State
+                        </label>
+                        @if (ViewData.ModelState["State"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span> @ViewData.ModelState["State"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <select class="govuk-select @(ViewData.ModelState["State"]?.Errors.Count > 0 ? "govuk-select--error" : "")" 
+                                id="State" name="State">
+                            @foreach (var state in Model.AvailableStates)
+                            {
+                                <option value="@state" selected="@(Model.State == state ? "selected" : null)">@state</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="govuk-button-group">
+                        <button type="submit" class="govuk-button">Create Product</button>
+                        <a href="@Url.Action("Products", "Admin")" class="govuk-button govuk-button--secondary">Cancel</a>
+                    </div>
+                </div>
+
+                <div class="govuk-grid-column-one-third">
+                    <div class="govuk-inset-text">
+                        <h3 class="govuk-heading-s">Creating a Product</h3>
+                        <ul class="govuk-list govuk-list--bullet">
+                            <li>All products are created as drafts by default</li>
+                            <li>You can publish them later from the product list</li>
+                            <li>Title and short description are required fields</li>
+                            <li>FIPS ID and CMDB System ID are optional identifiers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>

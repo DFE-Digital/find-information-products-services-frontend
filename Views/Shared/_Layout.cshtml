@@ -1,3 +1,4 @@
+@using FipsFrontend.Helpers
 <!DOCTYPE html>
 <html lang="en" class="govuk-template--rebranded">
 <head>
@@ -15,28 +16,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
 
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "t9ijn4cqjo");
-    </script>
+    <!-- Analytics will be loaded by cookie banner if user accepts -->
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RK6GSMSJ6V"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-RK6GSMSJ6V');
-    </script>
+    <!-- Security Script -->
+    @Html.Raw(Html.GetSecurityScript())
+    
+    <!-- Cookie Banner -->
+    @await Html.PartialAsync("_CookieBanner")
 
 </head>
-<body class="govuk-template__body">
-    <script>
-        document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');
-    </script>
+
+
+    <body class="govuk-template__body">
+  <script nonce="@Html.GetNonce()">
+    document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
+  </script>
     
     <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
     
@@ -60,7 +54,7 @@
          Find information about products and services
         </a>
       </span>
-      <nav aria-label="Menu" class="govuk-service-navigation__wrapper" style="width: 100%" >
+      <nav aria-label="Menu" class="govuk-service-navigation__wrapper full-width-nav" >
         <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden>
           Menu
         </button>
@@ -75,6 +69,14 @@
               Categories
             </a>
           </li>
+          @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+          {
+            <li class="govuk-service-navigation__item @(ViewData["ActiveNav"]?.ToString() == "admin" ? "govuk-service-navigation__item--active" : "")">
+              <a class="govuk-service-navigation__link" href="@Url.Action("Index", "Admin")">
+                Admin
+              </a>
+            </li>
+          }
         </ul>
       </nav>
     </div>
@@ -168,14 +170,28 @@
   </div>
 </footer>
 
-    <script type="module" src="/js/govuk-frontend.min.js"></script>
-    <script type="module" src="/js/moj-frontend.min.js"></script>
-    <script src="/js/accessible-autocomplete.min.js"></script>
-    <script type="module">
-      import { initAll } from '/js/govuk-frontend.min.js'
-      initAll()
-    </script>
+  
 
     @await RenderSectionAsync("Scripts", required: false)
+
+      <script type="module" src="/js/govuk-frontend.min.js"></script>
+    <script type="module" src="/js/moj-frontend.min.js"></script>
+    <script src="/js/accessible-autocomplete.min.js"></script>
+    <script type="module" nonce="@Html.GetNonce()">
+      import { initAll } from '/js/govuk-frontend.min.js'
+      initAll()
+      
+      // Handle confirmation dialogs for CSP compliance
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('button[data-confirm]').forEach(function(button) {
+          button.addEventListener('click', function(e) {
+            const message = this.getAttribute('data-confirm');
+            if (!confirm(message)) {
+              e.preventDefault();
+            }
+          });
+        });
+      });
+    </script>
 </body>
 </html>

@@ -95,7 +95,7 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@Html.GetNonce()">
         // Google Analytics Event Tracking Functions
         function trackGAEvent(eventName, parameters = {}) {
             console.log('Attempting to track GA event:', eventName, parameters);

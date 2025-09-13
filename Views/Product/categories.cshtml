@@ -8,7 +8,7 @@
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
-                    <a href="/products" class="govuk-back-link">Back to products</a>
+                    <a href="@GetBackLink()" class="govuk-back-link">@GetBackLinkText()</a>
                     <h1 class="govuk-heading-l dfe-masthead--title">
                         @Model.Product.Title
                     </h1>
@@ -138,6 +138,37 @@
 </div>
 
 @functions {
+    public string GetBackLink()
+    {
+        // Check if there's a referrer and if it's from the products page with filters
+        var referrer = Context.Request.Headers["Referer"].FirstOrDefault();
+        
+        if (!string.IsNullOrEmpty(referrer) && 
+            referrer.Contains("/products") && 
+            (referrer.Contains("?") || referrer.Contains("&")))
+        {
+            // User came from products page with filters - preserve them
+            return referrer;
+        }
+        
+        // Default back to products page
+        return "/products";
+    }
+    
+    public string GetBackLinkText()
+    {
+        var referrer = Context.Request.Headers["Referer"].FirstOrDefault();
+        
+        if (!string.IsNullOrEmpty(referrer) && 
+            referrer.Contains("/products") && 
+            (referrer.Contains("?") || referrer.Contains("&")))
+        {
+            return "Back to results";
+        }
+        
+        return "Back to products";
+    }
+    
     public string GetFilterParameter(string categoryTypeName, string slug)
     {
         return categoryTypeName.ToLower() switch

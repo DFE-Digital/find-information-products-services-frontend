@@ -1,0 +1,148 @@
+@model AdminProductsViewModel
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Product Management</h1>
+                <p class="govuk-body-l">Manage products in the FIPS system. All new products are created as drafts.</p>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                        <div class="govuk-notification-banner__header">
+                            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">Success</h2>
+                        </div>
+                        <div class="govuk-notification-banner__content">
+                            <p class="govuk-notification-banner__heading">@TempData["Success"]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-notification-banner" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                        <div class="govuk-notification-banner__header">
+                            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">Important</h2>
+                        </div>
+                        <div class="govuk-notification-banner__content">
+                            <p class="govuk-notification-banner__heading">@TempData["Error"]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="govuk-button-group">
+                    <a href="@Url.Action("CreateProduct", "Admin")" class="govuk-button">Add New Product</a>
+                    <a href="@Url.Action("Index", "Admin")" class="govuk-button govuk-button--secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                @if (Model.Products.Any())
+                {
+                    <table class="govuk-table">
+                        <caption class="govuk-table__caption govuk-table__caption--m">Products (@Model.Products.Count total)</caption>
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">ID</th>
+                                <th scope="col" class="govuk-table__header">Title</th>
+                                <th scope="col" class="govuk-table__header">State</th>
+                                <th scope="col" class="govuk-table__header">FIPS ID</th>
+                                <th scope="col" class="govuk-table__header">Published</th>
+                                <th scope="col" class="govuk-table__header">Created</th>
+                                <th scope="col" class="govuk-table__header">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            @foreach (var product in Model.Products)
+                            {
+                                <tr class="govuk-table__row">
+                                    <td class="govuk-table__cell">@product.Id</td>
+                                    <td class="govuk-table__cell">
+                                        <strong>@product.Title</strong>
+                                        @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                        {
+                                            <br><span class="govuk-body-s">@(product.ShortDescription.Length > 100 ? product.ShortDescription.Substring(0, 100) + "..." : product.ShortDescription)</span>
+                                        }
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        @{
+                                            var stateClass = product.State switch
+                                            {
+                                                "Active" => "govuk-tag govuk-tag--green",
+                                                "New" => "govuk-tag govuk-tag--blue",
+                                                "Rejected" => "govuk-tag govuk-tag--red",
+                                                "Removed" => "govuk-tag govuk-tag--grey",
+                                                _ => "govuk-tag"
+                                            };
+                                        }
+                                        <span class="@stateClass">@product.State</span>
+                                    </td>
+                                    <td class="govuk-table__cell">@(product.FipsId?.ToString() ?? "-")</td>
+                                    <td class="govuk-table__cell">
+                                        @if (product.PublishedAt.HasValue)
+                                        {
+                                            <span class="govuk-tag govuk-tag--green">Published</span>
+                                            <br><span class="govuk-body-s">@product.PublishedAt.Value.ToString("dd MMM yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="govuk-tag govuk-tag--grey">Draft</span>
+                                        }
+                                    </td>
+                                    <td class="govuk-table__cell">@(product.CreatedAt?.ToString("dd MMM yyyy") ?? "Unknown")</td>
+                                    <td class="govuk-table__cell">
+                                        <div class="govuk-button-group">
+                                            <a href="@Url.Action("EditProduct", "Admin", new { id = product.Id })" class="govuk-button govuk-button--small">Edit</a>
+                                            @if (product.PublishedAt.HasValue)
+                                            {
+                                                <form method="post" action="@Url.Action("UnpublishProduct", "Admin", new { id = product.Id })" class="inline-form">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="govuk-button govuk-button--small govuk-button--warning" data-confirm="Are you sure you want to unpublish this product?">Unpublish</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form method="post" action="@Url.Action("PublishProduct", "Admin", new { id = product.Id })" class="inline-form">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="govuk-button govuk-button--small govuk-button--secondary" data-confirm="Are you sure you want to publish this product?">Publish</button>
+                                                </form>
+                                            }
+                                            <form method="post" action="@Url.Action("DeleteProduct", "Admin", new { id = product.Id })" class="inline-form">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="govuk-button govuk-button--small govuk-button--destructive" data-confirm="Are you sure you want to delete this product? This action cannot be undone.">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="govuk-inset-text">
+                        <p class="govuk-body">No products found. <a href="@Url.Action("CreateProduct", "Admin")" class="govuk-link">Create your first product</a> to get started.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </main>
+</div>

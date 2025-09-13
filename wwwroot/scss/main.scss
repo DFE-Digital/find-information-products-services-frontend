@@ -79,7 +79,6 @@ $govuk-font-family: "Inter", sans-serif;
 .autocomplete-parent-name {
   font-size: 14px;
   color: #626a6e;
-  font-style: italic;
 }
 
 
@@ -270,46 +269,5 @@ $govuk-font-family: "Inter", sans-serif;
     margin-bottom: 10px;
 }
 
-/* Scrollable filter sections - only when expanded */
-.scrollable-filter {
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-left: -10px;
-    position: relative;
-    padding-bottom: 30px;
-    border-bottom: 1px solid #b1b4b6;
-
-}
-
-/* Webkit scrollbar styling for Chrome/Safari */
-.scrollable-filter::-webkit-scrollbar {
-    width: 8px;
-}
-
-.scrollable-filter::-webkit-scrollbar-track {
-    background: #f3f2f1;
-    border-radius: 4px;
-}
-
-.scrollable-filter::-webkit-scrollbar-thumb {
-    background: #626a6e;
-    border-radius: 4px;
-}
-
-.scrollable-filter::-webkit-scrollbar-thumb:hover {
-    background: #0b0c0c;
-}
-
-/* Add subtle fade at bottom to indicate more content */
-.scrollable-filter::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 8px; /* Account for scrollbar width */
-    height: 15px;
-    pointer-events: none;
-    z-index: 1;
-}
 
 

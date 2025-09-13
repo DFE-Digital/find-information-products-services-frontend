@@ -1,0 +1,237 @@
+@using FipsFrontend.Helpers
+<div id="cookie-banner" class="govuk-cookie-banner" data-nosnippet role="region" aria-label="Cookie banner" style="display: none;">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-cookie-banner__message govuk-width-container">
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <h2 class="govuk-cookie-banner__heading govuk-heading-m">Cookies on FIPS</h2>
+                            <div class="govuk-cookie-banner__content">
+                                <p class="govuk-body">We use some essential cookies to make this service work.</p>
+                                <p class="govuk-body">We'd also like to use analytics cookies so we can understand how you use the service and make improvements.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="govuk-cookie-banner__buttons">
+                        <div class="govuk-button-group">
+                            <button value="accept" type="button" name="cookies" class="govuk-button" data-module="govuk-button">
+                                Accept analytics cookies
+                            </button>
+                            <button value="reject" type="button" name="cookies" class="govuk-button" data-module="govuk-button">
+                                Reject analytics cookies
+                            </button>
+                            <a class="govuk-link" href="/cookies">View cookies</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="cookie-banner-confirmation" class="govuk-cookie-banner" data-nosnippet role="region" aria-label="Cookie banner" style="display: none;">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-cookie-banner__message govuk-width-container">
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <div class="govuk-cookie-banner__content">
+                                <p class="govuk-body" id="cookie-banner-confirmation-message"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="govuk-cookie-banner__buttons">
+                        <div class="govuk-button-group">
+                            <button class="govuk-button" data-module="govuk-button" onclick="hideCookieBanner()">
+                                Hide this message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script nonce="@Html.GetNonce()">
+// Cookie management functions
+window.GDS = window.GDS || {};
+window.GDS.cookies = {
+    // Cookie names
+    COOKIE_PREFERENCES_SET: 'cookie-preferences-set',
+    ANALYTICS_COOKIES_ACCEPTED: 'analytics-cookies-accepted',
+    
+    // Default cookie settings
+    DEFAULT_COOKIE_SETTINGS: {
+        essential: true,
+        analytics: false
+    },
+    
+    // Get cookie value
+    getCookie: function(name) {
+        const value = "; " + document.cookie;
+        const parts = value.split("; " + name + "=");
+        if (parts.length === 2) {
+            return parts.pop().split(";").shift();
+        }
+        return null;
+    },
+    
+    // Set cookie
+    setCookie: function(name, value, days) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = name + "=" + value + ";expires=" + expires.toUTCString() + ";path=/;SameSite=Strict;Secure";
+    },
+    
+    // Get cookie preferences
+    getCookiePreferences: function() {
+        const preferencesSet = this.getCookie(this.COOKIE_PREFERENCES_SET);
+        if (preferencesSet) {
+            return {
+                essential: true,
+                analytics: this.getCookie(this.ANALYTICS_COOKIES_ACCEPTED) === 'true'
+            };
+        }
+        return this.DEFAULT_COOKIE_SETTINGS;
+    },
+    
+    // Set cookie preferences
+    setCookiePreferences: function(preferences) {
+        this.setCookie(this.COOKIE_PREFERENCES_SET, 'true', 365);
+        this.setCookie(this.ANALYTICS_COOKIES_ACCEPTED, preferences.analytics.toString(), 365);
+        
+        // Initialize analytics based on preferences
+        this.initializeAnalytics(preferences.analytics);
+    },
+    
+    // Initialize analytics
+    initializeAnalytics: function(analyticsAccepted) {
+        if (analyticsAccepted) {
+            // Initialize Google Analytics
+            this.initializeGoogleAnalytics();
+            // Initialize Microsoft Clarity
+            this.initializeMicrosoftClarity();
+        } else {
+            // Disable analytics
+            this.disableAnalytics();
+        }
+    },
+    
+    // Initialize Google Analytics
+    initializeGoogleAnalytics: function() {
+        // Google Analytics initialization code
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-RK6GSMSJ6V');
+        
+        // Load Google Analytics script
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RK6GSMSJ6V';
+        document.head.appendChild(script);
+    },
+    
+    // Initialize Microsoft Clarity
+    initializeMicrosoftClarity: function() {
+        // Microsoft Clarity initialization code
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "t9ijn4cqjo");
+    },
+    
+    // Disable analytics
+    disableAnalytics: function() {
+        // Disable Google Analytics
+        if (typeof gtag !== 'undefined') {
+            gtag('config', 'G-RK6GSMSJ6V', {
+                'anonymize_ip': true,
+                'cookie_flags': 'SameSite=Strict;Secure'
+            });
+        }
+        
+        // Disable Microsoft Clarity
+        if (typeof clarity !== 'undefined') {
+            clarity('stop');
+        }
+    },
+    
+    // Show cookie banner
+    showCookieBanner: function() {
+        const banner = document.getElementById('cookie-banner');
+        if (banner) {
+            banner.style.display = 'block';
+        }
+    },
+    
+    // Hide cookie banner
+    hideCookieBanner: function() {
+        const banner = document.getElementById('cookie-banner');
+        if (banner) {
+            banner.style.display = 'none';
+        }
+    },
+    
+    // Show confirmation message
+    showConfirmationMessage: function(message) {
+        const confirmationBanner = document.getElementById('cookie-banner-confirmation');
+        const messageElement = document.getElementById('cookie-banner-confirmation-message');
+        
+        if (confirmationBanner && messageElement) {
+            messageElement.textContent = message;
+            confirmationBanner.style.display = 'block';
+        }
+    },
+    
+    // Hide confirmation message
+    hideConfirmationMessage: function() {
+        const confirmationBanner = document.getElementById('cookie-banner-confirmation');
+        if (confirmationBanner) {
+            confirmationBanner.style.display = 'none';
+        }
+    }
+};
+
+// Global function for hiding cookie banner (called from HTML)
+function hideCookieBanner() {
+    window.GDS.cookies.hideConfirmationMessage();
+}
+
+// Initialize cookie banner on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const preferences = window.GDS.cookies.getCookiePreferences();
+    
+    // If preferences haven't been set, show the cookie banner
+    if (!window.GDS.cookies.getCookie(window.GDS.cookies.COOKIE_PREFERENCES_SET)) {
+        window.GDS.cookies.showCookieBanner();
+    } else {
+        // Initialize analytics based on existing preferences
+        window.GDS.cookies.initializeAnalytics(preferences.analytics);
+    }
+    
+    // Handle cookie banner button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.name === 'cookies') {
+            const value = e.target.value;
+            const preferences = {
+                essential: true,
+                analytics: value === 'accept'
+            };
+            
+            window.GDS.cookies.setCookiePreferences(preferences);
+            window.GDS.cookies.hideCookieBanner();
+            
+            const message = value === 'accept' 
+                ? 'You've accepted analytics cookies. You can change your cookie settings at any time.'
+                : 'You've rejected analytics cookies. You can change your cookie settings at any time.';
+            
+            window.GDS.cookies.showConfirmationMessage(message);
+        }
+    });
+});
+</script>

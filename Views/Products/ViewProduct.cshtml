@@ -78,11 +78,11 @@
         
         @if (!string.IsNullOrEmpty(Model.LongDescription))
         {
-            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.LongDescription</pre>
+            <pre class="govuk-body pre-wrap-text">@Model.LongDescription</pre>
         }
         else if (!string.IsNullOrEmpty(Model.ShortDescription))
         {
-            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.ShortDescription</pre>
+            <pre class="govuk-body pre-wrap-text">@Model.ShortDescription</pre>
         }
 
         <h2 class="govuk-heading-m" id="contacts">Responsibilities and contacts</h2>

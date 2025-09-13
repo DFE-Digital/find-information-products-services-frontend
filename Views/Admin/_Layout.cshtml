@@ -1,0 +1,31 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">Admin</strong>
+            <span class="govuk-phase-banner__text">
+                This is the admin interface for FIPS. Only authorised users can access this area.
+            </span>
+        </p>
+    </div>
+
+    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "Home")">Home</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "Admin")">Admin</a>
+            </li>
+            @if (!string.IsNullOrEmpty(ViewBag.BreadcrumbTitle))
+            {
+                <li class="govuk-breadcrumbs__list-item" aria-current="page">@ViewBag.BreadcrumbTitle</li>
+            }
+        </ol>
+    </nav>
+
+    @RenderBody()
+</div>

@@ -60,4 +60,16 @@ public class HomeController : Controller
     {
         return View();
     }
+
+    [HttpGet]
+    [Route("api/session/check")]
+    public IActionResult CheckSession()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return Json(new { valid = true, userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value });
+        }
+        
+        return Json(new { valid = false });
+    }
 }

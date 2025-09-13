@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Admin Dashboard</h1>
+                <p class="govuk-body-l">Welcome to the FIPS admin interface. Use the options below to manage the system.</p>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Product Management</h2>
+                        <p class="govuk-body">Create, edit, and manage products in the system.</p>
+                        <a href="@Url.Action("Products", "Admin")" class="govuk-button">Manage Products</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">User Management</h2>
+                        <p class="govuk-body">View and manage user accounts and permissions.</p>
+                        <a href="#" class="govuk-button govuk-button--secondary" disabled>Coming Soon</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">System Settings</h2>
+                        <p class="govuk-body">Configure system-wide settings and preferences.</p>
+                        <a href="#" class="govuk-button govuk-button--secondary" disabled>Coming Soon</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="govuk-inset-text">
+                    <p class="govuk-body">
+                        <strong>Signed in as:</strong> @User.Identity?.Name<br>
+                        <strong>User ID:</strong> @ViewContext.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

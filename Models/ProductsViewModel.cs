@@ -58,6 +58,9 @@ namespace FipsFrontend.Models
         public int Count { get; set; }
         public bool IsSelected { get; set; }
         public List<FilterOption>? SubOptions { get; set; }
+        public string? ParentName { get; set; }
+        public bool HasChildren { get; set; }
+        public int ChildCount { get; set; }
     }
 
     public class SelectedFilter

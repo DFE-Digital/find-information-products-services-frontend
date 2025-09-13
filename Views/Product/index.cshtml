@@ -8,7 +8,7 @@
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
-                    <a href="/products" class="govuk-back-link">Back to products</a>
+                    <a href="@GetBackLink()" class="govuk-back-link">@GetBackLinkText()</a>
                     <h1 class="govuk-heading-l dfe-masthead--title">
                         @Model.Product.Title
                     </h1>
@@ -91,11 +91,11 @@
         
         @if (!string.IsNullOrEmpty(Model.Product.LongDescription))
         {
-            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.Product.LongDescription</pre>
+            <pre class="govuk-body pre-wrap-text">@Model.Product.LongDescription</pre>
         }
         else if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
         {
-            <pre class="govuk-body" style="white-space: pre-wrap; word-break: break-word; max-width: 100%;">@Model.Product.ShortDescription</pre>
+            <pre class="govuk-body pre-wrap-text">@Model.Product.ShortDescription</pre>
         }
 
         <h2 class="govuk-heading-m" id="contacts">Responsibilities and contacts</h2>
@@ -136,3 +136,36 @@
         }
     </div>
 </div>
+
+@functions {
+    public string GetBackLink()
+    {
+        // Check if there's a referrer and if it's from the products page with filters
+        var referrer = Context.Request.Headers["Referer"].FirstOrDefault();
+        
+        if (!string.IsNullOrEmpty(referrer) && 
+            referrer.Contains("/products") && 
+            (referrer.Contains("?") || referrer.Contains("&")))
+        {
+            // User came from products page with filters - preserve them
+            return referrer;
+        }
+        
+        // Default back to products page
+        return "/products";
+    }
+    
+    public string GetBackLinkText()
+    {
+        var referrer = Context.Request.Headers["Referer"].FirstOrDefault();
+        
+        if (!string.IsNullOrEmpty(referrer) && 
+            referrer.Contains("/products") && 
+            (referrer.Contains("?") || referrer.Contains("&")))
+        {
+            return "Back to results";
+        }
+        
+        return "Back to products";
+    }
+}

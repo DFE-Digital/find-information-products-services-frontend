@@ -24,7 +24,7 @@
                             </h2>
                             @if (!string.IsNullOrEmpty(categoryType.Description))
                             {
-                                <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryType.Description</p>
+                                <p class="dfe-chevron-card__description govuk-body govuk-body-s govuk-!-margin-bottom-2">@categoryType.Description</p>
                             }
                             @if (categoryType.MultiLevel)
                             {
@@ -60,7 +60,7 @@
 </div>
 
 @section Scripts {
-    <script>
+    <script nonce="@Html.GetNonce()">
         // Google Analytics Event Tracking Functions
         function trackGAEvent(eventName, parameters = {}) {
             if (typeof gtag !== 'undefined') {

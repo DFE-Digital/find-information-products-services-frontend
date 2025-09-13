@@ -1,0 +1,173 @@
+@model FipsFrontend.Models.CookiePreferencesViewModel
+@{
+    ViewData["Title"] = "Cookie preferences";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Cookie preferences</h1>
+                
+                <p class="govuk-body">We use cookies to make this service work and collect analytics information. To accept or reject cookies, turn them on or off using the toggle buttons and then select 'Save cookie preferences'.</p>
+                
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                        <div class="govuk-notification-banner__header">
+                            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">Success</h2>
+                        </div>
+                        <div class="govuk-notification-banner__content">
+                            <p class="govuk-notification-banner__heading">@TempData["SuccessMessage"]</p>
+                        </div>
+                    </div>
+                }
+                
+                <form method="post" action="@Url.Action("UpdatePreferences", "Cookies")">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="govuk-form-group">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                                <h2 class="govuk-fieldset__heading">Cookies that measure website use</h2>
+                            </legend>
+                            <div class="govuk-hint">
+                                We use Google Analytics and Microsoft Clarity to measure how you use the website so we can improve it based on user needs. We do not allow Google Analytics or Microsoft Clarity to use or share the data about how you use this site.
+                            </div>
+                            
+                            <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="analytics-on" name="AnalyticsAccepted" type="radio" value="true" @(Model.AnalyticsAccepted ? "checked" : "")>
+                                    <label class="govuk-label govuk-radios__label" for="analytics-on">
+                                        On
+                                    </label>
+                                </div>
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="analytics-off" name="AnalyticsAccepted" type="radio" value="false" @(!Model.AnalyticsAccepted ? "checked" : "")>
+                                    <label class="govuk-label govuk-radios__label" for="analytics-off">
+                                        Off
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    
+                    <div class="govuk-form-group">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                                <h2 class="govuk-fieldset__heading">Essential cookies</h2>
+                            </legend>
+                            <div class="govuk-hint">
+                                These essential cookies do things like remember your progress through a form. They always need to be on.
+                            </div>
+                            
+                            <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="essential-on" name="EssentialAccepted" type="radio" value="true" checked disabled>
+                                    <label class="govuk-label govuk-radios__label" for="essential-on">
+                                        On
+                                    </label>
+                                </div>
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="essential-off" name="EssentialAccepted" type="radio" value="false" disabled>
+                                    <label class="govuk-label govuk-radios__label" for="essential-off">
+                                        Off
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    
+                    <div class="govuk-button-group">
+                        <button class="govuk-button" data-module="govuk-button" type="submit">
+                            Save cookie preferences
+                        </button>
+                        <a class="govuk-button govuk-button--secondary" href="/">Cancel</a>
+                    </div>
+                </form>
+                
+                <h2 class="govuk-heading-m">How cookies are used on FIPS</h2>
+                
+                <h3 class="govuk-heading-s">Essential cookies</h3>
+                <p class="govuk-body">Essential cookies keep your information secure while you use FIPS. We do not need to ask permission to use them.</p>
+                
+                <table class="govuk-table">
+                    <thead class="govuk-table__head">
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header">Name</th>
+                            <th scope="col" class="govuk-table__header">Purpose</th>
+                            <th scope="col" class="govuk-table__header">Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody class="govuk-table__body">
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">FIPS.Session</td>
+                            <td class="govuk-table__cell">Stores your session information</td>
+                            <td class="govuk-table__cell">20 minutes</td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">cookie-preferences-set</td>
+                            <td class="govuk-table__cell">Remembers your cookie preferences</td>
+                            <td class="govuk-table__cell">1 year</td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">analytics-cookies-accepted</td>
+                            <td class="govuk-table__cell">Remembers if you've accepted analytics cookies</td>
+                            <td class="govuk-table__cell">1 year</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 class="govuk-heading-s">Analytics cookies</h3>
+                <p class="govuk-body">We use Google Analytics and Microsoft Clarity to collect information about how you use FIPS. This helps us to improve the service.</p>
+                <p class="govuk-body">The information we collect includes:</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>the pages you visit</li>
+                    <li>how long you spend on each page</li>
+                    <li>how you got to the site</li>
+                    <li>what you click on while you're visiting the site</li>
+                </ul>
+                
+                <table class="govuk-table">
+                    <thead class="govuk-table__head">
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header">Name</th>
+                            <th scope="col" class="govuk-table__header">Purpose</th>
+                            <th scope="col" class="govuk-table__header">Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody class="govuk-table__body">
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">_ga</td>
+                            <td class="govuk-table__cell">Google Analytics - distinguishes users</td>
+                            <td class="govuk-table__cell">2 years</td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">_ga_*</td>
+                            <td class="govuk-table__cell">Google Analytics - stores session state</td>
+                            <td class="govuk-table__cell">2 years</td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">_clck</td>
+                            <td class="govuk-table__cell">Microsoft Clarity - distinguishes users</td>
+                            <td class="govuk-table__cell">1 year</td>
+                        </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">_clsk</td>
+                            <td class="govuk-table__cell">Microsoft Clarity - stores session state</td>
+                            <td class="govuk-table__cell">1 day</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h2 class="govuk-heading-m">Change your cookie settings</h2>
+                <p class="govuk-body">You can change which cookies you're happy for us to use at any time.</p>
+                
+                <div class="govuk-button-group">
+                    <a class="govuk-button" href="/cookies">Change cookie preferences</a>
+                    <a class="govuk-button govuk-button--secondary" href="/">Back to home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

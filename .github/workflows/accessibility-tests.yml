@@ -1,0 +1,128 @@
+name: Accessibility Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  accessibility-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+        
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+      
+    - name: Build frontend assets
+      working-directory: ./frontend
+      run: npm run build
+      
+    - name: Restore .NET dependencies
+      working-directory: ./frontend
+      run: dotnet restore
+      
+    - name: Build .NET application
+      working-directory: ./frontend
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Start application
+      working-directory: ./frontend
+      run: |
+        dotnet run --configuration Release --no-build &
+        sleep 30
+      env:
+        ASPNETCORE_ENVIRONMENT: Development
+        
+    - name: Wait for application to start
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:5000; do sleep 2; done'
+        
+    - name: Run accessibility tests
+      working-directory: ./frontend
+      run: |
+        npm run test:accessibility:ci
+      env:
+        CI: true
+        BASE_URL: http://localhost:5000
+        
+    - name: Run Lighthouse accessibility audit
+      working-directory: ./frontend
+      run: |
+        npm run lighthouse:accessibility
+        
+    - name: Upload accessibility reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-reports
+        path: |
+          frontend/reports/
+        retention-days: 30
+        
+    - name: Comment PR with accessibility results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const reportPath = path.join('frontend', 'reports', 'accessibility-results.json');
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              const comment = `## 🔍 Accessibility Test Results
+              
+              **Summary:**
+              - 📄 Pages tested: ${report.summary.totalPages}
+              - ✅ Pages without violations: ${report.summary.pagesWithoutViolations}
+              - ❌ Pages with violations: ${report.summary.pagesWithViolations}
+              - 🚨 Total violations: ${report.summary.totalViolations}
+              - ✅ Total passes: ${report.summary.totalPasses}
+              
+              **Status:** ${report.summary.totalViolations === 0 ? '✅ All tests passed' : '❌ Accessibility violations found'}
+              
+              ${report.summary.totalViolations > 0 ? `
+              **Violations by page:**
+              ${report.results.filter(r => r.violations.length > 0).map(r => 
+                `- ${r.url}: ${r.violations.length} violation(s)`
+              ).join('\n')}
+              ` : ''}
+              
+              📁 [View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.log('Could not read accessibility report:', error.message);
+          }
+          
+    - name: Fail build if accessibility violations found
+      if: failure()
+      run: |
+        echo "❌ Accessibility tests failed. Please review the violations and fix them."
+        exit 1

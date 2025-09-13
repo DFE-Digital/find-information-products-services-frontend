@@ -165,7 +165,7 @@
 }
 
 @section Scripts {
-    <script>
+    <script nonce="@Html.GetNonce()">
         // Google Analytics Event Tracking Functions
         function trackGAEvent(eventName, parameters = {}) {
             if (typeof gtag !== 'undefined') {

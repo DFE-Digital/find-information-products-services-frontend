@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace FipsFrontend.Models;
 
+[DataClassification(DataClassification.Internal, "Product information for internal DfE use")]
 public class Product
 {
     public int Id { get; set; }
