@@ -13,7 +13,7 @@ namespace FipsFrontend.Models
         public DataClassification Classification { get; }
         public string Description { get; }
 
-        public DataClassificationAttribute(DataClassification classification, string description = null)
+        public DataClassificationAttribute(DataClassification classification, string? description = null)
         {
             Classification = classification;
             Description = description ?? GetDefaultDescription(classification);

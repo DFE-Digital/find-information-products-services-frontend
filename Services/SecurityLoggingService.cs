@@ -5,9 +5,9 @@ namespace FipsFrontend.Services
 {
     public interface ISecurityLoggingService
     {
-        void LogSecurityEvent(string eventType, string description, string userId = null, string ipAddress = null, Dictionary<string, object> additionalData = null);
-        void LogAuthenticationEvent(string eventType, string userId, string ipAddress, bool success, string reason = null);
-        void LogAuthorizationEvent(string eventType, string userId, string resource, bool success, string reason = null);
+        void LogSecurityEvent(string eventType, string description, string? userId = null, string? ipAddress = null, Dictionary<string, object>? additionalData = null);
+        void LogAuthenticationEvent(string eventType, string userId, string ipAddress, bool success, string? reason = null);
+        void LogAuthorizationEvent(string eventType, string userId, string resource, bool success, string? reason = null);
         void LogDataAccessEvent(string eventType, string userId, string dataType, string operation, bool success);
     }
 
@@ -22,7 +22,7 @@ namespace FipsFrontend.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public void LogSecurityEvent(string eventType, string description, string userId = null, string ipAddress = null, Dictionary<string, object> additionalData = null)
+        public void LogSecurityEvent(string eventType, string description, string? userId = null, string? ipAddress = null, Dictionary<string, object>? additionalData = null)
         {
             var context = _httpContextAccessor.HttpContext;
             var logData = new
@@ -43,7 +43,7 @@ namespace FipsFrontend.Services
                 eventType, description, logData.UserId, logData.IpAddress, logData);
         }
 
-        public void LogAuthenticationEvent(string eventType, string userId, string ipAddress, bool success, string reason = null)
+        public void LogAuthenticationEvent(string eventType, string userId, string ipAddress, bool success, string? reason = null)
         {
             var additionalData = new Dictionary<string, object>
             {
@@ -54,7 +54,7 @@ namespace FipsFrontend.Services
             LogSecurityEvent($"AUTH_{eventType}", $"Authentication {eventType.ToLower()}", userId, ipAddress, additionalData);
         }
 
-        public void LogAuthorizationEvent(string eventType, string userId, string resource, bool success, string reason = null)
+        public void LogAuthorizationEvent(string eventType, string userId, string resource, bool success, string? reason = null)
         {
             var additionalData = new Dictionary<string, object>
             {
