@@ -35,7 +35,7 @@ namespace FipsFrontend.Services
                 UserAgent = context?.Request.Headers["User-Agent"].ToString(),
                 RequestPath = context?.Request.Path,
                 RequestMethod = context?.Request.Method,
-                SessionId = context?.Session.Id,
+                SessionId = context?.Session?.Id,
                 AdditionalData = additionalData
             };
 

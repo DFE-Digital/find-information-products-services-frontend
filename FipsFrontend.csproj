@@ -23,12 +23,6 @@
     <Content Include="wwwroot\govuk-frontend\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="FipsFrontend.Tests\**\*" />
-    <EmbeddedResource Remove="FipsFrontend.Tests\**\*" />
-    <None Remove="FipsFrontend.Tests\**\*" />
-  </ItemGroup>
-
   <Target Name="BuildCSS" BeforeTargets="Build">
     <Exec Command="npm run build-css" ContinueOnError="false" />
   </Target>

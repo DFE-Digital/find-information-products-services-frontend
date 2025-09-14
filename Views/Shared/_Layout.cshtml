@@ -28,7 +28,7 @@
 
 
     <body class="govuk-template__body">
-  <script nonce="@Html.GetNonce()">
+  <script>
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
     
@@ -177,7 +177,7 @@
       <script type="module" src="/js/govuk-frontend.min.js"></script>
     <script type="module" src="/js/moj-frontend.min.js"></script>
     <script src="/js/accessible-autocomplete.min.js"></script>
-    <script type="module" nonce="@Html.GetNonce()">
+    <script type="module">
       import { initAll } from '/js/govuk-frontend.min.js'
       initAll()
       
