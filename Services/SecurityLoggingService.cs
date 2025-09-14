@@ -35,7 +35,7 @@ namespace FipsFrontend.Services
                 UserAgent = context?.Request.Headers["User-Agent"].ToString(),
                 RequestPath = context?.Request.Path,
                 RequestMethod = context?.Request.Method,
-                SessionId = context?.Session?.Id,
+                SessionId = GetSessionId(context),
                 AdditionalData = additionalData
             };
 
@@ -103,6 +103,21 @@ namespace FipsFrontend.Services
             }
 
             return context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+        }
+
+        private string GetSessionId(HttpContext? context)
+        {
+            if (context == null) return "NoContext";
+            
+            try
+            {
+                return context.Session?.Id ?? "NoSession";
+            }
+            catch (InvalidOperationException)
+            {
+                // Sessions not configured
+                return "SessionsNotConfigured";
+            }
         }
     }
 }

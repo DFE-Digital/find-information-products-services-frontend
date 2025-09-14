@@ -171,9 +171,13 @@ window.GDS.cookies = {
     
     // Hide cookie banner
     hideCookieBanner: function() {
+        console.log('hideCookieBanner called');
         const banner = document.getElementById('cookie-banner');
         if (banner) {
+            console.log('Hiding cookie banner');
             banner.style.display = 'none';
+        } else {
+            console.log('Cookie banner element not found');
         }
     },
     
@@ -204,34 +208,39 @@ function hideCookieBanner() {
 
 // Initialize cookie banner on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const preferences = window.GDS.cookies.getCookiePreferences();
-    
-    // If preferences haven't been set, show the cookie banner
-    if (!window.GDS.cookies.getCookie(window.GDS.cookies.COOKIE_PREFERENCES_SET)) {
-        window.GDS.cookies.showCookieBanner();
-    } else {
-        // Initialize analytics based on existing preferences
-        window.GDS.cookies.initializeAnalytics(preferences.analytics);
-    }
-    
-    // Handle cookie banner button clicks
-    document.addEventListener('click', function(e) {
-        if (e.target.name === 'cookies') {
-            const value = e.target.value;
-            const preferences = {
-                essential: true,
-                analytics: value === 'accept'
-            };
-            
-            window.GDS.cookies.setCookiePreferences(preferences);
-            window.GDS.cookies.hideCookieBanner();
-            
-            const message = value === 'accept' 
-                ? 'You've accepted analytics cookies. You can change your cookie settings at any time.'
-                : 'You've rejected analytics cookies. You can change your cookie settings at any time.';
-            
-            window.GDS.cookies.showConfirmationMessage(message);
+    // Wait for GOV.UK Frontend to initialize
+    setTimeout(function() {
+        const preferences = window.GDS.cookies.getCookiePreferences();
+        
+        // If preferences haven't been set, show the cookie banner
+        if (!window.GDS.cookies.getCookie(window.GDS.cookies.COOKIE_PREFERENCES_SET)) {
+            window.GDS.cookies.showCookieBanner();
+        } else {
+            // Initialize analytics based on existing preferences
+            window.GDS.cookies.initializeAnalytics(preferences.analytics);
         }
-    });
+        
+        // Handle cookie banner button clicks
+        document.addEventListener('click', function(e) {
+            console.log('Click detected:', e.target.name, e.target.value);
+            if (e.target.name === 'cookies') {
+                console.log('Cookie button clicked:', e.target.value);
+                const value = e.target.value;
+                const preferences = {
+                    essential: true,
+                    analytics: value === 'accept'
+                };
+                
+                window.GDS.cookies.setCookiePreferences(preferences);
+                window.GDS.cookies.hideCookieBanner();
+                
+                const message = value === 'accept' 
+                    ? 'You've accepted analytics cookies. You can change your cookie settings at any time.'
+                    : 'You've rejected analytics cookies. You can change your cookie settings at any time.';
+                
+                window.GDS.cookies.showConfirmationMessage(message);
+            }
+        });
+    }, 100); // Small delay to ensure GOV.UK Frontend is initialized
 });
 </script>
