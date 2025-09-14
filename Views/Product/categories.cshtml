@@ -79,6 +79,12 @@
                 <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
                     <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId/categories">Categories</a>
                 </li>
+                @if (ViewData["AssuranceEnabled"] as bool? == true)
+                {
+                    <li class="dfe-vertical-nav__section-item">
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.Product.FipsId/assurance">Assurance</a>
+                    </li>
+                }
             </ul>
         </nav>
     </div>

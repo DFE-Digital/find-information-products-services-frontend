@@ -4,6 +4,8 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using FipsFrontend.Services;
 using FipsFrontend.Middlewares;
+using FipsFrontend.Models;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using System.Threading.RateLimiting;
@@ -54,6 +56,9 @@ builder.Services.AddScoped<ISecurityService, SecurityService>();
 // Register security logging service
 builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
 builder.Services.AddHttpContextAccessor();
+
+// Configure feature flags
+builder.Services.Configure<EnabledFeatures>(builder.Configuration.GetSection("EnabledFeatures"));
 
 // Add memory caching
 builder.Services.AddMemoryCache();
@@ -165,6 +170,11 @@ app.MapControllerRoute(
     name: "product-categories",
     pattern: "product/{fipsid}/categories",
     defaults: new { controller = "Products", action = "ProductCategories" });
+
+app.MapControllerRoute(
+    name: "product-assurance",
+    pattern: "product/{fipsid}/assurance",
+    defaults: new { controller = "Products", action = "ProductAssurance" });
 
 app.MapControllerRoute(
     name: "product-view",

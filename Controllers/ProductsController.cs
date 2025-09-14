@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using FipsFrontend.Services;
 using FipsFrontend.Models;
 
@@ -10,11 +11,13 @@ public class ProductsController : Controller
 {
     private readonly ILogger<ProductsController> _logger;
     private readonly CmsApiService _cmsApiService;
+    private readonly EnabledFeatures _enabledFeatures;
 
-    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService)
+    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptions<EnabledFeatures> enabledFeatures)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
+        _enabledFeatures = enabledFeatures.Value;
     }
 
     // GET: Products
@@ -243,7 +246,7 @@ public class ProductsController : Controller
         try
         {
             // Find product by fips_id
-            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true");
+            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
 
             if (response?.Data == null || !response.Data.Any())
             {
@@ -258,6 +261,7 @@ public class ProductsController : Controller
                 PageDescription = $"View detailed information about {product.Title}"
             };
             ViewData["ActiveNav"] = "products";
+            ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             return View("~/Views/Product/index.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -317,11 +321,51 @@ public class ProductsController : Controller
             };
 
             ViewData["ActiveNav"] = "products";
+            ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             return View("~/Views/Product/categories.cshtml", viewModel);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading product categories for FIPS ID: {FipsId}", fipsid);
+            return NotFound();
+        }
+    }
+
+    public async Task<IActionResult> ProductAssurance(string fipsid)
+    {
+        // Check if Assurance feature is enabled
+        if (!_enabledFeatures.Assurance)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            // Find product by fips_id with product assurances populated
+            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
+
+            if (response?.Data == null || !response.Data.Any())
+            {
+                return NotFound();
+            }
+
+            var product = response.Data.First();
+
+            var viewModel = new ProductAssuranceViewModel
+            {
+                Product = product,
+                ProductAssurances = product.ProductAssurances ?? new List<ProductAssurance>(),
+                PageTitle = $"{product.Title} - Assurance",
+                PageDescription = $"View assurance information for {product.Title}"
+            };
+
+            ViewData["ActiveNav"] = "products";
+            ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
+            return View("~/Views/Product/assurance.cshtml", viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading product assurance for FIPS ID: {FipsId}", fipsid);
             return NotFound();
         }
     }

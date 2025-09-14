@@ -23,6 +23,8 @@ public class Product
     public List<CategoryValue>? CategoryValues { get; set; }
     [JsonPropertyName("product_contacts")]
     public List<ProductContact>? ProductContacts { get; set; }
+    [JsonPropertyName("product_assurances")]
+    public List<ProductAssurance>? ProductAssurances { get; set; }
     [JsonPropertyName("cmdb_last_sync")]
     public DateTime? CmdbLastSync { get; set; }
     public string State { get; set; } = "New";
@@ -90,6 +92,32 @@ public class ProductContact
     public string Email { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Role { get; set; }
+    public Product? Product { get; set; }
+    [JsonPropertyName("createdAt")]
+    public DateTime? CreatedAt { get; set; }
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+    [JsonPropertyName("publishedAt")]
+    public DateTime? PublishedAt { get; set; }
+}
+
+public class ProductAssurance
+{
+    public int Id { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
+    [JsonPropertyName("assurance_type")]
+    public string AssuranceType { get; set; } = string.Empty;
+    [JsonPropertyName("external_id")]
+    public string? ExternalId { get; set; }
+    [JsonPropertyName("external_url")]
+    public string? ExternalUrl { get; set; }
+    [JsonPropertyName("date_of_assurance")]
+    public DateTime? DateOfAssurance { get; set; }
+    public string? Outcome { get; set; }
+    public string? Phase { get; set; }
+    [JsonPropertyName("last_sync_date")]
+    public DateTime? LastSyncDate { get; set; }
     public Product? Product { get; set; }
     [JsonPropertyName("createdAt")]
     public DateTime? CreatedAt { get; set; }
