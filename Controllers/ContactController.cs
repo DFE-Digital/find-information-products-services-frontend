@@ -6,7 +6,7 @@ using FipsFrontend.Helpers;
 
 namespace FipsFrontend.Controllers;
 
-[Authorize]
+// [Authorize] // Temporarily disabled for testing
 public class ContactController : Controller
 {
     private readonly ILogger<ContactController> _logger;

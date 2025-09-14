@@ -555,7 +555,7 @@
 </div>
 
 @section Scripts {
-    <style>
+    <style nonce="@Html.GetNonce()">
         /* Ensure conditional reveal styling is correct */
         .govuk-checkboxes__conditional {
             margin-left: 0;
@@ -651,8 +651,45 @@
         #group-filter {
             display: none;
         }
+        
+        /* Filter toggle button styling */
+        .filter-toggle-button {
+            background: none;
+            border: none;
+            padding: 10px 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0b0c0c;
+            text-align: left;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-toggle-button:hover {
+            background-color: #f3f2f1;
+        }
+        
+        .filter-toggle-icon {
+            font-size: 14px;
+            transition: transform 0.2s ease;
+        }
+        
+        /* Add borders to filter groups */
+        .moj-filter-group {
+            border-bottom: 1px solid #b1b4b6;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .moj-filter-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
     </style>
-    <script>
+    <script nonce="@Html.GetNonce()">
         console.log('Products Index JavaScript starting...');
         
         // Google Analytics Event Tracking Functions
@@ -915,6 +952,10 @@
                 // Don't initialize if no data
                 if (userGroupsData.length === 0) {
                     console.log('No user groups data, skipping autocomplete initialization');
+                    const noDataElement = document.getElementById('user-groups-no-data');
+                    if (noDataElement) {
+                        noDataElement.style.display = 'block';
+                    }
                     return;
                 }
                 
@@ -1054,11 +1095,21 @@
                             target.style.display = 'none';
                             target.setAttribute('aria-hidden', 'true');
                             this.setAttribute('aria-expanded', 'false');
+                            // Update icon
+                            const icon = this.querySelector('.filter-toggle-icon');
+                            if (icon) {
+                                icon.textContent = '▼';
+                            }
                         } else {
                             // Expand
                             target.style.display = 'block';
                             target.setAttribute('aria-hidden', 'false');
                             this.setAttribute('aria-expanded', 'true');
+                            // Update icon
+                            const icon = this.querySelector('.filter-toggle-icon');
+                            if (icon) {
+                                icon.textContent = '▲';
+                            }
                         }
                     }
                 });

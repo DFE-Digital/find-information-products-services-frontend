@@ -5,7 +5,7 @@ using FipsFrontend.Models;
 
 namespace FipsFrontend.Controllers;
 
-[Authorize]
+// [Authorize] // Temporarily disabled for testing
 public class ProductsController : Controller
 {
     private readonly ILogger<ProductsController> _logger;

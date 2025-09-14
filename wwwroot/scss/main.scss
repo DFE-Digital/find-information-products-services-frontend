@@ -9,7 +9,7 @@
 @import "accessible-autocomplete.min.css";
 
 @import url("https://rsms.me/inter/inter.css");
-$govuk-font-family: "Inter", sans-serif;
+$govuk-font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 
 .tableNumbers {
   font-feature-settings: "tnum" 1, "ss01" 1, "zero" 1;
@@ -223,8 +223,7 @@ $govuk-font-family: "Inter", sans-serif;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid #b1b4b6;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    padding-bottom: 15px;
 }
 
 .filter-toggle-button:hover {

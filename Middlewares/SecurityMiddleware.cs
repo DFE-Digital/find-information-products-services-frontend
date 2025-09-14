@@ -7,13 +7,11 @@ namespace FipsFrontend.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<SecurityMiddleware> _logger;
-        private readonly ISecurityLoggingService _securityLogger;
 
-        public SecurityMiddleware(RequestDelegate next, ILogger<SecurityMiddleware> logger, ISecurityLoggingService securityLogger)
+        public SecurityMiddleware(RequestDelegate next, ILogger<SecurityMiddleware> logger)
         {
             _next = next;
             _logger = logger;
-            _securityLogger = securityLogger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -22,8 +20,11 @@ namespace FipsFrontend.Middlewares
             var userId = GetUserId(context);
             var ipAddress = GetClientIpAddress(context);
 
+            // Get the security logging service from the service provider
+            var securityLogger = context.RequestServices.GetRequiredService<ISecurityLoggingService>();
+
             // Log request start
-            _securityLogger.LogSecurityEvent("REQUEST_START", 
+            securityLogger.LogSecurityEvent("REQUEST_START", 
                 $"Request started: {context.Request.Method} {context.Request.Path}", 
                 userId, ipAddress);
 
@@ -34,7 +35,7 @@ namespace FipsFrontend.Middlewares
             catch (Exception ex)
             {
                 // Log security-relevant exceptions
-                _securityLogger.LogSecurityEvent("SECURITY_EXCEPTION", 
+                securityLogger.LogSecurityEvent("SECURITY_EXCEPTION", 
                     $"Security exception occurred: {ex.Message}", 
                     userId, ipAddress, 
                     new Dictionary<string, object> { ["Exception"] = ex.ToString() });
@@ -47,7 +48,7 @@ namespace FipsFrontend.Middlewares
                 var statusCode = context.Response.StatusCode;
 
                 // Log request completion
-                _securityLogger.LogSecurityEvent("REQUEST_COMPLETE", 
+                securityLogger.LogSecurityEvent("REQUEST_COMPLETE", 
                     $"Request completed: {context.Request.Method} {context.Request.Path} - Status: {statusCode} - Duration: {duration.TotalMilliseconds}ms", 
                     userId, ipAddress,
                     new Dictionary<string, object> 
@@ -60,21 +61,21 @@ namespace FipsFrontend.Middlewares
                 // Log potential security issues
                 if (statusCode == 401)
                 {
-                    _securityLogger.LogAuthenticationEvent("UNAUTHORIZED_ACCESS", userId, ipAddress, false, "Unauthorized access attempt");
+                    securityLogger.LogAuthenticationEvent("UNAUTHORIZED_ACCESS", userId, ipAddress, false, "Unauthorized access attempt");
                 }
                 else if (statusCode == 403)
                 {
-                    _securityLogger.LogAuthorizationEvent("FORBIDDEN_ACCESS", userId, context.Request.Path, false, "Forbidden access attempt");
+                    securityLogger.LogAuthorizationEvent("FORBIDDEN_ACCESS", userId, context.Request.Path, false, "Forbidden access attempt");
                 }
                 else if (statusCode >= 400 && statusCode < 500)
                 {
-                    _securityLogger.LogSecurityEvent("CLIENT_ERROR", 
+                    securityLogger.LogSecurityEvent("CLIENT_ERROR", 
                         $"Client error {statusCode} for {context.Request.Path}", 
                         userId, ipAddress);
                 }
                 else if (statusCode >= 500)
                 {
-                    _securityLogger.LogSecurityEvent("SERVER_ERROR", 
+                    securityLogger.LogSecurityEvent("SERVER_ERROR", 
                         $"Server error {statusCode} for {context.Request.Path}", 
                         userId, ipAddress);
                 }

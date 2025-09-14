@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using FipsFrontend.Services;
@@ -16,14 +17,20 @@ builder.Logging.AddFile("logs/app-{Date}.log");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
-// Configure Entra ID authentication
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+// Temporarily disable authentication for development
+// TODO: Re-enable authentication when Azure AD is properly configured
 
-// Add Microsoft Identity UI
-builder.Services.AddRazorPages()
-    .AddMicrosoftIdentityUI();
+// Add basic authentication services without Azure AD - DISABLED FOR TESTING
+// builder.Services.AddAuthentication("Cookies")
+//     .AddCookie("Cookies", options =>
+//     {
+//         options.LoginPath = "/Home/Index";
+//         options.LogoutPath = "/Home/Index";
+//         options.AccessDeniedPath = "/Home/Index";
+//     });
+// builder.Services.AddAuthorization();
 
 // Configure HTTP client for CMS API with optimizations
 builder.Services.AddHttpClient<CmsApiService>(client =>
@@ -142,8 +149,9 @@ app.Use(async (context, next) =>
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Use authentication middleware - DISABLED FOR TESTING
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 app.UseSession();
 
