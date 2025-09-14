@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install npm dependencies
         run: npm install
@@ -43,13 +45,13 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore NuGet packages
-        run: dotnet restore
+        run: dotnet restore FipsFrontend.csproj
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build FipsFrontend.csproj --configuration Release
 
       - name: Publish with dotnet
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish FipsFrontend.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
