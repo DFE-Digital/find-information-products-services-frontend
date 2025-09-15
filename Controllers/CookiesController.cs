@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using FipsFrontend.Models;
 using FipsFrontend.Helpers;
+using System.Collections.Generic;
 
 namespace FipsFrontend.Controllers
 {
@@ -33,16 +34,48 @@ namespace FipsFrontend.Controllers
             return View("Preferences", model);
         }
         
+        [HttpPost]
+        public IActionResult BannerAction(string cookies)
+        {
+            // Handle cookie banner form submission
+            if (cookies == "accept" || cookies == "reject")
+            {
+                bool analyticsAccepted = cookies == "accept";
+                SetCookiePreferences(analyticsAccepted);
+                
+                // Set a flag to trigger analytics loading on the redirected page
+                if (analyticsAccepted)
+                {
+                    TempData["LoadAnalytics"] = "true";
+                }
+                
+                // Return a redirect to the same page to show the confirmation message
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/");
+            }
+            
+            return Redirect("/");
+        }
+        
         private CookiePreferences GetCookiePreferences()
         {
-            var preferencesSet = Request.Cookies["cookie-preferences-set"];
-            if (!string.IsNullOrEmpty(preferencesSet))
+            var preferencesCookie = Request.Cookies["cookie-preferences"];
+            if (!string.IsNullOrEmpty(preferencesCookie))
             {
-                var analyticsAccepted = Request.Cookies["analytics-cookies-accepted"];
-                return new CookiePreferences
+                try
                 {
-                    AnalyticsAccepted = analyticsAccepted == "true"
-                };
+                    var preferences = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(preferencesCookie);
+                    if (preferences != null && preferences.ContainsKey("analytics"))
+                    {
+                        return new CookiePreferences
+                        {
+                            AnalyticsAccepted = preferences["analytics"] == "on"
+                        };
+                    }
+                }
+                catch
+                {
+                    // If JSON parsing fails, treat as no preferences set
+                }
             }
             
             return new CookiePreferences
@@ -55,14 +88,20 @@ namespace FipsFrontend.Controllers
         {
             var cookieOptions = new CookieOptions
             {
-                HttpOnly = true,
+                HttpOnly = false, // JavaScript needs to read this cookie
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddYears(1)
             };
             
-            Response.Cookies.Append("cookie-preferences-set", "true", cookieOptions);
-            Response.Cookies.Append("analytics-cookies-accepted", analyticsAccepted.ToString().ToLower(), cookieOptions);
+            // Create the preferences object that matches the JavaScript format
+            var preferences = new Dictionary<string, string>
+            {
+                { "analytics", analyticsAccepted ? "on" : "off" }
+            };
+            
+            var preferencesJson = System.Text.Json.JsonSerializer.Serialize(preferences);
+            Response.Cookies.Append("cookie-preferences", preferencesJson, cookieOptions);
         }
     }
     

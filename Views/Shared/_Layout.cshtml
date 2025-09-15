@@ -27,9 +27,11 @@
 
 
     <body class="govuk-template__body">
-  <script>
+  <script nonce="@Html.GetNonce()">
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
+
+  @await Html.PartialAsync("_CookieBanner")
     
     <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
     
@@ -85,6 +87,8 @@
 
 @RenderSection("BeforeContent", required: false)
 
+
+
 <div class="govuk-width-container">
     <main class="govuk-main-wrapper" id="main-content" role="main">
         <div class="govuk-width-container">
@@ -110,11 +114,11 @@
               <span class="govuk-visually-hidden" id="feedback-link-desc">Opens feedback form</span>
             </div>
 
-            <div class="dfe-feedback-banner--content-message" id="thanksMessage" role="status" aria-live="polite" style="display: none;">
+            <div class="dfe-feedback-banner--content-message" id="thanksMessage" role="status" aria-live="polite" style="display: none;" nonce="@Html.GetNonce()">
               <p class="govuk-body">Thank you for your feedback</p>
             </div>
 
-            <div class="dfe-feedback-panel" id="feedback-panel" style="display: none;" aria-hidden="true" aria-labelledby="feedback-form-heading">
+            <div class="dfe-feedback-panel" id="feedback-panel" style="display: none;" aria-hidden="true" aria-labelledby="feedback-form-heading" nonce="@Html.GetNonce()">
               <form id="feedback-form" novalidate>
                 <fieldset class="govuk-fieldset">
                   <legend class="govuk-fieldset__legend govuk-fieldset__legend--m" id="feedback-form-heading">
@@ -237,7 +241,9 @@
       <script type="module" src="/js/govuk-frontend.min.js"></script>
     <script type="module" src="/js/moj-frontend.min.js"></script>
     <script src="/js/accessible-autocomplete.min.js"></script>
-    <script type="module">
+    <script src="/js/cookies.js"></script>
+    <script src="/js/site.js"></script>
+    <script type="module" nonce="@Html.GetNonce()">
       import { initAll } from '/js/govuk-frontend.min.js'
       initAll()
       
@@ -251,6 +257,17 @@
             }
           });
         });
+        
+        // Check if we need to load analytics after cookie acceptance
+        @if (TempData["LoadAnalytics"]?.ToString() == "true")
+        {
+          <text>
+          console.log('Triggering analytics loading from server-side cookie acceptance...');
+          if (typeof window.sendAnalytics === 'function') {
+            window.sendAnalytics();
+          }
+          </text>
+        }
       });
     </script>
 </body>

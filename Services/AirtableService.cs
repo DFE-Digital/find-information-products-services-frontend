@@ -25,7 +25,6 @@ public class AirtableService : IAirtableService
         // Configure HttpClient for Airtable API
         _httpClient.BaseAddress = new Uri($"https://api.airtable.com/v0/{_config.BaseId}/");
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.ApiKey}");
-        _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
     }
 
     public async Task<bool> SubmitFeedbackAsync(string feedback, string pageUrl, string service = "FIPS")

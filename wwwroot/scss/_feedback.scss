@@ -35,6 +35,7 @@
 
   &--content-message {
       padding: 15px 0;
+      display: none; // Hidden by default
       
       p {
           margin-bottom: 0;
@@ -48,6 +49,7 @@
   margin-top: 15px;
   padding: 15px 0;
   background-color: #F4F8FC;
+  display: none; // Hidden by default
   
   .govuk-form-group {
       margin-bottom: 15px;

@@ -182,7 +182,7 @@ app.Use(async (context, next) =>
     context.Response.Headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()";
     
     // Additional security headers
-    context.Response.Headers["Cross-Origin-Embedder-Policy"] = "require-corp";
+    context.Response.Headers["Cross-Origin-Embedder-Policy"] = "credentialless";
     context.Response.Headers["Cross-Origin-Opener-Policy"] = "same-origin";
     context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
     

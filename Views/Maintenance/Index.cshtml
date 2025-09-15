@@ -1,3 +1,4 @@
+@using FipsFrontend.Helpers
 @{
     ViewData["Title"] = "Site Maintenance";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -7,7 +8,7 @@
     <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
-                <div class="govuk-panel govuk-panel--confirmation" style="background-color: #f47738;">
+                <div class="govuk-panel govuk-panel--confirmation" style="background-color: #f47738;" nonce="@Html.GetNonce()">
                     <h1 class="govuk-panel__title">
                         Site Maintenance
                     </h1>
@@ -66,7 +67,7 @@
                         <button class="govuk-button govuk-button--secondary" onclick="checkHealth()">
                             Check System Health
                         </button>
-                        <div id="health-status" class="govuk-inset-text" style="display: none; margin-top: 1rem;">
+                        <div id="health-status" class="govuk-inset-text" style="display: none; margin-top: 1rem;" nonce="@Html.GetNonce()">
                             <p class="govuk-body" id="health-message"></p>
                         </div>
                     </div>
@@ -76,7 +77,7 @@
     </main>
 </div>
 
-<script nonce="@Context.Items["Nonce"]">
+<script nonce="@Html.GetNonce()">
     function checkHealth() {
         const healthStatus = document.getElementById('health-status');
         const healthMessage = document.getElementById('health-message');
