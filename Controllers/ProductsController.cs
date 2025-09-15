@@ -147,7 +147,7 @@ public class ProductsController : Controller
                 {
                     searchQuery += $"&{filterQuery}";
                 }
-                searchQuery += $"&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name&populate[category_values][populate][parent][fields][0]=name&populate[category_values][populate][parent][fields][1]=slug";
+                searchQuery += $"&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
 
                 var searchResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(searchQuery, TimeSpan.FromMinutes(2));
                 filteredProducts = searchResponse?.Data ?? new List<Product>();
@@ -157,7 +157,7 @@ public class ProductsController : Controller
             else
             {
                 // No keywords, apply filters at CMS level
-                var filterQueryWithPagination = $"products?{filterQuery}&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name&populate[category_values][populate][parent][fields][0]=name&populate[category_values][populate][parent][fields][1]=slug";
+                var filterQueryWithPagination = $"products?{filterQuery}&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
 
                 var filteredResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(filterQueryWithPagination, TimeSpan.FromMinutes(5));
                 filteredProducts = filteredResponse?.Data ?? new List<Product>();
@@ -167,7 +167,7 @@ public class ProductsController : Controller
                 totalCount = filteredTotalCount;
                 if (string.IsNullOrEmpty(filterQuery))
                 {
-                    var countResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=1", TimeSpan.FromMinutes(10));
+                    var countResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=1&fields[0]=id", TimeSpan.FromMinutes(10));
                     totalCount = countResponse?.Meta?.Pagination?.Total ?? 0;
                 }
             }
@@ -226,7 +226,7 @@ public class ProductsController : Controller
     {
         try
         {
-            var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate=*");
+            var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
             if (response?.Data == null)
             {
                 return NotFound();
@@ -245,7 +245,7 @@ public class ProductsController : Controller
     {
         try
         {
-            // Find product by fips_id
+            // Find product by fips_id - optimized to return only needed fields
             var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
 
             if (response?.Data == null || !response.Data.Any())
@@ -275,7 +275,7 @@ public class ProductsController : Controller
     {
         try
         {
-            // Find product by fips_id
+            // Find product by fips_id - optimized for category view
             var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true");
 
             if (response?.Data == null || !response.Data.Any())
@@ -341,7 +341,7 @@ public class ProductsController : Controller
 
         try
         {
-            // Find product by fips_id with product assurances populated
+            // Find product by fips_id with product assurances populated - optimized for assurance view
             var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
 
             if (response?.Data == null || !response.Data.Any())
@@ -696,7 +696,7 @@ public class ProductsController : Controller
         // This is much faster than individual API calls
         _logger.LogInformation("Building filter options with bulk API call for counts");
 
-        var allProductsResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=10000&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name&populate[category_values][populate][parent][fields][0]=name&populate[category_values][populate][parent][fields][1]=slug");
+        var allProductsResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=10000&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name");
         var allProductsForCounting = allProductsResponse?.Data ?? new List<Product>();
 
         _logger.LogInformation("Loaded {Count} products for filter counting", allProductsForCounting.Count);

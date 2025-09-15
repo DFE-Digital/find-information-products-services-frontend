@@ -49,8 +49,8 @@ public class CategoriesController : Controller
                 {
                     _logger.LogInformation("=== PROCESSING CATEGORY TYPE: {Name} ===", categoryType.Name);
                     
-                    // Get all values for this category type - try different populate approaches
-                    var valuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryType.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate=*&sort=sort_order:asc";
+                    // Get all values for this category type - optimized to return only needed fields
+                    var valuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryType.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
                     _logger.LogInformation("Values API URL: {Url}", valuesUrl);
                     
                     var valuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(valuesUrl);
@@ -144,8 +144,8 @@ public class CategoriesController : Controller
                     {
                         _logger.LogInformation("=== PROCESSING CATEGORY TYPE: {Name} ===", ct.Name);
                         
-                        // Get all values for this category type - filter for root items only (no parent)
-                        var valuesUrl = $"category-values?filters[category_type][slug][$eq]={ct.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent]=true&populate[children]=true&sort=sort_order:asc";
+                        // Get all values for this category type - filter for root items only (no parent) - optimized
+                        var valuesUrl = $"category-values?filters[category_type][slug][$eq]={ct.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
                         _logger.LogInformation("Values API URL: {Url}", valuesUrl);
                         
                         var valuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(valuesUrl);
@@ -227,8 +227,8 @@ public class CategoriesController : Controller
                 BreadcrumbPath = slug
             };
 
-            // Get all published and enabled category values for this type with full population
-            var allValuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent]=true&populate[children]=true&sort=sort_order:asc";
+            // Get all published and enabled category values for this type with optimized population
+            var allValuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
             _logger.LogInformation("=== DETAIL VALUES API CALL ===");
             _logger.LogInformation("URL: {Url}", allValuesUrl);
             
@@ -288,8 +288,8 @@ public class CategoriesController : Controller
             }
             else
             {
-                // Multi-level navigation - need to get ALL values (not just root items) to find children
-                var allValuesForNavigationUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent]=true&populate[children]=true&sort=sort_order:asc";
+                // Multi-level navigation - need to get ALL values (not just root items) to find children - optimized
+                var allValuesForNavigationUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
                 _logger.LogInformation("=== MULTI-LEVEL NAVIGATION API CALL ===");
                 _logger.LogInformation("URL: {Url}", allValuesForNavigationUrl);
                 
@@ -339,9 +339,9 @@ public class CategoriesController : Controller
                 {
                     viewModel.ParentCategory = currentParent;
                     
-                    // Get children directly from API instead of filtering all records
+                    // Get children directly from API instead of filtering all records - optimized
                     _logger.LogInformation("Current parent DocumentId: {DocumentId}", currentParent.DocumentId);
-                    var childrenUrl = $"category-values?filters[parent][documentId][$eq]={currentParent.DocumentId}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate=*&sort=sort_order:asc";
+                    var childrenUrl = $"category-values?filters[parent][documentId][$eq]={currentParent.DocumentId}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
                     _logger.LogInformation("=== CHILDREN API CALL ===");
                     _logger.LogInformation("URL: {Url}", childrenUrl);
                     

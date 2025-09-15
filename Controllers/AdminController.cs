@@ -33,8 +33,8 @@ public class AdminController : Controller
 
         try
         {
-            // Get all products using the CMS API
-            var products = await _cmsApiService.GetAsync<List<Product>>("products?populate=*");
+            // Get all products using the CMS API - optimized to return only fields needed for admin table
+            var products = await _cmsApiService.GetAsync<List<Product>>("products?fields[0]=id&fields[1]=title&fields[2]=short_description&fields[3]=state&fields[4]=fips_id&fields[5]=publishedAt&fields[6]=createdAt");
             
             var viewModel = new AdminProductsViewModel
             {

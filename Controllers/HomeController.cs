@@ -22,12 +22,12 @@ public class HomeController : Controller
     {
         try
         {
-            // Get only published products for the count (cache for 5 minutes)
-            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1", TimeSpan.FromMinutes(5));
+            // Get only published products count (cache for 5 minutes) - optimized to return only count
+            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1&fields[0]=id", TimeSpan.FromMinutes(5));
             var publishedCount = publishedProducts?.Meta?.Pagination?.Total ?? 0;
             
-            // Get published category types count (cache for 10 minutes)
-            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1", TimeSpan.FromMinutes(10));
+            // Get published category types count (cache for 10 minutes) - optimized to return only count
+            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1&fields[0]=id", TimeSpan.FromMinutes(10));
             var categoryTypesCount = categoryTypes?.Meta?.Pagination?.Total ?? 0;
             
             var viewModel = new HomeViewModel

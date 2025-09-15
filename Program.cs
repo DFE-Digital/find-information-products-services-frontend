@@ -76,7 +76,8 @@ builder.Services.Configure<EnabledFeatures>(builder.Configuration.GetSection("En
 // Add memory caching
 builder.Services.AddMemoryCache(options =>
 {
-    options.SizeLimit = builder.Configuration.GetValue<int>("Caching:MemoryCache:SizeLimit", 100);
+    // Don't set SizeLimit to avoid capacity eviction issues
+    // This allows unlimited cache entries based on memory availability
     options.CompactionPercentage = builder.Configuration.GetValue<double>("Caching:MemoryCache:CompactionPercentage", 0.25);
 });
 
