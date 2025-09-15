@@ -64,6 +64,19 @@
         </div>
 
         <div class="govuk-form-group">
+            <h2 class="govuk-heading-m">Cache Operations</h2>
+            
+            <div class="govuk-form-group">
+                <form method="post" action="@Url.Action("WarmCache", "Cache")" class="inline-form">
+                    <button type="submit" class="govuk-button govuk-button--secondary">
+                        Warm Cache
+                    </button>
+                </form>
+                <p class="govuk-hint">Pre-loads critical data into cache for better performance.</p>
+            </div>
+        </div>
+
+        <div class="govuk-form-group">
             <h2 class="govuk-heading-m">Clear Specific Caches</h2>
             
             <div class="govuk-form-group">
@@ -95,6 +108,41 @@
                     Clear All Caches
                 </button>
             </form>
+        </div>
+
+        <div class="govuk-form-group">
+            <h2 class="govuk-heading-m">Cache Performance</h2>
+            
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number" id="hit-rate">--</div>
+                        <div class="govuk-stat__label">Hit Rate %</div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number" id="total-hits">--</div>
+                        <div class="govuk-stat__label">Total Hits</div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number" id="total-misses">--</div>
+                        <div class="govuk-stat__label">Total Misses</div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-stat govuk-stat--small">
+                        <div class="govuk-stat__number" id="memory-usage">--</div>
+                        <div class="govuk-stat__label">Memory Usage</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="govuk-button govuk-button--secondary" onclick="refreshCacheStats()">
+                Refresh Stats
+            </button>
         </div>
 
         <div class="govuk-form-group">
@@ -216,3 +264,37 @@
         </div>
     </div>
 </div>
+
+<script nonce="@Context.Items["Nonce"]">
+    function refreshCacheStats() {
+        fetch('/Cache/CacheStats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error fetching cache stats:', data.error);
+                    return;
+                }
+                
+                document.getElementById('hit-rate').textContent = data.HitRate ? data.HitRate.toFixed(1) : '0';
+                document.getElementById('total-hits').textContent = data.TotalHits || '0';
+                document.getElementById('total-misses').textContent = data.Misses || '0';
+                document.getElementById('memory-usage').textContent = formatBytes(data.MemoryUsage || 0);
+            })
+            .catch(error => {
+                console.error('Error fetching cache stats:', error);
+            });
+    }
+    
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+    
+    // Load stats on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        refreshCacheStats();
+    });
+</script>

@@ -53,6 +53,12 @@ builder.Services.AddScoped<CmsApiService>();
 // Register CMS health service
 builder.Services.AddScoped<ICmsHealthService, CmsHealthService>();
 
+// Register enhanced caching services
+builder.Services.AddScoped<ICacheConfigurationService, CacheConfigurationService>();
+builder.Services.AddScoped<IEnhancedCacheService, EnhancedCacheService>();
+builder.Services.AddScoped<ICacheWarmingService, CacheWarmingService>();
+builder.Services.AddScoped<ICacheInvalidationService, CacheInvalidationService>();
+
 // Register security service
 builder.Services.AddScoped<ISecurityService, SecurityService>();
 
@@ -64,7 +70,28 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<EnabledFeatures>(builder.Configuration.GetSection("EnabledFeatures"));
 
 // Add memory caching
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = builder.Configuration.GetValue<int>("Caching:MemoryCache:SizeLimit", 100);
+    options.CompactionPercentage = builder.Configuration.GetValue<double>("Caching:MemoryCache:CompactionPercentage", 0.25);
+});
+
+// Add distributed caching (Redis support)
+var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:Enabled", false);
+if (redisEnabled)
+{
+    var redisConnectionString = builder.Configuration.GetValue<string>("Caching:Redis:ConnectionString", "localhost:6379");
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnectionString;
+        options.InstanceName = builder.Configuration.GetValue<string>("Caching:Redis:KeyPrefix", "fips:");
+    });
+}
+else
+{
+    // Fallback to in-memory distributed cache
+    builder.Services.AddDistributedMemoryCache();
+}
 
 // Add response caching
 builder.Services.AddResponseCaching();
