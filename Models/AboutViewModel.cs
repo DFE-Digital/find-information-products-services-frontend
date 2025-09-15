@@ -48,6 +48,18 @@ namespace FipsFrontend.Models
         public DateTime? PublishedAt { get; set; }
     }
 
+    public class PageHelp
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string MetaDescription { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+        public string RelatedContent { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime? PublishedAt { get; set; }
+    }
+
     public class AboutViewModel : BaseViewModel
     {
         public PageAbout? PageContent { get; set; }
@@ -101,6 +113,20 @@ namespace FipsFrontend.Models
             HideNavigation = false; // Show navigation on contact page
             PageTitle = "Contact us";
             PageDescription = "Get in touch with the FIPS team";
+        }
+    }
+
+    public class HelpViewModel : BaseViewModel
+    {
+        public PageHelp? PageContent { get; set; }
+        public string ProcessedBody { get; set; } = "";
+        public string ProcessedRelatedContent { get; set; } = "";
+        
+        public HelpViewModel()
+        {
+            HideNavigation = false; // Show navigation on help page
+            PageTitle = "Help and support";
+            PageDescription = "Get help using the FIPS system";
         }
     }
 }

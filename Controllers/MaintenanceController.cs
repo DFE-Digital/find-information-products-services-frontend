@@ -14,8 +14,26 @@ public class MaintenanceController : Controller
         _cmsHealthService = cmsHealthService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        // Get diagnostic information for debugging
+        var isCmsAvailable = await _cmsHealthService.IsCmsAvailableAsync();
+        var isMaintenanceMode = _cmsHealthService.IsMaintenanceModeEnabled();
+        var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var maintenanceModeEnabled = configuration.GetValue<bool>("MaintenanceMode:Enabled", false);
+        
+        // Pass diagnostic data to the view
+        ViewBag.DebugInfo = new
+        {
+            MaintenanceModeEnabled = maintenanceModeEnabled,
+            CmsHealthServiceMaintenanceMode = isMaintenanceMode,
+            CmsAvailable = isCmsAvailable,
+            Timestamp = DateTime.UtcNow,
+            RequestPath = HttpContext.Request.Path,
+            UserAgent = HttpContext.Request.Headers["User-Agent"].ToString(),
+            RemoteIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
+        };
+        
         return View();
     }
 
@@ -25,13 +43,29 @@ public class MaintenanceController : Controller
     {
         var isCmsAvailable = await _cmsHealthService.IsCmsAvailableAsync();
         var isMaintenanceMode = _cmsHealthService.IsMaintenanceModeEnabled();
+        var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var maintenanceModeEnabled = configuration.GetValue<bool>("MaintenanceMode:Enabled", false);
+        
+        // Perform a fresh CMS health check for detailed diagnostics
+        var cmsHealthCheckResult = await _cmsHealthService.CheckCmsHealthAsync();
         
         var healthStatus = new
         {
             status = isCmsAvailable && !isMaintenanceMode ? "healthy" : "unhealthy",
             cmsAvailable = isCmsAvailable,
             maintenanceMode = isMaintenanceMode,
-            timestamp = DateTime.UtcNow
+            configurationMaintenanceMode = maintenanceModeEnabled,
+            cmsHealthCheckResult = cmsHealthCheckResult,
+            timestamp = DateTime.UtcNow,
+            debug = new
+            {
+                whyMaintenanceShown = !isCmsAvailable ? "CMS unavailable" : 
+                                     isMaintenanceMode ? "Health service maintenance mode enabled" :
+                                     maintenanceModeEnabled ? "Configuration maintenance mode enabled" : "Unknown",
+                cmsBaseUrl = configuration["CmsApi:BaseUrl"] ?? "Not configured",
+                healthCheckTimeout = configuration["MaintenanceMode:HealthCheckTimeoutSeconds"] ?? "10",
+                healthCheckInterval = configuration["MaintenanceMode:HealthCheckIntervalSeconds"] ?? "30"
+            }
         };
 
         return Json(healthStatus);

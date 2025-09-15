@@ -72,6 +72,68 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="govuk-details" data-module="govuk-details">
+                    <summary class="govuk-details__summary">
+                        <span class="govuk-details__summary-text">
+                            Debug Information
+                        </span>
+                    </summary>
+                    <div class="govuk-details__text">
+                        @if (ViewBag.DebugInfo != null)
+                        {
+                            <div class="govuk-inset-text">
+                                <h3 class="govuk-heading-s">Maintenance Trigger Analysis</h3>
+                                <p class="govuk-body">
+                                    <strong>Configuration Maintenance Mode:</strong> 
+                                    @if (ViewBag.DebugInfo.MaintenanceModeEnabled)
+                                    {
+                                        <span style="color: #d4351c;">✅ ENABLED (This is why maintenance page is shown)</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #00703c;">❌ Disabled</span>
+                                    }
+                                </p>
+                                <p class="govuk-body">
+                                    <strong>CMS Health Service Maintenance Mode:</strong> 
+                                    @if (ViewBag.DebugInfo.CmsHealthServiceMaintenanceMode)
+                                    {
+                                        <span style="color: #d4351c;">✅ ENABLED (This is why maintenance page is shown)</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #00703c;">❌ Disabled</span>
+                                    }
+                                </p>
+                                <p class="govuk-body">
+                                    <strong>CMS Available:</strong> 
+                                    @if (ViewBag.DebugInfo.CmsAvailable)
+                                    {
+                                        <span style="color: #00703c;">✅ Available</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #d4351c;">❌ UNAVAILABLE (This is why maintenance page is shown)</span>
+                                    }
+                                </p>
+                                <p class="govuk-body">
+                                    <strong>Debug Timestamp:</strong> @ViewBag.DebugInfo.Timestamp.ToString("yyyy-MM-dd HH:mm:ss UTC")
+                                </p>
+                                <p class="govuk-body">
+                                    <strong>Request Path:</strong> @ViewBag.DebugInfo.RequestPath
+                                </p>
+                                <p class="govuk-body">
+                                    <strong>Remote IP:</strong> @ViewBag.DebugInfo.RemoteIpAddress
+                                </p>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="govuk-body">Debug information not available.</p>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -91,11 +153,19 @@
                 const status = data.status === 'healthy' ? '✅ Healthy' : '❌ Unhealthy';
                 const cmsStatus = data.cmsAvailable ? 'Available' : 'Unavailable';
                 const maintenanceStatus = data.maintenanceMode ? 'Enabled' : 'Disabled';
+                const configMaintenanceStatus = data.configurationMaintenanceMode ? 'Enabled' : 'Disabled';
+                const cmsHealthCheck = data.cmsHealthCheckResult ? '✅ Passed' : '❌ Failed';
                 
                 healthMessage.innerHTML = `
                     <strong>System Status:</strong> ${status}<br>
                     <strong>CMS Status:</strong> ${cmsStatus}<br>
-                    <strong>Maintenance Mode:</strong> ${maintenanceStatus}<br>
+                    <strong>CMS Health Check:</strong> ${cmsHealthCheck}<br>
+                    <strong>Health Service Maintenance Mode:</strong> ${maintenanceStatus}<br>
+                    <strong>Configuration Maintenance Mode:</strong> ${configMaintenanceStatus}<br>
+                    <strong>Why Maintenance Shown:</strong> ${data.debug?.whyMaintenanceShown || 'Unknown'}<br>
+                    <strong>CMS Base URL:</strong> ${data.debug?.cmsBaseUrl || 'Not configured'}<br>
+                    <strong>Health Check Timeout:</strong> ${data.debug?.healthCheckTimeout || '10'}s<br>
+                    <strong>Health Check Interval:</strong> ${data.debug?.healthCheckInterval || '30'}s<br>
                     <strong>Last Checked:</strong> ${new Date(data.timestamp).toLocaleString()}
                 `;
             })

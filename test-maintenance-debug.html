@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maintenance Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { background: #f8f8f8; padding: 15px; margin: 10px 0; border-left: 4px solid #00703c; }
+        .error { border-left-color: #d4351c; }
+        .success { border-left-color: #00703c; }
+        .warning { border-left-color: #f47738; }
+        button { padding: 10px 15px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>FIPS Maintenance Debug Test</h1>
+    
+    <div class="debug-section">
+        <h2>Current System Status</h2>
+        <button onclick="checkHealth()">Check System Health</button>
+        <div id="health-status" style="display: none; margin-top: 10px;">
+            <pre id="health-message"></pre>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Test Maintenance Mode</h2>
+        <p>Use these buttons to test different maintenance scenarios:</p>
+        <button onclick="enableMaintenance()">Enable Maintenance Mode</button>
+        <button onclick="disableMaintenance()">Disable Maintenance Mode</button>
+        <button onclick="testCmsDown()">Simulate CMS Down</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>Debug Information</h2>
+        <p>When maintenance mode is triggered, you should see detailed debug information including:</p>
+        <ul>
+            <li><strong>Configuration Maintenance Mode:</strong> Shows if maintenance is enabled in appsettings.json</li>
+            <li><strong>CMS Health Service Maintenance Mode:</strong> Shows if maintenance is enabled programmatically</li>
+            <li><strong>CMS Available:</strong> Shows if the CMS backend is responding</li>
+            <li><strong>Why Maintenance Shown:</strong> Explains exactly why the maintenance page is displayed</li>
+            <li><strong>CMS Base URL:</strong> Shows the configured CMS endpoint</li>
+            <li><strong>Health Check Settings:</strong> Shows timeout and interval configurations</li>
+        </ul>
+    </div>
+
+    <script>
+        function checkHealth() {
+            const healthStatus = document.getElementById('health-status');
+            const healthMessage = document.getElementById('health-message');
+            
+            healthStatus.style.display = 'block';
+            healthMessage.textContent = 'Checking system health...';
+            
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    const status = data.status === 'healthy' ? '✅ Healthy' : '❌ Unhealthy';
+                    const cmsStatus = data.cmsAvailable ? 'Available' : 'Unavailable';
+                    const maintenanceStatus = data.maintenanceMode ? 'Enabled' : 'Disabled';
+                    const configMaintenanceStatus = data.configurationMaintenanceMode ? 'Enabled' : 'Disabled';
+                    const cmsHealthCheck = data.cmsHealthCheckResult ? '✅ Passed' : '❌ Failed';
+                    
+                    healthMessage.innerHTML = `
+System Status: ${status}
+CMS Status: ${cmsStatus}
+CMS Health Check: ${cmsHealthCheck}
+Health Service Maintenance Mode: ${maintenanceStatus}
+Configuration Maintenance Mode: ${configMaintenanceStatus}
+Why Maintenance Shown: ${data.debug?.whyMaintenanceShown || 'Unknown'}
+CMS Base URL: ${data.debug?.cmsBaseUrl || 'Not configured'}
+Health Check Timeout: ${data.debug?.healthCheckTimeout || '10'}s
+Health Check Interval: ${data.debug?.healthCheckInterval || '30'}s
+Last Checked: ${new Date(data.timestamp).toLocaleString()}
+                    `;
+                })
+                .catch(error => {
+                    healthMessage.textContent = 'Error checking system health: ' + error.message;
+                });
+        }
+
+        function enableMaintenance() {
+            fetch('/admin/maintenance/enable', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Maintenance mode enabled. Try accessing the main site.');
+                    } else {
+                        alert('Failed to enable maintenance mode. Check console for details.');
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+        }
+
+        function disableMaintenance() {
+            fetch('/admin/maintenance/disable', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Maintenance mode disabled.');
+                    } else {
+                        alert('Failed to disable maintenance mode. Check console for details.');
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error.message);
+                });
+        }
+
+        function testCmsDown() {
+            alert('To test CMS down scenario, you would need to:\n1. Stop the CMS server\n2. Or modify the CMS URL in configuration\n3. Then try accessing the main site');
+        }
+    </script>
+</body>
+</html>
