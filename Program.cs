@@ -50,6 +50,9 @@ builder.Services.AddHttpClient<CmsApiService>(client =>
 // Register CMS API service
 builder.Services.AddScoped<CmsApiService>();
 
+// Register CMS health service
+builder.Services.AddScoped<ICmsHealthService, CmsHealthService>();
+
 // Register security service
 builder.Services.AddScoped<ISecurityService, SecurityService>();
 
@@ -102,6 +105,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Add maintenance middleware (check CMS availability)
+app.UseMiddleware<MaintenanceMiddleware>();
 
 // Add security middleware
 app.UseMiddleware<SecurityMiddleware>();
@@ -190,6 +196,11 @@ app.MapControllerRoute(
     name: "cookies",
     pattern: "cookies",
     defaults: new { controller = "Cookies", action = "Preferences" });
+
+app.MapControllerRoute(
+    name: "maintenance",
+    pattern: "maintenance",
+    defaults: new { controller = "Maintenance", action = "Index" });
 
 app.MapControllerRoute(
     name: "default",

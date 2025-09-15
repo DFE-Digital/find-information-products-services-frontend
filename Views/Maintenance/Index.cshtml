@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Site Maintenance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="govuk-panel govuk-panel--confirmation" style="background-color: #f47738;">
+                    <h1 class="govuk-panel__title">
+                        Site Maintenance
+                    </h1>
+                </div>
+                
+                <div class="govuk-warning-text">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        <span class="govuk-warning-text__assistive">Warning</span>
+                        The FIPS website is currently undergoing maintenance
+                    </strong>
+                </div>
+
+                <p class="govuk-body">
+                    We're currently performing essential maintenance on the FIPS website. This means some features may be temporarily unavailable.
+                </p>
+
+                <h2 class="govuk-heading-m">What this means for you</h2>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>You may not be able to access product information</li>
+                    <li>Search functionality may be limited</li>
+                    <li>Some pages may not load correctly</li>
+                </ul>
+
+                <h2 class="govuk-heading-m">What you can do</h2>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li>Try refreshing the page in a few minutes</li>
+                    <li>Check back later when maintenance is complete</li>
+                    <li>Contact us if you need urgent assistance</li>
+                </ul>
+
+                <div class="govuk-inset-text">
+                    <p class="govuk-body">
+                        <strong>Expected completion:</strong> We aim to complete maintenance as quickly as possible. 
+                        Thank you for your patience.
+                    </p>
+                </div>
+
+                <div class="govuk-button-group">
+                    <button class="govuk-button" data-module="govuk-button" onclick="window.location.reload();">
+                        Try Again
+                    </button>
+                    <a class="govuk-link" href="mailto:support@education.gov.uk">Contact Support</a>
+                </div>
+
+                <div class="govuk-details" data-module="govuk-details">
+                    <summary class="govuk-details__summary">
+                        <span class="govuk-details__summary-text">
+                            Technical Information
+                        </span>
+                    </summary>
+                    <div class="govuk-details__text">
+                        <p class="govuk-body">
+                            If you're a system administrator or developer, you can check the system health status:
+                        </p>
+                        <button class="govuk-button govuk-button--secondary" onclick="checkHealth()">
+                            Check System Health
+                        </button>
+                        <div id="health-status" class="govuk-inset-text" style="display: none; margin-top: 1rem;">
+                            <p class="govuk-body" id="health-message"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script nonce="@Context.Items["Nonce"]">
+    function checkHealth() {
+        const healthStatus = document.getElementById('health-status');
+        const healthMessage = document.getElementById('health-message');
+        
+        healthStatus.style.display = 'block';
+        healthMessage.textContent = 'Checking system health...';
+        
+        fetch('/api/health')
+            .then(response => response.json())
+            .then(data => {
+                const status = data.status === 'healthy' ? '✅ Healthy' : '❌ Unhealthy';
+                const cmsStatus = data.cmsAvailable ? 'Available' : 'Unavailable';
+                const maintenanceStatus = data.maintenanceMode ? 'Enabled' : 'Disabled';
+                
+                healthMessage.innerHTML = `
+                    <strong>System Status:</strong> ${status}<br>
+                    <strong>CMS Status:</strong> ${cmsStatus}<br>
+                    <strong>Maintenance Mode:</strong> ${maintenanceStatus}<br>
+                    <strong>Last Checked:</strong> ${new Date(data.timestamp).toLocaleString()}
+                `;
+            })
+            .catch(error => {
+                healthMessage.textContent = 'Error checking system health: ' + error.message;
+            });
+    }
+</script>
