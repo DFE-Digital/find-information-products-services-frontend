@@ -93,9 +93,11 @@ public class CmsApiService
                 }
                 
                 // Set cache with callback to track expiration
+                var estimatedSizeBytes = EstimateObjectSizeBytes(result);
                 var cacheEntryOptions = new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = cacheDuration.Value
+                    AbsoluteExpirationRelativeToNow = cacheDuration.Value,
+                    Size = estimatedSizeBytes
                 };
                 
                 cacheEntryOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
@@ -274,6 +276,19 @@ public class CmsApiService
         catch
         {
             return "Unknown";
+        }
+    }
+
+    private long EstimateObjectSizeBytes(object obj)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(obj);
+            return json.Length;
+        }
+        catch
+        {
+            return 1024; // Default size if serialization fails
         }
     }
 

@@ -58,27 +58,21 @@ public class CmsHealthService : ICmsHealthService
     {
         try
         {
-            var healthCheckUrl = $"{_baseUrl.TrimEnd('/')}/health";
+            // Extract base URL without /api suffix for health check
+            var baseUrl = _baseUrl.Replace("/api", "");
+            var healthCheckUrl = $"{baseUrl}/admin";
             var timeout = TimeSpan.FromSeconds(10); // Short timeout for health checks
 
             using var cts = new CancellationTokenSource(timeout);
             
-            // Try to reach the CMS health endpoint
+            // Try to reach the CMS admin endpoint (this should be accessible without auth)
             var response = await _httpClient.GetAsync(healthCheckUrl, cts.Token);
             
-            if (response.IsSuccessStatusCode)
+            // Accept any response status code as long as we get a response
+            // This indicates the CMS server is running
+            if (response.StatusCode != System.Net.HttpStatusCode.ServiceUnavailable)
             {
-                _logger.LogDebug("CMS health check successful");
-                return true;
-            }
-
-            // If health endpoint doesn't exist, try a simple API call
-            var testUrl = $"{_baseUrl.TrimEnd('/')}/products?pagination[pageSize]=1";
-            var testResponse = await _httpClient.GetAsync(testUrl, cts.Token);
-            
-            if (testResponse.IsSuccessStatusCode)
-            {
-                _logger.LogDebug("CMS API test call successful");
+                _logger.LogDebug("CMS health check successful - server is responding");
                 return true;
             }
 
