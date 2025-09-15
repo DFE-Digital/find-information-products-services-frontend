@@ -31,4 +31,7 @@ logs/
 bin/
 obj/
 
+# Configuration files with sensitive data
 appsettings.json
+appsettings.*.json
+!appsettings.template.json

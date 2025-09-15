@@ -46,7 +46,6 @@ The maintenance mode feature automatically detects when the CMS (Content Managem
 ### Modified Files
 - `Program.cs` - Added service registration and middleware pipeline
 - `appsettings.json` - Added maintenance mode configuration
-- `appsettings.Development.json` - Added maintenance mode configuration
 
 ## Usage
 

@@ -20,7 +20,7 @@ A .NET Core MVC application for managing Federal Information Processing Standard
 
 ### 1. App Settings
 
-Update `appsettings.json` and `appsettings.Development.json` with your configuration:
+Update `appsettings.json` with your configuration:
 
 ```json
 {

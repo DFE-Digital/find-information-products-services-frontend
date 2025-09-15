@@ -96,6 +96,59 @@
 </div>
 
 
+<section class="dfe-feedback dfe-feedback--footer" role="complementary" aria-labelledby="feedback-heading">
+  <div class="govuk-width-container">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        <div class="dfe-feedback-banner">
+          <div class="dfe-feedback-banner--content">
+            <h2 class="govuk-visually-hidden" id="feedback-heading">Page feedback</h2>
+            <div class="dfe-feedback-banner--flex">
+              <p class="govuk-body" id="feedback-link-text">
+                <a href="/" class="govuk-link" id="feedback-link" aria-describedby="feedback-link-desc">Give feedback or report a problem with this page</a>.
+              </p>
+              <span class="govuk-visually-hidden" id="feedback-link-desc">Opens feedback form</span>
+            </div>
+
+            <div class="dfe-feedback-banner--content-message" id="thanksMessage" role="status" aria-live="polite" style="display: none;">
+              <p class="govuk-body">Thank you for your feedback</p>
+            </div>
+
+            <div class="dfe-feedback-panel" id="feedback-panel" style="display: none;" aria-hidden="true" aria-labelledby="feedback-form-heading">
+              <form id="feedback-form" novalidate>
+                <fieldset class="govuk-fieldset">
+                  <legend class="govuk-fieldset__legend govuk-fieldset__legend--m" id="feedback-form-heading">
+                    What do you want to tell us?
+                  </legend>
+                  <div class="govuk-character-count" data-module="govuk-character-count" data-maxlength="400">
+                    <div class="govuk-form-group">
+                      <label class="govuk-label govuk-visually-hidden" for="feedback_form_input">
+                        Your feedback
+                      </label>
+                      <textarea class="govuk-textarea govuk-js-character-count" id="feedback_form_input" name="feedback_form_input" rows="5" aria-describedby="feedback_form_input-info" required aria-required="true"></textarea>
+                      <div id="feedback_form_input-info" class="govuk-hint govuk-character-count__message">
+                        You can enter up to 400 characters
+                      </div>
+                    </div>
+                  </div>
+                  <div class="govuk-button-group">
+                    <button class="govuk-button" data-module="govuk-button" type="submit">
+                      Submit feedback
+                    </button>
+                    <button class="govuk-button govuk-button--secondary" type="button" data-module="govuk-button" id="cancelButton">
+                      Cancel
+                    </button>
+                  </div>
+                </fieldset>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer class="govuk-footer">
   <div class="govuk-width-container">
     <svg
@@ -123,12 +176,12 @@
         <h2 class="govuk-visually-hidden">Support links</h2>
         <ul class="govuk-footer__inline-list">
           <li class="govuk-footer__inline-list-item">
-            <a class="govuk-footer__link" href="#">
+            <a class="govuk-footer__link" href="/cookies">
               Cookies
             </a>
           </li>
           <li class="govuk-footer__inline-list-item">
-            <a class="govuk-footer__link" href="#">
+            <a class="govuk-footer__link" href="https://www.gov.uk/government/organisations/department-for-education/about/personal-information-charter">
               Privacy policy
             </a>
           </li>
@@ -137,6 +190,14 @@
               Accessibility statement
             </a>
           </li>
+
+          <li class="govuk-footer__inline-list-item">
+            <a class="govuk-footer__link" href="/contact">
+              Contact
+            </a>
+          </li>
+
+      
         </ul>
         <svg
           aria-hidden="true"

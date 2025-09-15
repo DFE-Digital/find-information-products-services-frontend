@@ -66,6 +66,10 @@ builder.Services.AddScoped<ISecurityService, SecurityService>();
 builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
 builder.Services.AddHttpContextAccessor();
 
+// Register Airtable service
+builder.Services.AddHttpClient<IAirtableService, AirtableService>();
+builder.Services.Configure<AirtableConfiguration>(builder.Configuration.GetSection("Airtable"));
+
 // Configure feature flags
 builder.Services.Configure<EnabledFeatures>(builder.Configuration.GetSection("EnabledFeatures"));
 

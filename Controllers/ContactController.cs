@@ -11,11 +11,13 @@ public class ContactController : Controller
 {
     private readonly ILogger<ContactController> _logger;
     private readonly CmsApiService _cmsApiService;
+    private readonly IAirtableService _airtableService;
 
-    public ContactController(ILogger<ContactController> logger, CmsApiService cmsApiService)
+    public ContactController(ILogger<ContactController> logger, CmsApiService cmsApiService, IAirtableService airtableService)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
+        _airtableService = airtableService;
     }
 
     public async Task<IActionResult> Index()
@@ -57,6 +59,44 @@ public class ContactController : Controller
                 PageContent = null
             };
             return View(viewModel);
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackSubmissionModel model)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(model.FeedbackFormInput))
+            {
+                return Json(new { success = false, message = "Feedback cannot be empty" });
+            }
+
+            // Get the referring page URL
+            var pageUrl = Request.Headers["Referer"].FirstOrDefault() ?? "Unknown";
+            var service = "FIPS";
+
+            _logger.LogInformation("Feedback received: {Feedback}, Page: {PageUrl}, Service: {Service}", 
+                model.FeedbackFormInput, pageUrl, service);
+
+            // Submit to Airtable
+            var success = await _airtableService.SubmitFeedbackAsync(model.FeedbackFormInput, pageUrl, service);
+
+            if (success)
+            {
+                _logger.LogInformation("Feedback submitted to Airtable successfully");
+                return Json(new { success = true, message = "Feedback submitted successfully" });
+            }
+            else
+            {
+                _logger.LogError("Failed to submit feedback to Airtable");
+                return Json(new { success = false, message = "An error occurred while processing your feedback" });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing feedback submission");
+            return Json(new { success = false, message = "An error occurred while processing your feedback" });
         }
     }
 }
