@@ -86,58 +86,62 @@ public class CacheConfigurationService : ICacheConfigurationService
     {
         var configs = new Dictionary<string, CacheConfig>(StringComparer.OrdinalIgnoreCase);
 
+        // Get cache durations from configuration
+        var durationsSection = _configuration.GetSection("Caching:Durations");
+        var defaultDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:DefaultDurationMinutes", 5));
+
         // Home page caching
         configs["home"] = new CacheConfig
         {
-            Duration = TimeSpan.FromMinutes(5),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("Home", 5)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         // Product caching
         configs["products"] = new CacheConfig
         {
-            Duration = TimeSpan.FromMinutes(5),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("Products", 5)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         configs["product_"] = new CacheConfig
         {
-            Duration = TimeSpan.FromMinutes(10),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("ProductDetail", 10)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         // Category caching
         configs["category-types"] = new CacheConfig
         {
-            Duration = TimeSpan.FromMinutes(15),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("CategoryTypes", 15)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         configs["category-values"] = new CacheConfig
         {
-            Duration = TimeSpan.FromMinutes(15),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("CategoryValues", 15)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         // Search caching
         configs["search"] = new CacheConfig
         {
-            Duration = TimeSpan.FromMinutes(2),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("Search", 2)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         // Static content caching
         configs["static"] = new CacheConfig
         {
-            Duration = TimeSpan.FromHours(1),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("Static", 60)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         // Admin operations - no caching
@@ -151,9 +155,9 @@ public class CacheConfigurationService : ICacheConfigurationService
         // Health checks - short cache
         configs["health"] = new CacheConfig
         {
-            Duration = TimeSpan.FromSeconds(30),
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("Health", 0.5)),
             Enabled = true,
-            Strategy = CacheStrategy.MemoryOnly
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
         };
 
         return configs;
