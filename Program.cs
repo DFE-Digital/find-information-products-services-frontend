@@ -9,8 +9,12 @@ using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using System.Threading.RateLimiting;
+using Microsoft.ApplicationInsights.Extensibility;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Application Insights
+builder.Services.AddApplicationInsightsTelemetry();
 
 // Add file logging
 builder.Logging.ClearProviders();
