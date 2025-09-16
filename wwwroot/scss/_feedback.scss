@@ -37,6 +37,10 @@
       padding: 15px 0;
       display: none; // Hidden by default
       
+      &.show {
+          display: block;
+      }
+      
       p {
           margin-bottom: 0;
           font-weight: bold;
@@ -50,6 +54,10 @@
   padding: 15px 0;
   background-color: #F4F8FC;
   display: none; // Hidden by default
+  
+  &.show {
+      display: block;
+  }
   
   .govuk-form-group {
       margin-bottom: 15px;
