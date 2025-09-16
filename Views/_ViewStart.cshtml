@@ -1,3 +1,4 @@
 @{
     Layout = "_Layout";
+    ViewBag.ApplicationInsightsKey = ViewContext.HttpContext.RequestServices.GetService<IConfiguration>()?["ApplicationInsights:InstrumentationKey"];
 }
