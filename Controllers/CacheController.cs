@@ -219,11 +219,11 @@ public class CacheController : Controller
     }
 
     [HttpGet]
-    public IActionResult DebugCache()
+    public async Task<IActionResult> DebugCache()
     {
         try
         {
-            var cacheInfo = _cmsApiService.GetCacheInfo();
+            var cacheInfo = await _cmsApiService.GetCacheInfo();
             return Json(new {
                 success = true,
                 trackingCount = cacheInfo.Count,
@@ -248,12 +248,12 @@ public class CacheController : Controller
     }
 
     [HttpGet]
-    public IActionResult SimpleCacheTest()
+    public async Task<IActionResult> SimpleCacheTest()
     {
         try
         {
             // Test if we can get cache info at all
-            var cacheInfo = _cmsApiService.GetCacheInfo();
+            var cacheInfo = await _cmsApiService.GetCacheInfo();
             return Json(new {
                 success = true,
                 message = "Cache info retrieved successfully",

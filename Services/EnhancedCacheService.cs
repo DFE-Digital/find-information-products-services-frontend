@@ -90,6 +90,14 @@ public class CacheConfigurationService : ICacheConfigurationService
         var durationsSection = _configuration.GetSection("Caching:Durations");
         var defaultDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:DefaultDurationMinutes", 5));
 
+        // CMS API caching
+        configs["cms_api_"] = new CacheConfig
+        {
+            Duration = TimeSpan.FromMinutes(durationsSection.GetValue<double>("Products", 5)),
+            Enabled = true,
+            Strategy = CacheStrategy.MemoryWithDistributedFallback
+        };
+
         // Home page caching
         configs["home"] = new CacheConfig
         {
@@ -211,6 +219,7 @@ public class EnhancedCacheService : IEnhancedCacheService
             return default;
 
         var strategy = _configService.GetCacheStrategy(cacheKey);
+        _logger.LogInformation("Cache strategy for {Key}: {Strategy}", cacheKey, strategy);
 
         try
         {
@@ -220,14 +229,19 @@ public class EnhancedCacheService : IEnhancedCacheService
                 if (_memoryCache.TryGetValue(cacheKey, out T? memoryValue))
                 {
                     UpdateCacheStats(cacheKey, true);
-                    _logger.LogDebug("Cache hit (memory): {Key}", cacheKey);
+                    _logger.LogInformation("CACHE HIT (memory): {Key}", cacheKey);
                     return memoryValue;
+                }
+                else
+                {
+                    _logger.LogInformation("Cache miss (memory): {Key}", cacheKey);
                 }
             }
 
             // Try distributed cache
             if (strategy == CacheStrategy.DistributedOnly || strategy == CacheStrategy.MemoryWithDistributedFallback)
             {
+                _logger.LogInformation("Attempting distributed cache lookup for: {Key}", cacheKey);
                 var distributedValue = await GetFromDistributedCache<T>(cacheKey);
                 if (distributedValue != null)
                 {
@@ -239,13 +253,17 @@ public class EnhancedCacheService : IEnhancedCacheService
                     }
                     
                     UpdateCacheStats(cacheKey, true);
-                    _logger.LogDebug("Cache hit (distributed): {Key}", cacheKey);
+                    _logger.LogInformation("CACHE HIT (distributed): {Key}", cacheKey);
                     return distributedValue;
+                }
+                else
+                {
+                    _logger.LogInformation("Cache miss (distributed): {Key}", cacheKey);
                 }
             }
 
             UpdateCacheStats(cacheKey, false);
-            _logger.LogDebug("Cache miss: {Key}", cacheKey);
+            _logger.LogInformation("Cache miss: {Key}", cacheKey);
             return default;
         }
         catch (Exception ex)
@@ -271,14 +289,15 @@ public class EnhancedCacheService : IEnhancedCacheService
             if (strategy == CacheStrategy.MemoryOnly || strategy == CacheStrategy.MemoryWithDistributedFallback)
             {
                 _memoryCache.Set(cacheKey, value, cacheDuration);
-                _logger.LogDebug("Cached in memory: {Key}", cacheKey);
+                _logger.LogInformation("CACHED in memory: {Key}", cacheKey);
             }
 
             // Store in distributed cache
             if (strategy == CacheStrategy.DistributedOnly || strategy == CacheStrategy.MemoryWithDistributedFallback)
             {
+                _logger.LogInformation("Attempting to cache in distributed cache: {Key}", cacheKey);
                 await SetInDistributedCache(cacheKey, value, cacheDuration);
-                _logger.LogDebug("Cached in distributed: {Key}", cacheKey);
+                _logger.LogInformation("CACHED in distributed: {Key}", cacheKey);
             }
 
             TrackCacheEntry(cacheKey, cacheDuration);
@@ -374,10 +393,15 @@ public class EnhancedCacheService : IEnhancedCacheService
     {
         try
         {
+            _logger.LogInformation("Getting from distributed cache: {Key}", key);
             var value = await _distributedCache.GetStringAsync(key);
             if (value == null)
+            {
+                _logger.LogInformation("No value found in distributed cache: {Key}", key);
                 return default;
+            }
 
+            _logger.LogInformation("Found value in distributed cache: {Key}", key);
             return JsonSerializer.Deserialize<T>(value);
         }
         catch (Exception ex)
@@ -391,6 +415,7 @@ public class EnhancedCacheService : IEnhancedCacheService
     {
         try
         {
+            _logger.LogInformation("Setting in distributed cache: {Key}", key);
             var serializedValue = JsonSerializer.Serialize(value);
             var options = new DistributedCacheEntryOptions
             {
@@ -398,6 +423,7 @@ public class EnhancedCacheService : IEnhancedCacheService
             };
 
             await _distributedCache.SetStringAsync(key, serializedValue, options);
+            _logger.LogInformation("Successfully set in distributed cache: {Key}", key);
         }
         catch (Exception ex)
         {

@@ -83,19 +83,25 @@ builder.Services.AddMemoryCache(options =>
 
 // Add distributed caching (Redis support)
 var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:Enabled", false);
+Console.WriteLine($"Redis enabled: {redisEnabled}");
+
 if (redisEnabled)
 {
     var redisConnectionString = builder.Configuration.GetValue<string>("Caching:Redis:ConnectionString", "localhost:6379");
+    Console.WriteLine($"Redis connection string: {redisConnectionString}");
+    
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = redisConnectionString;
         options.InstanceName = builder.Configuration.GetValue<string>("Caching:Redis:KeyPrefix", "fips:");
     });
+    Console.WriteLine("Redis cache registered successfully");
 }
 else
 {
     // Fallback to in-memory distributed cache
     builder.Services.AddDistributedMemoryCache();
+    Console.WriteLine("Using in-memory distributed cache");
 }
 
 // Add response caching

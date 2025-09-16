@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Caching.Memory;
 using FipsFrontend.Models;
 
 namespace FipsFrontend.Services;
@@ -12,11 +11,11 @@ public class CmsApiService
     private readonly IConfiguration _configuration;
     private readonly ILogger<CmsApiService> _logger;
     private readonly string _baseUrl;
-    private readonly IMemoryCache _cache;
+    private readonly IEnhancedCacheService _cache;
     private readonly Dictionary<string, CacheItemInfo> _cacheTracking;
     private readonly object _cacheTrackingLock = new();
 
-    public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger, IMemoryCache cache)
+    public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger, IEnhancedCacheService cache)
     {
         _httpClient = httpClient;
         _configuration = configuration;
@@ -36,34 +35,38 @@ public class CmsApiService
             var cacheKey = $"cms_api_{CreateCacheKey(endpoint)}";
             
             // Check cache first for GET requests (if cache duration is specified)
-            if (cacheDuration.HasValue && _cache.TryGetValue(cacheKey, out T? cachedResult))
+            if (cacheDuration.HasValue)
             {
-                _logger.LogInformation("CACHE HIT: {Endpoint}", endpoint);
-                // Update last accessed time in tracking
-                lock (_cacheTrackingLock)
+                var cachedResult = await _cache.GetAsync<T>(cacheKey);
+                if (cachedResult != null)
                 {
-                    if (_cacheTracking.ContainsKey(cacheKey))
+                    _logger.LogInformation("CACHE HIT: {Endpoint}", endpoint);
+                    // Update last accessed time in tracking
+                    lock (_cacheTrackingLock)
                     {
-                        _cacheTracking[cacheKey].LastAccessed = DateTimeOffset.UtcNow;
-                        _cacheTracking[cacheKey].HitCount++;
-                    }
-                    else
-                    {
-                        // Recreate tracking entry if it's missing
-                        _cacheTracking[cacheKey] = new CacheItemInfo
+                        if (_cacheTracking.ContainsKey(cacheKey))
                         {
-                            Endpoint = endpoint,
-                            Key = cacheKey,
-                            CreatedAt = DateTimeOffset.UtcNow,
-                            LastAccessed = DateTimeOffset.UtcNow,
-                            ExpiresAt = DateTimeOffset.UtcNow.Add(cacheDuration.Value),
-                            Duration = cacheDuration.Value,
-                            HitCount = 1,
-                            Size = EstimateObjectSize(cachedResult)
-                        };
+                            _cacheTracking[cacheKey].LastAccessed = DateTimeOffset.UtcNow;
+                            _cacheTracking[cacheKey].HitCount++;
+                        }
+                        else
+                        {
+                            // Recreate tracking entry if it's missing
+                            _cacheTracking[cacheKey] = new CacheItemInfo
+                            {
+                                Endpoint = endpoint,
+                                Key = cacheKey,
+                                CreatedAt = DateTimeOffset.UtcNow,
+                                LastAccessed = DateTimeOffset.UtcNow,
+                                ExpiresAt = DateTimeOffset.UtcNow.Add(cacheDuration.Value),
+                                Duration = cacheDuration.Value,
+                                HitCount = 1,
+                                Size = EstimateObjectSize(cachedResult)
+                            };
+                        }
                     }
+                    return cachedResult;
                 }
-                return cachedResult;
             }
             
             // Use read API key for GET requests
@@ -103,22 +106,8 @@ public class CmsApiService
                     _logger.LogInformation("TRACKING: Added {Key} -> {Endpoint} (Total tracking entries: {Count})", cacheKey, endpoint, _cacheTracking.Count);
                 }
                 
-                // Set cache with callback to track expiration
-                var cacheEntryOptions = new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = cacheDuration.Value
-                    // Removed Size property to avoid capacity eviction
-                };
-                
-                cacheEntryOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
-                {
-                    var keyStr = key.ToString() ?? string.Empty;
-                    _logger.LogInformation("Cache entry evicted: {Key}, reason: {Reason}", keyStr, reason);
-                    // Don't remove from tracking immediately - let cleanup handle it
-                    // This prevents race conditions where entries are removed too quickly
-                });
-                
-                _cache.Set(cacheKey, result, cacheEntryOptions);
+                // Use EnhancedCacheService to cache the result
+                await _cache.SetAsync(cacheKey, result, cacheDuration.Value);
                 
                 _logger.LogInformation("CACHED: {Endpoint} for {Duration}", endpoint, cacheDuration.Value);
             }
@@ -219,67 +208,65 @@ public class CmsApiService
         return Convert.ToBase64String(hash).Replace("/", "_").Replace("+", "-").TrimEnd('=');
     }
 
-    public void ClearCache()
+    public async Task ClearCache()
     {
         // Clear all CMS API cache entries
         var keysToRemove = _cacheTracking.Keys.ToList();
         foreach (var key in keysToRemove)
         {
-            _cache.Remove(key);
+            await _cache.RemoveAsync(key);
         }
         _cacheTracking.Clear();
         _logger.LogInformation("CMS API cache cleared - {Count} entries removed", keysToRemove.Count);
     }
 
-    public void ClearCacheForEndpoint(string endpoint)
+    public async Task ClearCacheForEndpoint(string endpoint)
     {
         var cacheKey = $"cms_api_{CreateCacheKey(endpoint)}";
-        _cache.Remove(cacheKey);
+        await _cache.RemoveAsync(cacheKey);
         _cacheTracking.Remove(cacheKey);
         _logger.LogInformation("CMS API cache cleared for endpoint: {Endpoint}", endpoint);
     }
 
-    public Dictionary<string, CacheItemInfo> GetCacheInfo()
+    public async Task<Dictionary<string, CacheItemInfo>> GetCacheInfo()
     {
-        lock (_cacheTrackingLock)
+        _logger.LogInformation("GetCacheInfo called - tracking has {Count} entries", _cacheTracking.Count);
+        
+        // Create a snapshot of current tracking entries
+        var snapshot = new Dictionary<string, CacheItemInfo>();
+        
+        // Only clean up expired entries occasionally, not every time
+        // This prevents aggressive cleanup that might remove valid entries
+        if (_cacheTracking.Count > 50)
         {
-            _logger.LogInformation("GetCacheInfo called - tracking has {Count} entries", _cacheTracking.Count);
-            
-            // Create a snapshot of current tracking entries
-            var snapshot = new Dictionary<string, CacheItemInfo>();
-            
-            // Only clean up expired entries occasionally, not every time
-            // This prevents aggressive cleanup that might remove valid entries
-            if (_cacheTracking.Count > 50)
-            {
-                CleanupExpiredEntries();
-            }
-            
-            // Build snapshot and verify entries exist in actual cache
-            foreach (var kvp in _cacheTracking)
-            {
-                var key = kvp.Key;
-                var info = kvp.Value;
-                
-                // Check if entry still exists in actual cache
-                if (_cache.TryGetValue(key, out _))
-                {
-                    snapshot[key] = info;
-                    _logger.LogInformation("Cache entry verified: {Key} -> {Endpoint}", key, info.Endpoint);
-                }
-                else
-                {
-                    _logger.LogWarning("Cache entry {Key} is tracked but not in actual cache - removing from tracking", key);
-                    _cacheTracking.Remove(key);
-                }
-            }
-            
-            _logger.LogInformation("Returning {Count} valid cache entries", snapshot.Count);
-            return snapshot;
+            await CleanupExpiredEntries();
         }
+        
+        // Build snapshot and verify entries exist in actual cache
+        foreach (var kvp in _cacheTracking)
+        {
+            var key = kvp.Key;
+            var info = kvp.Value;
+            
+            // Check if entry still exists in actual cache
+            var exists = await _cache.ExistsAsync(key);
+            if (exists)
+            {
+                snapshot[key] = info;
+                _logger.LogInformation("Cache entry verified: {Key} -> {Endpoint}", key, info.Endpoint);
+            }
+            else
+            {
+                _logger.LogWarning("Cache entry {Key} is tracked but not in actual cache - removing from tracking", key);
+                _cacheTracking.Remove(key);
+            }
+        }
+        
+        _logger.LogInformation("Returning {Count} valid cache entries", snapshot.Count);
+        return snapshot;
     }
 
-    private void CleanupExpiredEntries()
+    private async Task CleanupExpiredEntries()
     {
         var expiredKeys = _cacheTracking
             .Where(kvp => kvp.Value.ExpiresAt <= DateTimeOffset.UtcNow)
@@ -290,7 +277,7 @@ public class CmsApiService
 
         foreach (var key in expiredKeys)
         {
-            _cache.Remove(key); // Remove from actual cache
+            await _cache.RemoveAsync(key); // Remove from actual cache
             _cacheTracking.Remove(key); // Remove from tracking
             _logger.LogInformation("Removed expired cache entry: {Key}", key);
         }
