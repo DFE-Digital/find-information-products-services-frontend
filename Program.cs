@@ -168,7 +168,7 @@ app.Use(async (context, next) =>
         $"style-src 'self' 'nonce-{nonce}' https://rsms.me; " +
         $"img-src 'self' data: https:; " +
         $"font-src 'self' data: https://rsms.me; " +
-        $"connect-src 'self' https://www.clarity.ms https://a.clarity.ms https://c.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com; " +
+        $"connect-src 'self' https://q.clarity.ms https://www.clarity.ms https://a.clarity.ms https://c.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com; " +
         $"frame-ancestors 'none'; " +
         $"base-uri 'self'; " +
         $"form-action 'self'; " +
