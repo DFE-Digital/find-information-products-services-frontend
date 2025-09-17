@@ -225,11 +225,11 @@ public class PerformanceAnalysisService : IPerformanceAnalysisService
         }
     }
 
-    private async Task<double> GetCacheHitRateForEndpoint(string endpoint)
+    private Task<double> GetCacheHitRateForEndpoint(string endpoint)
     {
         // This would need to be implemented based on your specific logging structure
         // For now, return a placeholder
-        return 0.0;
+        return Task.FromResult(0.0);
     }
 }
 
