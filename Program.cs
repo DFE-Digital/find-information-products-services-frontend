@@ -80,6 +80,7 @@ builder.Services.AddScoped<ICacheWarmingService, CacheWarmingService>();
 builder.Services.AddScoped<ICacheInvalidationService, CacheInvalidationService>();
 builder.Services.AddScoped<ICachePerformanceService, CachePerformanceService>();
 builder.Services.AddScoped<IStartupCacheService, StartupCacheService>();
+builder.Services.AddScoped<IPerformanceAnalysisService, PerformanceAnalysisService>();
 
 // Register startup cache warming as a hosted service
 builder.Services.AddHostedService<StartupCacheHostedService>();
@@ -90,9 +91,9 @@ builder.Services.AddScoped<ISecurityService, SecurityService>();
 // Register security logging service
 builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
 
-// Register API logging service - DISABLED FOR PERFORMANCE
-// builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
-builder.Services.AddScoped<IApiLoggingService, NullApiLoggingService>();
+// Register API logging service - ENABLED FOR PERFORMANCE MONITORING
+builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
+// builder.Services.AddScoped<IApiLoggingService, NullApiLoggingService>();
 
 builder.Services.AddHttpContextAccessor();
 

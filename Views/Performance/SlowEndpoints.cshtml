@@ -1,0 +1,85 @@
+@model List<FipsFrontend.Services.SlowEndpoint>
+@{
+    ViewData["Title"] = "Slow Endpoints";
+    var thresholdMs = ViewBag.ThresholdMs ?? 1000;
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Slow Endpoints</h1>
+                <p class="govuk-body">Endpoints taking longer than @thresholdMs ms (threshold can be adjusted via query parameter)</p>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-table">
+                        <table class="govuk-table">
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header">Endpoint</th>
+                                    <th class="govuk-table__header">Avg Duration (ms)</th>
+                                    <th class="govuk-table__header">Max Duration (ms)</th>
+                                    <th class="govuk-table__header">P95 Duration (ms)</th>
+                                    <th class="govuk-table__header">Request Count</th>
+                                    <th class="govuk-table__header">Cache Hit Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                @foreach (var endpoint in Model)
+                                {
+                                    <tr class="govuk-table__row">
+                                        <td class="govuk-table__cell">@endpoint.Endpoint</td>
+                                        <td class="govuk-table__cell">@endpoint.AverageDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@endpoint.MaxDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@endpoint.P95DurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@endpoint.RequestCount</td>
+                                        <td class="govuk-table__cell">@endpoint.CacheHitRate.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-panel govuk-panel--confirmation">
+                        <h2 class="govuk-panel__title">No Slow Endpoints Found</h2>
+                        <div class="govuk-panel__body">
+                            All endpoints are performing within the @thresholdMs ms threshold.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Adjust Threshold</h2>
+                <div class="govuk-button-group">
+                    <a href="/Performance/SlowEndpoints?thresholdMs=500" class="govuk-button govuk-button--secondary">500ms Threshold</a>
+                    <a href="/Performance/SlowEndpoints?thresholdMs=1000" class="govuk-button govuk-button--secondary">1000ms Threshold</a>
+                    <a href="/Performance/SlowEndpoints?thresholdMs=2000" class="govuk-button govuk-button--secondary">2000ms Threshold</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Actions</h2>
+                <div class="govuk-button-group">
+                    <a href="/Performance/Report" class="govuk-button">Back to Report</a>
+                    <a href="/Performance/Index" class="govuk-button govuk-button--secondary">Performance Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

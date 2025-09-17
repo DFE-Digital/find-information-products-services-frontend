@@ -1,0 +1,78 @@
+@model Dictionary<string, FipsFrontend.Services.EndpointMetrics>
+@{
+    ViewData["Title"] = "Endpoint Metrics";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Endpoint Metrics</h1>
+                <p class="govuk-body">Detailed performance metrics for all endpoints.</p>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-table">
+                        <table class="govuk-table">
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header">Endpoint</th>
+                                    <th class="govuk-table__header">Requests</th>
+                                    <th class="govuk-table__header">Avg Duration (ms)</th>
+                                    <th class="govuk-table__header">Max Duration (ms)</th>
+                                    <th class="govuk-table__header">P95 Duration (ms)</th>
+                                    <th class="govuk-table__header">Cache Hits</th>
+                                    <th class="govuk-table__header">Cache Misses</th>
+                                    <th class="govuk-table__header">Hit Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                @foreach (var metric in Model.OrderByDescending(m => m.Value.AverageDurationMs))
+                                {
+                                    <tr class="govuk-table__row">
+                                        <td class="govuk-table__cell">@metric.Key</td>
+                                        <td class="govuk-table__cell">@metric.Value.RequestCount</td>
+                                        <td class="govuk-table__cell">@metric.Value.AverageDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@metric.Value.MaxDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@metric.Value.P95DurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@metric.Value.CacheHitCount</td>
+                                        <td class="govuk-table__cell">@metric.Value.CacheMissCount</td>
+                                        <td class="govuk-table__cell">@metric.Value.CacheHitRate.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-panel govuk-panel--confirmation">
+                        <h2 class="govuk-panel__title">No Metrics Available</h2>
+                        <div class="govuk-panel__body">
+                            No endpoint metrics have been collected yet. Use the application to generate performance data.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Actions</h2>
+                <div class="govuk-button-group">
+                    <a href="/Performance/Report" class="govuk-button">Back to Report</a>
+                    <a href="/Performance/SlowEndpoints" class="govuk-button govuk-button--secondary">View Slow Endpoints</a>
+                    <a href="/Performance/Index" class="govuk-button govuk-button--secondary">Performance Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

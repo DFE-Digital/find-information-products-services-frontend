@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Performance Monitoring";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Performance Monitoring</h1>
+                <p class="govuk-body">Monitor API performance, cache efficiency, and identify slow endpoints.</p>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Performance Report</h2>
+                        <p class="govuk-body">View comprehensive performance analysis including slow endpoints and cache issues.</p>
+                        <a href="/Performance/Report" class="govuk-button">View Report</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="govuk-grid-column-one-half">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Cache Statistics</h2>
+                        <p class="govuk-body">Monitor cache hit rates, memory usage, and performance metrics.</p>
+                        <a href="/Cache/Stats" class="govuk-button">View Cache Stats</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Slow Endpoints</h2>
+                        <p class="govuk-body">Identify API calls taking longer than expected.</p>
+                        <a href="/Performance/SlowEndpoints" class="govuk-button govuk-button--secondary">View Slow Endpoints</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Cache Issues</h2>
+                        <p class="govuk-body">Review cache performance problems and recommendations.</p>
+                        <a href="/Performance/CacheIssues" class="govuk-button govuk-button--secondary">View Cache Issues</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-card">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Endpoint Metrics</h2>
+                        <p class="govuk-body">Detailed performance metrics for all endpoints.</p>
+                        <a href="/Performance/EndpointMetrics" class="govuk-button govuk-button--secondary">View Metrics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Quick Actions</h2>
+                <div class="govuk-button-group">
+                    <a href="/Cache/WarmCache" class="govuk-button govuk-button--secondary">Warm Cache</a>
+                    <a href="/Cache/ClearAllCache" class="govuk-button govuk-button--warning">Clear All Cache</a>
+                    <a href="/Performance/ApiData" class="govuk-button govuk-button--secondary">Get JSON Data</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

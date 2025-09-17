@@ -1,0 +1,160 @@
+@model FipsFrontend.Services.PerformanceReport
+@{
+    ViewData["Title"] = "Performance Analysis Report";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Performance Analysis Report</h1>
+                <p class="govuk-body">Generated at: @Model.GeneratedAt.ToString("yyyy-MM-dd HH:mm:ss UTC")</p>
+            </div>
+        </div>
+
+        <!-- Cache Performance Summary -->
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Cache Performance Summary</h2>
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-panel govuk-panel--confirmation">
+                            <h3 class="govuk-panel__title">Hit Rate</h3>
+                            <div class="govuk-panel__body">
+                                @Model.CacheMetrics.HitRate.ToString("F1")%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-panel govuk-panel--confirmation">
+                            <h3 class="govuk-panel__title">Memory Usage</h3>
+                            <div class="govuk-panel__body">
+                                @((Model.CacheMetrics.MemoryUsage / (1024 * 1024)).ToString("F1")) MB
+                            </div>
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-panel govuk-panel--confirmation">
+                            <h3 class="govuk-panel__title">Total Requests</h3>
+                            <div class="govuk-panel__body">
+                                @(Model.CacheMetrics.TotalHits + Model.CacheMetrics.TotalMisses)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slow Endpoints -->
+        @if (Model.SlowEndpoints.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <h2 class="govuk-heading-l">Slow Endpoints</h2>
+                    <div class="govuk-table">
+                        <table class="govuk-table">
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header">Endpoint</th>
+                                    <th class="govuk-table__header">Avg Duration (ms)</th>
+                                    <th class="govuk-table__header">Max Duration (ms)</th>
+                                    <th class="govuk-table__header">P95 Duration (ms)</th>
+                                    <th class="govuk-table__header">Request Count</th>
+                                    <th class="govuk-table__header">Cache Hit Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                @foreach (var endpoint in Model.SlowEndpoints)
+                                {
+                                    <tr class="govuk-table__row">
+                                        <td class="govuk-table__cell">@endpoint.Endpoint</td>
+                                        <td class="govuk-table__cell">@endpoint.AverageDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@endpoint.MaxDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@endpoint.P95DurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@endpoint.RequestCount</td>
+                                        <td class="govuk-table__cell">@endpoint.CacheHitRate.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Cache Performance Issues -->
+        @if (Model.CacheIssues.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <h2 class="govuk-heading-l">Cache Performance Issues</h2>
+                    @foreach (var issue in Model.CacheIssues)
+                    {
+                        <div class="govuk-warning-text">
+                            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                            <strong class="govuk-warning-text__text">
+                                <span class="govuk-warning-text__assistive">Warning</span>
+                                @issue.Type (@issue.Severity)
+                            </strong>
+                        </div>
+                        <p class="govuk-body">@issue.Description</p>
+                        <p class="govuk-body"><strong>Recommendation:</strong> @issue.Recommendation</p>
+                        <hr class="govuk-section-break govuk-section-break--visible">
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Endpoint Metrics -->
+        @if (Model.EndpointMetrics.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <h2 class="govuk-heading-l">All Endpoint Metrics</h2>
+                    <div class="govuk-table">
+                        <table class="govuk-table">
+                            <thead class="govuk-table__head">
+                                <tr class="govuk-table__row">
+                                    <th class="govuk-table__header">Endpoint</th>
+                                    <th class="govuk-table__header">Requests</th>
+                                    <th class="govuk-table__header">Avg Duration (ms)</th>
+                                    <th class="govuk-table__header">Max Duration (ms)</th>
+                                    <th class="govuk-table__header">Cache Hits</th>
+                                    <th class="govuk-table__header">Cache Misses</th>
+                                    <th class="govuk-table__header">Hit Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                                @foreach (var metric in Model.EndpointMetrics.OrderByDescending(m => m.Value.AverageDurationMs))
+                                {
+                                    <tr class="govuk-table__row">
+                                        <td class="govuk-table__cell">@metric.Key</td>
+                                        <td class="govuk-table__cell">@metric.Value.RequestCount</td>
+                                        <td class="govuk-table__cell">@metric.Value.AverageDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@metric.Value.MaxDurationMs.ToString("F1")</td>
+                                        <td class="govuk-table__cell">@metric.Value.CacheHitCount</td>
+                                        <td class="govuk-table__cell">@metric.Value.CacheMissCount</td>
+                                        <td class="govuk-table__cell">@metric.Value.CacheHitRate.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Actions -->
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Actions</h2>
+                <div class="govuk-button-group">
+                    <a href="/Performance/Report" class="govuk-button">Refresh Report</a>
+                    <a href="/Performance/SlowEndpoints" class="govuk-button govuk-button--secondary">View Slow Endpoints</a>
+                    <a href="/Performance/CacheIssues" class="govuk-button govuk-button--secondary">View Cache Issues</a>
+                    <a href="/Cache/Stats" class="govuk-button govuk-button--secondary">Cache Statistics</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

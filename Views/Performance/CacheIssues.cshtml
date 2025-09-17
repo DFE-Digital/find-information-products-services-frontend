@@ -1,0 +1,63 @@
+@model List<FipsFrontend.Services.CachePerformanceIssue>
+@{
+    ViewData["Title"] = "Cache Performance Issues";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Cache Performance Issues</h1>
+                <p class="govuk-body">Issues detected with cache performance and recommendations for improvement.</p>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            @foreach (var issue in Model)
+            {
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-full">
+                        <div class="govuk-warning-text @(issue.Severity == "High" ? "govuk-warning-text--error" : "")">
+                            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                            <strong class="govuk-warning-text__text">
+                                <span class="govuk-warning-text__assistive">Warning</span>
+                                @issue.Type (@issue.Severity Severity)
+                            </strong>
+                        </div>
+                        <p class="govuk-body">@issue.Description</p>
+                        <div class="govuk-inset-text">
+                            <p class="govuk-body"><strong>Recommendation:</strong> @issue.Recommendation</p>
+                        </div>
+                        <hr class="govuk-section-break govuk-section-break--visible">
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-panel govuk-panel--confirmation">
+                        <h2 class="govuk-panel__title">No Cache Issues Found</h2>
+                        <div class="govuk-panel__body">
+                            Cache performance is within acceptable parameters.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Actions</h2>
+                <div class="govuk-button-group">
+                    <a href="/Performance/Report" class="govuk-button">Back to Report</a>
+                    <a href="/Cache/Stats" class="govuk-button govuk-button--secondary">View Cache Stats</a>
+                    <a href="/Cache/WarmCache" class="govuk-button govuk-button--secondary">Warm Cache</a>
+                    <a href="/Performance/Index" class="govuk-button govuk-button--secondary">Performance Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
