@@ -149,34 +149,50 @@ public class ProductsController : Controller
 
             if (!string.IsNullOrEmpty(keywords))
             {
-                // Search CMS for products matching the keywords with filters and pagination
-                var searchQuery = $"products?filters[title][$containsi]={Uri.EscapeDataString(keywords)}";
-                if (!string.IsNullOrEmpty(filterQuery))
-                {
-                    searchQuery += $"&{filterQuery}";
-                }
-                searchQuery += $"&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
+                // Use optimized service for search with caching
+                var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
+                var searchFilters = new Dictionary<string, string[]>();
+                
+                // Convert filters to the format expected by OptimizedCmsApiService
+                if (phase?.Any() == true) searchFilters["Phase"] = phase;
+                if (group?.Any() == true) searchFilters["Group"] = group;
+                if (subgroup?.Any() == true) searchFilters["Subgroup"] = subgroup;
+                if (channel?.Any() == true) searchFilters["Channel"] = channel;
+                if (type?.Any() == true) searchFilters["Type"] = type;
+                if (cmdbStatus?.Any() == true) searchFilters["CMDB Status"] = cmdbStatus;
+                if (parent?.Any() == true) searchFilters["Parent"] = parent;
+                if (userGroup?.Any() == true) searchFilters["User group"] = userGroup;
 
-                var searchResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(searchQuery, TimeSpan.FromMinutes(2));
-                filteredProducts = searchResponse?.Data ?? new List<Product>();
-                filteredTotalCount = searchResponse?.Meta?.Pagination?.Total ?? 0;
+                var searchResults = await _optimizedCmsApiService.GetProductsForListingAsync(cmsPage, pageSize, keywords, searchFilters, searchDuration);
+                filteredProducts = searchResults;
+                filteredTotalCount = searchResults.Count;
                 totalCount = filteredTotalCount; // For search, use filtered count as total
             }
             else
             {
-                // No keywords, apply filters at CMS level
-                var filterQueryWithPagination = $"products?{filterQuery}&pagination[page]={cmsPage}&pagination[pageSize]={pageSize}&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name";
+                // No keywords, apply filters at CMS level using optimized service
+                var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
+                var listingFilters = new Dictionary<string, string[]>();
+                
+                // Convert filters to the format expected by OptimizedCmsApiService
+                if (phase?.Any() == true) listingFilters["Phase"] = phase;
+                if (group?.Any() == true) listingFilters["Group"] = group;
+                if (subgroup?.Any() == true) listingFilters["Subgroup"] = subgroup;
+                if (channel?.Any() == true) listingFilters["Channel"] = channel;
+                if (type?.Any() == true) listingFilters["Type"] = type;
+                if (cmdbStatus?.Any() == true) listingFilters["CMDB Status"] = cmdbStatus;
+                if (parent?.Any() == true) listingFilters["Parent"] = parent;
+                if (userGroup?.Any() == true) listingFilters["User group"] = userGroup;
 
-                var filteredResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(filterQueryWithPagination, TimeSpan.FromMinutes(5));
-                filteredProducts = filteredResponse?.Data ?? new List<Product>();
-                filteredTotalCount = filteredResponse?.Meta?.Pagination?.Total ?? 0;
+                var listingResults = await _optimizedCmsApiService.GetProductsForListingAsync(cmsPage, pageSize, null, listingFilters, productsDuration);
+                filteredProducts = listingResults;
+                filteredTotalCount = listingResults.Count;
 
                 // Get total count separately only if no filters applied
                 totalCount = filteredTotalCount;
                 if (string.IsNullOrEmpty(filterQuery))
                 {
-                    var countResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=1&fields[0]=id", TimeSpan.FromMinutes(10));
-                    totalCount = countResponse?.Meta?.Pagination?.Total ?? 0;
+                    totalCount = await _optimizedCmsApiService.GetProductsCountAsync(productsDuration);
                 }
             }
 
@@ -234,12 +250,13 @@ public class ProductsController : Controller
     {
         try
         {
-            var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
-            if (response?.Data == null)
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var product = await _optimizedCmsApiService.GetProductByIdAsync(id, productDetailDuration);
+            if (product == null)
             {
                 return NotFound();
             }
-            return View(response.Data);
+            return View(product);
         }
         catch (Exception ex)
         {
@@ -262,15 +279,15 @@ public class ProductsController : Controller
 
         try
         {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
             // Find product by fips_id - optimized to return only needed fields
-            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts][populate][users_permissions_user]=true&populate[product_assurances]=true");
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
 
-            if (response?.Data == null || !response.Data.Any())
+            if (product == null)
             {
                 return NotFound();
             }
 
-            var product = response.Data.First();
             var viewModel = new ProductViewModel
             {
                 Product = product,
@@ -292,15 +309,14 @@ public class ProductsController : Controller
     {
         try
         {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
             // Find product by fips_id - optimized for category view
-            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true");
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
 
-            if (response?.Data == null || !response.Data.Any())
+            if (product == null)
             {
                 return NotFound();
             }
-
-            var product = response.Data.First();
 
             // Build category information
             var categoryInfo = new List<ProductCategoryInfo>();
@@ -358,15 +374,14 @@ public class ProductsController : Controller
 
         try
         {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
             // Find product by fips_id with product assurances populated - optimized for assurance view
-            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
 
-            if (response?.Data == null || !response.Data.Any())
+            if (product == null)
             {
                 return NotFound();
             }
-
-            var product = response.Data.First();
 
             var viewModel = new ProductAssuranceViewModel
             {
@@ -544,8 +559,8 @@ public class ProductsController : Controller
         // This is much faster than individual API calls
         _logger.LogInformation("Building filter options with bulk API call for counts");
 
-        var allProductsResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?pagination[pageSize]=10000&fields[0]=fips_id&fields[1]=title&fields[2]=short_description&populate[category_values][fields][0]=name&populate[category_values][fields][1]=slug&populate[category_values][populate][category_type][fields][0]=name");
-        var allProductsForCounting = allProductsResponse?.Data ?? new List<Product>();
+        var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
+        var allProductsForCounting = await _optimizedCmsApiService.GetProductsForFilterCountsAsync(productsDuration);
 
         _logger.LogInformation("Loaded {Count} products for filter counting", allProductsForCounting.Count);
 

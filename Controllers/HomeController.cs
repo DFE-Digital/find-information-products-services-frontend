@@ -10,12 +10,14 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly CmsApiService _cmsApiService;
+    private readonly IOptimizedCmsApiService _optimizedCmsApiService;
     private readonly IConfiguration _configuration;
 
-    public HomeController(ILogger<HomeController> logger, CmsApiService cmsApiService, IConfiguration configuration)
+    public HomeController(ILogger<HomeController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IConfiguration configuration)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
+        _optimizedCmsApiService = optimizedCmsApiService;
         _configuration = configuration;
     }
 
@@ -29,12 +31,11 @@ public class HomeController : Controller
             var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
             
             // Get only published products count - optimized to return only count
-            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1&fields[0]=id", homeDuration);
-            var publishedCount = publishedProducts?.Meta?.Pagination?.Total ?? 0;
+            var publishedCount = await _optimizedCmsApiService.GetProductsCountAsync(homeDuration);
             
             // Get published category types count - optimized to return only count
-            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1&fields[0]=id", categoryTypesDuration);
-            var categoryTypesCount = categoryTypes?.Meta?.Pagination?.Total ?? 0;
+            var categoryTypes = await _optimizedCmsApiService.GetCategoryTypesAsync(categoryTypesDuration);
+            var categoryTypesCount = categoryTypes?.Count ?? 0;
             
             var viewModel = new HomeViewModel
             {
