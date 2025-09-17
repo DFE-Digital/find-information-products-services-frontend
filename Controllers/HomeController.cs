@@ -10,11 +10,13 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly CmsApiService _cmsApiService;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(ILogger<HomeController> logger, CmsApiService cmsApiService)
+    public HomeController(ILogger<HomeController> logger, CmsApiService cmsApiService, IConfiguration configuration)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
+        _configuration = configuration;
     }
 
     [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)] // Cache for 5 minutes
@@ -22,12 +24,16 @@ public class HomeController : Controller
     {
         try
         {
-            // Get only published products count (cache for 5 minutes) - optimized to return only count
-            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1&fields[0]=id", TimeSpan.FromMinutes(5));
+            // Get cache durations from configuration
+            var homeDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Home", 15));
+            var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
+            
+            // Get only published products count - optimized to return only count
+            var publishedProducts = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>("products?filters[publishedAt][$notNull]=true&pagination[pageSize]=1&fields[0]=id", homeDuration);
             var publishedCount = publishedProducts?.Meta?.Pagination?.Total ?? 0;
             
-            // Get published category types count (cache for 10 minutes) - optimized to return only count
-            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1&fields[0]=id", TimeSpan.FromMinutes(10));
+            // Get published category types count - optimized to return only count
+            var categoryTypes = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>("category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1&fields[0]=id", categoryTypesDuration);
             var categoryTypesCount = categoryTypes?.Meta?.Pagination?.Total ?? 0;
             
             var viewModel = new HomeViewModel

@@ -9,23 +9,30 @@ public interface ICacheWarmingService
     Task WarmCategoryDataAsync();
     Task WarmHomePageDataAsync();
     Task<bool> IsDataWarmedAsync(string dataType);
+    Task WarmAllDataAsync();
 }
 
 public class CacheWarmingService : ICacheWarmingService
 {
     private readonly CmsApiService _cmsApiService;
+    private readonly IOptimizedCmsApiService _optimizedCmsApiService;
     private readonly IEnhancedCacheService _cacheService;
     private readonly ILogger<CacheWarmingService> _logger;
+    private readonly IConfiguration _configuration;
     private readonly HashSet<string> _warmedDataTypes;
 
     public CacheWarmingService(
         CmsApiService cmsApiService,
+        IOptimizedCmsApiService optimizedCmsApiService,
         IEnhancedCacheService cacheService,
-        ILogger<CacheWarmingService> logger)
+        ILogger<CacheWarmingService> logger,
+        IConfiguration configuration)
     {
         _cmsApiService = cmsApiService;
+        _optimizedCmsApiService = optimizedCmsApiService;
         _cacheService = cacheService;
         _logger = logger;
+        _configuration = configuration;
         _warmedDataTypes = new HashSet<string>();
     }
 
@@ -166,5 +173,86 @@ public class CacheWarmingService : ICacheWarmingService
     {
         await Task.CompletedTask; // Remove async warning
         return _warmedDataTypes.Contains(dataType.ToLower());
+    }
+
+    public async Task WarmAllDataAsync()
+    {
+        _logger.LogInformation("Starting comprehensive cache warming");
+
+        try
+        {
+            // Get cache durations from configuration
+            var durations = _configuration.GetSection("Caching:Durations");
+            var homeDuration = TimeSpan.FromMinutes(durations.GetValue<double>("Home", 15));
+            var productsDuration = TimeSpan.FromMinutes(durations.GetValue<double>("Products", 15));
+            var productDetailDuration = TimeSpan.FromMinutes(durations.GetValue<double>("ProductDetail", 10));
+            var categoryTypesDuration = TimeSpan.FromMinutes(durations.GetValue<double>("CategoryTypes", 15));
+            var categoryValuesDuration = TimeSpan.FromMinutes(durations.GetValue<double>("CategoryValues", 15));
+
+            var tasks = new List<Task>
+            {
+                WarmHomePageDataAsync(),
+                WarmProductDataAsync(),
+                WarmCategoryDataAsync(),
+                WarmProductDetailsAsync(productDetailDuration),
+                WarmSearchDataAsync()
+            };
+
+            await Task.WhenAll(tasks);
+            _logger.LogInformation("Comprehensive cache warming completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during comprehensive cache warming");
+        }
+    }
+
+    private async Task WarmProductDetailsAsync(TimeSpan cacheDuration)
+    {
+        try
+        {
+            _logger.LogInformation("Warming product details cache");
+
+            // Get first 10 products and cache their details
+            var products = await _optimizedCmsApiService.GetProductsForListingAsync(1, 10, cacheDuration: cacheDuration);
+            
+            foreach (var product in products.Take(10))
+            {
+                if (product.Id > 0)
+                {
+                    await _optimizedCmsApiService.GetProductByIdAsync(product.Id, cacheDuration);
+                }
+            }
+
+            _logger.LogInformation("Warmed product details cache for {Count} products", products.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error warming product details cache");
+        }
+    }
+
+    private async Task WarmSearchDataAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Warming search data cache");
+
+            var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
+            
+            // Warm common search terms
+            var commonSearches = new[] { "social", "health", "education", "digital", "service" };
+            
+            foreach (var searchTerm in commonSearches)
+            {
+                await _optimizedCmsApiService.GetProductsForListingAsync(1, 20, searchTerm, cacheDuration: searchDuration);
+            }
+
+            _logger.LogInformation("Warmed search data cache for {Count} common terms", commonSearches.Length);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error warming search data cache");
+        }
     }
 }

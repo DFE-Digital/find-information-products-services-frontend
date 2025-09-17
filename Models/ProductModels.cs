@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace FipsFrontend.Models;
 
@@ -8,8 +9,6 @@ public class Product
     public int Id { get; set; }
     [JsonPropertyName("documentId")]
     public string? DocumentId { get; set; }
-    [JsonPropertyName("fips_id")]
-    public string? FipsId { get; set; }
     public string Title { get; set; } = string.Empty;
     [JsonPropertyName("cmdb_sys_id")]
     public string? CmdbSysId { get; set; }
@@ -27,6 +26,8 @@ public class Product
     public List<ProductAssurance>? ProductAssurances { get; set; }
     [JsonPropertyName("cmdb_last_sync")]
     public DateTime? CmdbLastSync { get; set; }
+    [JsonPropertyName("fips_id")]
+    public string? FipsId { get; set; }
     public string State { get; set; } = "New";
     [JsonPropertyName("createdAt")]
     public DateTime? CreatedAt { get; set; }
@@ -88,10 +89,11 @@ public class CategoryType
 public class ProductContact
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string? Phone { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
     public string? Role { get; set; }
+    [JsonPropertyName("users_permissions_user")]
+    public UsersPermissionsUser? UsersPermissionsUser { get; set; }
     public Product? Product { get; set; }
     [JsonPropertyName("createdAt")]
     public DateTime? CreatedAt { get; set; }
@@ -119,6 +121,68 @@ public class ProductAssurance
     [JsonPropertyName("last_sync_date")]
     public DateTime? LastSyncDate { get; set; }
     public Product? Product { get; set; }
+    [JsonPropertyName("createdAt")]
+    public DateTime? CreatedAt { get; set; }
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+    [JsonPropertyName("publishedAt")]
+    public DateTime? PublishedAt { get; set; }
+}
+
+public class UsersPermissionsUser
+{
+    public int Id { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    [JsonPropertyName("first_name")]
+    public string? FirstName { get; set; }
+    [JsonPropertyName("last_name")]
+    public string? LastName { get; set; }
+    [JsonPropertyName("display_name")]
+    public string? DisplayName { get; set; }
+    [JsonPropertyName("entra_id")]
+    public string? EntraId { get; set; }
+    public bool Confirmed { get; set; } = false;
+    public bool Blocked { get; set; } = false;
+    public string? Provider { get; set; }
+    public Role? Role { get; set; }
+    [JsonPropertyName("product_contacts")]
+    public List<ProductContact>? ProductContacts { get; set; }
+    [JsonPropertyName("createdAt")]
+    public DateTime? CreatedAt { get; set; }
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+    [JsonPropertyName("publishedAt")]
+    public DateTime? PublishedAt { get; set; }
+}
+
+public class Role
+{
+    public int Id { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public List<Permission>? Permissions { get; set; }
+    public List<UsersPermissionsUser>? Users { get; set; }
+    [JsonPropertyName("createdAt")]
+    public DateTime? CreatedAt { get; set; }
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+    [JsonPropertyName("publishedAt")]
+    public DateTime? PublishedAt { get; set; }
+}
+
+public class Permission
+{
+    public int Id { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
+    public string Action { get; set; } = string.Empty;
+    public Role? Role { get; set; }
     [JsonPropertyName("createdAt")]
     public DateTime? CreatedAt { get; set; }
     [JsonPropertyName("updatedAt")]
@@ -162,3 +226,4 @@ public class ApiPagination
     public int PageCount { get; set; }
     public int Total { get; set; }
 }
+

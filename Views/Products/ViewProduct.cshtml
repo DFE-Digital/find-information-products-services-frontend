@@ -21,10 +21,10 @@
             </button>
             <ul class="dfe-vertical-nav__section" id="side-navigation">
                 <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.FipsId">Overview</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.FipsId) ? Model.DocumentId : Model.FipsId)">Overview</a>
                 </li>
                 <li class="dfe-vertical-nav__section-item">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.FipsId/categories">Categories</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.FipsId) ? Model.DocumentId : Model.FipsId)/categories">Categories</a>
                 </li>
             </ul>
         </nav>
@@ -46,7 +46,7 @@
                 </thead>
                 <tbody class="govuk-table__body">
                     <tr class="govuk-table__row">
-                        <td class="govuk-table__cell">UniqueID: @(Model.FipsId?.Substring(0, Math.Min(7, Model.FipsId?.Length ?? 0)))...</td>
+                        <td class="govuk-table__cell">UniqueID: @(string.IsNullOrWhiteSpace(Model.FipsId) ? Model.DocumentId?.Substring(0, Math.Min(7, Model.DocumentId?.Length ?? 0)) : Model.FipsId)</td>
                         <td class="govuk-table__cell">
                             @{
                                 var phaseCategory = Model.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
@@ -85,6 +85,27 @@
             <pre class="govuk-body pre-wrap-text">@Model.ShortDescription</pre>
         }
 
+        @if (!string.IsNullOrEmpty(Model.FipsId) || !string.IsNullOrEmpty(Model.CmdbSysId))
+        {
+            <h2 class="govuk-heading-m">Product identifiers</h2>
+            <dl class="govuk-summary-list">
+                @if (!string.IsNullOrEmpty(Model.FipsId))
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">FIPS ID</dt>
+                        <dd class="govuk-summary-list__value">@Model.FipsId</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.CmdbSysId))
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">CMDB System ID</dt>
+                        <dd class="govuk-summary-list__value">@Model.CmdbSysId</dd>
+                    </div>
+                }
+            </dl>
+        }
+
         <h2 class="govuk-heading-m" id="contacts">Responsibilities and contacts</h2>
 
         @if (Model.ProductContacts?.Any() == true)
@@ -96,21 +117,21 @@
                         <dt class="govuk-summary-list__key">
                             @if (!string.IsNullOrEmpty(contact.Role))
                             {
-                                @contact.Role
+                                @GetFriendlyRoleName(contact.Role)
                             }
                             else
                             {
-                                @contact.Name
+                                @(contact.UsersPermissionsUser?.DisplayName ?? contact.UsersPermissionsUser?.FirstName + " " + contact.UsersPermissionsUser?.LastName ?? "Contact")
                             }
                         </dt>
                         <dd class="govuk-summary-list__value">
-                            @if (!string.IsNullOrEmpty(contact.Email))
+                            @if (!string.IsNullOrEmpty(contact.UsersPermissionsUser?.Email))
                             {
-                                <a href="mailto:@contact.Email" class="govuk-link" rel="noopener noreferrer">@contact.Name</a>
+                                <a href="mailto:@contact.UsersPermissionsUser.Email" class="govuk-link" rel="noopener noreferrer">@(contact.UsersPermissionsUser?.DisplayName ?? contact.UsersPermissionsUser?.FirstName + " " + contact.UsersPermissionsUser?.LastName ?? contact.UsersPermissionsUser?.Email)</a>
                             }
                             else
                             {
-                                @contact.Name
+                                @(contact.UsersPermissionsUser?.DisplayName ?? contact.UsersPermissionsUser?.FirstName + " " + contact.UsersPermissionsUser?.LastName ?? "Contact")
                             }
                         </dd>
                     </div>
@@ -123,3 +144,16 @@
         }
     </div>
 </div>
+
+@functions {
+    public string GetFriendlyRoleName(string role)
+    {
+        return role switch
+        {
+            "senior_responsible_owner" => "Senior Responsible Owner",
+            "delivery_manager" => "Delivery Manager",
+            "information_asset_owner" => "Information Asset Owner",
+            _ => role // Return original if no mapping found
+        };
+    }
+}

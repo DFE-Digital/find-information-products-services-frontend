@@ -10,25 +10,38 @@ public class CategoriesController : Controller
 {
     private readonly ILogger<CategoriesController> _logger;
     private readonly CmsApiService _cmsApiService;
+    private readonly IApiLoggingService _apiLoggingService;
+    private readonly IConfiguration _configuration;
 
-    public CategoriesController(ILogger<CategoriesController> logger, CmsApiService cmsApiService)
+    public CategoriesController(ILogger<CategoriesController> logger, CmsApiService cmsApiService, IApiLoggingService apiLoggingService, IConfiguration configuration)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
+        _apiLoggingService = apiLoggingService;
+        _configuration = configuration;
     }
 
     [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)] // Cache for 10 minutes
     public async Task<IActionResult> Index()
     {
+        var startTime = DateTimeOffset.UtcNow;
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        
         try
         {
+            // Log the controller action start
+            await _apiLoggingService.LogApiRequestAsync("CategoriesController", "Index", "Categories/Index", null);
+
             // Log the API call
             var categoryTypesUrl = "category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&sort=sort_order:asc";
             _logger.LogInformation("=== CATEGORY TYPES API CALL ===");
             _logger.LogInformation("URL: {Url}", categoryTypesUrl);
             
-            // Get category types first, then populate values separately with proper parent-child relationships (cache for 15 minutes)
-            var categoryTypes = await _cmsApiService.GetAllCategoryTypes(TimeSpan.FromMinutes(15)) ?? new List<CategoryType>();
+            // Get cache duration from configuration
+            var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
+            
+            // Get category types first, then populate values separately with proper parent-child relationships
+            var categoryTypes = await _cmsApiService.GetAllCategoryTypes(categoryTypesDuration) ?? new List<CategoryType>();
 
             // Log the raw response
             _logger.LogInformation("=== CATEGORY TYPES API RESPONSE ===");
@@ -93,13 +106,26 @@ public class CategoriesController : Controller
                 CategoryTypes = categoryTypes ?? new List<CategoryType>()
             };
 
+            stopwatch.Stop();
+            
+            // Log the controller action completion
+            await _apiLoggingService.LogApiResponseAsync("CategoriesController", "Index", "Categories/Index", new 
+            { 
+                CategoryTypesCount = categoryTypes.Count,
+                TotalValuesCount = categoryTypes.Sum(ct => ct.Values?.Count ?? 0)
+            }, stopwatch.Elapsed, false);
 
             ViewData["ActiveNav"] = "categories";
             return View(viewModel);
         }
         catch (Exception ex)
         {
+            stopwatch.Stop();
             _logger.LogError(ex, "Error loading category types");
+            
+            // Log the controller action error
+            await _apiLoggingService.LogApiErrorAsync("CategoriesController", "Index", "Categories/Index", ex, stopwatch.Elapsed);
+            
             var viewModel = new CategoriesIndexViewModel
             {
                 CategoryTypes = new List<CategoryType>()
@@ -122,8 +148,11 @@ public class CategoriesController : Controller
                 _logger.LogInformation("=== CATEGORY TYPES API CALL ===");
                 _logger.LogInformation("URL: {Url}", categoryTypesUrl);
                 
+                // Get cache duration from configuration
+                var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
+                
                 // Get category types first, then populate values separately with proper parent-child relationships
-                var categoryTypes = await _cmsApiService.GetAllCategoryTypes(TimeSpan.FromMinutes(15)) ?? new List<CategoryType>();
+                var categoryTypes = await _cmsApiService.GetAllCategoryTypes(categoryTypesDuration) ?? new List<CategoryType>();
 
                 // Log the raw response
                 _logger.LogInformation("=== CATEGORY TYPES API RESPONSE ===");

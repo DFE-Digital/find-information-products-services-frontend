@@ -11,13 +11,17 @@ public class ProductsController : Controller
 {
     private readonly ILogger<ProductsController> _logger;
     private readonly CmsApiService _cmsApiService;
+    private readonly IOptimizedCmsApiService _optimizedCmsApiService;
     private readonly EnabledFeatures _enabledFeatures;
+    private readonly IConfiguration _configuration;
 
-    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptions<EnabledFeatures> enabledFeatures)
+    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
+        _optimizedCmsApiService = optimizedCmsApiService;
         _enabledFeatures = enabledFeatures.Value;
+        _configuration = configuration;
     }
 
     // GET: Products
@@ -28,22 +32,26 @@ public class ProductsController : Controller
         {
             var viewModel = new ProductsViewModel();
 
+            // Get cache durations from configuration
+            var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+
             // Debug: Get all category types to see what's available
-            var allCategoryTypes = await _cmsApiService.GetAllCategoryTypes(TimeSpan.FromMinutes(15));
+            var allCategoryTypes = await _optimizedCmsApiService.GetAllCategoryTypes(categoryTypesDuration);
             _logger.LogInformation("Available category types: {Types}", 
                 string.Join(", ", allCategoryTypes?.Select(ct => ct.Name) ?? new List<string>()));
 
-            // Load category values for filters using individual API calls for each category type (cache for 15 minutes)
-            var phaseValues = await _cmsApiService.GetCategoryValuesForFilter("Phase", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
-            var channelValues = await _cmsApiService.GetCategoryValuesForFilter("Channel", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
-            var groupValues = await _cmsApiService.GetCategoryValuesForFilter("Group", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+            // Load category values for filters using individual API calls for each category type
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
             // Try different variations of user group category type names
             var userGroupVariations = new[] { "User group", "User Group", "User groups", "User Groups", "User Type", "User Types", "Audience", "Target Audience" };
             List<CategoryValue> userGroupValues = new List<CategoryValue>();
             
             foreach (var variation in userGroupVariations)
             {
-                var values = await _cmsApiService.GetCategoryValuesForFilter(variation, TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+                var values = await _optimizedCmsApiService.GetCategoryValuesForFilter(variation, categoryValuesDuration) ?? new List<CategoryValue>();
                 if (values.Any())
                 {
                     _logger.LogInformation("Found {Count} values for category type '{Type}'", values.Count, variation);
@@ -87,7 +95,7 @@ public class ProductsController : Controller
             
             // Always check for "Social worker" specifically, even if we found user group values
             _logger.LogInformation("Searching for 'Social worker' in all category values...");
-            var allCategoryValues = await _cmsApiService.GetAllCategoryValues(TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+            var allCategoryValues = await _optimizedCmsApiService.GetAllCategoryValues(categoryValuesDuration) ?? new List<CategoryValue>();
             var socialWorkerValues = allCategoryValues.Where(cv => 
                 cv.Name.Equals("Social worker", StringComparison.OrdinalIgnoreCase) ||
                 cv.Name.Contains("Social worker", StringComparison.OrdinalIgnoreCase)
@@ -243,10 +251,19 @@ public class ProductsController : Controller
     // GET: Products/View/{fipsid}
     public async Task<IActionResult> ViewProduct(string fipsid)
     {
+
+        Console.WriteLine("fipsid: " + fipsid);
+
+        // Check if documentId is null or empty
+        if (string.IsNullOrEmpty(fipsid))
+        {
+            return NotFound();
+        }
+
         try
         {
             // Find product by fips_id - optimized to return only needed fields
-            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
+            var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts][populate][users_permissions_user]=true&populate[product_assurances]=true");
 
             if (response?.Data == null || !response.Data.Any())
             {
@@ -369,175 +386,6 @@ public class ProductsController : Controller
             return NotFound();
         }
     }
-
-    // GET: Products/Create
-    public async Task<IActionResult> Create()
-    {
-        // Load category values for dropdown
-        try
-        {
-            var categoryValues = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?populate=*");
-            ViewBag.CategoryValues = categoryValues?.Data ?? new List<CategoryValue>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading category values");
-            ViewBag.CategoryValues = new List<CategoryValue>();
-        }
-
-        return View();
-    }
-
-    // POST: Products/Create
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Product product)
-    {
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                var response = await _cmsApiService.PostAsync<ApiResponse<Product>>("products", product);
-                if (response?.Data != null)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating product");
-                ModelState.AddModelError("", "An error occurred while creating the product.");
-            }
-        }
-
-        // Reload category values for dropdown
-        try
-        {
-            var categoryValues = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?populate=*");
-            ViewBag.CategoryValues = categoryValues?.Data ?? new List<CategoryValue>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading category values");
-            ViewBag.CategoryValues = new List<CategoryValue>();
-        }
-
-        return View(product);
-    }
-
-    // GET: Products/Edit/5
-    public async Task<IActionResult> Edit(int id)
-    {
-        try
-        {
-            var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate=*");
-            if (response?.Data == null)
-            {
-                return NotFound();
-            }
-
-            // Load category values for dropdown
-            var categoryValues = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?populate=*");
-            ViewBag.CategoryValues = categoryValues?.Data ?? new List<CategoryValue>();
-
-            return View(response.Data);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading product for edit, ID: {Id}", id);
-            return NotFound();
-        }
-    }
-
-    // POST: Products/Edit/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Product product)
-    {
-        if (id != product.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                var response = await _cmsApiService.PutAsync<ApiResponse<Product>>($"products/{id}", product);
-                if (response?.Data != null)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating product with ID: {Id}", id);
-                ModelState.AddModelError("", "An error occurred while updating the product.");
-            }
-        }
-
-        // Reload category values for dropdown
-        try
-        {
-            var categoryValues = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>("category-values?populate=*");
-            ViewBag.CategoryValues = categoryValues?.Data ?? new List<CategoryValue>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading category values");
-            ViewBag.CategoryValues = new List<CategoryValue>();
-        }
-
-        return View(product);
-    }
-
-    // GET: Products/Delete/5
-    public async Task<IActionResult> Delete(int id)
-    {
-        try
-        {
-            var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate=*");
-            if (response?.Data == null)
-            {
-                return NotFound();
-            }
-            return View(response.Data);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading product for delete, ID: {Id}", id);
-            return NotFound();
-        }
-    }
-
-    // POST: Products/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        try
-        {
-            var success = await _cmsApiService.DeleteAsync($"products/{id}");
-            if (success)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                ModelState.AddModelError("", "An error occurred while deleting the product.");
-                var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate=*");
-                return View(response?.Data);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting product with ID: {Id}", id);
-            ModelState.AddModelError("", "An error occurred while deleting the product.");
-            var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{id}?populate=*");
-            return View(response?.Data);
-        }
-    }
-
     private List<Product> ApplyFilters(List<Product> products, string? keywords, string[]? phase, string[]? group,
         string[]? subgroup, string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent, string[]? userGroup)
     {
@@ -750,7 +598,7 @@ public class ProductsController : Controller
         }
 
         // Build type options from category type "Type" using individual API call
-        var typeValues = await _cmsApiService.GetCategoryValuesForFilter("Type", TimeSpan.FromMinutes(15)) ?? new List<CategoryValue>();
+        var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15))) ?? new List<CategoryValue>();
         
         if (typeValues.Any())
         {

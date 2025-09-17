@@ -32,7 +32,7 @@ var products = await _cmsApiService.GetAsync<List<Product>>("products?populate=*
 **After:**
 ```csharp
 // Only return fields needed for admin table view
-var products = await _cmsApiService.GetAsync<List<Product>>("products?fields[0]=id&fields[1]=title&fields[2]=short_description&fields[3]=state&fields[4]=fips_id&fields[5]=publishedAt&fields[6]=createdAt");
+var products = await _cmsApiService.GetAsync<List<Product>>("products?fields[0]=id&fields[1]=title&fields[2]=short_description&fields[3]=state&fields[4]=documentId&fields[5]=publishedAt&fields[6]=createdAt");
 ```
 
 **Impact:** Reduces response size by ~80% for admin product listing.
@@ -70,13 +70,13 @@ var response = await _cmsApiService.GetAsync<ApiResponse<Product>>($"products/{i
 **Before:**
 ```csharp
 // Returned all fields for all relationships
-var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
+var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[documentId][$eq]={Uri.EscapeDataString(documentId)}&populate[category_values][populate][category_type]=true&populate[product_contacts]=true&populate[product_assurances]=true");
 ```
 
 **After:**
 ```csharp
 // Only return specific fields needed for product view
-var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[fips_id][$eq]={Uri.EscapeDataString(fipsid)}&populate[category_values][populate][category_type][fields][0]=name&populate[product_contacts][fields][0]=name&populate[product_contacts][fields][1]=email&populate[product_contacts][fields][2]=role&populate[product_assurances][fields][0]=assurance_type&populate[product_assurances][fields][1]=outcome&populate[product_assurances][fields][2]=date_of_assurance");
+var response = await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>($"products?filters[documentId][$eq]={Uri.EscapeDataString(documentId)}&populate[category_values][populate][category_type][fields][0]=name&populate[product_contacts][fields][0]=name&populate[product_contacts][fields][1]=email&populate[product_contacts][fields][2]=role&populate[product_assurances][fields][0]=assurance_type&populate[product_assurances][fields][1]=outcome&populate[product_assurances][fields][2]=date_of_assurance");
 ```
 
 **Impact:** Reduces response size by ~70% for product detail views.

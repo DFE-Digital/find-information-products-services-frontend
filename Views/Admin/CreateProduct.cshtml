@@ -53,10 +53,10 @@
                     </div>
 
                     <div class="govuk-form-group">
-                        <label class="govuk-label" for="FipsId">
-                            FIPS ID
+                        <label class="govuk-label" for="DocumentId">
+                            Document ID
                         </label>
-                        <input class="govuk-input govuk-input--width-10" id="FipsId" name="FipsId" type="number" value="@Model.FipsId">
+                        <input class="govuk-input govuk-input--width-20" id="DocumentId" name="DocumentId" type="text" value="@Model.DocumentId">
                     </div>
 
                     <div class="govuk-form-group">
@@ -64,6 +64,13 @@
                             CMDB System ID
                         </label>
                         <input class="govuk-input govuk-input--width-20" id="CmdbSysId" name="CmdbSysId" type="text" value="@Model.CmdbSysId">
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="FipsId">
+                            FIPS ID
+                        </label>
+                        <input class="govuk-input govuk-input--width-20" id="FipsId" name="FipsId" type="text" value="@Model.FipsId">
                     </div>
 
                     <div class="govuk-form-group">
@@ -105,7 +112,7 @@
                             <li>All products are created as drafts by default</li>
                             <li>You can publish them later from the product list</li>
                             <li>Title and short description are required fields</li>
-                            <li>FIPS ID and CMDB System ID are optional identifiers</li>
+                            <li>Document ID and CMDB System ID are optional identifiers</li>
                         </ul>
                     </div>
                 </div>

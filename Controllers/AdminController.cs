@@ -34,7 +34,7 @@ public class AdminController : Controller
         try
         {
             // Get all products using the CMS API - optimized to return only fields needed for admin table
-            var products = await _cmsApiService.GetAsync<List<Product>>("products?fields[0]=id&fields[1]=title&fields[2]=short_description&fields[3]=state&fields[4]=fips_id&fields[5]=publishedAt&fields[6]=createdAt");
+            var products = await _cmsApiService.GetAsync<List<Product>>("products?fields[0]=id&fields[1]=title&fields[2]=short_description&fields[3]=state&fields[4]=documentId&fields[5]=publishedAt&fields[6]=createdAt");
             
             var viewModel = new AdminProductsViewModel
             {
@@ -83,9 +83,10 @@ public class AdminController : Controller
             {
                 data = new
                 {
-                    fips_id = model.FipsId,
+                    documentId = model.DocumentId,
                     title = model.Title,
                     cmdb_sys_id = model.CmdbSysId,
+                    fips_id = model.FipsId,
                     short_description = model.ShortDescription,
                     long_description = model.LongDescription,
                     product_url = model.ProductUrl,
@@ -136,9 +137,10 @@ public class AdminController : Controller
             var viewModel = new ProductFormViewModel
             {
                 Id = product.Id,
-                FipsId = long.TryParse(product.FipsId, out var fipsId) ? fipsId : null,
+                DocumentId = product.DocumentId,
                 Title = product.Title,
                 CmdbSysId = product.CmdbSysId,
+                FipsId = product.FipsId,
                 ShortDescription = product.ShortDescription,
                 LongDescription = product.LongDescription,
                 ProductUrl = product.ProductUrl,
@@ -175,9 +177,10 @@ public class AdminController : Controller
             {
                 data = new
                 {
-                    fips_id = model.FipsId,
+                    documentId = model.DocumentId,
                     title = model.Title,
                     cmdb_sys_id = model.CmdbSysId,
+                    fips_id = model.FipsId,
                     short_description = model.ShortDescription,
                     long_description = model.LongDescription,
                     product_url = model.ProductUrl,

@@ -9,12 +9,8 @@ using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using System.Threading.RateLimiting;
-using Microsoft.ApplicationInsights.Extensibility;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add Application Insights
-builder.Services.AddApplicationInsightsTelemetry();
 
 // Add file logging
 builder.Logging.ClearProviders();
@@ -54,6 +50,26 @@ builder.Services.AddHttpClient<CmsApiService>(client =>
 // Register CMS API service
 builder.Services.AddScoped<CmsApiService>();
 
+// Register optimized CMS API service
+builder.Services.AddHttpClient<IOptimizedCmsApiService, OptimizedCmsApiService>(client =>
+{
+    var baseUrl = builder.Configuration["CmsApi:BaseUrl"] ?? "http://localhost:1337/api";
+    // Ensure BaseAddress ends with '/' for proper relative URL resolution
+    if (!baseUrl.EndsWith("/"))
+    {
+        baseUrl += "/";
+    }
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("User-Agent", "FIPS-Frontend-Optimized/1.0");
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+{
+    MaxConnectionsPerServer = 10,
+    UseProxy = false // Disable proxy for better performance in local development
+})
+.AddPolicyHandler(GetRetryPolicy());
+
 // Register CMS health service
 builder.Services.AddScoped<ICmsHealthService, CmsHealthService>();
 
@@ -62,12 +78,22 @@ builder.Services.AddScoped<ICacheConfigurationService, CacheConfigurationService
 builder.Services.AddScoped<IEnhancedCacheService, EnhancedCacheService>();
 builder.Services.AddScoped<ICacheWarmingService, CacheWarmingService>();
 builder.Services.AddScoped<ICacheInvalidationService, CacheInvalidationService>();
+builder.Services.AddScoped<ICachePerformanceService, CachePerformanceService>();
+builder.Services.AddScoped<IStartupCacheService, StartupCacheService>();
+
+// Register startup cache warming as a hosted service
+builder.Services.AddHostedService<StartupCacheHostedService>();
 
 // Register security service
 builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 // Register security logging service
 builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
+
+// Register API logging service - DISABLED FOR PERFORMANCE
+// builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
+builder.Services.AddScoped<IApiLoggingService, NullApiLoggingService>();
+
 builder.Services.AddHttpContextAccessor();
 
 // Register Airtable service

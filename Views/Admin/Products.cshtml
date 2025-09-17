@@ -64,7 +64,7 @@
                                 <th scope="col" class="govuk-table__header">ID</th>
                                 <th scope="col" class="govuk-table__header">Title</th>
                                 <th scope="col" class="govuk-table__header">State</th>
-                                <th scope="col" class="govuk-table__header">FIPS ID</th>
+                                <th scope="col" class="govuk-table__header">Document ID</th>
                                 <th scope="col" class="govuk-table__header">Published</th>
                                 <th scope="col" class="govuk-table__header">Created</th>
                                 <th scope="col" class="govuk-table__header">Actions</th>
@@ -95,7 +95,7 @@
                                         }
                                         <span class="@stateClass">@product.State</span>
                                     </td>
-                                    <td class="govuk-table__cell">@(product.FipsId?.ToString() ?? "-")</td>
+                                    <td class="govuk-table__cell">@(product.DocumentId ?? "-")</td>
                                     <td class="govuk-table__cell">
                                         @if (product.PublishedAt.HasValue)
                                         {

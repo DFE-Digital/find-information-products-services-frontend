@@ -12,8 +12,8 @@ public class ProductFormViewModel
 {
     public int Id { get; set; }
 
-    [Display(Name = "FIPS ID")]
-    public long? FipsId { get; set; }
+    [Display(Name = "Document ID")]
+    public string? DocumentId { get; set; }
 
     [Required(ErrorMessage = "Title is required")]
     [StringLength(255, ErrorMessage = "Title cannot exceed 255 characters")]
@@ -22,6 +22,10 @@ public class ProductFormViewModel
     [Display(Name = "CMDB System ID")]
     [StringLength(100, ErrorMessage = "CMDB System ID cannot exceed 100 characters")]
     public string? CmdbSysId { get; set; }
+
+    [Display(Name = "FIPS ID")]
+    [StringLength(20, ErrorMessage = "FIPS ID cannot exceed 20 characters")]
+    public string? FipsId { get; set; }
 
     [Required(ErrorMessage = "Short description is required")]
     [StringLength(1000, ErrorMessage = "Short description cannot exceed 1000 characters")]

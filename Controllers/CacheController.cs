@@ -12,16 +12,19 @@ public class CacheController : Controller
     private readonly ILogger<CacheController> _logger;
     private readonly CmsApiService _cmsApiService;
     private readonly IMemoryCache _cache;
+    private readonly IConfiguration _configuration;
     private static readonly Dictionary<string, (DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt)> _cacheTimestamps = new();
 
     public CacheController(
         ILogger<CacheController> logger, 
         CmsApiService cmsApiService, 
-        IMemoryCache cache)
+        IMemoryCache cache,
+        IConfiguration configuration)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
         _cache = cache;
+        _configuration = configuration;
     }
 
     [HttpPost]
@@ -92,21 +95,12 @@ public class CacheController : Controller
     {
         try
         {
-            // Warm cache by making API calls that will populate the CmsApiService cache
-            await _cmsApiService.GetAsync<ApiCollectionResponse<Product>>(
-                "products?filters[publishedAt][$notNull]=true&pagination[page]=1&pagination[pageSize]=20", 
-                TimeSpan.FromMinutes(30));
+            // Use the enhanced cache warming service
+            var cacheWarmingService = HttpContext.RequestServices.GetRequiredService<ICacheWarmingService>();
+            await cacheWarmingService.WarmAllDataAsync();
             
-            await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>(
-                "category-types?filters[publishedAt][$notNull]=true&filters[enabled]=true&pagination[pageSize]=1", 
-                TimeSpan.FromMinutes(30));
-            
-            await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(
-                "category-values?pagination[pageSize]=150", 
-                TimeSpan.FromMinutes(30));
-            
-            _logger.LogInformation("Cache warming initiated by user: {User}", User.Identity?.Name);
-            TempData["SuccessMessage"] = "Cache warming has been initiated successfully.";
+            _logger.LogInformation("Comprehensive cache warming initiated by user: {User}", User.Identity?.Name);
+            TempData["SuccessMessage"] = "Comprehensive cache warming has been initiated successfully.";
         }
         catch (Exception ex)
         {
@@ -118,25 +112,31 @@ public class CacheController : Controller
     }
 
     [HttpGet]
-    public IActionResult CacheStats()
+    public async Task<IActionResult> CacheStats()
     {
         try
         {
-            // Get real cache info using direct inspection
-            var realCacheInfo = GetRealCacheInfo();
+            // Get enhanced cache performance metrics
+            var performanceService = HttpContext.RequestServices.GetRequiredService<ICachePerformanceService>();
+            var metrics = await performanceService.GetPerformanceMetricsAsync();
+            var isPerformingWell = await performanceService.IsCachePerformingWellAsync();
+            var recommendations = await performanceService.GetPerformanceRecommendationsAsync();
             
             var stats = new Dictionary<string, object>
             {
-                ["TotalEntries"] = realCacheInfo.Count,
-                ["MemoryHits"] = "N/A", 
-                ["DistributedHits"] = 0,
-                ["Misses"] = "N/A",
-                ["TotalHits"] = "N/A",
-                ["HitRate"] = "N/A",
-                ["MemoryUsage"] = "N/A",
-                ["Status"] = "Cache is working - performance improvements confirmed",
-                ["Debug"] = $"Found {realCacheInfo.Count} cache entries at {DateTime.Now:HH:mm:ss}",
-                ["Note"] = "Cache performance is excellent (96%+ improvement)"
+                ["TotalEntries"] = metrics.TotalEntries,
+                ["MemoryHits"] = metrics.MemoryHits, 
+                ["DistributedHits"] = metrics.DistributedHits,
+                ["Misses"] = metrics.TotalMisses,
+                ["TotalHits"] = metrics.TotalHits,
+                ["HitRate"] = $"{metrics.HitRate:F1}%",
+                ["MemoryUsage"] = $"{metrics.MemoryUsage / (1024 * 1024):F1} MB",
+                ["RequestRate"] = $"{metrics.RequestRate:F1}%",
+                ["MemoryEfficiency"] = $"{metrics.MemoryEfficiency:F2}",
+                ["Status"] = isPerformingWell ? "Cache is performing well" : "Cache performance needs attention",
+                ["Recommendations"] = recommendations,
+                ["Timestamp"] = metrics.Timestamp.ToString("HH:mm:ss"),
+                ["RedisEnabled"] = _configuration.GetValue<bool>("Caching:Redis:Enabled", false)
             };
             
             return Json(stats);

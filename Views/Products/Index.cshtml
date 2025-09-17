@@ -352,9 +352,9 @@
                         <div class="dfe-chevron-card__wrapper">
                             <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
                                 <a class="govuk-link govuk-link--no-visited-state product-link" 
-                                   href="/product/@product.FipsId"
+                                   href="/product/@(string.IsNullOrWhiteSpace(product.FipsId) ? product.DocumentId : product.FipsId)"
                                    data-product-title="@product.Title"
-                                   data-fips-id="@product.FipsId"
+                                   data-document-id="@product.DocumentId"
                                    data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                     @product.Title
                                 </a>
@@ -372,7 +372,7 @@
 
                             <!-- Meta information -->
                             <div class="govuk-!-margin-top-2">
-                                <span class="govuk-tag govuk-tag--grey govuk-!-font-size-16">FIPS-@product.FipsId</span>
+                                <span class="govuk-tag govuk-tag--grey govuk-!-font-size-16">@product.FipsId</span>
                                 @{
                                     var phaseCategoryValue = product.CategoryValues?.FirstOrDefault(cv => 
                                         cv.CategoryType?.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
@@ -393,7 +393,7 @@
                                aria-hidden="true" 
                                tabindex="-1"
                                data-product-title="@product.Title"
-                               data-fips-id="@product.FipsId"
+                               data-document-id="@product.DocumentId"
                                data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                 <span class="govuk-visually-hidden">@product.Title</span>
                             </a>
@@ -747,15 +747,15 @@
             trackClarityEvent(eventName, parameters);
         }
 
-        function trackProductClick(productTitle, fipsId, position, searchTerm = '', activeFilters = []) {
+        function trackProductClick(productTitle, documentId, position, searchTerm = '', activeFilters = []) {
             trackEvent('product_click', {
                 event_category: 'Product Interaction',
                 event_label: productTitle,
-                product_id: fipsId,
+                product_id: documentId,
                 product_position: position,
                 search_term: searchTerm,
                 active_filters: activeFilters.join(', '),
-                custom_parameter_1: fipsId,
+                custom_parameter_1: documentId,
                 custom_parameter_2: position.toString()
             });
         }
@@ -1122,7 +1122,7 @@
             document.querySelectorAll('.product-link').forEach(function(link) {
                 link.addEventListener('click', function(e) {
                     const productTitle = this.getAttribute('data-product-title');
-                    const fipsId = this.getAttribute('data-fips-id');
+                    const documentId = this.getAttribute('data-document-id');
                     const position = this.getAttribute('data-position');
                     const searchTerm = document.getElementById('keywords')?.value || '';
                     
@@ -1136,7 +1136,7 @@
                         }
                     });
                     
-                    trackProductClick(productTitle, fipsId, position, searchTerm, activeFilters);
+                    trackProductClick(productTitle, documentId, position, searchTerm, activeFilters);
                 });
             });
 
