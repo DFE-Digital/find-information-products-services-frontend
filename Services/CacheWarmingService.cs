@@ -1,4 +1,5 @@
 using FipsFrontend.Models;
+using System.Linq;
 
 namespace FipsFrontend.Services;
 
@@ -214,9 +215,9 @@ public class CacheWarmingService : ICacheWarmingService
             _logger.LogInformation("Warming product details cache");
 
             // Get first 10 products and cache their details
-            var products = await _optimizedCmsApiService.GetProductsForListingAsync(1, 10, cacheDuration: cacheDuration);
+            var productsResult = await _optimizedCmsApiService.GetProductsForListingAsync(1, 10, cacheDuration: cacheDuration);
             
-            foreach (var product in products.Take(10))
+            foreach (var product in productsResult.Products.Take(10))
             {
                 if (product.Id > 0)
                 {
@@ -224,7 +225,7 @@ public class CacheWarmingService : ICacheWarmingService
                 }
             }
 
-            _logger.LogInformation("Warmed product details cache for {Count} products", products.Count);
+            _logger.LogInformation("Warmed product details cache for {Count} products", productsResult.Products.Count);
         }
         catch (Exception ex)
         {

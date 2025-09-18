@@ -164,8 +164,8 @@ public class ProductsController : Controller
                 if (userGroup?.Any() == true) searchFilters["User group"] = userGroup;
 
                 var searchResults = await _optimizedCmsApiService.GetProductsForListingAsync(cmsPage, pageSize, keywords, searchFilters, searchDuration);
-                filteredProducts = searchResults;
-                filteredTotalCount = searchResults.Count;
+                filteredProducts = searchResults.Products;
+                filteredTotalCount = searchResults.TotalCount;
                 totalCount = filteredTotalCount; // For search, use filtered count as total
             }
             else
@@ -185,8 +185,8 @@ public class ProductsController : Controller
                 if (userGroup?.Any() == true) listingFilters["User group"] = userGroup;
 
                 var listingResults = await _optimizedCmsApiService.GetProductsForListingAsync(cmsPage, pageSize, null, listingFilters, productsDuration);
-                filteredProducts = listingResults;
-                filteredTotalCount = listingResults.Count;
+                filteredProducts = listingResults.Products;
+                filteredTotalCount = listingResults.TotalCount;
 
                 // Get total count separately only if no filters applied
                 totalCount = filteredTotalCount;

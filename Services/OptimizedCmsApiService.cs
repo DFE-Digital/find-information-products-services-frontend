@@ -5,15 +5,15 @@ namespace FipsFrontend.Services;
 
 public interface IOptimizedCmsApiService
 {
-    Task<List<Product>> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
+    Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByIdAsync(int id, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByFipsIdAsync(string fipsId, TimeSpan? cacheDuration = null);
     Task<List<CategoryType>> GetCategoryTypesAsync(TimeSpan? cacheDuration = null);
     Task<List<CategoryValue>> GetCategoryValuesAsync(string categoryTypeSlug, TimeSpan? cacheDuration = null);
     Task<List<CategoryValue>> GetCategoryValuesByParentAsync(string parentDocumentId, TimeSpan? cacheDuration = null);
-    Task<int> GetProductsCountAsync(TimeSpan? cacheDuration = null);
-    Task<List<Product>> GetProductsForFilterCountsAsync(TimeSpan? cacheDuration = null);
+    Task<int> GetProductsCountAsync(TimeSpan? cacheDuration = null, string? state = "Active");
+    Task<List<Product>> GetProductsForFilterCountsAsync(TimeSpan? cacheDuration = null, string? state = "Active");
     Task<List<CategoryType>> GetAllCategoryTypes(TimeSpan? cacheDuration = null);
     Task<List<CategoryValue>?> GetCategoryValuesForFilter(string categoryTypeName, TimeSpan? cacheDuration = null);
     Task<List<CategoryValue>?> GetAllCategoryValues(TimeSpan? cacheDuration = null);
@@ -38,7 +38,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
     }
 
-    public async Task<List<Product>> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
+    public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
     {
         // Create cache key based on parameters
         var cacheKey = $"products_listing_{page}_{pageSize}_{searchQuery ?? "null"}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? new string[0])}";
@@ -46,8 +46,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // Try to get from cache first
         if (cacheDuration.HasValue)
         {
-            var cachedResult = await _cacheService.GetAsync<List<Product>>(cacheKey);
-            if (cachedResult != null)
+            var cachedResult = await _cacheService.GetAsync<(List<Product> Products, int TotalCount)>(cacheKey);
+            if (cachedResult.Products != null)
             {
                 _logger.LogInformation("CACHE HIT: Products listing for page {Page}", page);
                 return cachedResult;
@@ -58,6 +58,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             $"pagination[page]={page}",
             $"pagination[pageSize]={pageSize}",
+            // Sort products alphabetically by title
+            "sort=title:asc",
             // Only essential fields for listing
             "fields[0]=title",
             "fields[1]=short_description", 
@@ -67,6 +69,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][0]=name"
         };
+
+        // Add state filter - default to Active if no state filter is provided
+        if (filters == null || !filters.ContainsKey("state"))
+        {
+            queryParams.Add("filters[state][$eq]=Active");
+        }
 
         // Add search query if provided - optimized for performance
         if (!string.IsNullOrEmpty(searchQuery))
@@ -108,6 +116,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
             var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
             var products = result?.Data ?? new List<Product>();
+            var totalCount = result?.Meta?.Pagination?.Total ?? 0;
             
             // If we have a search query and got fewer than 5 results, try a broader search
             if (!string.IsNullOrEmpty(searchQuery) && products.Count < 5)
@@ -116,22 +125,25 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 if (broaderResults.Any())
                 {
                     products = broaderResults;
+                    // For broader search, we don't have the total count, so we'll use the current page count
+                    totalCount = products.Count;
                 }
             }
             
             // Cache the result if cache duration is specified
             if (cacheDuration.HasValue && products.Any())
             {
-                await _cacheService.SetAsync(cacheKey, products, cacheDuration.Value);
+                var cacheData = (Products: products, TotalCount: totalCount);
+                await _cacheService.SetAsync(cacheKey, cacheData, cacheDuration.Value);
                 _logger.LogInformation("CACHED: Products listing for page {Page} for {Duration}", page, cacheDuration.Value);
             }
             
-            return products;
+            return (products, totalCount);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "API Error: {Url}", url);
-            return new List<Product>();
+            return (new List<Product>(), 0);
         }
     }
 
@@ -141,6 +153,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             $"pagination[page]={page}",
             $"pagination[pageSize]={pageSize}",
+            // Sort products alphabetically by title
+            "sort=title:asc",
             "fields[0]=title",
             "fields[1]=short_description", 
             "fields[2]=fips_id",
@@ -148,6 +162,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][0]=name"
         };
+
+        // Add state filter - default to Active if no state filter is provided
+        if (filters == null || !filters.ContainsKey("state"))
+        {
+            queryParams.Add("filters[state][$eq]=Active");
+        }
 
         // Use broader search with $containsi on multiple fields
         queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
@@ -711,9 +731,9 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
     }
 
-    public async Task<int> GetProductsCountAsync(TimeSpan? cacheDuration = null)
+    public async Task<int> GetProductsCountAsync(TimeSpan? cacheDuration = null, string? state = "Active")
     {
-        var cacheKey = "products_count_total";
+        var cacheKey = $"products_count_{state ?? "all"}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -721,7 +741,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             var cachedResult = await _cacheService.GetAsync<int>(cacheKey);
             if (cachedResult > 0)
             {
-                _logger.LogInformation("CACHE HIT: Products count");
+                _logger.LogInformation("CACHE HIT: Products count for state {State}", state);
                 return cachedResult;
             }
         }
@@ -731,6 +751,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "pagination[pageSize]=1",
             "fields[0]=id" // Only need ID for count
         };
+
+        // Add state filter if specified
+        if (!string.IsNullOrEmpty(state))
+        {
+            queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(state)}");
+        }
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
@@ -757,7 +783,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             if (cacheDuration.HasValue && count > 0)
             {
                 await _cacheService.SetAsync(cacheKey, count, cacheDuration.Value);
-                _logger.LogInformation("CACHED: Products count {Count} for {Duration}", count, cacheDuration.Value);
+                _logger.LogInformation("CACHED: Products count {Count} for state {State} for {Duration}", count, state, cacheDuration.Value);
             }
             
             return count;
@@ -769,9 +795,9 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
     }
 
-    public async Task<List<Product>> GetProductsForFilterCountsAsync(TimeSpan? cacheDuration = null)
+    public async Task<List<Product>> GetProductsForFilterCountsAsync(TimeSpan? cacheDuration = null, string? state = "Active")
     {
-        var cacheKey = "products_filter_counts";
+        var cacheKey = $"products_filter_counts_{state ?? "all"}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -779,7 +805,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             var cachedResult = await _cacheService.GetAsync<List<Product>>(cacheKey);
             if (cachedResult != null)
             {
-                _logger.LogInformation("CACHE HIT: Products for filter counts");
+                _logger.LogInformation("CACHE HIT: Products for filter counts for state {State}", state);
                 return cachedResult;
             }
         }
@@ -787,6 +813,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         var queryParams = new List<string>
         {
             "pagination[pageSize]=1000", // Reasonable limit for filter counts
+            // Sort products alphabetically by title
+            "sort=title:asc",
             // Only fields needed for filtering
             "fields[0]=id",
             "fields[1]=fips_id",
@@ -794,6 +822,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][0]=name"
         };
+
+        // Add state filter if specified
+        if (!string.IsNullOrEmpty(state))
+        {
+            queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(state)}");
+        }
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
@@ -820,7 +854,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             if (cacheDuration.HasValue && products.Any())
             {
                 await _cacheService.SetAsync(cacheKey, products, cacheDuration.Value);
-                _logger.LogInformation("CACHED: Products for filter counts for {Duration}", cacheDuration.Value);
+                _logger.LogInformation("CACHED: Products for filter counts for state {State} for {Duration}", state, cacheDuration.Value);
             }
             
             return products;
