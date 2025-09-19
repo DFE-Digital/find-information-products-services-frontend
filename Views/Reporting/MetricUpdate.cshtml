@@ -1,0 +1,145 @@
+@model FipsFrontend.Models.MetricUpdateViewModel
+@{
+    ViewData["Title"] = "Update " + Model.MetricTitle;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">@Model.MetricTitle</h1>
+                
+                <div class="govuk-inset-text">
+                    <p><strong>Alpha</strong> This is a prototype. Help us improve it and give your feedback by email.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <p class="govuk-body">
+                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = Model.ProductId })">
+                        Back to service
+                    </a>
+                </p>
+
+                <h2 class="govuk-heading-l">@Model.ProductName</h2>
+                <h3 class="govuk-heading-m">@Model.MetricTitle</h3>
+                
+                @if (!string.IsNullOrEmpty(Model.MetricDescription))
+                {
+                    <p class="govuk-body">@Model.MetricDescription</p>
+                }
+
+                @if (Model.IsCompleted)
+                {
+                    <div class="govuk-summary-card">
+                        <div class="govuk-summary-card__title-wrapper">
+                            <h2 class="govuk-summary-card__title">Current value</h2>
+                        </div>
+                        <div class="govuk-summary-card__content">
+                            <dl class="govuk-summary-list">
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">Value</dt>
+                                    <dd class="govuk-summary-list__value">@Model.CurrentValue</dd>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.CurrentNotes))
+                                {
+                                    <div class="govuk-summary-list__row">
+                                        <dt class="govuk-summary-list__key">Notes</dt>
+                                        <dd class="govuk-summary-list__value">@Model.CurrentNotes</dd>
+                                    </div>
+                                }
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">Last updated</dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @Model.LastUpdated?.ToString("d MMMM yyyy") by @Model.LastUpdatedBy
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                }
+
+                <form method="post" action="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = Model.MetricId })">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="NewValue">
+                            @Model.MetricTitle
+                            @if (Model.DataType == "percentage")
+                            {
+                                <span class="govuk-hint">Enter as a percentage (e.g., 95.5)</span>
+                            }
+                            else if (Model.DataType == "currency")
+                            {
+                                <span class="govuk-hint">Enter amount in pounds (e.g., 0.12)</span>
+                            }
+                            else if (Model.DataType == "number")
+                            {
+                                <span class="govuk-hint">Enter a number</span>
+                            }
+                        </label>
+                        
+                        @if (Model.DataType == "text")
+                        {
+                            <textarea class="govuk-textarea" id="NewValue" name="NewValue" rows="3" required>@Model.NewValue</textarea>
+                        }
+                        else if (Model.DataType == "boolean")
+                        {
+                            <div class="govuk-radios" data-module="govuk-radios">
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="NewValue-true" name="NewValue" type="radio" value="true" @(Model.NewValue == "true" ? "checked" : "")>
+                                    <label class="govuk-label govuk-radios__label" for="NewValue-true">
+                                        Yes
+                                    </label>
+                                </div>
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="NewValue-false" name="NewValue" type="radio" value="false" @(Model.NewValue == "false" ? "checked" : "")>
+                                    <label class="govuk-label govuk-radios__label" for="NewValue-false">
+                                        No
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <input class="govuk-input" id="NewValue" name="NewValue" type="@(Model.DataType == "number" || Model.DataType == "percentage" || Model.DataType == "currency" ? "number" : "text")" 
+                                   value="@Model.NewValue" required 
+                                   @(Model.DataType == "percentage" ? "step=\"0.1\" min=\"0\" max=\"100\"" : 
+                                     Model.DataType == "currency" ? "step=\"0.01\" min=\"0\"" : 
+                                     Model.DataType == "number" ? "step=\"1\"" : "")>
+                        }
+                        
+                        @if (ViewData.ModelState["NewValue"]?.Errors.Any() == true)
+                        {
+                            <span class="govuk-error-message">
+                                @ViewData.ModelState["NewValue"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="NewNotes">
+                            Notes (optional)
+                        </label>
+                        <textarea class="govuk-textarea" id="NewNotes" name="NewNotes" rows="3">@Model.NewNotes</textarea>
+                        <div class="govuk-hint">
+                            Add any additional context or explanation for this metric value.
+                        </div>
+                    </div>
+
+                    <div class="govuk-form-group">
+                        <button class="govuk-button" type="submit">
+                            @(Model.IsCompleted ? "Update" : "Save") value
+                        </button>
+                        <a class="govuk-button govuk-button--secondary" href="@Url.Action("ServiceReport", new { productId = Model.ProductId })">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>

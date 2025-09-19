@@ -1,0 +1,487 @@
+@model FipsFrontend.Models.ServiceReportViewModel
+@{
+    ViewData["Title"] = Model.ProductName + " - Service Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">@Model.ProductName</h1>
+                
+                <div class="govuk-inset-text">
+                    <p><strong>Alpha</strong> This is a prototype. Help us improve it and give your feedback by email.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">@Model.CurrentPeriod.PeriodStart.ToString("MMMM yyyy") service report</h2>
+                
+                <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                        <h2 class="govuk-summary-card__title">Report status</h2>
+                    </div>
+                    <div class="govuk-summary-card__content">
+                        <dl class="govuk-summary-list">
+                            <div class="govuk-summary-list__row">
+                                <dt class="govuk-summary-list__key">Status</dt>
+                                <dd class="govuk-summary-list__value">
+                                    <strong class="govuk-tag govuk-tag--@(Model.CurrentPeriod.Status == ReportingStatus.Overdue ? "red" : Model.CurrentPeriod.Status == ReportingStatus.Late ? "yellow" : Model.CurrentPeriod.Status == ReportingStatus.Complete ? "green" : "blue")">
+                                        @Model.CurrentPeriod.StatusDisplay
+                                    </strong>
+                                </dd>
+                            </div>
+                            <div class="govuk-summary-list__row">
+                                <dt class="govuk-summary-list__key">Progress</dt>
+                                <dd class="govuk-summary-list__value">
+                                    @Model.CurrentPeriod.CompletedMetrics of @Model.CurrentPeriod.TotalMetrics returns completed
+                                </dd>
+                            </div>
+                            <div class="govuk-summary-list__row">
+                                <dt class="govuk-summary-list__key">Due by</dt>
+                                <dd class="govuk-summary-list__value">
+                                    @Model.CurrentPeriod.DueDate.ToString("d MMMM yyyy")
+                                </dd>
+                            </div>
+                            @if (Model.CurrentPeriod.SubmittedAt.HasValue)
+                            {
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">Submitted</dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @Model.CurrentPeriod.SubmittedAt?.ToString("d MMMM yyyy") by @Model.CurrentPeriod.SubmittedBy
+                                    </dd>
+                                </div>
+                            }
+                        </dl>
+                    </div>
+                </div>
+
+                <nav class="govuk-tabs" data-module="govuk-tabs">
+                    <h2 class="govuk-tabs__title">Contents</h2>
+                    <ul class="govuk-tabs__list">
+                        <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+                            <a class="govuk-tabs__tab" href="#customer-experience">
+                                Customer experience
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#availability-performance">
+                                Availability & performance
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#usage-adoption">
+                                Usage & adoption
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#operational-health">
+                                Operational health
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#security-risk">
+                                Security & risk
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#financial-business">
+                                Financial & business impact
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#milestones">
+                                Milestones
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#submission">
+                                Submission
+                            </a>
+                        </li>
+                    </ul>
+
+                    <section class="govuk-tabs__panel" id="customer-experience">
+                        <h2 class="govuk-heading-l">Customer Experience</h2>
+                        
+                        @foreach (var metric in Model.PerformanceMetrics.Where(m => m.Title.Contains("satisfaction") || m.Title.Contains("customer")))
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__title-wrapper">
+                                    <h3 class="govuk-summary-card__title">@metric.Title</h3>
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <span class="govuk-tag govuk-tag--green">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-tag govuk-tag--grey">Not started</span>
+                                    }
+                                </div>
+                                <div class="govuk-summary-card__content">
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Value</dt>
+                                                <dd class="govuk-summary-list__value">@metric.CurrentValue</dd>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(metric.CurrentNotes))
+                                            {
+                                                <div class="govuk-summary-list__row">
+                                                    <dt class="govuk-summary-list__key">Notes</dt>
+                                                    <dd class="govuk-summary-list__value">@metric.CurrentNotes</dd>
+                                                </div>
+                                            }
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Last updated</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @metric.LastUpdated?.ToString("d MMMM yyyy") by @metric.LastUpdatedBy
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        <p class="govuk-body">@metric.Description</p>
+                                    }
+                                    <a class="govuk-link" href="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = metric.Id })">
+                                        @(metric.IsCompleted ? "Update" : "Add") value
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="availability-performance">
+                        <h2 class="govuk-heading-l">Availability & Performance</h2>
+                        
+                        @foreach (var metric in Model.PerformanceMetrics.Where(m => m.Title.Contains("uptime") || m.Title.Contains("latency") || m.Title.Contains("SLA")))
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__title-wrapper">
+                                    <h3 class="govuk-summary-card__title">@metric.Title</h3>
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <span class="govuk-tag govuk-tag--green">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-tag govuk-tag--grey">Not started</span>
+                                    }
+                                </div>
+                                <div class="govuk-summary-card__content">
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Value</dt>
+                                                <dd class="govuk-summary-list__value">@metric.CurrentValue</dd>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(metric.CurrentNotes))
+                                            {
+                                                <div class="govuk-summary-list__row">
+                                                    <dt class="govuk-summary-list__key">Notes</dt>
+                                                    <dd class="govuk-summary-list__value">@metric.CurrentNotes</dd>
+                                                </div>
+                                            }
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        <p class="govuk-body">@metric.Description</p>
+                                    }
+                                    <a class="govuk-link" href="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = metric.Id })">
+                                        @(metric.IsCompleted ? "Update" : "Add") value
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="usage-adoption">
+                        <h2 class="govuk-heading-l">Usage & Adoption</h2>
+                        
+                        @foreach (var metric in Model.PerformanceMetrics.Where(m => m.Title.Contains("users") || m.Title.Contains("transactions") || m.Title.Contains("adoption")))
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__title-wrapper">
+                                    <h3 class="govuk-summary-card__title">@metric.Title</h3>
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <span class="govuk-tag govuk-tag--green">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-tag govuk-tag--grey">Not started</span>
+                                    }
+                                </div>
+                                <div class="govuk-summary-card__content">
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Value</dt>
+                                                <dd class="govuk-summary-list__value">@metric.CurrentValue</dd>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(metric.CurrentNotes))
+                                            {
+                                                <div class="govuk-summary-list__row">
+                                                    <dt class="govuk-summary-list__key">Notes</dt>
+                                                    <dd class="govuk-summary-list__value">@metric.CurrentNotes</dd>
+                                                </div>
+                                            }
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        <p class="govuk-body">@metric.Description</p>
+                                    }
+                                    <a class="govuk-link" href="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = metric.Id })">
+                                        @(metric.IsCompleted ? "Update" : "Add") value
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="operational-health">
+                        <h2 class="govuk-heading-l">Operational Health</h2>
+                        
+                        @foreach (var metric in Model.PerformanceMetrics.Where(m => m.Title.Contains("incident") || m.Title.Contains("outage") || m.Title.Contains("deployment")))
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__title-wrapper">
+                                    <h3 class="govuk-summary-card__title">@metric.Title</h3>
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <span class="govuk-tag govuk-tag--green">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-tag govuk-tag--grey">Not started</span>
+                                    }
+                                </div>
+                                <div class="govuk-summary-card__content">
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Value</dt>
+                                                <dd class="govuk-summary-list__value">@metric.CurrentValue</dd>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(metric.CurrentNotes))
+                                            {
+                                                <div class="govuk-summary-list__row">
+                                                    <dt class="govuk-summary-list__key">Notes</dt>
+                                                    <dd class="govuk-summary-list__value">@metric.CurrentNotes</dd>
+                                                </div>
+                                            }
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        <p class="govuk-body">@metric.Description</p>
+                                    }
+                                    <a class="govuk-link" href="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = metric.Id })">
+                                        @(metric.IsCompleted ? "Update" : "Add") value
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="security-risk">
+                        <h2 class="govuk-heading-l">Security & Risk</h2>
+                        
+                        @foreach (var metric in Model.PerformanceMetrics.Where(m => m.Title.Contains("security") || m.Title.Contains("vulnerability") || m.Title.Contains("compliance")))
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__title-wrapper">
+                                    <h3 class="govuk-summary-card__title">@metric.Title</h3>
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <span class="govuk-tag govuk-tag--green">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-tag govuk-tag--grey">Not started</span>
+                                    }
+                                </div>
+                                <div class="govuk-summary-card__content">
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Value</dt>
+                                                <dd class="govuk-summary-list__value">@metric.CurrentValue</dd>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(metric.CurrentNotes))
+                                            {
+                                                <div class="govuk-summary-list__row">
+                                                    <dt class="govuk-summary-list__key">Notes</dt>
+                                                    <dd class="govuk-summary-list__value">@metric.CurrentNotes</dd>
+                                                </div>
+                                            }
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        <p class="govuk-body">@metric.Description</p>
+                                    }
+                                    <a class="govuk-link" href="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = metric.Id })">
+                                        @(metric.IsCompleted ? "Update" : "Add") value
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="financial-business">
+                        <h2 class="govuk-heading-l">Financial & Business Impact</h2>
+                        
+                        @foreach (var metric in Model.PerformanceMetrics.Where(m => m.Title.Contains("cost") || m.Title.Contains("financial")))
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__title-wrapper">
+                                    <h3 class="govuk-summary-card__title">@metric.Title</h3>
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <span class="govuk-tag govuk-tag--green">Completed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-tag govuk-tag--grey">Not started</span>
+                                    }
+                                </div>
+                                <div class="govuk-summary-card__content">
+                                    @if (metric.IsCompleted)
+                                    {
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Value</dt>
+                                                <dd class="govuk-summary-list__value">@metric.CurrentValue</dd>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(metric.CurrentNotes))
+                                            {
+                                                <div class="govuk-summary-list__row">
+                                                    <dt class="govuk-summary-list__key">Notes</dt>
+                                                    <dd class="govuk-summary-list__value">@metric.CurrentNotes</dd>
+                                                </div>
+                                            }
+                                        </dl>
+                                    }
+                                    else
+                                    {
+                                        <p class="govuk-body">@metric.Description</p>
+                                    }
+                                    <a class="govuk-link" href="@Url.Action("MetricUpdate", new { productId = Model.ProductId, metricId = metric.Id })">
+                                        @(metric.IsCompleted ? "Update" : "Add") value
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="milestones">
+                        <h2 class="govuk-heading-l">Milestones</h2>
+                        
+                        @if (Model.Milestones.Any())
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__content">
+                                    @foreach (var milestone in Model.Milestones)
+                                    {
+                                        <div class="govuk-summary-card">
+                                            <div class="govuk-summary-card__title-wrapper">
+                                                <h3 class="govuk-summary-card__title">@milestone.Title</h3>
+                                                <ul class="govuk-summary-card__actions">
+                                                    <li class="govuk-summary-card__action">
+                                                        <a class="govuk-link" href="@Url.Action("Milestones", new { productId = Model.ProductId })">
+                                                            Manage milestone <span class="govuk-visually-hidden">@milestone.Title</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="govuk-summary-card__content">
+                                                <dl class="govuk-summary-list">
+                                                    <div class="govuk-summary-list__row">
+                                                        <dt class="govuk-summary-list__key">Status</dt>
+                                                        <dd class="govuk-summary-list__value">
+                                                            <strong class="govuk-tag govuk-tag--@(milestone.Status == MilestoneStatus.AtRisk ? "red" : milestone.Status == MilestoneStatus.OnTrack ? "green" : "blue")">
+                                                                @milestone.StatusDisplay
+                                                            </strong>
+                                                        </dd>
+                                                    </div>
+                                                    <div class="govuk-summary-list__row">
+                                                        <dt class="govuk-summary-list__key">Due</dt>
+                                                        <dd class="govuk-summary-list__value">@milestone.DueDate.ToString("d MMMM yyyy")</dd>
+                                                    </div>
+                                                    <div class="govuk-summary-list__row">
+                                                        <dt class="govuk-summary-list__key">Owner</dt>
+                                                        <dd class="govuk-summary-list__value">@milestone.Owner</dd>
+                                                    </div>
+                                                </dl>
+                                                @if (!string.IsNullOrEmpty(milestone.Description))
+                                                {
+                                                    <p class="govuk-body">@milestone.Description</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="govuk-body">No milestones defined for this service.</p>
+                        }
+                        
+                        <a class="govuk-button govuk-button--secondary" href="@Url.Action("Milestones", new { productId = Model.ProductId })">
+                            Manage milestones
+                        </a>
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="submission">
+                        <h2 class="govuk-heading-l">Submission</h2>
+                        
+                        @if (Model.CanSubmit)
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__content">
+                                    <p class="govuk-body">You can submit the return for this service when all sections are completed.</p>
+                                    
+                                    <form method="post" action="@Url.Action("SubmitReport", new { productId = Model.ProductId })">
+                                        @Html.AntiForgeryToken()
+                                        <button class="govuk-button" type="submit">
+                                            Submit return
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="govuk-summary-card">
+                                <div class="govuk-summary-card__content">
+                                    <p class="govuk-body">Complete all required sections before submitting the return.</p>
+                                    
+                                    <div class="govuk-warning-text">
+                                        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                                        <strong class="govuk-warning-text__text">
+                                            <span class="govuk-warning-text__assistive">Warning</span>
+                                            @(Model.CurrentPeriod.CompletedMetrics) of @(Model.CurrentPeriod.TotalMetrics) metrics completed
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </section>
+                </nav>
+            </div>
+        </div>
+    </main>
+</div>

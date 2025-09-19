@@ -1,0 +1,260 @@
+@model FipsFrontend.Models.MilestonesViewModel
+@{
+    ViewData["Title"] = Model.ProductName + " - Milestones";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Milestones</h1>
+                
+                <div class="govuk-inset-text">
+                    <p><strong>Alpha</strong> This is a prototype. Help us improve it and give your feedback by email.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <p class="govuk-body">
+                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = Model.ProductId })">
+                        Back to service
+                    </a>
+                </p>
+
+                <h2 class="govuk-heading-l">@Model.ProductName</h2>
+
+                @if (Model.Milestones.Any())
+                {
+                    @foreach (var milestone in Model.Milestones)
+                    {
+                        <div class="govuk-summary-card">
+                            <div class="govuk-summary-card__title-wrapper">
+                                <h3 class="govuk-summary-card__title">@milestone.Title</h3>
+                                <ul class="govuk-summary-card__actions">
+                                    <li class="govuk-summary-card__action">
+                                        <form method="post" action="@Url.Action("UpdateMilestone", new { productId = Model.ProductId, milestoneId = milestone.Id })" style="display: inline;">
+                                            @Html.AntiForgeryToken()
+                                            <select class="govuk-select" name="status" onchange="this.form.submit()">
+                                                @{
+                                                    var statusOptions = new[]
+                                                    {
+                                                        new { Value = "1", Text = "Open", IsSelected = milestone.Status == MilestoneStatus.Open },
+                                                        new { Value = "2", Text = "On track", IsSelected = milestone.Status == MilestoneStatus.OnTrack },
+                                                        new { Value = "3", Text = "At risk", IsSelected = milestone.Status == MilestoneStatus.AtRisk },
+                                                        new { Value = "4", Text = "Completed", IsSelected = milestone.Status == MilestoneStatus.Completed },
+                                                        new { Value = "5", Text = "Cancelled", IsSelected = milestone.Status == MilestoneStatus.Cancelled }
+                                                    };
+                                                }
+                                                @foreach (var option in statusOptions)
+                                                {
+                                                    <option value="@option.Value" selected="@option.IsSelected">@option.Text</option>
+                                                }
+                                            </select>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="govuk-summary-card__content">
+                                <dl class="govuk-summary-list">
+                                    <div class="govuk-summary-list__row">
+                                        <dt class="govuk-summary-list__key">Status</dt>
+                                        <dd class="govuk-summary-list__value">
+                                            <strong class="govuk-tag govuk-tag--@(milestone.Status == MilestoneStatus.AtRisk ? "red" : milestone.Status == MilestoneStatus.OnTrack ? "green" : milestone.Status == MilestoneStatus.Completed ? "green" : "blue")">
+                                                @milestone.StatusDisplay
+                                            </strong>
+                                        </dd>
+                                    </div>
+                                    <div class="govuk-summary-list__row">
+                                        <dt class="govuk-summary-list__key">Due</dt>
+                                        <dd class="govuk-summary-list__value">@milestone.DueDate.ToString("d MMMM yyyy")</dd>
+                                    </div>
+                                    <div class="govuk-summary-list__row">
+                                        <dt class="govuk-summary-list__key">Owner</dt>
+                                        <dd class="govuk-summary-list__value">@milestone.Owner</dd>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(milestone.Category))
+                                    {
+                                        <div class="govuk-summary-list__row">
+                                            <dt class="govuk-summary-list__key">Category</dt>
+                                            <dd class="govuk-summary-list__value">@milestone.Category</dd>
+                                        </div>
+                                    }
+                                </dl>
+                                
+                                @if (!string.IsNullOrEmpty(milestone.Description))
+                                {
+                                    <p class="govuk-body">@milestone.Description</p>
+                                }
+
+                                @if (milestone.Updates.Any())
+                                {
+                                    <h4 class="govuk-heading-s">Updates</h4>
+                                    @foreach (var update in milestone.Updates.Take(3))
+                                    {
+                                        <div class="govuk-summary-card">
+                                            <div class="govuk-summary-card__content">
+                                                <p class="govuk-body">@update.UpdateText</p>
+                                                <dl class="govuk-summary-list govuk-summary-list--no-border">
+                                                    <div class="govuk-summary-list__row">
+                                                        <dt class="govuk-summary-list__key">Updated by</dt>
+                                                        <dd class="govuk-summary-list__value">@update.UpdatedBy</dd>
+                                                    </div>
+                                                    <div class="govuk-summary-list__row">
+                                                        <dt class="govuk-summary-list__key">Date</dt>
+                                                        <dd class="govuk-summary-list__value">@update.CreatedAt.ToString("d MMMM yyyy")</dd>
+                                                    </div>
+                                                    @if (update.RagStatus.HasValue)
+                                                    {
+                                                        <div class="govuk-summary-list__row">
+                                                            <dt class="govuk-summary-list__key">RAG Status</dt>
+                                                            <dd class="govuk-summary-list__value">
+                                                                <strong class="govuk-tag govuk-tag--@(update.RagStatus == RagStatus.Red ? "red" : update.RagStatus == RagStatus.Amber ? "yellow" : "green")">
+                                                                    @update.RagStatusDisplay
+                                                                </strong>
+                                                            </dd>
+                                                        </div>
+                                                    }
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    }
+                                    
+                                    @if (milestone.Updates.Count > 3)
+                                    {
+                                        <p class="govuk-body">
+                                            <a class="govuk-link" href="#" onclick="showAllUpdates(@milestone.Id)">
+                                                Show all @milestone.Updates.Count updates
+                                            </a>
+                                        </p>
+                                    }
+                                }
+
+                                <!-- Add Update Form -->
+                                <div class="govuk-summary-card">
+                                    <div class="govuk-summary-card__title-wrapper">
+                                        <h4 class="govuk-summary-card__title">Add update</h4>
+                                    </div>
+                                    <div class="govuk-summary-card__content">
+                                        <form method="post" action="@Url.Action("AddMilestoneUpdate", new { productId = Model.ProductId, milestoneId = milestone.Id })">
+                                            @Html.AntiForgeryToken()
+                                            
+                                            <div class="govuk-form-group">
+                                                <label class="govuk-label" for="UpdateText-@milestone.Id">
+                                                    Update text
+                                                </label>
+                                                <textarea class="govuk-textarea" id="UpdateText-@milestone.Id" name="UpdateText" rows="3" required></textarea>
+                                            </div>
+
+                                            <div class="govuk-form-group">
+                                                <label class="govuk-label" for="RagStatus-@milestone.Id">
+                                                    RAG Status (optional)
+                                                </label>
+                                                <select class="govuk-select" id="RagStatus-@milestone.Id" name="RagStatus">
+                                                    <option value="">Not set</option>
+                                                    <option value="1">Red</option>
+                                                    <option value="2">Amber</option>
+                                                    <option value="3">Green</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="govuk-form-group">
+                                                <label class="govuk-label" for="Risks-@milestone.Id">
+                                                    Risks (optional)
+                                                </label>
+                                                <textarea class="govuk-textarea" id="Risks-@milestone.Id" name="Risks" rows="2"></textarea>
+                                            </div>
+
+                                            <div class="govuk-form-group">
+                                                <label class="govuk-label" for="Issues-@milestone.Id">
+                                                    Issues (optional)
+                                                </label>
+                                                <textarea class="govuk-textarea" id="Issues-@milestone.Id" name="Issues" rows="2"></textarea>
+                                            </div>
+
+                                            <button class="govuk-button" type="submit">
+                                                Add update
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="govuk-body">No milestones defined for this service.</p>
+                }
+
+                <!-- Create New Milestone -->
+                <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__title-wrapper">
+                        <h2 class="govuk-summary-card__title">Create new milestone</h2>
+                    </div>
+                    <div class="govuk-summary-card__content">
+                        <form method="post" action="@Url.Action("CreateMilestone", new { productId = Model.ProductId })">
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="Title">
+                                    Title
+                                </label>
+                                <input class="govuk-input" id="Title" name="Title" type="text" required>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="Description">
+                                    Description
+                                </label>
+                                <textarea class="govuk-textarea" id="Description" name="Description" rows="3"></textarea>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="DueDate">
+                                    Due date
+                                </label>
+                                <input class="govuk-input" id="DueDate" name="DueDate" type="date" required>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="Owner">
+                                    Owner
+                                </label>
+                                <input class="govuk-input" id="Owner" name="Owner" type="text" required>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label" for="Category">
+                                    Category
+                                </label>
+                                <select class="govuk-select" id="Category" name="Category">
+                                    <option value="">Select category</option>
+                                    <option value="strategic">Strategic</option>
+                                    <option value="flagship">Flagship</option>
+                                    <option value="mission">Mission</option>
+                                    <option value="operational">Operational</option>
+                                    <option value="compliance">Compliance</option>
+                                </select>
+                            </div>
+
+                            <button class="govuk-button" type="submit">
+                                Create milestone
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+function showAllUpdates(milestoneId) {
+    // This would show all updates for a milestone in a modal or expanded view
+    // For now, we'll just scroll to the milestone
+    document.getElementById('milestone-' + milestoneId).scrollIntoView();
+}
+</script>

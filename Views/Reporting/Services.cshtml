@@ -1,0 +1,195 @@
+@model FipsFrontend.Models.ServicesReportViewModel
+@{
+    ViewData["Title"] = "Service Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Service Reports</h1>
+                
+                <div class="govuk-inset-text">
+                    <p><strong>Alpha</strong> This is a prototype. Help us improve it and give your feedback by email.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <nav class="govuk-tabs" data-module="govuk-tabs">
+                    <h2 class="govuk-tabs__title">Contents</h2>
+                    <ul class="govuk-tabs__list">
+                        <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+                            <a class="govuk-tabs__tab" href="#active">
+                                Active and overdue reports
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#upcoming">
+                                Upcoming reports
+                            </a>
+                        </li>
+                        <li class="govuk-tabs__list-item">
+                            <a class="govuk-tabs__tab" href="#submitted">
+                                Submitted reports
+                            </a>
+                        </li>
+                    </ul>
+
+                    <section class="govuk-tabs__panel" id="active">
+                        <h2 class="govuk-heading-l">Active and overdue reports</h2>
+                        
+                        @if (Model.ActivePeriods.Any())
+                        {
+                            <div class="govuk-table-responsive">
+                                <table class="govuk-table">
+                                    <thead class="govuk-table__head">
+                                        <tr class="govuk-table__row">
+                                            <th scope="col" class="govuk-table__header">Service Name</th>
+                                            <th scope="col" class="govuk-table__header">Status</th>
+                                            <th scope="col" class="govuk-table__header">Progress</th>
+                                            <th scope="col" class="govuk-table__header">Due by</th>
+                                            <th scope="col" class="govuk-table__header">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="govuk-table__body">
+                                        @foreach (var period in Model.ActivePeriods)
+                                        {
+                                            <tr class="govuk-table__row">
+                                                <td class="govuk-table__cell">
+                                                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                        @period.ProductName
+                                                    </a>
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    <strong class="govuk-tag govuk-tag--@(period.Status == ReportingStatus.Overdue ? "red" : period.Status == ReportingStatus.Late ? "yellow" : "blue")">
+                                                        @period.StatusDisplay
+                                                    </strong>
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.CompletedMetrics of @period.TotalMetrics returns completed
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.DueDate.ToString("d MMMM yyyy")
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                        Report completion
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="govuk-body">No active or overdue reports.</p>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="upcoming">
+                        <h2 class="govuk-heading-l">Upcoming reports</h2>
+                        
+                        @if (Model.UpcomingPeriods.Any())
+                        {
+                            <div class="govuk-table-responsive">
+                                <table class="govuk-table">
+                                    <thead class="govuk-table__head">
+                                        <tr class="govuk-table__row">
+                                            <th scope="col" class="govuk-table__header">Service Name</th>
+                                            <th scope="col" class="govuk-table__header">Reporting Period</th>
+                                            <th scope="col" class="govuk-table__header">Due by</th>
+                                            <th scope="col" class="govuk-table__header">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="govuk-table__body">
+                                        @foreach (var period in Model.UpcomingPeriods)
+                                        {
+                                            <tr class="govuk-table__row">
+                                                <td class="govuk-table__cell">
+                                                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                        @period.ProductName
+                                                    </a>
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.PeriodStart.ToString("MMMM yyyy")
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.DueDate.ToString("d MMMM yyyy")
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                        View service
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="govuk-body">No upcoming reports.</p>
+                        }
+                    </section>
+
+                    <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="submitted">
+                        <h2 class="govuk-heading-l">Submitted reports</h2>
+                        
+                        @if (Model.SubmittedPeriods.Any())
+                        {
+                            <div class="govuk-table-responsive">
+                                <table class="govuk-table">
+                                    <thead class="govuk-table__head">
+                                        <tr class="govuk-table__row">
+                                            <th scope="col" class="govuk-table__header">Service Name</th>
+                                            <th scope="col" class="govuk-table__header">Reporting Period</th>
+                                            <th scope="col" class="govuk-table__header">Submitted</th>
+                                            <th scope="col" class="govuk-table__header">Submitted by</th>
+                                            <th scope="col" class="govuk-table__header">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="govuk-table__body">
+                                        @foreach (var period in Model.SubmittedPeriods)
+                                        {
+                                            <tr class="govuk-table__row">
+                                                <td class="govuk-table__cell">
+                                                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                        @period.ProductName
+                                                    </a>
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.PeriodStart.ToString("MMMM yyyy")
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.SubmittedAt?.ToString("d MMMM yyyy")
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    @period.SubmittedBy
+                                                </td>
+                                                <td class="govuk-table__cell">
+                                                    <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                        View report
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="govuk-body">No submitted reports.</p>
+                        }
+                    </section>
+                </nav>
+            </div>
+        </div>
+    </main>
+</div>

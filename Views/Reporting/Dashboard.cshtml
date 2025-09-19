@@ -1,0 +1,245 @@
+@model FipsFrontend.Models.ReportingDashboardViewModel
+@{
+    ViewData["Title"] = "Reporting Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Reporting</h1>
+                
+                <div class="govuk-inset-text">
+                    <p><strong>Alpha</strong> This is a prototype. Help us improve it and give your feedback by email.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-l">Monthly service performance return</h2>
+                
+                @if (Model.ActivePeriods.Any())
+                {
+                    <div class="govuk-summary-card">
+                        <div class="govuk-summary-card__title-wrapper">
+                            <h2 class="govuk-summary-card__title">Active and overdue reports</h2>
+                        </div>
+                        <div class="govuk-summary-card__content">
+                            @foreach (var period in Model.ActivePeriods)
+                            {
+                                <div class="govuk-summary-card">
+                                    <div class="govuk-summary-card__title-wrapper">
+                                        <h3 class="govuk-summary-card__title">@period.PeriodStart.ToString("MMMM yyyy") service performance return</h3>
+                                        <ul class="govuk-summary-card__actions">
+                                            <li class="govuk-summary-card__action">
+                                                <a class="govuk-link" href="@Url.Action("ServiceReport", new { productId = period.ProductId })">
+                                                    Report completion <span class="govuk-visually-hidden">for @period.ProductName</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="govuk-summary-card__content">
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Status</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    <strong class="govuk-tag govuk-tag--@(period.Status == ReportingStatus.Overdue ? "red" : period.Status == ReportingStatus.Late ? "yellow" : "blue")">
+                                                        @period.StatusDisplay
+                                                    </strong>
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Submission</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @if (period.Status == ReportingStatus.Complete)
+                                                    {
+                                                        <span>Submitted</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Cannot start</span>
+                                                    }
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Progress</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @period.CompletedMetrics of @period.TotalMetrics returns completed
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Due by</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @period.DueDate.ToString("d MMMM yyyy")
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                        <p class="govuk-body">
+                                            The monthly service performance return is due by the 7th of each month and covers services you are responsible for.
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.UpcomingPeriods.Any())
+                {
+                    <div class="govuk-summary-card">
+                        <div class="govuk-summary-card__title-wrapper">
+                            <h2 class="govuk-summary-card__title">Upcoming reports</h2>
+                        </div>
+                        <div class="govuk-summary-card__content">
+                            @foreach (var period in Model.UpcomingPeriods)
+                            {
+                                <div class="govuk-summary-card">
+                                    <div class="govuk-summary-card__title-wrapper">
+                                        <h3 class="govuk-summary-card__title">@period.PeriodStart.ToString("MMMM yyyy") service performance return</h3>
+                                    </div>
+                                    <div class="govuk-summary-card__content">
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Status</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    <strong class="govuk-tag govuk-tag--grey">Upcoming</strong>
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Due by</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @period.DueDate.ToString("d MMMM yyyy")
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.SubmittedPeriods.Any())
+                {
+                    <div class="govuk-summary-card">
+                        <div class="govuk-summary-card__title-wrapper">
+                            <h2 class="govuk-summary-card__title">Submitted reports</h2>
+                        </div>
+                        <div class="govuk-summary-card__content">
+                            @foreach (var period in Model.SubmittedPeriods)
+                            {
+                                <div class="govuk-summary-card">
+                                    <div class="govuk-summary-card__title-wrapper">
+                                        <h3 class="govuk-summary-card__title">@period.PeriodStart.ToString("MMMM yyyy") service performance return</h3>
+                                    </div>
+                                    <div class="govuk-summary-card__content">
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Status</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    <strong class="govuk-tag govuk-tag--green">Complete</strong>
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Submitted</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @period.SubmittedAt?.ToString("d MMMM yyyy") by @period.SubmittedBy
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <h2 class="govuk-heading-l">Service reports</h2>
+                <ul class="govuk-list">
+                    <li><a class="govuk-link" href="@Url.Action("Services")">Service compliance</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">Service data completion</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">User coverage</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">Missions, pillars and priorities</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">User activity trends</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">Data export history</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">Error and issue logs</a></li>
+                    <li><a class="govuk-link" href="@Url.Action("Services")">Access logs</a></li>
+                </ul>
+
+                @if (Model.ActiveMilestones.Any())
+                {
+                    <h2 class="govuk-heading-l">Active milestones</h2>
+                    <div class="govuk-summary-card">
+                        <div class="govuk-summary-card__content">
+                            @foreach (var milestone in Model.ActiveMilestones)
+                            {
+                                <div class="govuk-summary-card">
+                                    <div class="govuk-summary-card__title-wrapper">
+                                        <h3 class="govuk-summary-card__title">@milestone.Title</h3>
+                                    </div>
+                                    <div class="govuk-summary-card__content">
+                                        <dl class="govuk-summary-list">
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Status</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    <strong class="govuk-tag govuk-tag--@(milestone.Status == MilestoneStatus.AtRisk ? "red" : milestone.Status == MilestoneStatus.OnTrack ? "green" : "blue")">
+                                                        @milestone.StatusDisplay
+                                                    </strong>
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Due</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @milestone.DueDate.ToString("d MMMM yyyy")
+                                                </dd>
+                                            </div>
+                                            <div class="govuk-summary-list__row">
+                                                <dt class="govuk-summary-list__key">Owner</dt>
+                                                <dd class="govuk-summary-list__value">
+                                                    @milestone.Owner
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                        @if (!string.IsNullOrEmpty(milestone.Description))
+                                        {
+                                            <p class="govuk-body">@milestone.Description</p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-summary-card">
+                            <div class="govuk-summary-card__content">
+                                <h3 class="govuk-heading-s">Total products</h3>
+                                <p class="govuk-body govuk-!-font-size-48 govuk-!-font-weight-bold">@Model.TotalProducts</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-summary-card">
+                            <div class="govuk-summary-card__content">
+                                <h3 class="govuk-heading-s">Completed reports</h3>
+                                <p class="govuk-body govuk-!-font-size-48 govuk-!-font-weight-bold">@Model.CompletedReports</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-third">
+                        <div class="govuk-summary-card">
+                            <div class="govuk-summary-card__content">
+                                <h3 class="govuk-heading-s">Overdue reports</h3>
+                                <p class="govuk-body govuk-!-font-size-48 govuk-!-font-weight-bold govuk-!-colour-red">@Model.OverdueReports</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

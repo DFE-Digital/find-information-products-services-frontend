@@ -5,7 +5,9 @@ using Microsoft.Identity.Web.UI;
 using FipsFrontend.Services;
 using FipsFrontend.Middlewares;
 using FipsFrontend.Models;
+using FipsFrontend.Data;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Extensions.Http;
 using System.Threading.RateLimiting;
@@ -95,6 +97,17 @@ builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
 builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
 // builder.Services.AddScoped<IApiLoggingService, NullApiLoggingService>();
 
+// Configure Entity Framework with SQLite for reporting
+builder.Services.AddDbContext<ReportingDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("ReportingDb") ?? "Data Source=reporting.db";
+    options.UseSqlite(connectionString);
+});
+
+// Register reporting services
+builder.Services.AddScoped<IReportingService, ReportingService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 builder.Services.AddHttpContextAccessor();
 
 // Register Airtable service
@@ -164,6 +177,13 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+
+// Ensure database is created and migrated
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ReportingDbContext>();
+    context.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -270,6 +290,31 @@ app.MapControllerRoute(
     name: "maintenance",
     pattern: "maintenance",
     defaults: new { controller = "Maintenance", action = "Index" });
+
+app.MapControllerRoute(
+    name: "reporting-dashboard",
+    pattern: "reports",
+    defaults: new { controller = "Reporting", action = "Dashboard" });
+
+app.MapControllerRoute(
+    name: "reporting-services",
+    pattern: "reports/services",
+    defaults: new { controller = "Reporting", action = "Services" });
+
+app.MapControllerRoute(
+    name: "reporting-service",
+    pattern: "reports/services/{productId}",
+    defaults: new { controller = "Reporting", action = "ServiceReport" });
+
+app.MapControllerRoute(
+    name: "reporting-metric",
+    pattern: "reports/services/{productId}/metric/{metricId}",
+    defaults: new { controller = "Reporting", action = "MetricUpdate" });
+
+app.MapControllerRoute(
+    name: "reporting-milestones",
+    pattern: "reports/services/{productId}/milestones",
+    defaults: new { controller = "Reporting", action = "Milestones" });
 
 app.MapControllerRoute(
     name: "default",
