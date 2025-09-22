@@ -1,332 +1,199 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using FipsFrontend.Services;
 using FipsFrontend.Models;
-using System.Text.Json;
 
 namespace FipsFrontend.Controllers;
 
-// [Authorize] // Temporarily disabled for testing
+// [Authorize] // Temporarily disabled for testing - roles will be added later
 public class AdminController : Controller
 {
-    private readonly CmsApiService _cmsApiService;
-    private readonly ISecurityService _securityService;
     private readonly ILogger<AdminController> _logger;
+    private readonly CmsApiService _cmsApiService;
+    private readonly IOptimizedCmsApiService _optimizedCmsApiService;
+    private readonly IConfiguration _configuration;
 
-    public AdminController(CmsApiService cmsApiService, ISecurityService securityService, ILogger<AdminController> logger)
+    public AdminController(ILogger<AdminController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IConfiguration configuration)
     {
-        _cmsApiService = cmsApiService;
-        _securityService = securityService;
         _logger = logger;
+        _cmsApiService = cmsApiService;
+        _optimizedCmsApiService = optimizedCmsApiService;
+        _configuration = configuration;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Products()
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)] // Cache for 5 minutes
+    public async Task<IActionResult> Index()
     {
-        // Check if user has admin permissions
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            _logger.LogWarning("User {UserId} attempted to access admin products without permission", 
-                _securityService.GetUserId(HttpContext));
-            return Forbid();
-        }
-
         try
         {
-            // Get all products using the CMS API - optimized to return only fields needed for admin table
-            var products = await _cmsApiService.GetAsync<List<Product>>("products?fields[0]=id&fields[1]=title&fields[2]=short_description&fields[3]=state&fields[4]=documentId&fields[5]=publishedAt&fields[6]=createdAt");
+            // Get cache durations from configuration
+            var homeDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Home", 15));
+            var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
             
-            var viewModel = new AdminProductsViewModel
+            // Get published products count
+            var publishedCount = await _optimizedCmsApiService.GetProductsCountAsync(homeDuration);
+            
+            // Get published category types count
+            var categoryTypes = await _optimizedCmsApiService.GetCategoryTypesAsync(categoryTypesDuration);
+            var categoryTypesCount = categoryTypes?.Count ?? 0;
+            
+            var viewModel = new AdminViewModel
             {
-                Products = products ?? new List<Product>(),
-                UserEmail = User.Identity?.Name ?? "Unknown"
+                PublishedProductsCount = publishedCount,
+                CategoryTypesCount = categoryTypesCount,
+                PageTitle = "Admin dashboard",
+                PageDescription = "Manage products, categories and system settings"
             };
 
+            ViewData["ActiveNav"] = "admin";
+            // Note: For other admin pages, set ViewData["ActiveNavItem"] to the appropriate value:
+            // - "manage-products" for /admin/products
+            // - "manage-categories" for /admin/categories  
+            // - "manage-users" for /admin/users
+            // - "export-data" for /admin/export
+            // - "use-data-api" for /admin/api
+            // - "cache-management" for /admin/cache
+            // - "system-performance" for /admin/performance
             return View(viewModel);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching products for admin interface");
-            TempData["Error"] = "Failed to load products. Please try again.";
-            return View(new AdminProductsViewModel { Products = new List<Product>() });
+            _logger.LogError(ex, "Error loading admin dashboard");
+            var viewModel = new AdminViewModel
+            {
+                PublishedProductsCount = 0,
+                CategoryTypesCount = 0,
+                PageTitle = "Admin dashboard",
+                PageDescription = "Manage products, categories and system settings"
+            };
+            ViewData["ActiveNav"] = "admin";
+            return View(viewModel);
         }
     }
 
-    [HttpGet]
-    public IActionResult CreateProduct()
+    // GET: Admin/Product/Create
+    public async Task<IActionResult> ProductCreate()
     {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        return View(new ProductFormViewModel());
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateProduct(ProductFormViewModel model)
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
-
         try
         {
+            // Get Group and Phase category values for the form
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            // Find Demand phase and set it as selected by default
+            var demandPhase = phaseValues.FirstOrDefault(cv => cv.Name.Equals("Demand", StringComparison.OrdinalIgnoreCase));
+
+            var viewModel = new ProductCreateViewModel
+            {
+                AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList(),
+                AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList(),
+                SelectedPhaseId = demandPhase?.Id
+            };
+
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "manage-products";
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading product creation form");
+            var viewModel = new ProductCreateViewModel();
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "manage-products";
+            return View(viewModel);
+        }
+    }
+
+    // POST: Admin/Product/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProductCreate(ProductCreateViewModel model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                // Reload group and phase values for the form
+                var reloadDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", reloadDuration) ?? new List<CategoryValue>();
+                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", reloadDuration) ?? new List<CategoryValue>();
+                model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+                model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+
+                ViewData["ActiveNav"] = "admin";
+                ViewData["ActiveNavItem"] = "manage-products";
+                return View(model);
+            }
+
+            // Prepare category values list
+            var categoryValuesList = new List<int>();
+            
+            // Add the selected group if provided (and not empty string)
+            if (model.SelectedGroupId.HasValue && model.SelectedGroupId.Value > 0)
+            {
+                categoryValuesList.Add(model.SelectedGroupId.Value);
+            }
+            
+            // Add the selected phase if provided
+            if (model.SelectedPhaseId.HasValue && model.SelectedPhaseId.Value > 0)
+            {
+                categoryValuesList.Add(model.SelectedPhaseId.Value);
+            }
+
+            // Prepare the product data for CMS API
             var productData = new
             {
                 data = new
                 {
-                    documentId = model.DocumentId,
                     title = model.Title,
-                    cmdb_sys_id = model.CmdbSysId,
-                    fips_id = model.FipsId,
                     short_description = model.ShortDescription,
                     long_description = model.LongDescription,
-                    product_url = model.ProductUrl,
-                    state = model.State,
-                    publishedAt = (string?)null // Keep as draft per user preference
+                    state = model.State, // Defaults to "Active"
+                    category_values = categoryValuesList,
+                    publishedAt = (DateTime?)null // Keep as draft [[memory:8564229]]
                 }
             };
 
-            var result = await _cmsApiService.PostAsync<Product>("products", productData);
-            
-            if (result != null)
+            // Create the product via CMS API
+            var createdProduct = await _cmsApiService.PostAsync<ApiResponse<Product>>("products", productData);
+
+            if (createdProduct?.Data != null)
             {
-                TempData["Success"] = "Product created successfully.";
-                return RedirectToAction(nameof(Products));
+                TempData["SuccessMessage"] = $"Product '{model.Title}' has been created successfully.";
+                return RedirectToAction("Index");
             }
             else
             {
-                TempData["Error"] = "Failed to create product.";
+                ModelState.AddModelError("", "Failed to create the product. Please try again.");
+                
+                // Reload group and phase values for the form
+                var errorReloadDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", errorReloadDuration) ?? new List<CategoryValue>();
+                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", errorReloadDuration) ?? new List<CategoryValue>();
+                model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+                model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+
+                ViewData["ActiveNav"] = "admin";
+                ViewData["ActiveNavItem"] = "manage-products";
                 return View(model);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating product");
-            TempData["Error"] = "An error occurred while creating the product.";
+            _logger.LogError(ex, "Error creating product: {Title}", model.Title);
+            ModelState.AddModelError("", "An error occurred while creating the product. Please try again.");
+            
+            // Reload group and phase values for the form
+            var catchReloadDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", catchReloadDuration) ?? new List<CategoryValue>();
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", catchReloadDuration) ?? new List<CategoryValue>();
+            model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "manage-products";
             return View(model);
         }
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> EditProduct(int id)
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        try
-        {
-            var product = await _cmsApiService.GetAsync<Product>($"products/{id}?populate=*");
-            
-            if (product == null)
-            {
-                TempData["Error"] = "Product not found.";
-                return RedirectToAction(nameof(Products));
-            }
-
-            var viewModel = new ProductFormViewModel
-            {
-                Id = product.Id,
-                DocumentId = product.DocumentId,
-                Title = product.Title,
-                CmdbSysId = product.CmdbSysId,
-                FipsId = product.FipsId,
-                ShortDescription = product.ShortDescription,
-                LongDescription = product.LongDescription,
-                ProductUrl = product.ProductUrl,
-                State = product.State
-            };
-
-            return View(viewModel);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching product {ProductId} for editing", id);
-            TempData["Error"] = "Failed to load product for editing.";
-            return RedirectToAction(nameof(Products));
-        }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditProduct(int id, ProductFormViewModel model)
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
-
-        try
-        {
-            var productData = new
-            {
-                data = new
-                {
-                    documentId = model.DocumentId,
-                    title = model.Title,
-                    cmdb_sys_id = model.CmdbSysId,
-                    fips_id = model.FipsId,
-                    short_description = model.ShortDescription,
-                    long_description = model.LongDescription,
-                    product_url = model.ProductUrl,
-                    state = model.State,
-                    publishedAt = model.PublishedAt // Allow publishing if explicitly set
-                }
-            };
-
-            var result = await _cmsApiService.PutAsync<Product>($"products/{id}", productData);
-            
-            if (result != null)
-            {
-                TempData["Success"] = "Product updated successfully.";
-                return RedirectToAction(nameof(Products));
-            }
-            else
-            {
-                TempData["Error"] = "Failed to update product.";
-                return View(model);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating product {ProductId}", id);
-            TempData["Error"] = "An error occurred while updating the product.";
-            return View(model);
-        }
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteProduct(int id)
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        try
-        {
-            var success = await _cmsApiService.DeleteAsync($"products/{id}");
-            
-            if (success)
-            {
-                TempData["Success"] = "Product deleted successfully.";
-            }
-            else
-            {
-                TempData["Error"] = "Failed to delete product.";
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting product {ProductId}", id);
-            TempData["Error"] = "An error occurred while deleting the product.";
-        }
-
-        return RedirectToAction(nameof(Products));
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PublishProduct(int id)
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        try
-        {
-            var productData = new
-            {
-                data = new
-                {
-                    publishedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
-                }
-            };
-
-            var result = await _cmsApiService.PutAsync<Product>($"products/{id}", productData);
-            
-            if (result != null)
-            {
-                TempData["Success"] = "Product published successfully.";
-            }
-            else
-            {
-                TempData["Error"] = "Failed to publish product.";
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error publishing product {ProductId}", id);
-            TempData["Error"] = "An error occurred while publishing the product.";
-        }
-
-        return RedirectToAction(nameof(Products));
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UnpublishProduct(int id)
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        try
-        {
-            var productData = new
-            {
-                data = new
-                {
-                    publishedAt = (string?)null
-                }
-            };
-
-            var result = await _cmsApiService.PutAsync<Product>($"products/{id}", productData);
-            
-            if (result != null)
-            {
-                TempData["Success"] = "Product unpublished successfully.";
-            }
-            else
-            {
-                TempData["Error"] = "Failed to unpublish product.";
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error unpublishing product {ProductId}", id);
-            TempData["Error"] = "An error occurred while unpublishing the product.";
-        }
-
-        return RedirectToAction(nameof(Products));
-    }
-
-    [HttpGet]
-    public IActionResult Index()
-    {
-        if (!_securityService.CanAccessResource(HttpContext, "admin"))
-        {
-            return Forbid();
-        }
-
-        return View();
     }
 }

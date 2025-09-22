@@ -1,57 +1,140 @@
-@{
-    ViewData["Title"] = "Admin Dashboard";
+@using FipsFrontend.Helpers
+@model AdminViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+
+@section BeforeContent {
+
+  <div class="dfe-masthead govuk-!-padding-bottom-0">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        Adminstration
+                    </h1>
+                </div>
+            </div>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                   <nav class="app-sub-navigation govuk-!-margin-top-5" aria-label="Application menu">
+                    <ul class="app-sub-navigation__list">
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link"  aria-current="page"  href="/admin">Dashboard</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/products">Products</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/categories">Categories</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/users">Users</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/settings">System settings</a>
+                        </li>   
+                    </ul>
+                </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
 }
 
-<div class="govuk-width-container">
-    <main class="govuk-main-wrapper" id="main-content" role="main">
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <h1 class="govuk-heading-xl">Admin Dashboard</h1>
-                <p class="govuk-body-l">Welcome to the FIPS admin interface. Use the options below to manage the system.</p>
-            </div>
-        </div>
 
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-one-third">
-                <div class="govuk-card">
-                    <div class="govuk-card__content">
-                        <h2 class="govuk-heading-m">Product Management</h2>
-                        <p class="govuk-body">Create, edit, and manage products in the system.</p>
-                        <a href="@Url.Action("Products", "Admin")" class="govuk-button">Manage Products</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="govuk-grid-column-one-third">
-                <div class="govuk-card">
-                    <div class="govuk-card__content">
-                        <h2 class="govuk-heading-m">User Management</h2>
-                        <p class="govuk-body">View and manage user accounts and permissions.</p>
-                        <a href="#" class="govuk-button govuk-button--secondary" disabled>Coming Soon</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="govuk-grid-column-one-third">
-                <div class="govuk-card">
-                    <div class="govuk-card__content">
-                        <h2 class="govuk-heading-m">System Settings</h2>
-                        <p class="govuk-body">Configure system-wide settings and preferences.</p>
-                        <a href="#" class="govuk-button govuk-button--secondary" disabled>Coming Soon</a>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-full">
-                <div class="govuk-inset-text">
-                    <p class="govuk-body">
-                        <strong>Signed in as:</strong> @User.Identity?.Name<br>
-                        <strong>User ID:</strong> @ViewContext.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                    </p>
-                </div>
-            </div>
-        </div>
-    </main>
+
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <h1 class="govuk-heading-xl">@ViewData["Title"]</h1>
+    <p class="govuk-body-l">@ViewData["Description"]</p>
+  </div>
 </div>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+
+
+
+    <nav class="dfe-vertical-nav">
+      <ul class="dfe-vertical-nav__section">
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-products" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/products" data-action="manage_products">
+            Manage products
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductCreate" data-action="create_product">
+            Create new product
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-categories" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/categories" data-action="manage_categories">
+            Manage categories and values
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-users" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/users" data-action="manage_users">
+            Manage users
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-objectives" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/objectives" data-action="manage_objectives">
+            Manage objectives
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <nav class="dfe-vertical-nav">
+      <h2 class="govuk-heading-s">Data</h2>
+      <ul class="dfe-vertical-nav__section">
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "export-data" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/export" data-action="export_data">
+            Export data
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "use-data-api" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/api" data-action="use_data_api">
+            Use data with API
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <nav class="dfe-vertical-nav">
+      <h2 class="govuk-heading-s">Service management</h2>
+      <ul class="dfe-vertical-nav__section">
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "cache-management" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/cache" data-action="cache_management">
+            Cache management
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "system-performance" ? "dfe-vertical-nav__section-item--current" : "")">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/performance" data-action="system_performance">
+            System performance
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="govuk-grid-column-three-quarters">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-half">
+        <div class="dfe-card">
+          <h2 class="dfe-card-title">System overview</h2>
+          <p class="dfe-card-content">
+            <strong>@Model.PublishedProductsCount</strong> products<br>
+            <strong>@Model.CategoryTypesCount</strong> category types
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

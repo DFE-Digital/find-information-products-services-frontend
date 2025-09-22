@@ -172,6 +172,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Configure 404 handling
+app.UseStatusCodePagesWithReExecute("/Home/NotFound");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

@@ -16,6 +16,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
 
+
+
+
     <!-- Analytics will be loaded by cookie banner if user accepts -->
 
     <!-- Application Insights -->
@@ -32,7 +35,8 @@
     </script>
 
     <!-- Security Script -->
-    @Html.Raw(Html.GetSecurityScript())
+    @* Temporarily disabled for testing *@
+    @* @Html.Raw(Html.GetSecurityScript()) *@
     
 
 
@@ -43,6 +47,8 @@
   <script nonce="@Html.GetNonce()">
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
+
+   
 
   @await Html.PartialAsync("_CookieBanner")
     
@@ -83,14 +89,16 @@
               Categories
             </a>
           </li>
-          @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
-          {
-            <li class="govuk-service-navigation__item @(ViewData["ActiveNav"]?.ToString() == "admin" ? "govuk-service-navigation__item--active" : "")">
-              <a class="govuk-service-navigation__link" href="@Url.Action("Index", "Admin")">
-                Admin
-              </a>
-            </li>
-          }
+          <li class="govuk-service-navigation__item @(ViewData["ActiveNav"]?.ToString() == "categories" ? "govuk-service-navigation__item--active" : "")">
+            <a class="govuk-service-navigation__link" href="/categories">
+              Reporting
+            </a>
+          </li>
+          <li class="govuk-service-navigation__item @(ViewData["ActiveNav"]?.ToString() == "admin" ? "govuk-service-navigation__item--active" : "")">
+            <a class="govuk-service-navigation__link" href="/admin">
+              Admin
+            </a>
+          </li>
         </ul>
       </nav>
     </div>

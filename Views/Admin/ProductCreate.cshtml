@@ -1,0 +1,256 @@
+@using FipsFrontend.Helpers
+@model ProductCreateViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+@section BeforeContent {
+
+  <div class="dfe-masthead govuk-!-padding-bottom-0">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        Create new product
+                    </h1>
+                </div>
+            </div>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                   <nav class="app-sub-navigation govuk-!-margin-top-5" aria-label="Application menu">
+                    <ul class="app-sub-navigation__list">
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin">Dashboard</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/products">Products</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/categories">Categories</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/users">Users</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/settings">System settings</a>
+                        </li>   
+                    </ul>
+                </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+
+    <nav class="dfe-vertical-nav">
+      <ul class="dfe-vertical-nav__section">
+        <li class="dfe-vertical-nav__section-item">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/products" data-action="manage_products">
+            Manage products
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductCreate" data-action="create_product">
+            Create new product
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/categories" data-action="manage_categories">
+            Manage categories and values
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/users" data-action="manage_users">
+            Manage users
+          </a>
+        </li>
+        <li class="dfe-vertical-nav__section-item">
+          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/objectives" data-action="manage_objectives">
+            Manage objectives
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+  </div>
+
+  <div class="govuk-grid-column-three-quarters">
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    <form asp-action="ProductCreate" method="post" novalidate>
+        @Html.AntiForgeryToken()
+        
+        <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--m" for="Title">
+                Product title
+            </label>
+            @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="Title" 
+                   name="Title" 
+                   type="text" 
+                   value="@Model.Title"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error" : "")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--m" for="ShortDescription">
+                Short description
+            </label>
+            @if (ViewData.ModelState["ShortDescription"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ShortDescription"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <textarea class="govuk-textarea @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="ShortDescription" 
+                      name="ShortDescription" 
+                      rows="3"
+                      maxlength="500"
+                      aria-describedby="@(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "ShortDescription-error" : "")">@Model.ShortDescription</textarea>
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--m" for="LongDescription">
+                Long description
+            </label>
+            @if (ViewData.ModelState["LongDescription"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["LongDescription"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <textarea class="govuk-textarea @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="LongDescription" 
+                      name="LongDescription" 
+                      rows="5"
+                      maxlength="2000"
+                      aria-describedby="@(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "LongDescription-error" : "")">@Model.LongDescription</textarea>
+        </div>
+
+        <div class="govuk-inset-text">
+            <p class="govuk-body">
+                <strong>Default stage:</strong> New products will be automatically assigned to the <strong>Demand</strong> stage. 
+                Once the request has gone through Triage, it will be updated to the <strong>Triage</strong> stage and assigned to the appropriate Group.
+            </p>
+        </div>
+
+        @if (Model.AvailablePhases.Any())
+        {
+            <div class="govuk-form-group @(ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                        Phase
+                    </legend>
+                    @if (ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0)
+                    {
+                        <span class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @ViewData.ModelState["SelectedPhaseId"]?.Errors.First().ErrorMessage
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        @foreach (var phase in Model.AvailablePhases.OrderBy(p => p.Name))
+                        {
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" 
+                                       id="SelectedPhaseId_@phase.Id" 
+                                       name="SelectedPhaseId" 
+                                       type="radio" 
+                                       value="@phase.Id"
+                                       @(Model.SelectedPhaseId == phase.Id ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="SelectedPhaseId_@phase.Id">
+                                    @phase.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+        @if (Model.AvailableGroups.Any())
+        {
+            <div class="govuk-form-group @(ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                        Group assignment
+                    </legend>
+                    @if (ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0)
+                    {
+                        <span class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @ViewData.ModelState["SelectedGroupId"]?.Errors.First().ErrorMessage
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        <div class="govuk-radios__item">
+                            <input class="govuk-radios__input" 
+                                   id="SelectedGroupId_0" 
+                                   name="SelectedGroupId" 
+                                   type="radio" 
+                                   value=""
+                                   @(Model.SelectedGroupId == null ? "checked" : "")>
+                            <label class="govuk-label govuk-radios__label" for="SelectedGroupId_0">
+                                No group assigned (will be assigned during Triage)
+                            </label>
+                        </div>
+                        @foreach (var group in Model.AvailableGroups.OrderBy(g => g.Name))
+                        {
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" 
+                                       id="SelectedGroupId_@group.Id" 
+                                       name="SelectedGroupId" 
+                                       type="radio" 
+                                       value="@group.Id"
+                                       @(Model.SelectedGroupId == group.Id ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="SelectedGroupId_@group.Id">
+                                    @group.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+        <div class="govuk-button-group">
+            <button class="govuk-button" data-module="govuk-button" type="submit">
+                Create product
+            </button>
+            <a class="govuk-link govuk-link--no-visited-state" href="/admin">Cancel</a>
+        </div>
+
+    </form>
+
+  </div>
+</div>

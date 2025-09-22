@@ -68,6 +68,13 @@ public class HomeController : Controller
         return View();
     }
 
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public new IActionResult NotFound()
+    {
+        Response.StatusCode = 404;
+        return View();
+    }
+
     [HttpGet]
     [Route("api/session/check")]
     public IActionResult CheckSession()
