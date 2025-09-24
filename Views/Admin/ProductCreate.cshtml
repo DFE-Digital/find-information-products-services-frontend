@@ -48,31 +48,13 @@
 
     <nav class="dfe-vertical-nav">
       <ul class="dfe-vertical-nav__section">
-        <li class="dfe-vertical-nav__section-item">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/products" data-action="manage_products">
-            Manage products
-          </a>
-        </li>
+     
         <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
           <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductCreate" data-action="create_product">
             Create new product
           </a>
         </li>
-        <li class="dfe-vertical-nav__section-item">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/categories" data-action="manage_categories">
-            Manage categories and values
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/users" data-action="manage_users">
-            Manage users
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/objectives" data-action="manage_objectives">
-            Manage objectives
-          </a>
-        </li>
+       
       </ul>
     </nav>
 
@@ -100,9 +82,14 @@
         @Html.AntiForgeryToken()
         
         <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label class="govuk-label govuk-label--m" for="Title">
-                Product title
-            </label>
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--m" for="Title">
+                    Product title
+                </label>
+            </h1>
+            <div id="Title-hint" class="govuk-hint">
+                This is the title of the product that will be displayed in search results and product results.
+            </div>
             @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
             {
                 <span class="govuk-error-message">
@@ -116,13 +103,18 @@
                    type="text" 
                    value="@Model.Title"
                    maxlength="255"
-                   aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error" : "")">
+                   aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint" : "Title-hint")">
         </div>
 
         <div class="govuk-form-group @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label class="govuk-label govuk-label--m" for="ShortDescription">
-                Short description
-            </label>
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--m" for="ShortDescription">
+                    Short description
+                </label>
+            </h1>
+            <div id="ShortDescription-hint" class="govuk-hint">
+                This is the short description of the product that will be displayed in search results and product results.
+            </div>
             @if (ViewData.ModelState["ShortDescription"]?.Errors.Count > 0)
             {
                 <span class="govuk-error-message">
@@ -135,27 +127,9 @@
                       name="ShortDescription" 
                       rows="3"
                       maxlength="500"
-                      aria-describedby="@(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "ShortDescription-error" : "")">@Model.ShortDescription</textarea>
+                      aria-describedby="@(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "ShortDescription-error ShortDescription-hint" : "ShortDescription-hint")">@Model.ShortDescription</textarea>
         </div>
 
-        <div class="govuk-form-group @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label class="govuk-label govuk-label--m" for="LongDescription">
-                Long description
-            </label>
-            @if (ViewData.ModelState["LongDescription"]?.Errors.Count > 0)
-            {
-                <span class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["LongDescription"]?.Errors.First().ErrorMessage
-                </span>
-            }
-            <textarea class="govuk-textarea @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
-                      id="LongDescription" 
-                      name="LongDescription" 
-                      rows="5"
-                      maxlength="2000"
-                      aria-describedby="@(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "LongDescription-error" : "")">@Model.LongDescription</textarea>
-        </div>
 
         <div class="govuk-inset-text">
             <p class="govuk-body">
@@ -171,6 +145,9 @@
                     <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                         Phase
                     </legend>
+                    <div id="SelectedPhaseId-hint" class="govuk-hint">
+                        The current phase the product is in.
+                    </div>
                     @if (ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0)
                     {
                         <span class="govuk-error-message">
@@ -179,7 +156,7 @@
                         </span>
                     }
                     <div class="govuk-radios" data-module="govuk-radios">
-                        @foreach (var phase in Model.AvailablePhases.OrderBy(p => p.Name))
+                        @foreach (var phase in Model.AvailablePhases)
                         {
                             <div class="govuk-radios__item">
                                 <input class="govuk-radios__input" 
@@ -205,6 +182,9 @@
                     <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                         Group assignment
                     </legend>
+                    <div id="SelectedGroupId-hint" class="govuk-hint">
+                        The area of DfE that is primarily responsible for the product.
+                    </div>
                     @if (ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0)
                     {
                         <span class="govuk-error-message">

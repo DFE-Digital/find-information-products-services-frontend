@@ -1,0 +1,402 @@
+@using FipsFrontend.Helpers
+@model ProductEditViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+@section BeforeContent {
+    <div class="dfe-masthead dfe-masthead--with-links">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" class="govuk-back-link">Back to product</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        @Model.Product.Title
+                    </h1>
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Phase</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Group</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Contacts</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">UniqueID: </span>
+                                    <span title="@(Model.Product.FipsId ?? Model.Product.DocumentId)">
+                                        @if (!string.IsNullOrWhiteSpace(Model.Product.FipsId))
+                                        {
+                                            @Model.Product.FipsId
+                                        }
+                                        else
+                                        {
+                                            @Model.Product.DocumentId?.Substring(0, Math.Min(6, Model.Product.DocumentId?.Length ?? 0))
+                                        }
+                                    </span>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">Phase: </span>
+                                    @{
+                                        var phaseCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+                                    }
+                                    @if (phaseCategory != null)
+                                    {
+                                        <strong class="govuk-tag govuk-tag--blue">@phaseCategory.Name</strong>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">Group: </span>
+                                    @{
+                                        var businessAreaCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+                                    }
+                                    @if (businessAreaCategory != null)
+                                    {
+                                        @businessAreaCategory.Name
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (Model.Product.ProductContacts?.Any() == true)
+                                    {
+                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                    }
+                                    else
+                                    {
+                                        <span>0 contacts</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-quarter">
+
+        <nav aria-label="Components Menu" class="dfe-vertical-nav">
+            <button type="button" class="dfe-vertical-nav__toggle dfe-js-vertical-nav-toggle" aria-controls="side-navigation" hidden="" aria-expanded="false">
+                Product navigation
+            </button>
+            <ul class="dfe-vertical-nav__section" id="side-navigation">
+                <li class="dfe-vertical-nav__section-item">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)">Overview</a>
+                </li>
+                <li class="dfe-vertical-nav__section-item">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/categories">Categories</a>
+                </li>
+                @if (ViewData["AssuranceEnabled"] as bool? == true)
+                {
+                    <li class="dfe-vertical-nav__section-item">
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance">Assurance</a>
+                    </li>
+                }
+                <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/edit">Edit product</a>
+                </li>
+            </ul>
+        </nav>
+
+  </div>
+
+  <div class="govuk-grid-column-three-quarters">
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    <form asp-action="ProductEdit" method="post" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="fipsid" value="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" />
+        
+        <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--m" for="Title">
+                    Product title
+                </label>
+            </h1>
+            <div id="Title-hint" class="govuk-hint">
+                This is the title of the product that will be displayed in search results and product results.
+            </div>
+            @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="Title" 
+                   name="Title" 
+                   type="text" 
+                   value="@Model.Title"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint" : "Title-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--m" for="ShortDescription">
+                    Short description
+                </label>
+            </h1>
+            <div id="ShortDescription-hint" class="govuk-hint">
+                This is the short description of the product that will be displayed in search results and product results.
+            </div>
+            @if (ViewData.ModelState["ShortDescription"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ShortDescription"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <textarea class="govuk-textarea @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="ShortDescription" 
+                      name="ShortDescription" 
+                      rows="3"
+                      maxlength="500"
+                      aria-describedby="@(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "ShortDescription-error ShortDescription-hint" : "ShortDescription-hint")">@Model.ShortDescription</textarea>
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <h1 class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--m" for="LongDescription">
+                    Long description
+                </label>
+            </h1>
+            <div id="LongDescription-hint" class="govuk-hint">
+                This is the long description of the product that will be displayed on the product detail page. It can be the same as the short description. 
+            </div>
+            @if (ViewData.ModelState["LongDescription"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["LongDescription"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <textarea class="govuk-textarea @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="LongDescription" 
+                      name="LongDescription" 
+                      rows="5"
+                      maxlength="2000"
+                      aria-describedby="@(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "LongDescription-error LongDescription-hint" : "LongDescription-hint")">@Model.LongDescription</textarea>
+        </div>
+
+        @if (Model.AvailablePhases.Any())
+        {
+            <div class="govuk-form-group @(ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                        Phase
+                    </legend>
+                    <div id="SelectedPhaseId-hint" class="govuk-hint">
+                        The current phase the product is in.
+                    </div>
+                    @if (ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0)
+                    {
+                        <span class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @ViewData.ModelState["SelectedPhaseId"]?.Errors.First().ErrorMessage
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        <div class="govuk-radios__item">
+                            <input class="govuk-radios__input" 
+                                   id="SelectedPhaseId_0" 
+                                   name="SelectedPhaseId" 
+                                   type="radio" 
+                                   value=""
+                                   @(Model.SelectedPhaseId == null ? "checked" : "")>
+                            <label class="govuk-label govuk-radios__label" for="SelectedPhaseId_0">
+                                No phase assigned
+                            </label>
+                        </div>
+                        @foreach (var phase in Model.AvailablePhases.OrderBy(p => p.Name))
+                        {
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" 
+                                       id="SelectedPhaseId_@phase.Id" 
+                                       name="SelectedPhaseId" 
+                                       type="radio" 
+                                       value="@phase.Id"
+                                       @(Model.SelectedPhaseId == phase.Id ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="SelectedPhaseId_@phase.Id">
+                                    @phase.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+        @if (Model.AvailableGroups.Any())
+        {
+            <div class="govuk-form-group @(ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                        Group assignment
+                    </legend>
+                    <div id="SelectedGroupId-hint" class="govuk-hint">
+                        The area of DfE that is primarily responsible for the product.
+                    </div>
+                    @if (ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0)
+                    {
+                        <span class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @ViewData.ModelState["SelectedGroupId"]?.Errors.First().ErrorMessage
+                        </span>
+                    }
+                    <div class="govuk-radios" data-module="govuk-radios">
+                        <div class="govuk-radios__item">
+                            <input class="govuk-radios__input" 
+                                   id="SelectedGroupId_0" 
+                                   name="SelectedGroupId" 
+                                   type="radio" 
+                                   value=""
+                                   @(Model.SelectedGroupId == null ? "checked" : "")>
+                            <label class="govuk-label govuk-radios__label" for="SelectedGroupId_0">
+                                No group assigned
+                            </label>
+                        </div>
+                        @foreach (var group in Model.AvailableGroups.OrderBy(g => g.Name))
+                        {
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" 
+                                       id="SelectedGroupId_@group.Id" 
+                                       name="SelectedGroupId" 
+                                       type="radio" 
+                                       value="@group.Id"
+                                       @(Model.SelectedGroupId == group.Id ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="SelectedGroupId_@group.Id">
+                                    @group.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+        @if (Model.AvailableChannels.Any())
+        {
+            <div class="govuk-form-group @(ViewData.ModelState["SelectedChannelIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                        Channels
+                    </legend>
+                    <div id="SelectedChannelIds-hint" class="govuk-hint">
+                        Select all channels through which the product is delivered.
+                    </div>
+                    @if (ViewData.ModelState["SelectedChannelIds"]?.Errors.Count > 0)
+                    {
+                        <span class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @ViewData.ModelState["SelectedChannelIds"]?.Errors.First().ErrorMessage
+                        </span>
+                    }
+                    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                        @foreach (var channel in Model.AvailableChannels.OrderBy(c => c.Name))
+                        {
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" 
+                                       id="SelectedChannelIds_@channel.Id" 
+                                       name="SelectedChannelIds" 
+                                       type="checkbox" 
+                                       value="@channel.Id"
+                                       @(Model.SelectedChannelIds.Contains(channel.Id) ? "checked" : "")>
+                                <label class="govuk-label govuk-checkboxes__label" for="SelectedChannelIds_@channel.Id">
+                                    @channel.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+        @if (Model.AvailableTypes.Any())
+        {
+            <div class="govuk-form-group @(ViewData.ModelState["SelectedTypeIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                        Types
+                    </legend>
+                    <div id="SelectedTypeIds-hint" class="govuk-hint">
+                        Select all types that apply to this product or service.
+                    </div>
+                    @if (ViewData.ModelState["SelectedTypeIds"]?.Errors.Count > 0)
+                    {
+                        <span class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span>
+                            @ViewData.ModelState["SelectedTypeIds"]?.Errors.First().ErrorMessage
+                        </span>
+                    }
+                    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                        @foreach (var type in Model.AvailableTypes.OrderBy(t => t.Name))
+                        {
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" 
+                                       id="SelectedTypeIds_@type.Id" 
+                                       name="SelectedTypeIds" 
+                                       type="checkbox" 
+                                       value="@type.Id"
+                                       @(Model.SelectedTypeIds.Contains(type.Id) ? "checked" : "")>
+                                <label class="govuk-label govuk-checkboxes__label" for="SelectedTypeIds_@type.Id">
+                                    @type.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+        }
+
+
+        <div class="govuk-button-group">
+            <button class="govuk-button" data-module="govuk-button" type="submit" id="update-product-btn">
+                Update product
+            </button>
+            <a class="govuk-link govuk-link--no-visited-state" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)">Cancel</a>
+        </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script nonce="@Context.Items["CSPNonce"]">
+document.addEventListener('DOMContentLoaded', function() {
+    const updateBtn = document.getElementById('update-product-btn');
+    const form = document.querySelector('form');
+    
+    if (updateBtn) {
+        updateBtn.addEventListener('click', function() {
+            console.log('Update button clicked');
+        });
+    }
+    
+    if (form) {
+        form.addEventListener('submit', function() {
+            console.log('Form submitting...');
+        });
+    }
+});
+</script>

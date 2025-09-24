@@ -1,0 +1,185 @@
+@using FipsFrontend.Helpers
+@model FipsFrontend.Models.ProductCategoriesViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+@section BeforeContent {
+    <div class="dfe-masthead">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/Admin/ProductDetail/@Model.Product.FipsId" class="govuk-back-link">Back to product details</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        Manage categories
+                    </h1>
+                    <p class="govuk-body-l">
+                        @Model.Product.Title
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row govuk-!-margin-top-6">
+  <div class="govuk-grid-column-full">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--error" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Error
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["ErrorMessage"]
+                </p>
+            </div>
+        </div>
+    }
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <form method="post" action="@Url.Action("ProductManageCategories", "Admin")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="fipsId" value="@Model.Product.FipsId" />
+
+            <!-- Phase Selection -->
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="selectedPhaseId">
+                    Phase
+                </label>
+                <div id="selectedPhaseId-hint" class="govuk-hint">
+                    Select the development phase for this product.
+                </div>
+                <select class="govuk-select" id="selectedPhaseId" name="selectedPhaseId" aria-describedby="selectedPhaseId-hint">
+                    <option value="">No phase selected</option>
+                    @foreach (var phase in Model.AvailablePhases)
+                    {
+                        <option value="@phase.Id" selected="@(Model.SelectedPhaseId == phase.Id)">@phase.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Group Selection -->
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="selectedGroupId">
+                    Group
+                </label>
+                <div id="selectedGroupId-hint" class="govuk-hint">
+                    Select the primary group for this product.
+                </div>
+                <select class="govuk-select" id="selectedGroupId" name="selectedGroupId" aria-describedby="selectedGroupId-hint">
+                    <option value="">No group selected</option>
+                    @foreach (var group in Model.AvailableGroups)
+                    {
+                        <option value="@group.Id" selected="@(Model.SelectedGroupId == group.Id)">@group.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Channel Selection (Multiple) -->
+            <div class="govuk-form-group">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                        <h2 class="govuk-fieldset__heading">
+                            Channels
+                        </h2>
+                    </legend>
+                    <div id="channels-hint" class="govuk-hint">
+                        Select all channels that apply to this product.
+                    </div>
+                    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                        @foreach (var channel in Model.AvailableChannels)
+                        {
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="channel-@channel.Id" name="selectedChannelIds" type="checkbox" value="@channel.Id" 
+                                       checked="@Model.SelectedChannelIds.Contains(channel.Id)">
+                                <label class="govuk-label govuk-checkboxes__label" for="channel-@channel.Id">
+                                    @channel.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Type Selection (Multiple) -->
+            <div class="govuk-form-group">
+                <fieldset class="govuk-fieldset">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                        <h2 class="govuk-fieldset__heading">
+                            Types
+                        </h2>
+                    </legend>
+                    <div id="types-hint" class="govuk-hint">
+                        Select all types that apply to this product.
+                    </div>
+                    <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                        @foreach (var type in Model.AvailableTypes)
+                        {
+                            <div class="govuk-checkboxes__item">
+                                <input class="govuk-checkboxes__input" id="type-@type.Id" name="selectedTypeIds" type="checkbox" value="@type.Id" 
+                                       checked="@Model.SelectedTypeIds.Contains(type.Id)">
+                                <label class="govuk-label govuk-checkboxes__label" for="type-@type.Id">
+                                    @type.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="govuk-button-group">
+                <button class="govuk-button" type="submit" data-module="govuk-button">
+                    Save changes
+                </button>
+                <a class="govuk-button govuk-button--secondary" href="/Admin/ProductDetail/@Model.Product.FipsId" data-module="govuk-button">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+        <div class="govuk-inset-text">
+            <h3 class="govuk-heading-s">Current categories</h3>
+            @if (Model.Product.CategoryValues != null && Model.Product.CategoryValues.Any())
+            {
+                @foreach (var category in Model.Product.CategoryValues.GroupBy(cv => cv.CategoryType?.Name).OrderBy(g => g.Key))
+                {
+                    <div class="govuk-!-margin-bottom-2">
+                        <strong class="govuk-tag govuk-tag--blue">@category.Key</strong>
+                        @foreach (var value in category.OrderBy(v => v.Name))
+                        {
+                            <div class="govuk-body-s govuk-!-margin-left-2">@value.Name</div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="govuk-body-s">No categories assigned</p>
+            }
+        </div>
+    </div>
+</div>

@@ -6,6 +6,7 @@ namespace FipsFrontend.Services;
 public interface IOptimizedCmsApiService
 {
     Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
+    Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByIdAsync(int id, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByFipsIdAsync(string fipsId, TimeSpan? cacheDuration = null);
@@ -17,6 +18,8 @@ public interface IOptimizedCmsApiService
     Task<List<CategoryType>> GetAllCategoryTypes(TimeSpan? cacheDuration = null);
     Task<List<CategoryValue>?> GetCategoryValuesForFilter(string categoryTypeName, TimeSpan? cacheDuration = null);
     Task<List<CategoryValue>?> GetAllCategoryValues(TimeSpan? cacheDuration = null);
+    Task<string[]> GetAvailableStates(TimeSpan? cacheDuration = null);
+    Task<(List<Product> Products, int TotalCount)> GetProductsForAdminAsync(int page = 1, int pageSize = 25, string? searchQuery = null, string? stateFilter = null, TimeSpan? cacheDuration = null);
 }
 
 public class OptimizedCmsApiService : IOptimizedCmsApiService
@@ -26,6 +29,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
     private readonly ILogger<OptimizedCmsApiService> _logger;
     private readonly IEnhancedCacheService _cacheService;
     private readonly string _apiKey;
+    private static readonly string[] DefaultStates = { "New", "Active", "Rejected", "Deleted" };
 
     public OptimizedCmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<OptimizedCmsApiService> logger, IEnhancedCacheService cacheService)
     {
@@ -64,16 +68,35 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "fields[0]=title",
             "fields[1]=short_description", 
             "fields[2]=fips_id",
+            "fields[3]=documentId",
+            "fields[4]=state",
             // Minimal populate for categories (just names)
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][0]=name"
         };
 
-        // Add state filter - default to Active if no state filter is provided
-        if (filters == null || !filters.ContainsKey("state"))
+        // Add state filter - default to Active only if no filters are provided at all
+        if (filters == null)
         {
             queryParams.Add("filters[state][$eq]=Active");
+        }
+        else if (filters.ContainsKey("state"))
+        {
+            // State filter is explicitly provided, use it
+            if (filters["state"].Length == 1)
+            {
+                // Single state value - use $eq
+                queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(filters["state"][0])}");
+            }
+            else
+            {
+                // Multiple state values - use $in
+                for (int i = 0; i < filters["state"].Length; i++)
+                {
+                    queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
+                }
+            }
         }
 
         // Add search query if provided - optimized for performance
@@ -91,9 +114,29 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             foreach (var filter in filters)
             {
-                for (int i = 0; i < filter.Value.Length; i++)
+                if (filter.Key == "state")
                 {
-                    queryParams.Add($"filters[category_values][name][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    // Handle state filters
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+                else if (filter.Key == "category_values.slug")
+                {
+                    // Handle category value filters
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[category_values][slug][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+                else
+                {
+                    // Handle other filters generically
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[{filter.Key}][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
                 }
             }
         }
@@ -147,6 +190,154 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
     }
 
+    public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
+    {
+        // Create cache key based on parameters
+        var cacheKey = $"products_listing2_{page}_{pageSize}_{searchQuery ?? "null"}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? new string[0])}";
+        
+        // Try to get from cache first
+        if (cacheDuration.HasValue)
+        {
+            var cachedResult = await _cacheService.GetAsync<(List<Product> Products, int TotalCount)>(cacheKey);
+            if (cachedResult.Products != null)
+            {
+                _logger.LogInformation("CACHE HIT: Products listing2 for page {Page}", page);
+                return cachedResult;
+            }
+        }
+
+        var queryParams = new List<string>
+        {
+            $"pagination[page]={page}",
+            $"pagination[pageSize]={pageSize}",
+            // Sort products alphabetically by title
+            "sort=title:asc",
+            // Only essential fields for listing
+            "fields[0]=title",
+            "fields[1]=short_description", 
+            "fields[2]=fips_id",
+            "fields[3]=documentId",
+            "fields[4]=state",
+            // Minimal populate for categories (just names)
+            "populate[category_values][fields][0]=name",
+            "populate[category_values][fields][1]=slug",
+            "populate[category_values][populate][category_type][fields][0]=name"
+        };
+
+        // Add state filter - default to Active only if no filters are provided at all
+        if (filters == null)
+        {
+            queryParams.Add("filters[state][$eq]=Active");
+        }
+        else if (filters.ContainsKey("state"))
+        {
+            // State filter is explicitly provided, use it
+            if (filters["state"].Length == 1)
+            {
+                // Single state value - use $eq
+                queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(filters["state"][0])}");
+            }
+            else
+            {
+                // Multiple state values - use $in
+                for (int i = 0; i < filters["state"].Length; i++)
+                {
+                    queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
+                }
+            }
+        }
+
+        // Add search query if provided - optimized for performance
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            // Use $startsWith for better performance on title field (most common search)
+            queryParams.Add($"filters[title][$startsWith]={Uri.EscapeDataString(searchQuery)}");
+            
+            // Only search other fields if title search doesn't return enough results
+            // This will be handled by the fallback search if needed
+        }
+
+        // Add filters if provided
+        if (filters != null)
+        {
+            foreach (var filter in filters)
+            {
+                if (filter.Key == "state")
+                {
+                    // Handle state filters
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+                else if (filter.Key == "category_values.slug")
+                {
+                    // Handle category value filters
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[category_values][slug][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+                else
+                {
+                    // Handle other filters generically
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[{filter.Key}][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+            }
+        }
+
+        var queryString = string.Join("&", queryParams);
+        var url = $"products?{queryString}";
+
+        try
+        {
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            
+            var jsonContent = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
+            var products = result?.Data ?? new List<Product>();
+            var totalCount = result?.Meta?.Pagination?.Total ?? 0;
+            
+            // If we have a search query and got fewer than 5 results, try a broader search
+            if (!string.IsNullOrEmpty(searchQuery) && products.Count < 5)
+            {
+                var broaderResults = await GetBroaderSearchResults(searchQuery, page, pageSize, filters);
+                if (broaderResults.Any())
+                {
+                    products = broaderResults;
+                    // For broader search, we don't have the total count, so we'll use the current page count
+                    totalCount = products.Count;
+                }
+            }
+            
+            // Cache the result if cache duration is specified
+            if (cacheDuration.HasValue && products.Any())
+            {
+                var cacheData = (Products: products, TotalCount: totalCount);
+                await _cacheService.SetAsync(cacheKey, cacheData, cacheDuration.Value);
+                _logger.LogInformation("CACHED: Products listing2 for page {Page} for {Duration}", page, cacheDuration.Value);
+            }
+            
+            return (products, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "API Error: {Url}", url);
+            return (new List<Product>(), 0);
+        }
+    }
+
     private async Task<List<Product>> GetBroaderSearchResults(string searchQuery, int page, int pageSize, Dictionary<string, string[]>? filters)
     {
         var queryParams = new List<string>
@@ -158,15 +349,24 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "fields[0]=title",
             "fields[1]=short_description", 
             "fields[2]=fips_id",
+            "fields[3]=documentId",
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][0]=name"
         };
 
-        // Add state filter - default to Active if no state filter is provided
-        if (filters == null || !filters.ContainsKey("state"))
+        // Add state filter - default to Active only if no filters are provided at all
+        if (filters == null)
         {
             queryParams.Add("filters[state][$eq]=Active");
+        }
+        else if (filters.ContainsKey("state"))
+        {
+            // State filter is explicitly provided, use it
+            for (int i = 0; i < filters["state"].Length; i++)
+            {
+                queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
+            }
         }
 
         // Use broader search with $containsi on multiple fields
@@ -179,9 +379,29 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             foreach (var filter in filters)
             {
-                for (int i = 0; i < filter.Value.Length; i++)
+                if (filter.Key == "state")
                 {
-                    queryParams.Add($"filters[category_values][category_type][name][$eq]={Uri.EscapeDataString(filter.Key)}&filters[category_values][slug][$in]={Uri.EscapeDataString(filter.Value[i])}");
+                    // Handle state filters
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+                else if (filter.Key == "category_values.slug")
+                {
+                    // Handle category value filters
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[category_values][slug][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
+                }
+                else
+                {
+                    // Handle other filters generically
+                    for (int i = 0; i < filter.Value.Length; i++)
+                    {
+                        queryParams.Add($"filters[{filter.Key}][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
+                    }
                 }
             }
         }
@@ -893,6 +1113,98 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             _logger.LogError(ex, "API Error fetching all category values: {Endpoint}", endpoint);
             return new List<CategoryValue>();
+        }
+    }
+
+    public async Task<string[]> GetAvailableStates(TimeSpan? cacheDuration = null)
+    {
+        // For now, return the default states from the CMS schema
+        // In the future, this could be made dynamic by querying the CMS schema API
+        return await Task.FromResult(DefaultStates);
+    }
+
+    public async Task<(List<Product> Products, int TotalCount)> GetProductsForAdminAsync(int page = 1, int pageSize = 25, string? searchQuery = null, string? stateFilter = null, TimeSpan? cacheDuration = null)
+    {
+        // Create cache key based on parameters
+        var cacheKey = $"products_admin_{page}_{pageSize}_{searchQuery ?? "null"}_{stateFilter ?? "all"}";
+        
+        // Try to get from cache first
+        if (cacheDuration.HasValue)
+        {
+            var cachedResult = await _cacheService.GetAsync<(List<Product> Products, int TotalCount)>(cacheKey);
+            if (cachedResult.Products != null)
+            {
+                _logger.LogInformation("CACHE HIT: Admin products listing for page {Page}", page);
+                return cachedResult;
+            }
+        }
+
+        var queryParams = new List<string>
+        {
+            $"pagination[page]={page}",
+            $"pagination[pageSize]={pageSize}",
+            // Sort products alphabetically by title
+            "sort=title:asc",
+            // Only essential fields for admin listing
+            "fields[0]=title",
+            "fields[1]=short_description", 
+            "fields[2]=fips_id",
+            "fields[3]=documentId",
+            "fields[4]=state",
+            "fields[5]=id",
+            // Minimal populate for categories (just names)
+            "populate[category_values][fields][0]=name",
+            "populate[category_values][fields][1]=slug",
+            "populate[category_values][populate][category_type][fields][0]=name"
+        };
+
+        // Add state filter if provided (admin can see all states)
+        if (!string.IsNullOrEmpty(stateFilter))
+        {
+            queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(stateFilter)}");
+        }
+
+        // Add search query if provided - search both title and fips_id for admin
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            // Use $containsi for case-insensitive search across multiple fields
+            queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][1][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        }
+
+        var queryString = string.Join("&", queryParams);
+        var url = $"products?{queryString}";
+
+        try
+        {
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            
+            var jsonContent = await response.Content.ReadAsStringAsync();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
+            var products = result?.Data ?? new List<Product>();
+            var totalCount = result?.Meta?.Pagination?.Total ?? 0;
+            
+            // Cache the result if cache duration is specified
+            if (cacheDuration.HasValue && products.Any())
+            {
+                await _cacheService.SetAsync(cacheKey, (products, totalCount), cacheDuration.Value);
+                _logger.LogInformation("CACHED: Admin products listing page {Page} for {Duration}", page, cacheDuration.Value);
+            }
+            
+            return (products, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "API Error: {Url}", url);
+            return (new List<Product>(), 0);
         }
     }
 }

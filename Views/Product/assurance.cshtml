@@ -158,27 +158,17 @@
                         </div>
                     }
                     
-                    @if (!string.IsNullOrEmpty(assurance.ExternalId))
-                    {
-                        <div class="govuk-summary-list__row">
-                            <dt class="govuk-summary-list__key">
-                                External ID
-                            </dt>
-                            <dd class="govuk-summary-list__value">
-                                @assurance.ExternalId
-                            </dd>
-                        </div>
-                    }
+                   
                     
                     @if (!string.IsNullOrEmpty(assurance.ExternalUrl))
                     {
                         <div class="govuk-summary-list__row">
                             <dt class="govuk-summary-list__key">
-                                External Reference
+                                Linked resource
                             </dt>
                             <dd class="govuk-summary-list__value">
                                 <a href="@assurance.ExternalUrl" class="govuk-link" target="_blank" rel="noopener noreferrer">
-                                    View external reference
+                                    View on Service Assessment Service
                                     <span class="govuk-visually-hidden">(opens in new tab)</span>
                                 </a>
                             </dd>

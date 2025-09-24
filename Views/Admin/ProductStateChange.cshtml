@@ -1,0 +1,117 @@
+@using FipsFrontend.Helpers
+@model Product
+@{ ViewData["Title"] = $"Change state: {Model.Title}"; } 
+@{ ViewData["Description"] = "Change the state of this product"; }
+
+@section BeforeContent {
+    <div class="dfe-masthead">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/Admin/ProductDetail/@Model.FipsId" class="govuk-back-link">Back to product details</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        Change product state
+                    </h1>
+                    <p class="govuk-body-l">
+                        @Model.Title
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row govuk-!-margin-top-6">
+  <div class="govuk-grid-column-full">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--error" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Error
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["ErrorMessage"]
+                </p>
+            </div>
+        </div>
+    }
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-inset-text">
+            <p><strong>Current state:</strong> @ViewData["CurrentState"]</p>
+        </div>
+
+        @{
+            var validTransitions = ViewData["ValidTransitions"] as string[];
+        }
+
+        @if (validTransitions != null && validTransitions.Any())
+        {
+            <form method="post" action="@Url.Action("ProductStateChange", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="fipsId" value="@Model.FipsId" />
+
+                <div class="govuk-form-group">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                            <h2 class="govuk-fieldset__heading">
+                                What would you like to change the state to?
+                            </h2>
+                        </legend>
+                        <div class="govuk-radios" data-module="govuk-radios">
+                            @foreach (var newState in validTransitions)
+                            {
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="state-@newState.ToLower()" name="newState" type="radio" value="@newState">
+                                    <label class="govuk-label govuk-radios__label" for="state-@newState.ToLower()">
+                                        @newState
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="govuk-button-group">
+                    <button class="govuk-button" type="submit" data-module="govuk-button">
+                        Change state
+                    </button>
+                    <a class="govuk-button govuk-button--secondary" href="/Admin/ProductDetail/@Model.FipsId" data-module="govuk-button">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p>No state changes are available for products in the current state (@ViewData["CurrentState"]).</p>
+            </div>
+            <a class="govuk-button" href="/Admin/ProductDetail/@Model.FipsId" data-module="govuk-button">
+                Back to product details
+            </a>
+        }
+    </div>
+</div>

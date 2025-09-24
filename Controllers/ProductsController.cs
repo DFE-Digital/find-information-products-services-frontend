@@ -147,54 +147,53 @@ public class ProductsController : Controller
             int filteredTotalCount;
             int totalCount;
 
-            if (!string.IsNullOrEmpty(keywords))
+            // Build server-side filters for CMS API
+            var serverFilters = new Dictionary<string, string[]>();
+            
+            // Add state filter (default to Active for public products page)
+            serverFilters["state"] = new[] { "Active" };
+            
+            // Convert category filters to server-side format
+            if (phase?.Length > 0)
             {
-                // Use optimized service for search with caching
-                var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
-                var searchFilters = new Dictionary<string, string[]>();
-                
-                // Convert filters to the format expected by OptimizedCmsApiService
-                if (phase?.Any() == true) searchFilters["Phase"] = phase;
-                if (group?.Any() == true) searchFilters["Group"] = group;
-                if (subgroup?.Any() == true) searchFilters["Subgroup"] = subgroup;
-                if (channel?.Any() == true) searchFilters["Channel"] = channel;
-                if (type?.Any() == true) searchFilters["Type"] = type;
-                if (cmdbStatus?.Any() == true) searchFilters["CMDB Status"] = cmdbStatus;
-                if (parent?.Any() == true) searchFilters["Parent"] = parent;
-                if (userGroup?.Any() == true) searchFilters["User group"] = userGroup;
-
-                var searchResults = await _optimizedCmsApiService.GetProductsForListingAsync(cmsPage, pageSize, keywords, searchFilters, searchDuration);
-                filteredProducts = searchResults.Products;
-                filteredTotalCount = searchResults.TotalCount;
-                totalCount = filteredTotalCount; // For search, use filtered count as total
+                serverFilters["category_values.slug"] = phase;
             }
-            else
+            if (channel?.Length > 0)
             {
-                // No keywords, apply filters at CMS level using optimized service
-                var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
-                var listingFilters = new Dictionary<string, string[]>();
-                
-                // Convert filters to the format expected by OptimizedCmsApiService
-                if (phase?.Any() == true) listingFilters["Phase"] = phase;
-                if (group?.Any() == true) listingFilters["Group"] = group;
-                if (subgroup?.Any() == true) listingFilters["Subgroup"] = subgroup;
-                if (channel?.Any() == true) listingFilters["Channel"] = channel;
-                if (type?.Any() == true) listingFilters["Type"] = type;
-                if (cmdbStatus?.Any() == true) listingFilters["CMDB Status"] = cmdbStatus;
-                if (parent?.Any() == true) listingFilters["Parent"] = parent;
-                if (userGroup?.Any() == true) listingFilters["User group"] = userGroup;
-
-                var listingResults = await _optimizedCmsApiService.GetProductsForListingAsync(cmsPage, pageSize, null, listingFilters, productsDuration);
-                filteredProducts = listingResults.Products;
-                filteredTotalCount = listingResults.TotalCount;
-
-                // Get total count separately only if no filters applied
-                totalCount = filteredTotalCount;
-                if (string.IsNullOrEmpty(filterQuery))
-                {
-                    totalCount = await _optimizedCmsApiService.GetProductsCountAsync(productsDuration);
-                }
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(channel).ToArray();
             }
+            if (type?.Length > 0)
+            {
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(type).ToArray();
+            }
+            if (group?.Length > 0)
+            {
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(group).ToArray();
+            }
+            if (subgroup?.Length > 0)
+            {
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(subgroup).ToArray();
+            }
+            if (parent?.Length > 0)
+            {
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(parent).ToArray();
+            }
+            if (userGroup?.Length > 0)
+            {
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(userGroup).ToArray();
+            }
+
+            // Use optimized service for search with caching and server-side filtering
+            var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
+            var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
+            
+            var cacheDuration = !string.IsNullOrEmpty(keywords) ? searchDuration : productsDuration;
+            
+            // Get products with server-side filtering and pagination
+            var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
+            filteredProducts = result.Products;
+            filteredTotalCount = result.TotalCount;
+            totalCount = result.TotalCount;
 
             // Ensure view model properties are initialized
             viewModel.PhaseOptions = new List<FilterOption>();
@@ -229,8 +228,9 @@ public class ProductsController : Controller
             viewModel.SelectedCmdbGroups = parent?.ToList() ?? new List<string>();
             viewModel.SelectedUserGroups = userGroup?.ToList() ?? new List<string>();
 
-            // Build filter options
-            await BuildFilterOptions(viewModel, filteredProducts, phaseValues, channelValues, groupValues, userGroupValues);
+            // Build filter options - get all products for counting, not just the current page
+            var allProductsForCounting = await _optimizedCmsApiService.GetProductsForFilterCountsAsync(productsDuration, "Active");
+            await BuildFilterOptions(viewModel, allProductsForCounting, phaseValues, channelValues, groupValues, userGroupValues);
 
             // Build selected filters for display
             BuildSelectedFilters(viewModel);
@@ -551,17 +551,11 @@ public class ProductsController : Controller
         return string.Join("&", filters);
     }
 
-    private async Task BuildFilterOptions(ProductsViewModel viewModel, List<Product> allProducts,
+    private async Task BuildFilterOptions(ProductsViewModel viewModel, List<Product> allProductsForCounting,
         List<CategoryValue> phaseValues, List<CategoryValue> channelValues,
         List<CategoryValue> groupValues, List<CategoryValue> userGroupValues)
     {
-        // Use a single bulk API call to get all products with category values for counting
-        // This is much faster than individual API calls
-        _logger.LogInformation("Building filter options with bulk API call for counts");
-
-        var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
-        var allProductsForCounting = await _optimizedCmsApiService.GetProductsForFilterCountsAsync(productsDuration);
-
+        _logger.LogInformation("Building filter options with provided products for counting");
         _logger.LogInformation("Loaded {Count} products for filter counting", allProductsForCounting.Count);
 
         // Build phase options from specific phase values
@@ -639,7 +633,7 @@ public class ProductsController : Controller
         }
 
         // Build CMDB status options (based on product states for now)
-        var stateGroups = allProducts.GroupBy(p => p.State).OrderBy(g => g.Key);
+        var stateGroups = allProductsForCounting.GroupBy(p => p.State).OrderBy(g => g.Key);
         viewModel.CmdbStatusOptions = stateGroups.Select(g => new FilterOption
         {
             Value = g.Key,
@@ -950,5 +944,257 @@ public class ProductsController : Controller
 
         var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
         return $"/products{queryString}";
+    }
+
+    // GET: Products/Edit/{fipsid}
+    public async Task<IActionResult> ProductEdit(string fipsid)
+    {
+        try
+        {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            
+            // Get the product
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found for FIPS ID: {FipsId}", fipsid);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Loaded product for FIPS ID: {FipsId}, Product ID: {ProductId}, DocumentId: {DocumentId}, Title: {Title}, CategoryValues Count: {CategoryCount}", 
+                fipsid, product.Id, product.DocumentId, product.Title, product.CategoryValues?.Count ?? 0);
+
+            // Get category values for all types
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            // Note: Users API call removed since contacts section was removed
+
+            // Note: Product contacts removed since contacts section was removed
+
+            // Find current category values
+            var currentPhase = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+            var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+            var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+
+            var viewModel = new ProductEditViewModel
+            {
+                Product = product,
+                Title = product.Title,
+                ShortDescription = product.ShortDescription,
+                LongDescription = product.LongDescription,
+                SelectedPhaseId = currentPhase?.Id,
+                SelectedGroupId = currentGroup?.Id,
+                SelectedChannelIds = currentChannels.Select(c => c.Id).ToList(),
+                SelectedTypeIds = currentTypes.Select(c => c.Id).ToList(),
+                AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList(),
+                AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList(),
+                AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList(),
+                AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList(),
+                PageTitle = $"Edit {product.Title}",
+                PageDescription = $"Edit details, categories and contacts for {product.Title}"
+            };
+
+            ViewData["ActiveNav"] = "products";
+            return View("~/Views/Product/edit.cshtml", viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading product edit form for FIPS ID: {FipsId}", fipsid);
+            return NotFound();
+        }
+    }
+
+    // POST: Products/Edit/{fipsid}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProductEdit(string fipsid, ProductEditViewModel model)
+    {
+        _logger.LogInformation("ProductEdit POST method called with FIPS ID: {FipsId}", fipsid);
+        _logger.LogInformation("Model data - Title: {Title}, ShortDescription: {ShortDesc}, LongDescription: {LongDesc}, SelectedPhaseId: {PhaseId}, SelectedGroupId: {GroupId}", 
+            model.Title, model.ShortDescription, model.LongDescription, model.SelectedPhaseId, model.SelectedGroupId);
+        _logger.LogInformation("ModelState.IsValid: {IsValid}, ModelState Error Count: {ErrorCount}", 
+            ModelState.IsValid, ModelState.ErrorCount);
+        
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                // Reload the form data
+                var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+                var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+                var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+                // Note: Users API call removed since contacts section was removed
+
+                model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+                model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+                model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
+                model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+                ViewData["ActiveNav"] = "products";
+                return View("~/Views/Product/edit.cshtml", model);
+            }
+
+            // Get the current product to ensure we have the right ID
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Prepare category values list
+            var categoryValuesList = new List<int>();
+            
+            if (model.SelectedPhaseId.HasValue && model.SelectedPhaseId.Value > 0)
+            {
+                categoryValuesList.Add(model.SelectedPhaseId.Value);
+            }
+            if (model.SelectedGroupId.HasValue && model.SelectedGroupId.Value > 0)
+            {
+                categoryValuesList.Add(model.SelectedGroupId.Value);
+            }
+            // Add multiple channels
+            categoryValuesList.AddRange(model.SelectedChannelIds.Where(id => id > 0));
+            
+            // Add multiple types
+            categoryValuesList.AddRange(model.SelectedTypeIds.Where(id => id > 0));
+
+            // Prepare the product data for CMS API
+            var productData = new
+            {
+                data = new
+                {
+                    title = model.Title,
+                    short_description = model.ShortDescription,
+                    long_description = model.LongDescription,
+                    category_values = categoryValuesList,
+                    publishedAt = (DateTime?)null // Keep as draft [[memory:8564229]]
+                }
+            };
+
+            // Update the product via CMS API
+            _logger.LogInformation("Attempting to update product with ID: {ProductId}, DocumentId: {DocumentId}, FipsId: {FipsId}", 
+                product.Id, product.DocumentId, product.FipsId);
+            
+            // Use documentId for the update (this is what Strapi expects for PUT requests)
+            string documentId = product.DocumentId ?? throw new InvalidOperationException("Product has no documentId");
+            _logger.LogInformation("Using documentId: {DocumentId} for update", documentId);
+            
+            ApiResponse<Product>? updatedProduct = null;
+            try
+            {
+                updatedProduct = await _cmsApiService.PutAsync<ApiResponse<Product>>($"products/{documentId}", productData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update product with documentId: {DocumentId}. Error: {ErrorMessage}", 
+                    documentId, ex.Message);
+                ModelState.AddModelError("", $"Failed to update the product: {ex.Message}");
+                
+                // Reload form data and return to view
+                return await ReloadEditFormWithData(fipsid, model);
+            }
+
+            if (updatedProduct?.Data != null)
+            {
+                // Note: Product contacts updates removed since contacts section was removed
+
+                TempData["SuccessMessage"] = $"Product '{model.Title}' has been updated successfully.";
+                return RedirectToAction("ViewProduct", new { fipsid = fipsid });
+            }
+            else
+            {
+                ModelState.AddModelError("", "Failed to update the product. Please try again.");
+                
+                // Reload form data
+                var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+                var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+                var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+                // Note: Users API call removed since contacts section was removed
+
+                model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+                model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+                model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
+                model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+                ViewData["ActiveNav"] = "products";
+                return View("~/Views/Product/edit.cshtml", model);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating product: {Title}", model.Title);
+            ModelState.AddModelError("", "An error occurred while updating the product. Please try again.");
+            
+            // Reload form data
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+            // Note: Users API call removed since contacts section was removed
+
+            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+            ViewData["ActiveNav"] = "products";
+            return View("~/Views/Product/edit.cshtml", model);
+        }
+    }
+
+    // Note: UpdateProductContacts method removed since contacts section was removed
+
+    private async Task<IActionResult> ReloadEditFormWithData(string fipsid, ProductEditViewModel model)
+    {
+        try
+        {
+            // Get the product again to ensure we have current data
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Reload category values
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            // Update the model with fresh data
+            model.Product = product;
+            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+            // Get current category values for the product
+            var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+            var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+
+            model.SelectedChannelIds = currentChannels.Select(c => c.Id).ToList();
+            model.SelectedTypeIds = currentTypes.Select(c => c.Id).ToList();
+
+            ViewData["ActiveNav"] = "products";
+            return View("~/Views/Product/edit.cshtml", model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reloading edit form for FIPS ID: {FipsId}", fipsid);
+            return NotFound();
+        }
     }
 }

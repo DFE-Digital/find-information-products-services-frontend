@@ -11,9 +11,6 @@ namespace FipsFrontend.Models
         [StringLength(500, ErrorMessage = "Short description cannot exceed 500 characters")]
         public string ShortDescription { get; set; } = string.Empty;
 
-        [StringLength(2000, ErrorMessage = "Long description cannot exceed 2000 characters")]
-        public string? LongDescription { get; set; }
-
         public string State { get; set; } = "Active";
 
         public int? SelectedGroupId { get; set; }

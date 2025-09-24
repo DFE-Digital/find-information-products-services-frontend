@@ -6,6 +6,18 @@ namespace FipsFrontend.Models
     {
         public Product Product { get; set; } = new Product();
         public List<ProductCategoryInfo> CategoryInfo { get; set; } = new List<ProductCategoryInfo>();
+        
+        // Available category values for editing
+        public List<CategoryValue> AvailablePhases { get; set; } = new List<CategoryValue>();
+        public List<CategoryValue> AvailableGroups { get; set; } = new List<CategoryValue>();
+        public List<CategoryValue> AvailableChannels { get; set; } = new List<CategoryValue>();
+        public List<CategoryValue> AvailableTypes { get; set; } = new List<CategoryValue>();
+        
+        // Selected category values
+        public int? SelectedPhaseId { get; set; }
+        public int? SelectedGroupId { get; set; }
+        public List<int> SelectedChannelIds { get; set; } = new List<int>();
+        public List<int> SelectedTypeIds { get; set; } = new List<int>();
 
         public ProductCategoriesViewModel()
         {

@@ -1,0 +1,75 @@
+@using FipsFrontend.Helpers
+@model ProductCreateConfirmationViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+@section BeforeContent {
+
+  <div class="dfe-masthead govuk-!-padding-bottom-0">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        Create new product
+                    </h1>
+                </div>
+            </div>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                   <nav class="app-sub-navigation govuk-!-margin-top-5" aria-label="Application menu">
+                    <ul class="app-sub-navigation__list">
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin">Dashboard</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/products">Products</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/categories">Categories</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/users">Users</a>
+                        </li>
+                        <li class="app-sub-navigation__item">
+                            <a class="app-sub-navigation__link" href="/admin/settings">System settings</a>
+                        </li>   
+                    </ul>
+                </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <div class="govuk-panel govuk-panel--confirmation">
+          <h1 class="govuk-panel__title">
+            @Model.ProductTitle added
+          </h1>
+          <div class="govuk-panel__body">
+            FIPS product code<br><strong>@Model.ReferenceNumber</strong>
+          </div>
+        </div>
+        
+        <h2 class="govuk-heading-m">Next steps</h2>
+       
+   <ul class="govuk-list govuk-list--spaced">
+   <li>
+          <a class="govuk-link" href="/product/@Model.ReferenceNumber">
+            View the product entry
+          </a>
+          </li>
+          <li>
+          <a class="govuk-link" href="/admin/products/@Model.ReferenceNumber/edit" >
+            Make changes to the entry
+          </a>
+          </li>
+        </ul>
+        
+   
+      </div>
+    </div>
+

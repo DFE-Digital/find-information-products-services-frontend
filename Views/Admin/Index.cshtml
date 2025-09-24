@@ -6,36 +6,14 @@
 
 @section BeforeContent {
 
-  <div class="dfe-masthead govuk-!-padding-bottom-0">
+  <div class="dfe-masthead">
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-two-thirds">
                     <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
-                        Adminstration
+                        Admin dashboard
                     </h1>
-                </div>
-            </div>
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-full">
-                   <nav class="app-sub-navigation govuk-!-margin-top-5" aria-label="Application menu">
-                    <ul class="app-sub-navigation__list">
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link"  aria-current="page"  href="/admin">Dashboard</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/products">Products</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/categories">Categories</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/users">Users</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/settings">System settings</a>
-                        </li>   
-                    </ul>
-                </nav>
+                    
                 </div>
             </div>
         </div>
@@ -45,96 +23,103 @@
 
 
 
-
-
-
-<div class="govuk-grid-row">
+<div class="govuk-grid-row govuk-!-margin-top-6">
   <div class="govuk-grid-column-full">
-    <h1 class="govuk-heading-xl">@ViewData["Title"]</h1>
-    <p class="govuk-body-l">@ViewData["Description"]</p>
-  </div>
-</div>
-
-<div class="govuk-grid-row">
-  <div class="govuk-grid-column-one-quarter">
-
-
-
-    <nav class="dfe-vertical-nav">
-      <ul class="dfe-vertical-nav__section">
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-products" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/products" data-action="manage_products">
-            Manage products
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductCreate" data-action="create_product">
-            Create new product
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-categories" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/categories" data-action="manage_categories">
-            Manage categories and values
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-users" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/users" data-action="manage_users">
-            Manage users
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "manage-objectives" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/objectives" data-action="manage_objectives">
-            Manage objectives
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <nav class="dfe-vertical-nav">
-      <h2 class="govuk-heading-s">Data</h2>
-      <ul class="dfe-vertical-nav__section">
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "export-data" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/export" data-action="export_data">
-            Export data
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "use-data-api" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/api" data-action="use_data_api">
-            Use data with API
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <nav class="dfe-vertical-nav">
-      <h2 class="govuk-heading-s">Service management</h2>
-      <ul class="dfe-vertical-nav__section">
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "cache-management" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/cache" data-action="cache_management">
-            Cache management
-          </a>
-        </li>
-        <li class="dfe-vertical-nav__section-item @(ViewData["ActiveNavItem"]?.ToString() == "system-performance" ? "dfe-vertical-nav__section-item--current" : "")">
-          <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/admin/performance" data-action="system_performance">
-            System performance
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-
-  <div class="govuk-grid-column-three-quarters">
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-one-half">
-        <div class="dfe-card">
-          <h2 class="dfe-card-title">System overview</h2>
-          <p class="dfe-card-content">
-            <strong>@Model.PublishedProductsCount</strong> products<br>
-            <strong>@Model.CategoryTypesCount</strong> category types
-          </p>
-        </div>
-      </div>
+    <div class="dfe-card-group">
+      <a href="/Admin/ProductCreate" class="dfe-card admin-card-link" data-action="create_product" data-card-type="create">
+        <h2 class="dfe-card-title">Create new product</h2>
+        <p class="dfe-card-content">
+          Add a new product to the service.
+        </p>
+      </a>
+      <a href="/Admin/ProductManage" class="dfe-card admin-card-link" data-action="manage_products" data-card-type="manage">
+        <h2 class="dfe-card-title">Manage an entry</h2>
+        <p class="dfe-card-content">
+          Edit or delete existing product entries in the system.
+        </p>
+        <p class="dfe-card-meta">@Model.PublishedProductsCount products</p>
+      </a>
     </div>
   </div>
 </div>
+
+@section Scripts {
+    <script nonce="@Html.GetNonce()">
+        // Google Analytics Event Tracking Functions
+        function trackGAEvent(eventName, parameters = {}) {
+            console.log('Attempting to track GA event:', eventName, parameters);
+            
+            if (typeof gtag !== 'undefined') {
+                console.log('Using gtag for GA4');
+                gtag('event', eventName, parameters);
+            } else if (typeof ga !== 'undefined') {
+                console.log('Using ga for Universal Analytics');
+                ga('send', 'event', parameters.category || 'User Interaction', eventName, parameters.label || '', parameters.value || 0);
+            } else {
+                console.error('Google Analytics not loaded - gtag and ga are undefined');
+                console.log('Available globals:', Object.keys(window).filter(key => key.includes('google') || key.includes('gtag') || key.includes('ga')));
+            }
+            
+            // Also log to dataLayer for debugging
+            if (window.dataLayer) {
+                console.log('dataLayer exists, current length:', window.dataLayer.length);
+            } else {
+                console.error('dataLayer not found');
+            }
+        }
+
+        // Microsoft Clarity Event Tracking Functions
+        function trackClarityEvent(eventName, parameters = {}) {
+            if (typeof clarity !== 'undefined') {
+                clarity('event', eventName);
+                
+                // Set custom tags for additional context
+                if (parameters.event_category) {
+                    clarity('set', 'event_category', parameters.event_category);
+                }
+                if (parameters.action) {
+                    clarity('set', 'action', parameters.action);
+                }
+                if (parameters.card_type) {
+                    clarity('set', 'card_type', parameters.card_type);
+                }
+                
+                console.log('Clarity Event:', eventName, parameters);
+            }
+        }
+
+        // Combined tracking function
+        function trackEvent(eventName, parameters = {}) {
+            trackGAEvent(eventName, parameters);
+            trackClarityEvent(eventName, parameters);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Admin card link tracking
+            document.querySelectorAll('.admin-card-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const action = this.getAttribute('data-action');
+                    const cardType = this.getAttribute('data-card-type');
+                    
+                    trackEvent('admin_card_click', {
+                        event_category: 'Admin Dashboard',
+                        event_label: action,
+                        card_type: cardType,
+                        action: action
+                    });
+                });
+            });
+
+            // Test GA connection on page load
+            setTimeout(function() {
+                trackEvent('page_view_test', {
+                    event_category: 'Test',
+                    event_label: 'Admin Dashboard Load',
+                    page_title: '@Model.PageTitle',
+                    test_timestamp: new Date().toISOString()
+                });
+            }, 1000);
+        });
+    </script>
+}
 

@@ -6,5 +6,6 @@ namespace FipsFrontend.Models
         public string? PageTitle { get; set; }
         public string? PageDescription { get; set; }
         public string? Group { get; set; }
+        public bool IsHomepage { get; set; } = false;
     }
 }

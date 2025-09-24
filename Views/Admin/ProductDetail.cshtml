@@ -1,0 +1,325 @@
+@using FipsFrontend.Helpers
+@model Product
+@{ ViewData["Title"] = $"Manage product: {Model.Title}"; } 
+@{ ViewData["Description"] = "View and edit product details"; }
+
+@functions {
+    private static string[] GetValidStateTransitions(string currentState)
+    {
+        return currentState switch
+        {
+            "New" => new[] { "Active", "Rejected", "Deleted" },
+            "Active" => new[] { "Rejected", "Deleted" },
+            "Rejected" => new[] { "Active", "Deleted" },
+            "Deleted" => new[] { "Active", "Rejected" },
+            _ => new string[0]
+        };
+    }
+}
+
+@section BeforeContent {
+    <div class="dfe-masthead dfe-masthead--with-links">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/Admin/ProductManage" class="govuk-back-link">Back to product management</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        @Model.Title
+                    </h1>
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">State</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Reference</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <span title="@(Model.FipsId ?? Model.DocumentId)">
+                                        @if (!string.IsNullOrWhiteSpace(Model.FipsId))
+                                        {
+                                            @Model.FipsId
+                                        }
+                                        else
+                                        {
+                                            @Model.DocumentId?.Substring(0, Math.Min(6, Model.DocumentId?.Length ?? 0))
+                                        }
+                                    </span>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @{
+                                        var stateClass = Model.State switch
+                                        {
+                                            "Active" => "govuk-tag--green",
+                                            "New" => "govuk-tag--blue",
+                                            "Rejected" => "govuk-tag--red",
+                                            "Deleted" => "govuk-tag--grey",
+                                            _ => "govuk-tag--yellow"
+                                        };
+                                    }
+                                    <strong class="govuk-tag @stateClass">@(Model.State ?? "Unknown")</strong>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (!string.IsNullOrEmpty(Model.FipsId))
+                                    {
+                                        @Model.FipsId
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-hint">PRD-@Model.Id.ToString("D6")</span>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @if (Model.UpdatedAt.HasValue)
+                                    {
+                                        @Model.UpdatedAt.Value.ToString("dd MMM yyyy 'at' HH:mm")
+                                    }
+                                    else
+                                    {
+                                        <span class="govuk-hint">Unknown</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row govuk-!-margin-top-6">
+  <div class="govuk-grid-column-full">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--error" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Error
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["ErrorMessage"]
+                </p>
+            </div>
+        </div>
+    }
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-quarter">
+        <nav aria-label="Product Menu" class="dfe-vertical-nav">
+            <button type="button" class="dfe-vertical-nav__toggle dfe-js-vertical-nav-toggle" aria-controls="side-navigation" hidden="" aria-expanded="false">
+                Product navigation
+            </button>
+            <ul class="dfe-vertical-nav__section" id="side-navigation">
+                <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductDetail/@Model.FipsId">Details</a>
+                </li>
+                <li class="dfe-vertical-nav__section-item">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductDetail/@Model.FipsId/categories">Categories</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="govuk-grid-column-three-quarters">
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Product title
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @Model.Title
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/Admin/ProductEditTitle/@(Model.FipsId ?? Model.DocumentId ?? Model.Id.ToString())">
+            Change<span class="govuk-visually-hidden"> product title</span>
+          </a>
+        </dd>
+      </div>
+      
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Reference number
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @if (!string.IsNullOrEmpty(Model.FipsId))
+          {
+              @Model.FipsId
+          }
+          else
+          {
+              <span class="govuk-hint">PRD-@Model.Id.ToString("D6")</span>
+          }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <span class="govuk-body-s govuk-!-text-align-right govuk-!-padding-top-1">
+            Auto-generated
+          </span>
+        </dd>
+      </div>
+
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          State
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @{
+              var stateClass = Model.State switch
+              {
+                  "Active" => "govuk-tag--green",
+                  "New" => "govuk-tag--blue",
+                  "Rejected" => "govuk-tag--red",
+                  "Deleted" => "govuk-tag--grey",
+                  _ => "govuk-tag--yellow"
+              };
+          }
+          <strong class="govuk-tag @stateClass">@(Model.State ?? "Unknown")</strong>
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/Admin/ProductStateChange/@(Model.FipsId ?? Model.DocumentId ?? Model.Id.ToString())">
+            Change state<span class="govuk-visually-hidden"> product state</span>
+          </a>
+        </dd>
+      </div>
+
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Short description
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @if (!string.IsNullOrEmpty(Model.ShortDescription))
+          {
+              @Model.ShortDescription
+          }
+          else
+          {
+              <span class="govuk-hint">No description provided</span>
+          }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/Admin/ProductEditShortDescription/@(Model.FipsId ?? Model.DocumentId ?? Model.Id.ToString())">
+            Change<span class="govuk-visually-hidden"> short description</span>
+          </a>
+        </dd>
+      </div>
+
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Long description
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @if (!string.IsNullOrEmpty(Model.LongDescription))
+          {
+              @Model.LongDescription
+          }
+          else
+          {
+              <span class="govuk-hint">No long description provided</span>
+          }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/Admin/ProductEditLongDescription/@(Model.FipsId ?? Model.DocumentId ?? Model.Id.ToString())">
+            Change<span class="govuk-visually-hidden"> long description</span>
+          </a>
+        </dd>
+      </div>
+
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Categories
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @if (Model.CategoryValues != null && Model.CategoryValues.Any())
+          {
+              @foreach (var category in Model.CategoryValues.GroupBy(cv => cv.CategoryType?.Name).OrderBy(g => g.Key))
+              {
+                  <div class="govuk-!-margin-bottom-2">
+                      <strong class="govuk-tag govuk-tag--blue">@category.Key</strong>
+                      @foreach (var value in category.OrderBy(v => v.Name))
+                      {
+                          <span class="govuk-body-s govuk-!-margin-left-2">@value.Name</span>
+                      }
+                  </div>
+              }
+          }
+          else
+          {
+              <span class="govuk-hint">No categories assigned</span>
+          }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <a class="govuk-link" href="/Admin/ProductManageCategories/@(Model.FipsId ?? Model.DocumentId ?? Model.Id.ToString())">
+            Change<span class="govuk-visually-hidden"> categories</span>
+          </a>
+        </dd>
+      </div>
+
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Created
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @if (Model.CreatedAt.HasValue)
+          {
+              @Model.CreatedAt.Value.ToString("dd MMM yyyy 'at' HH:mm")
+          }
+          else
+          {
+              <span class="govuk-hint">Unknown</span>
+          }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <span class="govuk-body-s govuk-!-text-align-right govuk-!-padding-top-1">
+            System generated
+          </span>
+        </dd>
+      </div>
+
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          Last updated
+        </dt>
+        <dd class="govuk-summary-list__value">
+          @if (Model.UpdatedAt.HasValue)
+          {
+              @Model.UpdatedAt.Value.ToString("dd MMM yyyy 'at' HH:mm")
+          }
+          else
+          {
+              <span class="govuk-hint">Unknown</span>
+          }
+        </dd>
+        <dd class="govuk-summary-list__actions">
+          <span class="govuk-body-s govuk-!-text-align-right govuk-!-padding-top-1">
+            System generated
+          </span>
+        </dd>
+      </div>
+    </dl>
+
+    </div>
+</div>
+</div>

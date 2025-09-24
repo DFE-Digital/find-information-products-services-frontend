@@ -1,0 +1,86 @@
+@using FipsFrontend.Helpers
+@model Product
+@{ ViewData["Title"] = $"Edit long description: {Model.Title}"; } 
+@{ ViewData["Description"] = "Edit the long description of this product"; }
+
+@section BeforeContent {
+    <div class="dfe-masthead">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/Admin/ProductDetail/@Model.FipsId" class="govuk-back-link">Back to product details</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        Edit long description
+                    </h1>
+                    <p class="govuk-body-l">
+                        @Model.Title
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row govuk-!-margin-top-6">
+  <div class="govuk-grid-column-full">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--error" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Error
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["ErrorMessage"]
+                </p>
+            </div>
+        </div>
+    }
+  </div>
+</div>
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <form method="post" action="@Url.Action("ProductEditLongDescription", "Admin")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="fipsId" value="@Model.FipsId" />
+
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="longDescription">
+                    Long description
+                </label>
+                <div id="longDescription-hint" class="govuk-hint">
+                    Provide a detailed description of this product including its purpose, features, and any other relevant information.
+                </div>
+                <textarea class="govuk-textarea" id="longDescription" name="longDescription" rows="10" aria-describedby="longDescription-hint">@Model.LongDescription</textarea>
+            </div>
+
+            <div class="govuk-button-group">
+                <button class="govuk-button" type="submit" data-module="govuk-button">
+                    Save changes
+                </button>
+                <a class="govuk-button govuk-button--secondary" href="/Admin/ProductDetail/@Model.FipsId" data-module="govuk-button">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

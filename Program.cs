@@ -255,6 +255,11 @@ app.MapControllerRoute(
     defaults: new { controller = "Products", action = "ProductAssurance" });
 
 app.MapControllerRoute(
+    name: "product-edit",
+    pattern: "product/{fipsid}/edit",
+    defaults: new { controller = "Products", action = "ProductEdit" });
+
+app.MapControllerRoute(
     name: "product-view",
     pattern: "product/{fipsid}",
     defaults: new { controller = "Products", action = "ViewProduct" });

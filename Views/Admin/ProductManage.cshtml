@@ -1,0 +1,407 @@
+@using FipsFrontend.Helpers
+@model List<Product>
+@{ ViewData["Title"] = "Manage product entries"; } 
+@{ ViewData["Description"] = "Edit or delete existing product entries in the system"; }
+
+
+@functions {
+    private static string[] GetValidStateTransitions(string currentState)
+    {
+        return currentState switch
+        {
+            "New" => new[] { "Active", "Rejected", "Deleted" },
+            "Active" => new[] { "Rejected", "Deleted" },
+            "Rejected" => new[] { "Active", "Deleted" },
+            "Deleted" => new[] { "Active", "Rejected" },
+            _ => new string[0]
+        };
+    }
+}
+
+@section BeforeContent {
+
+  <div class="dfe-masthead govuk-!-padding-bottom-0">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        Manage product entries
+                    </h1>
+                    <p class="govuk-body-l dfe-masthead--description govuk-!-margin-top-4">
+                        Edit or delete existing product entries in the system
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Success
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["SuccessMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="govuk-notification-banner govuk-notification-banner--error" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                    Error
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                <p class="govuk-notification-banner__heading">
+                    @TempData["ErrorMessage"]
+                </p>
+            </div>
+        </div>
+    }
+
+    <!-- State Summary Cards -->
+    <div class="govuk-grid-row govuk-!-margin-bottom-6">
+        <div class="govuk-grid-column-full">
+            <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Products by state</h2>
+            <div class="govuk-grid-row">
+                @{
+                    var stateCounts = ViewData["StateCounts"] as Dictionary<string, int>;
+                }
+                
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--new">
+                        <div class="govuk-card__content">
+                            <h3 class="govuk-heading-s state-summary-card__title">New</h3>
+                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("New", 0) ?? 0)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--active">
+                        <div class="govuk-card__content">
+                            <h3 class="govuk-heading-s state-summary-card__title">Active</h3>
+                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Active", 0) ?? 0)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--rejected">
+                        <div class="govuk-card__content">
+                            <h3 class="govuk-heading-s state-summary-card__title">Rejected</h3>
+                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Rejected", 0) ?? 0)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="govuk-grid-column-one-quarter">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--deleted">
+                        <div class="govuk-card__content">
+                            <h3 class="govuk-heading-s state-summary-card__title">Deleted</h3>
+                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Deleted", 0) ?? 0)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="govuk-grid-row govuk-!-margin-bottom-6">
+        <div class="govuk-grid-column-two-thirds">
+            <form method="get" action="/Admin/ProductManage">
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-one-half">
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="search">
+                                Search products
+                            </label>
+                            <input class="govuk-input" id="search" name="search" type="text" value="@ViewData["SearchQuery"]" placeholder="Enter product title or reference...">
+                        </div>
+                    </div>
+                    <div class="govuk-grid-column-one-half">
+                        <div class="govuk-form-group">
+                            <label class="govuk-label" for="state">
+                                Filter by state
+                            </label>
+                            <select class="govuk-select" id="state" name="state">
+                                <option value="">All states</option>
+                                @{
+                                    var selectedState = ViewData["SelectedState"]?.ToString();
+                                    var availableStates = ViewData["AvailableStates"] as string[];
+                                }
+                                @if (availableStates != null)
+                                {
+                                    @foreach (var stateOption in availableStates)
+                                    {
+                                        <option value="@stateOption" selected="@(selectedState == stateOption)">@stateOption</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="govuk-form-group">
+                    <button class="govuk-button" type="submit">
+                        Apply filters
+                    </button>
+                    <button class="govuk-button govuk-button--secondary" type="button" id="clear-filters">
+                        Clear filters
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="govuk-grid-column-one-third">
+            <p class="govuk-body govuk-!-text-align-right">
+                <strong>@ViewData["TotalCount"]</strong> products found
+            </p>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="govuk-table-responsive">
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Product title</th>
+                        <th scope="col" class="govuk-table__header">Reference</th>
+                        <th scope="col" class="govuk-table__header">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    @foreach (var product in Model)
+                    {
+                        <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">
+                            <a href="/Admin/ProductDetail/@product.FipsId" class="govuk-link">@product.Title</a>
+                        </td>
+                            <td class="govuk-table__cell">
+                                @if (!string.IsNullOrEmpty(product.FipsId))
+                                {
+                                    @product.FipsId
+                                }
+                                else
+                                {
+                                    <span class="govuk-hint">PRD-@product.Id.ToString("D6")</span>
+                                }
+                            </td>
+                            <td class="govuk-table__cell">
+                                @{
+                                    var stateClass = product.State switch
+                                    {
+                                        "Active" => "govuk-tag--green",
+                                        "New" => "govuk-tag--blue",
+                                        "Rejected" => "govuk-tag--red",
+                                        "Deleted" => "govuk-tag--grey",
+                                        _ => "govuk-tag--yellow"
+                                    };
+                                }
+                                <strong class="govuk-tag @stateClass">@(product.State ?? "Unknown")</strong>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        var currentPage = (int)ViewData["CurrentPage"];
+        var totalPages = (int)ViewData["TotalPages"];
+        var searchQuery = ViewData["SearchQuery"]?.ToString();
+        var selectedState = ViewData["SelectedState"]?.ToString();
+
+        @if (totalPages > 1 && Model.Any())
+        {
+            <nav class="govuk-pagination" role="navigation" aria-label="Pagination">
+                @if (currentPage > 1)
+                {
+                    <div class="govuk-pagination__prev">
+                        <a class="govuk-link govuk-pagination__link" href="@Url.Action("ProductManage", "Admin", new { 
+                            page = currentPage - 1,
+                            search = searchQuery,
+                            state = selectedState
+                        })" rel="prev">
+                            <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+                            </svg>
+                            <span class="govuk-pagination__link-title">Previous</span>
+                        </a>
+                    </div>
+                }
+
+                <ul class="govuk-pagination__list">
+                    @{
+                        var startPage = Math.Max(1, currentPage - 2);
+                        var endPage = Math.Min(totalPages, currentPage + 2);
+                    }
+
+                    @if (startPage > 1)
+                    {
+                        <li class="govuk-pagination__item">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("ProductManage", "Admin", new { 
+                                page = 1,
+                                search = searchQuery,
+                                state = selectedState
+                            })">1</a>
+                        </li>
+                        @if (startPage > 2)
+                        {
+                            <li class="govuk-pagination__item govuk-pagination__item--ellipsis">⋯</li>
+                        }
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="govuk-pagination__item @(i == currentPage ? "govuk-pagination__item--current" : "")">
+                            @if (i == currentPage)
+                            {
+                                <span class="govuk-pagination__link" aria-current="page" aria-label="Page @i">@i</span>
+                            }
+                            else
+                            {
+                                <a class="govuk-link govuk-pagination__link" href="@Url.Action("ProductManage", "Admin", new { 
+                                    page = i,
+                                    search = searchQuery,
+                                    state = selectedState
+                                })" aria-label="Page @i">@i</a>
+                            }
+                        </li>
+                    }
+
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <li class="govuk-pagination__item govuk-pagination__item--ellipsis">⋯</li>
+                        }
+                        <li class="govuk-pagination__item">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("ProductManage", "Admin", new { 
+                                page = totalPages,
+                                search = searchQuery,
+                                state = selectedState
+                            })">@totalPages</a>
+                        </li>
+                    }
+                </ul>
+
+                @if (currentPage < totalPages)
+                {
+                    <div class="govuk-pagination__next">
+                        <a class="govuk-link govuk-pagination__link" href="@Url.Action("ProductManage", "Admin", new { 
+                            page = currentPage + 1,
+                            search = searchQuery,
+                            state = selectedState
+                        })" rel="next">
+                            <span class="govuk-pagination__link-title">Next</span>
+                            <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                <path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9768 1.377 1.449-6.7441-6.4062 6.7246-6.7266z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                }
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="govuk-inset-text">
+            <h3 class="govuk-heading-s">No products found</h3>
+            <p class="govuk-body">There are currently no products in the system. <a href="/Admin/ProductCreate" class="govuk-link">Create your first product</a> to get started.</p>
+        </div>
+    }
+  </div>
+</div>
+
+<div class="govuk-grid-row govuk-!-margin-top-6">
+  <div class="govuk-grid-column-full">
+    <a class="govuk-link" href="/admin">← Back to admin dashboard</a>
+  </div>
+</div>
+
+<style nonce="@Html.GetNonce()">
+    .state-summary-card {
+        border: 1px solid #b1b4b6;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .state-summary-card:hover {
+        border-color: #1d70b8;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    
+    .state-summary-card__title {
+        margin-bottom: 8px;
+        color: #0b0c0c;
+        font-weight: 600;
+    }
+    
+    .state-summary-card__number {
+        font-size: 2.25rem;
+        font-weight: 700;
+        line-height: 1;
+        margin: 0;
+        color: #0b0c0c;
+    }
+    
+    .state-summary-card--active .state-summary-card__number {
+        color: #00703c;
+    }
+    
+    .state-summary-card--new .state-summary-card__number {
+        color: #1d70b8;
+    }
+    
+    .state-summary-card--other .state-summary-card__number {
+        color: #626a6e;
+    }
+    
+    .state-summary-card .govuk-card__content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .state-summary-card__number {
+            font-size: 1.875rem;
+        }
+        
+        .state-summary-card .govuk-card__content {
+            padding: 16px;
+        }
+    }
+</style>
+
+<script nonce="@Html.GetNonce()">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear filters functionality
+        const clearFiltersButton = document.getElementById('clear-filters');
+        if (clearFiltersButton) {
+            clearFiltersButton.addEventListener('click', function() {
+                // Redirect to the same page without any filters
+                window.location.href = '@Url.Action("ProductManage", "Admin")';
+            });
+        }
+    });
+</script>
+

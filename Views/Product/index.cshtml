@@ -96,6 +96,10 @@
                         <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance">Assurance</a>
                     </li>
                 }
+
+                <li class="dfe-vertical-nav__section-item">
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/edit">Edit product</a>
+                </li>
             </ul>
         </nav>
     </div>
@@ -170,13 +174,19 @@
                         <dd class="govuk-summary-list__value">@Model.Product.FipsId</dd>
                     </div>
                 }
-                @if (!string.IsNullOrEmpty(Model.Product.CmdbSysId))
-                {
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key">CMDB System ID</dt>
-                        <dd class="govuk-summary-list__value">@Model.Product.CmdbSysId</dd>
-                    </div>
-                }
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">CMDB System ID</dt>
+                    <dd class="govuk-summary-list__value">
+                        @if (!string.IsNullOrEmpty(Model.Product.CmdbSysId))
+                        {
+                            @Model.Product.CmdbSysId
+                        }
+                        else
+                        {
+                            <span class="govuk-body-s govuk-!-font-weight-normal">No CMDB entry found</span>
+                        }
+                    </dd>
+                </div>
             </dl>
         }
         </div>
@@ -222,9 +232,12 @@
     {
         return role switch
         {
-            "senior_responsible_owner" => "Senior Responsible Owner",
             "delivery_manager" => "Delivery Manager",
             "information_asset_owner" => "Information Asset Owner",
+            "product_manager" => "Product Manager",
+            "reporting" => "Reporting",
+            "senior_responsible_owner" => "Senior Responsible Owner",
+            "service_owner" => "Service Owner",
             _ => role // Return original if no mapping found
         };
     }
