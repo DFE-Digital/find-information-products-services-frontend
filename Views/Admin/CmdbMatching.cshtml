@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "CMDB Matching";
+    ViewData["PageDescription"] = "Match CMDB entries with CMS products";
+}
+
+<div class="govuk-width-container">
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "Admin")">Admin</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item" aria-current="page">CMDB Matching</li>
+        </ol>
+    </div>
+
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">CMDB Matching</h1>
+                <p class="govuk-body-l">
+                    Match CMDB entries with CMS products to keep them synchronised.
+                </p>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half">
+                <div class="govuk-card govuk-card--contained">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Unmapped CMS Products</h2>
+                        <p class="govuk-body">
+                            Products in the CMS that don't have a CMDB System ID assigned.
+                        </p>
+                        <a href="@Url.Action("UnmappedProducts", "Admin")" class="govuk-button govuk-button--secondary">
+                            View Unmapped Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="govuk-grid-column-one-half">
+                <div class="govuk-card govuk-card--contained">
+                    <div class="govuk-card__content">
+                        <h2 class="govuk-heading-m">Unmapped CMDB Entries</h2>
+                        <p class="govuk-body">
+                            CMDB entries that don't have corresponding products in the CMS.
+                        </p>
+                        <a href="@Url.Action("UnmappedCmdbEntries", "Admin")" class="govuk-button govuk-button--secondary">
+                            View Unmapped CMDB Entries
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="govuk-inset-text">
+                    <h3 class="govuk-heading-s">How CMDB Matching Works</h3>
+                    <ul class="govuk-list govuk-list--bullet">
+                        <li>Products with a CMDB System ID are automatically synchronised with CMDB data</li>
+                        <li>Products without a CMDB System ID need to be manually matched</li>
+                        <li>Once matched, products will be kept in sync during future CMDB synchronisation runs</li>
+                        <li>You can unlink products from CMDB if needed</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

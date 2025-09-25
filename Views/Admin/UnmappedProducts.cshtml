@@ -1,0 +1,225 @@
+@model List<Product>
+
+@{
+    ViewData["Title"] = "Unmapped Products";
+    ViewData["PageDescription"] = "CMS products without CMDB System ID";
+}
+
+<div class="govuk-width-container">
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "Admin")">Admin</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("CmdbMatching", "Admin")">CMDB Matching</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item" aria-current="page">Unmapped Products</li>
+        </ol>
+    </div>
+
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Products Without CMDB System ID</h1>
+                <p class="govuk-body-l">
+                    These products don't have a CMDB System ID assigned (cmdb_sys_id is null or empty).
+                </p>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Success
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["SuccessMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="govuk-notification-banner" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Error
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["ErrorMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">Product Name</th>
+                                <th scope="col" class="govuk-table__header">Description</th>
+                                <th scope="col" class="govuk-table__header">State</th>
+                                <th scope="col" class="govuk-table__header">CMDB Sys ID</th>
+                                <th scope="col" class="govuk-table__header">Created</th>
+                                <th scope="col" class="govuk-table__header">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            @foreach (var product in Model)
+                            {
+                                <tr class="govuk-table__row">
+                                    <td class="govuk-table__cell">
+                                        <strong>@product.Title</strong>
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        @(product.ShortDescription?.Length > 100 ? product.ShortDescription.Substring(0, 100) + "..." : product.ShortDescription)
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        <span class="govuk-tag govuk-tag--@(product.State?.ToLower() switch {
+                                            "active" => "green",
+                                            "new" => "blue",
+                                            "rejected" => "red",
+                                            "deleted" => "grey",
+                                            _ => "grey"
+                                        })">
+                                            @product.State
+                                        </span>
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        @if (string.IsNullOrEmpty(product.CmdbSysId))
+                                        {
+                                            <span class="govuk-tag govuk-tag--red">No CMDB ID</span>
+                                        }
+                                        else
+                                        {
+                                            <code>@product.CmdbSysId</code>
+                                        }
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        @product.CreatedAt?.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        <button type="button" class="govuk-button govuk-button--secondary govuk-button--small" onclick="openAssignModal(@product.Id, '@Html.Raw(Html.Encode(product.Title))')">
+                                            Assign CMDB ID
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-inset-text">
+                        <p class="govuk-body">No products found without CMDB System ID. All products have a cmdb_sys_id assigned.</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <a href="@Url.Action("CmdbMatching", "Admin")" class="govuk-link">← Back to CMDB Matching</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Assign CMDB ID Modal -->
+<div class="govuk-modal" id="assignModal" role="dialog" aria-labelledby="assignModalTitle" aria-describedby="assignModalDescription">
+    <div class="govuk-modal__content">
+        <div class="govuk-modal__header">
+            <h2 class="govuk-modal__title" id="assignModalTitle">Assign CMDB System ID</h2>
+        </div>
+        <div class="govuk-modal__body">
+            <p class="govuk-body" id="assignModalDescription">
+                Assign a CMDB System ID to product: <strong id="productName"></strong>
+            </p>
+            <form method="post" action="@Url.Action("AssignCmdbSysId", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="productId" name="productId" />
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="cmdbSysId">
+                        CMDB System ID
+                    </label>
+                    <input class="govuk-input" id="cmdbSysId" name="cmdbSysId" type="text" required>
+                </div>
+                <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button">Assign</button>
+                    <button type="button" class="govuk-button govuk-button--secondary" onclick="closeAssignModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAssignModal(productId, productName) {
+        document.getElementById('productId').value = productId;
+        document.getElementById('productName').textContent = productName;
+        document.getElementById('assignModal').style.display = 'block';
+        document.getElementById('cmdbSysId').focus();
+    }
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').style.display = 'none';
+        document.getElementById('cmdbSysId').value = '';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('assignModal');
+        if (event.target === modal) {
+            closeAssignModal();
+        }
+    }
+</script>
+
+<style>
+    .govuk-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .govuk-modal__content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    .govuk-modal__header {
+        margin-bottom: 20px;
+    }
+
+    .govuk-modal__title {
+        margin: 0;
+    }
+
+    .govuk-modal__body {
+        margin-bottom: 20px;
+    }
+</style>
