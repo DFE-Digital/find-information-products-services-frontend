@@ -849,13 +849,27 @@ function sendAnalytics() {
   if (!window.clarity) {
     console.log('Attempting to load Microsoft Clarity...');
     
+    // Initialize Clarity function before loading script
+    window.clarity = function() {
+      (window.clarity.q = window.clarity.q || []).push(arguments);
+    };
+    
     // Load Microsoft Clarity script externally to avoid CSP issues
     const clarityScript = document.createElement('script');
     clarityScript.type = 'text/javascript';
     clarityScript.async = true;
     clarityScript.src = `https://www.clarity.ms/tag/${cID}`;
+    
+    clarityScript.onload = function() {
+      console.log('Microsoft Clarity script loaded successfully');
+    };
+    
+    clarityScript.onerror = function() {
+      console.error('Failed to load Microsoft Clarity script');
+    };
+    
     document.head.appendChild(clarityScript);
-    console.log('Microsoft Clarity script loaded externally');
+    console.log('Microsoft Clarity script loading...');
     
     // Check if Clarity loaded successfully after a short delay
     setTimeout(() => {
@@ -863,7 +877,7 @@ function sendAnalytics() {
       console.log('window.clarity exists:', !!window.clarity);
       console.log('window.clarity type:', typeof window.clarity);
       
-      if (window.clarity) {
+      if (window.clarity && typeof window.clarity === 'function') {
         console.log('Microsoft Clarity loaded successfully with ID:', cID);
         // Try to call clarity to test if it's working
         try {
@@ -875,7 +889,7 @@ function sendAnalytics() {
       } else {
         console.error('Microsoft Clarity failed to load - window.clarity is not defined');
       }
-    }, 2000);
+    }, 3000);
   } else {
     console.log('Microsoft Clarity already loaded');
   }
