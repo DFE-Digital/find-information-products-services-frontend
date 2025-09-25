@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FipsFrontend.Services;
 using FipsFrontend.Models;
+using Microsoft.Extensions.Options;
 
 namespace FipsFrontend.Controllers;
 
@@ -12,13 +13,15 @@ public class AdminController : Controller
     private readonly CmsApiService _cmsApiService;
     private readonly IOptimizedCmsApiService _optimizedCmsApiService;
     private readonly IConfiguration _configuration;
+    private readonly EnabledFeatures _enabledFeatures;
 
-    public AdminController(ILogger<AdminController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IConfiguration configuration)
+    public AdminController(ILogger<AdminController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IConfiguration configuration, IOptions<EnabledFeatures> enabledFeatures)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
         _optimizedCmsApiService = optimizedCmsApiService;
         _configuration = configuration;
+        _enabledFeatures = enabledFeatures.Value;
     }
 
     public async Task<IActionResult> Index()
@@ -243,12 +246,16 @@ public class AdminController : Controller
 
             // Get state counts for the summary cards (no caching for admin)
             var stateCounts = await GetStateCounts(null);
+            
+            // Get total count for all products (for the "All" card)
+            var totalProductsCount = await _optimizedCmsApiService.GetProductsCountAsync(null);
 
             ViewData["ActiveNav"] = "admin";
             ViewData["ActiveNavItem"] = "manage-products";
             ViewData["CurrentPage"] = page;
             ViewData["TotalPages"] = totalPages;
             ViewData["TotalCount"] = totalCount;
+            ViewData["TotalProductsCount"] = totalProductsCount; // For the "All" card
             ViewData["SearchQuery"] = search;
             ViewData["SelectedState"] = state;
             ViewData["AvailableStates"] = availableStates;
@@ -321,6 +328,7 @@ public class AdminController : Controller
 
             ViewData["ActiveNav"] = "admin";
             ViewData["ActiveNavItem"] = "manage-products";
+            ViewData["EnabledFeatures"] = _enabledFeatures;
             
             // If subPage is "categories", redirect to ProductManageCategories
             if (subPage == "categories")
@@ -813,5 +821,128 @@ public class AdminController : Controller
             "Deleted" => new[] { "Active", "Rejected" },
             _ => new string[0]
         };
+    }
+
+    // GET: Admin/CmdbMatching
+    public IActionResult CmdbMatching()
+    {
+        try
+        {
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "cmdb-matching";
+            
+            return View();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading CMDB matching page");
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "cmdb-matching";
+            return View();
+        }
+    }
+
+    // GET: Admin/UnmappedProducts
+    public async Task<IActionResult> UnmappedProducts()
+    {
+        try
+        {
+            var unmappedProducts = await _cmsApiService.GetUnmappedProductsAsync();
+            
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "cmdb-matching";
+            
+            return View(unmappedProducts);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading unmapped products");
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "cmdb-matching";
+            return View(new List<Product>());
+        }
+    }
+
+    // GET: Admin/UnmappedCmdbEntries
+    public async Task<IActionResult> UnmappedCmdbEntries()
+    {
+        try
+        {
+            var unmappedEntries = await _cmsApiService.GetUnmappedCmdbEntriesAsync();
+            
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "cmdb-matching";
+            
+            return View(unmappedEntries);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading unmapped CMDB entries");
+            ViewData["ActiveNav"] = "admin";
+            ViewData["ActiveNavItem"] = "cmdb-matching";
+            return View(new List<object>());
+        }
+    }
+
+    // POST: Admin/AssignCmdbSysId
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AssignCmdbSysId(int productId, string cmdbSysId)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(cmdbSysId))
+            {
+                TempData["ErrorMessage"] = "CMDB System ID is required";
+                return RedirectToAction("UnmappedProducts");
+            }
+
+            var success = await _cmsApiService.AssignCmdbSysIdAsync(productId, cmdbSysId);
+            
+            if (success)
+            {
+                TempData["SuccessMessage"] = "CMDB System ID assigned successfully";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to assign CMDB System ID";
+            }
+            
+            return RedirectToAction("UnmappedProducts");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error assigning CMDB System ID to product {ProductId}", productId);
+            TempData["ErrorMessage"] = "An error occurred while assigning CMDB System ID";
+            return RedirectToAction("UnmappedProducts");
+        }
+    }
+
+    // POST: Admin/UnlinkCmdbSysId
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UnlinkCmdbSysId(int productId)
+    {
+        try
+        {
+            var success = await _cmsApiService.UnlinkCmdbSysIdAsync(productId);
+            
+            if (success)
+            {
+                TempData["SuccessMessage"] = "CMDB System ID unlinked successfully";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to unlink CMDB System ID";
+            }
+            
+            return RedirectToAction("ProductManage");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error unlinking CMDB System ID from product {ProductId}", productId);
+            TempData["ErrorMessage"] = "An error occurred while unlinking CMDB System ID";
+            return RedirectToAction("ProductManage");
+        }
     }
 }

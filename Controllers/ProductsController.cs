@@ -296,6 +296,7 @@ public class ProductsController : Controller
             };
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
             return View("~/Views/Product/index.cshtml", viewModel);
         }
         catch (Exception ex)

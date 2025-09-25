@@ -1,0 +1,270 @@
+@model List<object>
+
+@{
+    ViewData["Title"] = "Unmapped CMDB Entries";
+    ViewData["PageDescription"] = "CMDB entries without corresponding CMS products";
+}
+
+<div class="govuk-width-container">
+    <div class="govuk-breadcrumbs">
+        <ol class="govuk-breadcrumbs__list">
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "Admin")">Admin</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item">
+                <a class="govuk-breadcrumbs__link" href="@Url.Action("CmdbMatching", "Admin")">CMDB Matching</a>
+            </li>
+            <li class="govuk-breadcrumbs__list-item" aria-current="page">Unmapped CMDB Entries</li>
+        </ol>
+    </div>
+
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Unmapped CMDB Entries</h1>
+                <p class="govuk-body-l">
+                    These CMDB entries don't have corresponding products in the CMS. You can create new products from these entries or assign them to existing products.
+                </p>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Success
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["SuccessMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="govuk-notification-banner" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Error
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["ErrorMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <table class="govuk-table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">CMDB Name</th>
+                                <th scope="col" class="govuk-table__header">System ID</th>
+                                <th scope="col" class="govuk-table__header">Description</th>
+                                <th scope="col" class="govuk-table__header">Parent</th>
+                                <th scope="col" class="govuk-table__header">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            @foreach (dynamic entry in Model)
+                            {
+                                <tr class="govuk-table__row">
+                                    <td class="govuk-table__cell">
+                                        <strong>@(entry.name ?? "N/A")</strong>
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        <code>@(entry.sys_id ?? "N/A")</code>
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        @{
+                                            var description = entry.description?.ToString();
+                                            var displayDescription = description?.Length > 100 ? description.Substring(0, 100) + "..." : description;
+                                        }
+                                        @displayDescription
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        @(entry.parent?.name ?? "N/A")
+                                    </td>
+                                    <td class="govuk-table__cell">
+                                        <div class="govuk-button-group">
+                                            <button type="button" class="govuk-button govuk-button--small" onclick="openCreateModal('@entry.sys_id', '@Html.Raw(Html.Encode(entry.name))')">
+                                                Create Product
+                                            </button>
+                                            <button type="button" class="govuk-button govuk-button--secondary govuk-button--small" onclick="openAssignModal('@entry.sys_id', '@Html.Raw(Html.Encode(entry.name))')">
+                                                Assign to Existing
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-inset-text">
+                        <p class="govuk-body">No unmapped CMDB entries found. All CMDB entries have corresponding products in the CMS.</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <a href="@Url.Action("CmdbMatching", "Admin")" class="govuk-link">← Back to CMDB Matching</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Create Product Modal -->
+<div class="govuk-modal" id="createModal" role="dialog" aria-labelledby="createModalTitle" aria-describedby="createModalDescription">
+    <div class="govuk-modal__content">
+        <div class="govuk-modal__header">
+            <h2 class="govuk-modal__title" id="createModalTitle">Create Product from CMDB Entry</h2>
+        </div>
+        <div class="govuk-modal__body">
+            <p class="govuk-body" id="createModalDescription">
+                Create a new product from CMDB entry: <strong id="createProductName"></strong>
+            </p>
+            <form method="post" action="@Url.Action("CreateProduct", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="createCmdbSysId" name="cmdbSysId" />
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="productTitle">
+                        Product Title
+                    </label>
+                    <input class="govuk-input" id="productTitle" name="title" type="text" required>
+                </div>
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="productDescription">
+                        Short Description
+                    </label>
+                    <textarea class="govuk-textarea" id="productDescription" name="shortDescription" rows="3" required></textarea>
+                </div>
+                <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button">Create Product</button>
+                    <button type="button" class="govuk-button govuk-button--secondary" onclick="closeCreateModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Assign to Existing Product Modal -->
+<div class="govuk-modal" id="assignModal" role="dialog" aria-labelledby="assignModalTitle" aria-describedby="assignModalDescription">
+    <div class="govuk-modal__content">
+        <div class="govuk-modal__header">
+            <h2 class="govuk-modal__title" id="assignModalTitle">Assign CMDB Entry to Existing Product</h2>
+        </div>
+        <div class="govuk-modal__body">
+            <p class="govuk-body" id="assignModalDescription">
+                Assign CMDB entry: <strong id="assignProductName"></strong>
+            </p>
+            <form method="post" action="@Url.Action("AssignCmdbSysId", "Admin")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="assignCmdbSysId" name="cmdbSysId" />
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="existingProductId">
+                        Select Existing Product
+                    </label>
+                    <select class="govuk-select" id="existingProductId" name="productId" required>
+                        <option value="">Choose a product...</option>
+                        <!-- This would be populated via AJAX or server-side -->
+                    </select>
+                </div>
+                <div class="govuk-button-group">
+                    <button type="submit" class="govuk-button">Assign</button>
+                    <button type="button" class="govuk-button govuk-button--secondary" onclick="closeAssignModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openCreateModal(cmdbSysId, productName) {
+        document.getElementById('createCmdbSysId').value = cmdbSysId;
+        document.getElementById('createProductName').textContent = productName;
+        document.getElementById('productTitle').value = productName;
+        document.getElementById('createModal').style.display = 'block';
+        document.getElementById('productTitle').focus();
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createModal').style.display = 'none';
+        document.getElementById('productTitle').value = '';
+        document.getElementById('productDescription').value = '';
+    }
+
+    function openAssignModal(cmdbSysId, productName) {
+        document.getElementById('assignCmdbSysId').value = cmdbSysId;
+        document.getElementById('assignProductName').textContent = productName;
+        document.getElementById('assignModal').style.display = 'block';
+        document.getElementById('existingProductId').focus();
+    }
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').style.display = 'none';
+        document.getElementById('existingProductId').value = '';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const createModal = document.getElementById('createModal');
+        const assignModal = document.getElementById('assignModal');
+        if (event.target === createModal) {
+            closeCreateModal();
+        }
+        if (event.target === assignModal) {
+            closeAssignModal();
+        }
+    }
+</script>
+
+<style>
+    .govuk-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .govuk-modal__content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    .govuk-modal__header {
+        margin-bottom: 20px;
+    }
+
+    .govuk-modal__title {
+        margin: 0;
+    }
+
+    .govuk-modal__body {
+        margin-bottom: 20px;
+    }
+</style>

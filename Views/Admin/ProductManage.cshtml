@@ -75,46 +75,56 @@
     <div class="govuk-grid-row govuk-!-margin-bottom-6">
         <div class="govuk-grid-column-full">
             <h2 class="govuk-heading-m govuk-!-margin-bottom-4">Products by state</h2>
-            <div class="govuk-grid-row">
+            <div class="state-summary-cards-grid">
                 @{
                     var stateCounts = ViewData["StateCounts"] as Dictionary<string, int>;
+                    var totalProductsCount = ViewData["TotalProductsCount"] as int? ?? 0;
                 }
                 
-                <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--new">
+                <a href="@Url.Action("ProductManage", "Admin")" class="state-summary-card-link">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--all @(ViewData["SelectedState"]?.ToString() == null ? "state-summary-card--selected" : "")">
+                        <div class="govuk-card__content">
+                            <h3 class="govuk-heading-s state-summary-card__title">All</h3>
+                            <p class="govuk-body state-summary-card__number">@totalProductsCount</p>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="@Url.Action("ProductManage", "Admin", new { state = "New" })" class="state-summary-card-link">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--new @(ViewData["SelectedState"]?.ToString() == "New" ? "state-summary-card--selected" : "")">
                         <div class="govuk-card__content">
                             <h3 class="govuk-heading-s state-summary-card__title">New</h3>
                             <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("New", 0) ?? 0)</p>
                         </div>
                     </div>
-                </div>
+                </a>
                 
-                <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--active">
+                <a href="@Url.Action("ProductManage", "Admin", new { state = "Active" })" class="state-summary-card-link">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--active @(ViewData["SelectedState"]?.ToString() == "Active" ? "state-summary-card--selected" : "")">
                         <div class="govuk-card__content">
                             <h3 class="govuk-heading-s state-summary-card__title">Active</h3>
                             <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Active", 0) ?? 0)</p>
                         </div>
                     </div>
-                </div>
+                </a>
                 
-                <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--rejected">
+                <a href="@Url.Action("ProductManage", "Admin", new { state = "Rejected" })" class="state-summary-card-link">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--rejected @(ViewData["SelectedState"]?.ToString() == "Rejected" ? "state-summary-card--selected" : "")">
                         <div class="govuk-card__content">
                             <h3 class="govuk-heading-s state-summary-card__title">Rejected</h3>
                             <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Rejected", 0) ?? 0)</p>
                         </div>
                     </div>
-                </div>
+                </a>
                 
-                <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--deleted">
+                <a href="@Url.Action("ProductManage", "Admin", new { state = "Deleted" })" class="state-summary-card-link">
+                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--deleted @(ViewData["SelectedState"]?.ToString() == "Deleted" ? "state-summary-card--selected" : "")">
                         <div class="govuk-card__content">
                             <h3 class="govuk-heading-s state-summary-card__title">Deleted</h3>
                             <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Deleted", 0) ?? 0)</p>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
@@ -122,43 +132,18 @@
     <div class="govuk-grid-row govuk-!-margin-bottom-6">
         <div class="govuk-grid-column-two-thirds">
             <form method="get" action="/Admin/ProductManage">
-                <div class="govuk-grid-row">
-                    <div class="govuk-grid-column-one-half">
-                        <div class="govuk-form-group">
-                            <label class="govuk-label" for="search">
-                                Search products
-                            </label>
-                            <input class="govuk-input" id="search" name="search" type="text" value="@ViewData["SearchQuery"]" placeholder="Enter product title or reference...">
-                        </div>
-                    </div>
-                    <div class="govuk-grid-column-one-half">
-                        <div class="govuk-form-group">
-                            <label class="govuk-label" for="state">
-                                Filter by state
-                            </label>
-                            <select class="govuk-select" id="state" name="state">
-                                <option value="">All states</option>
-                                @{
-                                    var selectedState = ViewData["SelectedState"]?.ToString();
-                                    var availableStates = ViewData["AvailableStates"] as string[];
-                                }
-                                @if (availableStates != null)
-                                {
-                                    @foreach (var stateOption in availableStates)
-                                    {
-                                        <option value="@stateOption" selected="@(selectedState == stateOption)">@stateOption</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="search">
+                        Search products
+                    </label>
+                    <input class="govuk-input" id="search" name="search" type="text" value="@ViewData["SearchQuery"]" placeholder="Enter product title or reference...">
                 </div>
                 <div class="govuk-form-group">
                     <button class="govuk-button" type="submit">
-                        Apply filters
+                        Search
                     </button>
                     <button class="govuk-button govuk-button--secondary" type="button" id="clear-filters">
-                        Clear filters
+                        Clear search
                     </button>
                 </div>
             </form>
@@ -172,6 +157,29 @@
 
     @if (Model.Any())
     {
+        var selectedState = ViewData["SelectedState"]?.ToString();
+        var searchQuery = ViewData["SearchQuery"]?.ToString();
+        var filterTitle = "";
+        
+        if (!string.IsNullOrEmpty(selectedState))
+        {
+            filterTitle = $"Showing {selectedState} products";
+        }
+        else if (!string.IsNullOrEmpty(searchQuery))
+        {
+            filterTitle = $"Search results for '{searchQuery}'";
+        }
+        else
+        {
+            filterTitle = "All products";
+        }
+        
+        <div class="govuk-grid-row govuk-!-margin-bottom-4">
+            <div class="govuk-grid-column-full">
+                <h2 class="govuk-heading-m">@filterTitle</h2>
+            </div>
+        </div>
+        
         <div class="govuk-table-responsive">
             <table class="govuk-table">
                 <thead class="govuk-table__head">
@@ -219,8 +227,6 @@
 
         var currentPage = (int)ViewData["CurrentPage"];
         var totalPages = (int)ViewData["TotalPages"];
-        var searchQuery = ViewData["SearchQuery"]?.ToString();
-        var selectedState = ViewData["SelectedState"]?.ToString();
 
         @if (totalPages > 1 && Model.Any())
         {
@@ -331,6 +337,25 @@
 </div>
 
 <style nonce="@Html.GetNonce()">
+    /* Custom grid system for state summary cards */
+    .state-summary-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        margin-bottom: 24px;
+        width: 100%;
+    }
+    
+    .state-summary-card-link {
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+    
+    .state-summary-card-link:hover {
+        text-decoration: none;
+    }
+    
     .state-summary-card {
         border: 1px solid #b1b4b6;
         border-radius: 4px;
@@ -338,6 +363,9 @@
         height: 100%;
         position: relative;
         overflow: hidden;
+        cursor: pointer;
+        min-height: 120px;
+        background: #ffffff;
     }
     
     .state-summary-card:hover {
@@ -346,11 +374,19 @@
         transform: translateY(-2px);
     }
     
+    .state-summary-card--selected {
+        border-color: #1d70b8;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
     
     .state-summary-card__title {
         margin-bottom: 8px;
         color: #0b0c0c;
         font-weight: 600;
+        font-size: 1rem;
+        line-height: 1.2;
+        text-align: left;
     }
     
     .state-summary-card__number {
@@ -359,6 +395,7 @@
         line-height: 1;
         margin: 0;
         color: #0b0c0c;
+        text-align: left;
     }
     
     .state-summary-card--active .state-summary-card__number {
@@ -369,36 +406,80 @@
         color: #1d70b8;
     }
     
-    .state-summary-card--other .state-summary-card__number {
+    .state-summary-card--rejected .state-summary-card__number {
+        color: #d4351c;
+    }
+    
+    .state-summary-card--deleted .state-summary-card__number {
         color: #626a6e;
+    }
+    
+    .state-summary-card--all .state-summary-card__number {
+        color: #0b0c0c;
     }
     
     .state-summary-card .govuk-card__content {
         padding: 20px;
+        height: 100%;
         display: flex;
         flex-direction: column;
-        height: 100%;
+        justify-content: flex-start;
+        align-items: flex-start;
+        text-align: left;
     }
     
-    /* Responsive adjustments */
+    /* Responsive grid adjustments */
+    @@media (max-width: 1024px) {
+        .state-summary-cards-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+    }
+    
     @@media (max-width: 768px) {
+        .state-summary-cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
         .state-summary-card__number {
             font-size: 1.875rem;
         }
         
         .state-summary-card .govuk-card__content {
             padding: 16px;
+            min-height: 100px;
+        }
+        
+        .state-summary-card__title {
+            font-size: 0.9rem;
+        }
+    }
+    
+    @@media (max-width: 480px) {
+        .state-summary-cards-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .state-summary-card__number {
+            font-size: 1.5rem;
+        }
+        
+        .state-summary-card .govuk-card__content {
+            padding: 12px;
+            min-height: 80px;
         }
     }
 </style>
 
 <script nonce="@Html.GetNonce()">
     document.addEventListener('DOMContentLoaded', function() {
-        // Clear filters functionality
+        // Clear search functionality
         const clearFiltersButton = document.getElementById('clear-filters');
         if (clearFiltersButton) {
             clearFiltersButton.addEventListener('click', function() {
-                // Redirect to the same page without any filters
+                // Redirect to the same page without any search query
                 window.location.href = '@Url.Action("ProductManage", "Admin")';
             });
         }

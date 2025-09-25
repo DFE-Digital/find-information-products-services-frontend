@@ -456,4 +456,75 @@ public class CmsApiService
         return allResults;
     }
 
+    // CMDB Matching Methods
+    
+    /// <summary>
+    /// Get products that don't have a cmdb_sys_id (unmapped products)
+    /// </summary>
+    public async Task<List<Product>> GetUnmappedProductsAsync()
+    {
+        try
+        {
+            var response = await GetAsync<ApiCollectionResponse<Product>>("products?filters[cmdb_sys_id][$null]=true");
+            return response?.Data ?? new List<Product>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching unmapped products");
+            return new List<Product>();
+        }
+    }
+
+    /// <summary>
+    /// Get CMDB entries that don't have corresponding CMS products
+    /// </summary>
+    public async Task<List<object>> GetUnmappedCmdbEntriesAsync()
+    {
+        try
+        {
+            var response = await GetAsync<ApiCollectionResponse<object>>("admin/unmapped-cmdb-entries");
+            return response?.Data ?? new List<object>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching unmapped CMDB entries");
+            return new List<object>();
+        }
+    }
+
+    /// <summary>
+    /// Assign a CMDB sys_id to a CMS product
+    /// </summary>
+    public async Task<bool> AssignCmdbSysIdAsync(int productId, string cmdbSysId)
+    {
+        try
+        {
+            var requestData = new { cmdb_sys_id = cmdbSysId };
+            var response = await PostAsync<object>($"admin/products/{productId}/assign-cmdb-sys-id", requestData);
+            return response != null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error assigning CMDB sys_id {CmdbSysId} to product {ProductId}", cmdbSysId, productId);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Remove cmdb_sys_id from a product (unlink from CMDB)
+    /// </summary>
+    public async Task<bool> UnlinkCmdbSysIdAsync(int productId)
+    {
+        try
+        {
+            var response = await PostAsync<object>($"admin/products/{productId}/unlink-cmdb-sys-id", new { });
+            return response != null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error unlinking CMDB sys_id from product {ProductId}", productId);
+            return false;
+        }
+    }
+
 }

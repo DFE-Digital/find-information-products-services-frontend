@@ -137,6 +137,15 @@
                 <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
                     <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductDetail/@Model.FipsId">Details</a>
                 </li>
+                @{
+                    var enabledFeatures = ViewData["EnabledFeatures"] as EnabledFeatures;
+                }
+                @if (enabledFeatures?.EditProduct == true)
+                {
+                    <li class="dfe-vertical-nav__section-item">
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@Model.FipsId/edit">Edit Product</a>
+                    </li>
+                }
                 <li class="dfe-vertical-nav__section-item">
                     <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductDetail/@Model.FipsId/categories">Categories</a>
                 </li>
