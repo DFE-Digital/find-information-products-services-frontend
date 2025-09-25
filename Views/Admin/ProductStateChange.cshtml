@@ -13,7 +13,14 @@
                         Change product state
                     </h1>
                     <p class="govuk-body-l">
-                        @Model.Title
+                        @if (ViewData["CurrentState"]?.ToString() == "Deleted")
+                        {
+                            @Model.Title <span class="govuk-tag govuk-tag--grey">(DELETED)</span>
+                        }
+                        else
+                        {
+                            @Model.Title
+                        }
                     </p>
                 </div>
             </div>
@@ -60,7 +67,15 @@
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
         <div class="govuk-inset-text">
-            <p><strong>Current state:</strong> @ViewData["CurrentState"]</p>
+            <p><strong>Current state:</strong> 
+            @if (ViewData["CurrentState"]?.ToString() == "Deleted")
+            {
+                @ViewData["CurrentState"] <span class="govuk-tag govuk-tag--grey">(DELETED)</span>
+            }
+            else
+            {
+                @ViewData["CurrentState"]
+            }</p>
         </div>
 
         @{
@@ -107,7 +122,15 @@
         else
         {
             <div class="govuk-inset-text">
-                <p>No state changes are available for products in the current state (@ViewData["CurrentState"]).</p>
+                <p>No state changes are available for products in the current state 
+                @if (ViewData["CurrentState"]?.ToString() == "Deleted")
+                {
+                    @ViewData["CurrentState"] <span class="govuk-tag govuk-tag--grey">(DELETED)</span>
+                }
+                else
+                {
+                    @ViewData["CurrentState"]
+                }.</p>
             </div>
             <a class="govuk-button" href="/Admin/ProductDetail/@Model.FipsId" data-module="govuk-button">
                 Back to product details

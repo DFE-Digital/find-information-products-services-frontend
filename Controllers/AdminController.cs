@@ -404,20 +404,63 @@ public class AdminController : Controller
                 return RedirectToAction("ProductManage");
             }
 
-            // Update the product state (preserve FIPS_ID to prevent regeneration)
-            var updateData = new
+            // Prepare update data - handle title modification based on state changes
+            object updateData;
+            string? modifiedTitle = null;
+            
+            if (newState == "Deleted" && currentState != "Deleted")
             {
-                data = new
+                // Adding "(DELETED)" to title when setting to Deleted
+                modifiedTitle = product.Title?.Contains(" (DELETED)") == true 
+                    ? product.Title 
+                    : $"{product.Title} (DELETED)";
+            }
+            else if (currentState == "Deleted" && newState != "Deleted")
+            {
+                // Removing "(DELETED)" from title when changing from Deleted
+                modifiedTitle = product.Title?.Replace(" (DELETED)", "").Trim();
+            }
+            
+            if (modifiedTitle != null)
+            {
+                updateData = new
                 {
-                    state = newState,
-                    fips_id = product.FipsId // Explicitly preserve the FIPS_ID
-                }
-            };
+                    data = new
+                    {
+                        state = newState,
+                        title = modifiedTitle,
+                        fips_id = product.FipsId // Explicitly preserve the FIPS_ID
+                    }
+                };
+            }
+            else
+            {
+                updateData = new
+                {
+                    data = new
+                    {
+                        state = newState,
+                        fips_id = product.FipsId // Explicitly preserve the FIPS_ID
+                    }
+                };
+            }
             var result = await _cmsApiService.PutAsync<Product>($"products/{product.DocumentId}", updateData);
 
             if (result != null)
             {
-                TempData["SuccessMessage"] = $"Product state successfully changed from '{currentState}' to '{newState}'.";
+                var message = $"Product state successfully changed from '{currentState}' to '{newState}'.";
+                
+                // Add information about title modification
+                if (newState == "Deleted" && currentState != "Deleted" && product.Title?.Contains(" (DELETED)") != true)
+                {
+                    message += " The '(DELETED)' tag has been added to the product title.";
+                }
+                else if (currentState == "Deleted" && newState != "Deleted" && product.Title?.Contains(" (DELETED)") == true)
+                {
+                    message += " The '(DELETED)' tag has been removed from the product title.";
+                }
+                
+                TempData["SuccessMessage"] = message;
             }
             else
             {
