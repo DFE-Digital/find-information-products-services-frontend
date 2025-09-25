@@ -81,39 +81,47 @@
                 }
                 
                 <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--new">
-                        <div class="govuk-card__content">
-                            <h3 class="govuk-heading-s state-summary-card__title">New</h3>
-                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("New", 0) ?? 0)</p>
+                    <a href="@Url.Action("ProductManage", "Admin", new { search = ViewData["SearchQuery"], state = "New" })" class="state-summary-card-link">
+                        <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--new">
+                            <div class="govuk-card__content">
+                                <h3 class="govuk-heading-s state-summary-card__title">New</h3>
+                                <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("New", 0) ?? 0)</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 
                 <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--active">
-                        <div class="govuk-card__content">
-                            <h3 class="govuk-heading-s state-summary-card__title">Active</h3>
-                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Active", 0) ?? 0)</p>
+                    <a href="@Url.Action("ProductManage", "Admin", new { search = ViewData["SearchQuery"], state = "Active" })" class="state-summary-card-link">
+                        <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--active">
+                            <div class="govuk-card__content">
+                                <h3 class="govuk-heading-s state-summary-card__title">Active</h3>
+                                <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Active", 0) ?? 0)</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 
                 <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--rejected">
-                        <div class="govuk-card__content">
-                            <h3 class="govuk-heading-s state-summary-card__title">Rejected</h3>
-                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Rejected", 0) ?? 0)</p>
+                    <a href="@Url.Action("ProductManage", "Admin", new { search = ViewData["SearchQuery"], state = "Rejected" })" class="state-summary-card-link">
+                        <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--rejected">
+                            <div class="govuk-card__content">
+                                <h3 class="govuk-heading-s state-summary-card__title">Rejected</h3>
+                                <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Rejected", 0) ?? 0)</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 
                 <div class="govuk-grid-column-one-quarter">
-                    <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--deleted">
-                        <div class="govuk-card__content">
-                            <h3 class="govuk-heading-s state-summary-card__title">Deleted</h3>
-                            <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Deleted", 0) ?? 0)</p>
+                    <a href="@Url.Action("ProductManage", "Admin", new { search = ViewData["SearchQuery"], state = "Deleted" })" class="state-summary-card-link">
+                        <div class="govuk-card govuk-card--contained state-summary-card state-summary-card--deleted">
+                            <div class="govuk-card__content">
+                                <h3 class="govuk-heading-s state-summary-card__title">Deleted</h3>
+                                <p class="govuk-body state-summary-card__number">@(stateCounts?.GetValueOrDefault("Deleted", 0) ?? 0)</p>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -122,43 +130,18 @@
     <div class="govuk-grid-row govuk-!-margin-bottom-6">
         <div class="govuk-grid-column-two-thirds">
             <form method="get" action="/Admin/ProductManage">
-                <div class="govuk-grid-row">
-                    <div class="govuk-grid-column-one-half">
-                        <div class="govuk-form-group">
-                            <label class="govuk-label" for="search">
-                                Search products
-                            </label>
-                            <input class="govuk-input" id="search" name="search" type="text" value="@ViewData["SearchQuery"]" placeholder="Enter product title or reference...">
-                        </div>
-                    </div>
-                    <div class="govuk-grid-column-one-half">
-                        <div class="govuk-form-group">
-                            <label class="govuk-label" for="state">
-                                Filter by state
-                            </label>
-                            <select class="govuk-select" id="state" name="state">
-                                <option value="">All states</option>
-                                @{
-                                    var selectedState = ViewData["SelectedState"]?.ToString();
-                                    var availableStates = ViewData["AvailableStates"] as string[];
-                                }
-                                @if (availableStates != null)
-                                {
-                                    @foreach (var stateOption in availableStates)
-                                    {
-                                        <option value="@stateOption" selected="@(selectedState == stateOption)">@stateOption</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
+                <div class="govuk-form-group">
+                    <label class="govuk-label" for="search">
+                        Search products
+                    </label>
+                    <input class="govuk-input" id="search" name="search" type="text" value="@ViewData["SearchQuery"]" placeholder="Enter product title or reference...">
                 </div>
                 <div class="govuk-form-group">
                     <button class="govuk-button" type="submit">
-                        Apply filters
+                        Apply search
                     </button>
                     <button class="govuk-button govuk-button--secondary" type="button" id="clear-filters">
-                        Clear filters
+                        Clear search
                     </button>
                 </div>
             </form>
@@ -331,6 +314,16 @@
 </div>
 
 <style nonce="@Html.GetNonce()">
+    .state-summary-card-link {
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+    
+    .state-summary-card-link:hover {
+        text-decoration: none;
+    }
+    
     .state-summary-card {
         border: 1px solid #b1b4b6;
         border-radius: 4px;
@@ -338,6 +331,7 @@
         height: 100%;
         position: relative;
         overflow: hidden;
+        cursor: pointer;
     }
     
     .state-summary-card:hover {
@@ -346,6 +340,11 @@
         transform: translateY(-2px);
     }
     
+    .state-summary-card-link:hover .state-summary-card {
+        border-color: #1d70b8;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
     
     .state-summary-card__title {
         margin-bottom: 8px;
@@ -369,7 +368,11 @@
         color: #1d70b8;
     }
     
-    .state-summary-card--other .state-summary-card__number {
+    .state-summary-card--rejected .state-summary-card__number {
+        color: #d4351c;
+    }
+    
+    .state-summary-card--deleted .state-summary-card__number {
         color: #626a6e;
     }
     
@@ -394,11 +397,11 @@
 
 <script nonce="@Html.GetNonce()">
     document.addEventListener('DOMContentLoaded', function() {
-        // Clear filters functionality
+        // Clear search functionality
         const clearFiltersButton = document.getElementById('clear-filters');
         if (clearFiltersButton) {
             clearFiltersButton.addEventListener('click', function() {
-                // Redirect to the same page without any filters
+                // Redirect to the same page without any search filters
                 window.location.href = '@Url.Action("ProductManage", "Admin")';
             });
         }
