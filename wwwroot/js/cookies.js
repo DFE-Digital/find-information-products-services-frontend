@@ -849,29 +849,13 @@ function sendAnalytics() {
   if (!window.clarity) {
     console.log('Attempting to load Microsoft Clarity...');
     
-    // Method 1: Try direct execution first
-    try {
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", cID);
-      
-      console.log('Microsoft Clarity script executed directly');
-    } catch (error) {
-      console.error('Direct execution failed:', error);
-      
-      // Method 2: Fallback to script injection
-      const clarityScript = document.createElement('script');
-      clarityScript.type = 'text/javascript';
-      clarityScript.innerHTML = `(function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "${cID}");`;
-      document.head.appendChild(clarityScript);
-      console.log('Microsoft Clarity script injected as element');
-    }
+    // Load Microsoft Clarity script externally to avoid CSP issues
+    const clarityScript = document.createElement('script');
+    clarityScript.type = 'text/javascript';
+    clarityScript.async = true;
+    clarityScript.src = `https://www.clarity.ms/tag/${cID}`;
+    document.head.appendChild(clarityScript);
+    console.log('Microsoft Clarity script loaded externally');
     
     // Check if Clarity loaded successfully after a short delay
     setTimeout(() => {
