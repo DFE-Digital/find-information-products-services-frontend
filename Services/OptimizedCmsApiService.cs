@@ -102,8 +102,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // Add search query if provided - optimized for performance
         if (!string.IsNullOrEmpty(searchQuery))
         {
-            // Use $startsWith for better performance on title field (most common search)
-            queryParams.Add($"filters[title][$startsWith]={Uri.EscapeDataString(searchQuery)}");
+            // Use $startsWithi for case-insensitive search on title field (most common search)
+            queryParams.Add($"filters[title][$startsWithi]={Uri.EscapeDataString(searchQuery)}");
             
             // Only search other fields if title search doesn't return enough results
             // This will be handled by the fallback search if needed
@@ -250,8 +250,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // Add search query if provided - optimized for performance
         if (!string.IsNullOrEmpty(searchQuery))
         {
-            // Use $startsWith for better performance on title field (most common search)
-            queryParams.Add($"filters[title][$startsWith]={Uri.EscapeDataString(searchQuery)}");
+            // Use $startsWithi for case-insensitive search on title field (most common search)
+            queryParams.Add($"filters[title][$startsWithi]={Uri.EscapeDataString(searchQuery)}");
             
             // Only search other fields if title search doesn't return enough results
             // This will be handled by the fallback search if needed
@@ -1164,10 +1164,10 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(stateFilter)}");
         }
 
-        // Add search query if provided - search both title and fips_id for admin
+        // Add search query if provided - search title and fips_id for admin
         if (!string.IsNullOrEmpty(searchQuery))
         {
-            // Use $containsi for case-insensitive search across multiple fields
+            // Use $containsi for case-insensitive search across title and fips_id fields
             queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
             queryParams.Add($"filters[$or][1][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
