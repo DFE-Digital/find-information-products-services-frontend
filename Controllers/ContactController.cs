@@ -38,7 +38,7 @@ public class ContactController : Controller
                     viewModel.PageContent.RelatedContent?.Length ?? 0);
                 
                 viewModel.ProcessedBody = GovUkMarkdownHelper.ToGovUkHtml(viewModel.PageContent.Body ?? "");
-                viewModel.ProcessedRelatedContent = GovUkMarkdownHelper.ToGovUkPlainList(viewModel.PageContent.RelatedContent ?? "");
+                viewModel.ProcessedRelatedContent = GovUkMarkdownHelper.ToGovUkHtml(viewModel.PageContent.RelatedContent ?? "");
                 
                 _logger.LogInformation("Processed content. ProcessedBody length: {ProcessedBodyLength}, ProcessedRelatedContent length: {ProcessedRelatedLength}", 
                     viewModel.ProcessedBody?.Length ?? 0, 
