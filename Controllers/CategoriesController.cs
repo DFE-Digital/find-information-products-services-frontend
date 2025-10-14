@@ -387,7 +387,7 @@ public class CategoriesController : Controller
                     
                     viewModel.PageTitle = $"{string.Join(" - ", breadcrumbNames)}";
                     viewModel.Group = categoryType.Name;
-                    viewModel.PageDescription = $"Browse products in {currentParent.Name}";
+                    viewModel.PageDescription = currentParent.ShortDescription ?? $"Browse products in {currentParent.Name}";
                 }
                 else
                 {

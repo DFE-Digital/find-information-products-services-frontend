@@ -44,6 +44,8 @@ public class CategoryValue
     public string? DocumentId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
+    [JsonPropertyName("short_description")]
+    public string? ShortDescription { get; set; }
     public bool Enabled { get; set; } = true;
     [JsonPropertyName("sort_order")]
     public int? SortOrder { get; set; }

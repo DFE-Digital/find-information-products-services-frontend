@@ -50,7 +50,7 @@
                                 @Model.ParentCategory.Name
                             </a>
                         </h2>
-                        <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
+                        <p class="dfe-chevron-card__description govuk-body govuk-body-s">@Model.ParentCategory.ShortDescription</p>
                         
                         <a class="dfe-chevron-card__link category-filter-link" 
                            href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)" 
