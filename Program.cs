@@ -47,8 +47,8 @@ builder.Services.AddHttpClient<CmsApiService>(client =>
 })
 .AddPolicyHandler(GetRetryPolicy());
 
-// Register CMS API service
-builder.Services.AddScoped<CmsApiService>();
+// Note: CmsApiService is already registered above via AddHttpClient<CmsApiService>
+// No need for additional registration
 
 // Register optimized CMS API service
 builder.Services.AddHttpClient<IOptimizedCmsApiService, OptimizedCmsApiService>(client =>

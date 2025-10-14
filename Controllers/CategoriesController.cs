@@ -413,7 +413,7 @@ public class CategoriesController : Controller
             "phase" => $"phase={slug}",
             "channel" => $"channel={slug}",
             "type" => $"type={slug}",
-            "group" => $"group={slug}",
+            "business area" => $"group={slug}",
             "user group" => $"userGroup={slug}",
             _ => $"category={slug}"
         };

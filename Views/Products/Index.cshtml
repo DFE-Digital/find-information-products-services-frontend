@@ -107,81 +107,9 @@
 
                         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
-                        <!-- Phase filter -->
-                        @if (Model.PhaseOptions != null && Model.PhaseOptions.Any())
-                        {
-                            <div class="moj-filter-group">
-                                <button type="button" 
-                                        class="filter-toggle-button" 
-                                        data-target="phase-filter" 
-                                        aria-expanded="false" 
-                                        aria-controls="phase-filter"
-                                        aria-describedby="phase-filter-description">
-                                    Phase
-                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
-                                </button>
-                                <div id="phase-filter-description" class="govuk-visually-hidden">
-                                    Click to show or hide Phase filter options
-                                </div>
-                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="phase-filter" data-module="govuk-checkboxes" aria-hidden="true">
-                                    @foreach (var phase in Model.PhaseOptions)
-                                    {
-                                        <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input filter-checkbox" 
-                                                   id="phase-@phase.Value.ToLower().Replace(" ", "-")" 
-                                                   name="phase" 
-                                                   type="checkbox" 
-                                                   value="@phase.Value" 
-                                                   data-filter-type="phase"
-                                                   data-filter-value="@phase.Value"
-                                                   @(phase.IsSelected ? "checked" : "")>
-                                            <label class="govuk-label govuk-checkboxes__label" for="phase-@phase.Value.ToLower().Replace(" ", "-")">
-                                                @phase.Text
-                                            </label>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
+         
 
-                        <!-- Channel filter -->
-                        @if (Model.ChannelOptions != null && Model.ChannelOptions.Any())
-                        {
-                            <div class="moj-filter-group">
-                                <button type="button" 
-                                        class="filter-toggle-button" 
-                                        data-target="channel-filter" 
-                                        aria-expanded="false" 
-                                        aria-controls="channel-filter"
-                                        aria-describedby="channel-filter-description">
-                                    Channel
-                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
-                                </button>
-                                <div id="channel-filter-description" class="govuk-visually-hidden">
-                                    Click to show or hide Channel filter options
-                                </div>
-                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="channel-filter" data-module="govuk-checkboxes" aria-hidden="true">
-                                    @foreach (var channel in Model.ChannelOptions)
-                                    {
-                                        <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input filter-checkbox" 
-                                                   id="channel-@channel.Value.ToLower().Replace(" ", "-")" 
-                                                   name="channel" 
-                                                   type="checkbox" 
-                                                   value="@channel.Value" 
-                                                   data-filter-type="channel"
-                                                   data-filter-value="@channel.Value"
-                                                   @(channel.IsSelected ? "checked" : "")>
-                                            <label class="govuk-label govuk-checkboxes__label" for="channel-@channel.Value.ToLower().Replace(" ", "-")">
-                                                @channel.Text
-                                            </label>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-
-                        <!-- Group filter -->
+                        <!-- Business Area filter -->
                         @if (Model.GroupOptions != null && Model.GroupOptions.Any())
 {
     <div class="moj-filter-group">
@@ -191,11 +119,11 @@
                 aria-expanded="false"
                 aria-controls="group-filter"
                 aria-describedby="group-filter-description">
-            Group
+            Business area
             <span class="filter-toggle-icon" aria-hidden="true">▼</span>
         </button>
         <div id="group-filter-description" class="govuk-visually-hidden">
-            Click to show or hide Group filter options
+            Click to show or hide business area filter options
         </div>
 
         <div id="group-filter"
@@ -204,7 +132,7 @@
 
             <fieldset class="govuk-fieldset">
                 <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
-                    <span class="govuk-visually-hidden">Group filter options</span>
+                    <span class="govuk-visually-hidden">Business Area filter options</span>
                 </legend>
 
                 <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter"
@@ -283,6 +211,80 @@
     </div>
 }
 
+                        <!-- Channel filter -->
+                        @if (Model.ChannelOptions != null && Model.ChannelOptions.Any())
+                        {
+                            <div class="moj-filter-group">
+                                <button type="button" 
+                                        class="filter-toggle-button" 
+                                        data-target="channel-filter" 
+                                        aria-expanded="false" 
+                                        aria-controls="channel-filter"
+                                        aria-describedby="channel-filter-description">
+                                    Channel
+                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
+                                </button>
+                                <div id="channel-filter-description" class="govuk-visually-hidden">
+                                    Click to show or hide Channel filter options
+                                </div>
+                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="channel-filter" data-module="govuk-checkboxes" aria-hidden="true">
+                                    @foreach (var channel in Model.ChannelOptions)
+                                    {
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="channel-@channel.Value.ToLower().Replace(" ", "-")" 
+                                                   name="channel" 
+                                                   type="checkbox" 
+                                                   value="@channel.Value" 
+                                                   data-filter-type="channel"
+                                                   data-filter-value="@channel.Value"
+                                                   @(channel.IsSelected ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="channel-@channel.Value.ToLower().Replace(" ", "-")">
+                                                @channel.Text
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+
+               <!-- Phase filter -->
+                        @if (Model.PhaseOptions != null && Model.PhaseOptions.Any())
+                        {
+                            <div class="moj-filter-group">
+                                <button type="button" 
+                                        class="filter-toggle-button" 
+                                        data-target="phase-filter" 
+                                        aria-expanded="false" 
+                                        aria-controls="phase-filter"
+                                        aria-describedby="phase-filter-description">
+                                    Phase
+                                    <span class="filter-toggle-icon" aria-hidden="true">▼</span>
+                                </button>
+                                <div id="phase-filter-description" class="govuk-visually-hidden">
+                                    Click to show or hide Phase filter options
+                                </div>
+                                <div class="govuk-checkboxes govuk-checkboxes--small scrollable-filter" id="phase-filter" data-module="govuk-checkboxes" aria-hidden="true">
+                                    @foreach (var phase in Model.PhaseOptions)
+                                    {
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="phase-@phase.Value.ToLower().Replace(" ", "-")" 
+                                                   name="phase" 
+                                                   type="checkbox" 
+                                                   value="@phase.Value" 
+                                                   data-filter-type="phase"
+                                                   data-filter-value="@phase.Value"
+                                                   @(phase.IsSelected ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="phase-@phase.Value.ToLower().Replace(" ", "-")">
+                                                @phase.Text
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
 
                         <!-- Type filter -->
                         @if (Model.TypeOptions != null && Model.TypeOptions.Any())
