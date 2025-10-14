@@ -1,0 +1,190 @@
+@model FipsFrontend.Models.Assessment
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+@section BeforeContent {
+<div class="dfe-masthead">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        @ViewData["Title"]
+                    </h1>
+               
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        
+        <!-- Assessment Details -->
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Type</dt>
+                <dd class="govuk-summary-list__value">@Model.Type</dd>
+            </div>
+            
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Phase</dt>
+                <dd class="govuk-summary-list__value">@Model.Phase</dd>
+            </div>
+            
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">Status</dt>
+                <dd class="govuk-summary-list__value">
+                    <span class="govuk-tag govuk-tag--@GetStatusTagClass(Model.Status)">@Model.Status</span>
+                </dd>
+            </div>
+            
+            @if (Model.StartDate.HasValue)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">Start date</dt>
+                    <dd class="govuk-summary-list__value">@Model.StartDate.Value.ToString("dd MMMM yyyy")</dd>
+                </div>
+            }
+            
+            @if (Model.EndDate.HasValue)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">End date</dt>
+                    <dd class="govuk-summary-list__value">@Model.EndDate.Value.ToString("dd MMMM yyyy")</dd>
+                </div>
+            }
+            
+            @if (Model.CreatedAt.HasValue)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">Created</dt>
+                    <dd class="govuk-summary-list__value">@Model.CreatedAt.Value.ToString("dd MMMM yyyy")</dd>
+                </div>
+            }
+            
+            @if (Model.UpdatedAt.HasValue)
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">Last updated</dt>
+                    <dd class="govuk-summary-list__value">@Model.UpdatedAt.Value.ToString("dd MMMM yyyy")</dd>
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(Model.Url))
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">External link</dt>
+                    <dd class="govuk-summary-list__value">
+                        <a href="@Model.Url" class="govuk-link" target="_blank">View assessment details</a>
+                    </dd>
+                </div>
+            }
+        </dl>
+
+        <!-- Description -->
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <h2 class="govuk-heading-m">Description</h2>
+            <div class="govuk-body">
+                @Html.Raw(Model.Description.Replace("\n", "<br/>"))
+            </div>
+        }
+
+        <!-- Contacts -->
+        @if (Model.Contacts != null && Model.Contacts.Any())
+        {
+            <h2 class="govuk-heading-m">Contacts</h2>
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Name</th>
+                        <th scope="col" class="govuk-table__header">Email</th>
+                        <th scope="col" class="govuk-table__header">Role</th>
+                        <th scope="col" class="govuk-table__header">Department</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    @foreach (var contact in Model.Contacts)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">@contact.Name</td>
+                            <td class="govuk-table__cell">
+                                @if (!string.IsNullOrEmpty(contact.Email))
+                                {
+                                    <a href="mailto:@contact.Email" class="govuk-link">@contact.Email</a>
+                                }
+                            </td>
+                            <td class="govuk-table__cell">@contact.Role</td>
+                            <td class="govuk-table__cell">@contact.Department</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <!-- Attachments -->
+        @if (Model.Attachments != null && Model.Attachments.Any())
+        {
+            <h2 class="govuk-heading-m">Attachments</h2>
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Name</th>
+                        <th scope="col" class="govuk-table__header">Type</th>
+                        <th scope="col" class="govuk-table__header">Size</th>
+                        <th scope="col" class="govuk-table__header">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    @foreach (var attachment in Model.Attachments)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">@attachment.Name</td>
+                            <td class="govuk-table__cell">@attachment.Type</td>
+                            <td class="govuk-table__cell">@FormatFileSize(attachment.Size)</td>
+                            <td class="govuk-table__cell">
+                                <a href="@attachment.Url" class="govuk-link" target="_blank">Download</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <!-- Back link -->
+        <div class="govuk-!-margin-top-6">
+            <a href="@Url.Action("Index", "Assessments")" class="govuk-back-link">Back to assessments</a>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusTagClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "completed" => "green",
+            "in progress" => "blue",
+            "pending" => "yellow",
+            "cancelled" => "red",
+            "draft" => "grey",
+            _ => "grey"
+        };
+    }
+
+    string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+}

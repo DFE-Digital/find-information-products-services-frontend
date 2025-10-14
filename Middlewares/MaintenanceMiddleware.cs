@@ -6,7 +6,7 @@ public class MaintenanceMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<MaintenanceMiddleware> _logger;
-    private readonly ICmsHealthService _cmsHealthService;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IConfiguration _configuration;
 
     // Paths that should be excluded from maintenance mode
@@ -23,11 +23,11 @@ public class MaintenanceMiddleware
     };
 
     public MaintenanceMiddleware(RequestDelegate next, ILogger<MaintenanceMiddleware> logger, 
-        ICmsHealthService cmsHealthService, IConfiguration configuration)
+        IServiceScopeFactory serviceScopeFactory, IConfiguration configuration)
     {
         _next = next;
         _logger = logger;
-        _cmsHealthService = cmsHealthService;
+        _serviceScopeFactory = serviceScopeFactory;
         _configuration = configuration;
     }
 
@@ -46,7 +46,13 @@ public class MaintenanceMiddleware
         var maintenanceModeEnabled = _configuration.GetValue<bool>("MaintenanceMode:Enabled", false);
         
         // Check if CMS is available (unless maintenance mode is manually enabled)
-        var isCmsAvailable = await _cmsHealthService.IsCmsAvailableAsync();
+        bool isCmsAvailable = true;
+        if (!maintenanceModeEnabled)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var cmsHealthService = scope.ServiceProvider.GetRequiredService<ICmsHealthService>();
+            isCmsAvailable = await cmsHealthService.IsCmsAvailableAsync();
+        }
 
         // If maintenance mode is enabled OR CMS is not available, show maintenance page
         if (maintenanceModeEnabled || !isCmsAvailable)

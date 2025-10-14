@@ -101,6 +101,26 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IAirtableService, AirtableService>();
 builder.Services.Configure<AirtableConfiguration>(builder.Configuration.GetSection("Airtable"));
 
+// Register Service Assessments service
+builder.Services.AddHttpClient<IServiceAssessmentsService, ServiceAssessmentsService>(client =>
+{
+    var baseUrl = builder.Configuration["SAS:TenantId"] ?? "https://service-assessments.education.gov.uk/";
+    // Ensure BaseAddress ends with '/' for proper relative URL resolution
+    if (!baseUrl.EndsWith("/"))
+    {
+        baseUrl += "/";
+    }
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("User-Agent", "FIPS-Frontend-Assessments/1.0");
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+{
+    MaxConnectionsPerServer = 10,
+    UseProxy = false // Disable proxy for better performance in local development
+})
+.AddPolicyHandler(GetRetryPolicy());
+
 // Configure feature flags
 builder.Services.Configure<EnabledFeatures>(builder.Configuration.GetSection("EnabledFeatures"));
 

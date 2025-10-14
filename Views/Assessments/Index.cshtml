@@ -1,0 +1,378 @@
+@using FipsFrontend.Helpers
+@model FipsFrontend.Models.AssessmentsViewModel
+
+@{
+    ViewData["Title"] = Model.PageTitle;
+}
+
+@section BeforeContent {
+<div class="dfe-masthead">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
+                        @ViewData["Title"]
+                    </h1>
+               
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+        
+        <!-- MOJ Filter Component -->
+        <form method="get" action="/assessments">
+            
+            <div class="moj-filter" data-module="moj-filter">
+                <div class="moj-filter__header">
+                    <div class="moj-filter__header-title">
+                        <h2 class="govuk-heading-m">Filter</h2>
+                    </div>
+                    <div class="moj-filter__header-action">
+                        @if (Model.SelectedFilters.Any())
+                        {
+                            <p><a class="govuk-link govuk-link--no-visited-state" href="/assessments">Clear filters</a></p>
+                        }
+                    </div>
+                </div>
+
+                <div class="moj-filter__content">
+                    
+                    @if (Model.SelectedFilters.Any())
+                    {
+                        <div class="moj-filter__selected">
+                            <div class="moj-filter__selected-heading">
+                                <div class="moj-filter__heading-title">
+                                    <h2 class="govuk-heading-m">Selected filters</h2>
+                                </div>
+                                <div class="moj-filter__heading-action">
+                                    <p><a class="govuk-link govuk-link--no-visited-state" href="/assessments">Clear filters</a></p>
+                                </div>
+                            </div>
+
+                            @foreach (var filter in Model.SelectedFilters)
+                            {
+                                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">@filter.Key</h3>
+                                <ul class="moj-filter-tags">
+                                    @foreach (var value in filter.Value)
+                                    {
+                                        <li><a class="moj-filter__tag" href="@Url.Action("Index", "Assessments", new { 
+                                            page = 1, 
+                                            search = Model.SearchQuery, 
+                                            type = filter.Key == "Type" ? "" : Model.TypeFilter,
+                                            phase = filter.Key == "Phase" ? "" : Model.PhaseFilter,
+                                            status = filter.Key == "Status" ? "" : Model.StatusFilter
+                                        })">
+                                            <span class="govuk-visually-hidden">Remove this filter</span> @value
+                                        </a></li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    }
+
+                    <div class="moj-filter__options">
+                        
+                        <!-- Search -->
+                        <div class="govuk-form-group">
+                            <label class="govuk-label govuk-label--s" for="search">
+                                Search assessments
+                            </label>
+                            <input class="govuk-input" id="search" name="search" type="text" value="@Model.SearchQuery" placeholder="Enter search term">
+                        </div>
+
+                        <!-- Type Filter -->
+                        @if (Model.AvailableTypes.Any())
+                        {
+                            <div class="govuk-form-group">
+                                <fieldset class="govuk-fieldset">
+                                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                        Assessment type
+                                    </legend>
+                                    <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="type-all" name="type" type="radio" value="" @(string.IsNullOrEmpty(Model.TypeFilter) ? "checked" : "")>
+                                            <label class="govuk-label govuk-radios__label" for="type-all">
+                                                All types
+                                            </label>
+                                        </div>
+                                        @foreach (var type in Model.AvailableTypes)
+                                        {
+                                            <div class="govuk-radios__item">
+                                                <input class="govuk-radios__input" id="type-@type.ToLower().Replace(" ", "-")" name="type" type="radio" value="@type" @(Model.TypeFilter == type ? "checked" : "")>
+                                                <label class="govuk-label govuk-radios__label" for="type-@type.ToLower().Replace(" ", "-")">
+                                                    @type
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }
+
+                        <!-- Phase Filter -->
+                        @if (Model.AvailablePhases.Any())
+                        {
+                            <div class="govuk-form-group">
+                                <fieldset class="govuk-fieldset">
+                                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                        Assessment phase
+                                    </legend>
+                                    <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="phase-all" name="phase" type="radio" value="" @(string.IsNullOrEmpty(Model.PhaseFilter) ? "checked" : "")>
+                                            <label class="govuk-label govuk-radios__label" for="phase-all">
+                                                All phases
+                                            </label>
+                                        </div>
+                                        @foreach (var phase in Model.AvailablePhases)
+                                        {
+                                            <div class="govuk-radios__item">
+                                                <input class="govuk-radios__input" id="phase-@phase.ToLower().Replace(" ", "-")" name="phase" type="radio" value="@phase" @(Model.PhaseFilter == phase ? "checked" : "")>
+                                                <label class="govuk-label govuk-radios__label" for="phase-@phase.ToLower().Replace(" ", "-")">
+                                                    @phase
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }
+
+                        <!-- Status Filter -->
+                        @if (Model.AvailableStatuses.Any())
+                        {
+                            <div class="govuk-form-group">
+                                <fieldset class="govuk-fieldset">
+                                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                                        Assessment status
+                                    </legend>
+                                    <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+                                        <div class="govuk-radios__item">
+                                            <input class="govuk-radios__input" id="status-all" name="status" type="radio" value="" @(string.IsNullOrEmpty(Model.StatusFilter) ? "checked" : "")>
+                                            <label class="govuk-label govuk-radios__label" for="status-all">
+                                                All statuses
+                                            </label>
+                                        </div>
+                                        @foreach (var status in Model.AvailableStatuses)
+                                        {
+                                            <div class="govuk-radios__item">
+                                                <input class="govuk-radios__input" id="status-@status.ToLower().Replace(" ", "-")" name="status" type="radio" value="@status" @(Model.StatusFilter == status ? "checked" : "")>
+                                                <label class="govuk-label govuk-radios__label" for="status-@status.ToLower().Replace(" ", "-")">
+                                                    @status
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }
+
+                        <div class="moj-filter__actions">
+                            <button class="govuk-button" data-module="govuk-button">
+                                Apply filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="govuk-grid-column-two-thirds">
+        
+        <!-- Results Summary -->
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <p class="govuk-body">
+                    @if (Model.TotalCount == 0)
+                    {
+                        <span>No assessments found</span>
+                    }
+                    else
+                    {
+                        <span>Showing @((Model.CurrentPage - 1) * Model.PageSize + 1) to @Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount) of @Model.TotalCount assessments</span>
+                    }
+                </p>
+            </div>
+        </div>
+
+        <!-- Assessments Table -->
+        @if (Model.Assessments.Any())
+        {
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Title</th>
+                        <th scope="col" class="govuk-table__header">Type</th>
+                        <th scope="col" class="govuk-table__header">Phase</th>
+                        <th scope="col" class="govuk-table__header">Status</th>
+                        <th scope="col" class="govuk-table__header">Start date</th>
+                        <th scope="col" class="govuk-table__header">End date</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    @foreach (var assessment in Model.Assessments)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">
+                                @if (!string.IsNullOrEmpty(assessment.Url))
+                                {
+                                    <a href="@assessment.Url" class="govuk-link" target="_blank">@assessment.Title</a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Detail", "Assessments", new { id = assessment.Id })" class="govuk-link">@assessment.Title</a>
+                                }
+                            </td>
+                            <td class="govuk-table__cell">@assessment.Type</td>
+                            <td class="govuk-table__cell">@assessment.Phase</td>
+                            <td class="govuk-table__cell">
+                                <span class="govuk-tag govuk-tag--@GetStatusTagClass(assessment.Status)">@assessment.Status</span>
+                            </td>
+                            <td class="govuk-table__cell">
+                                @if (assessment.StartDate.HasValue)
+                                {
+                                    @assessment.StartDate.Value.ToString("dd MMM yyyy")
+                                }
+                            </td>
+                            <td class="govuk-table__cell">
+                                @if (assessment.EndDate.HasValue)
+                                {
+                                    @assessment.EndDate.Value.ToString("dd MMM yyyy")
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="govuk-pagination" role="navigation" aria-label="results">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <div class="govuk-pagination__prev">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Assessments", new { 
+                                page = Model.CurrentPage - 1, 
+                                search = Model.SearchQuery, 
+                                type = Model.TypeFilter, 
+                                phase = Model.PhaseFilter, 
+                                status = Model.StatusFilter 
+                            })" rel="prev">
+                                <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                    <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+                                </svg>
+                                <span class="govuk-pagination__link-title">Previous</span>
+                            </a>
+                        </div>
+                    }
+
+                    <ul class="govuk-pagination__list">
+                        @{
+                            var startPage = Math.Max(1, Model.CurrentPage - 2);
+                            var endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                        }
+
+                        @if (startPage > 1)
+                        {
+                            <li class="govuk-pagination__item">
+                                <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Assessments", new { 
+                                    page = 1, 
+                                    search = Model.SearchQuery, 
+                                    type = Model.TypeFilter, 
+                                    phase = Model.PhaseFilter, 
+                                    status = Model.StatusFilter 
+                                })" aria-label="Page 1">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                            }
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="govuk-pagination__item @(i == Model.CurrentPage ? "govuk-pagination__item--current" : "")">
+                                @if (i == Model.CurrentPage)
+                                {
+                                    <span class="govuk-pagination__link" aria-current="page" aria-label="Page @i, current page">@i</span>
+                                }
+                                else
+                                {
+                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Assessments", new { 
+                                        page = i, 
+                                        search = Model.SearchQuery, 
+                                        type = Model.TypeFilter, 
+                                        phase = Model.PhaseFilter, 
+                                        status = Model.StatusFilter 
+                                    })" aria-label="Page @i">@i</a>
+                                }
+                            </li>
+                        }
+
+                        @if (endPage < Model.TotalPages)
+                        {
+                            @if (endPage < Model.TotalPages - 1)
+                            {
+                                <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                            }
+                            <li class="govuk-pagination__item">
+                                <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Assessments", new { 
+                                    page = Model.TotalPages, 
+                                    search = Model.SearchQuery, 
+                                    type = Model.TypeFilter, 
+                                    phase = Model.PhaseFilter, 
+                                    status = Model.StatusFilter 
+                                })" aria-label="Page @Model.TotalPages">@Model.TotalPages</a>
+                            </li>
+                        }
+                    </ul>
+
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <div class="govuk-pagination__next">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Assessments", new { 
+                                page = Model.CurrentPage + 1, 
+                                search = Model.SearchQuery, 
+                                type = Model.TypeFilter, 
+                                phase = Model.PhaseFilter, 
+                                status = Model.StatusFilter 
+                            })" rel="next">
+                                <span class="govuk-pagination__link-title">Next</span>
+                                <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                    <path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.449 6.7441-6.4062-6.7246-6.7266z"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    }
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p>No assessments found matching your criteria.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    string GetStatusTagClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "completed" => "green",
+            "in progress" => "blue",
+            "pending" => "yellow",
+            "cancelled" => "red",
+            "draft" => "grey",
+            _ => "grey"
+        };
+    }
+}

@@ -71,14 +71,14 @@ public class StartupCacheService : IStartupCacheService
 
 public class StartupCacheHostedService : BackgroundService
 {
-    private readonly IStartupCacheService _startupCacheService;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<StartupCacheHostedService> _logger;
 
     public StartupCacheHostedService(
-        IStartupCacheService startupCacheService,
+        IServiceScopeFactory serviceScopeFactory,
         ILogger<StartupCacheHostedService> logger)
     {
-        _startupCacheService = startupCacheService;
+        _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
     }
 
@@ -87,7 +87,11 @@ public class StartupCacheHostedService : BackgroundService
         try
         {
             _logger.LogInformation("Startup cache service starting");
-            await _startupCacheService.WarmCacheOnStartupAsync();
+            
+            using var scope = _serviceScopeFactory.CreateScope();
+            var startupCacheService = scope.ServiceProvider.GetRequiredService<IStartupCacheService>();
+            
+            await startupCacheService.WarmCacheOnStartupAsync();
         }
         catch (Exception ex)
         {
