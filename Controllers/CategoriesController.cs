@@ -130,6 +130,7 @@ public class CategoriesController : Controller
             {
                 CategoryTypes = new List<CategoryType>()
             };
+            ViewData["ActiveNav"] = "categories";
             return View(viewModel);
         }
     }
@@ -225,6 +226,7 @@ public class CategoriesController : Controller
                     CategoryTypes = categoryTypes ?? new List<CategoryType>()
                 };
 
+                ViewData["ActiveNav"] = "categories";
                 return View("Index", indexViewModel);
             }
 
@@ -401,6 +403,7 @@ public class CategoriesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading category detail for slug: {Slug}", slug);
+            ViewData["ActiveNav"] = "categories";
             return NotFound();
         }
     }
