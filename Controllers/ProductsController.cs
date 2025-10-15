@@ -137,15 +137,15 @@ public class ProductsController : Controller
             _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, BusinessArea={BusinessAreaCount}, UserGroup={UserGroupCount}", 
                 phaseValues.Count, channelValues.Count, groupValues.Count, userGroupValues.Count);
             
-            // Additional debug logging for Business Area values
+            // Additional debug logging for Business area values
             if (groupValues.Any())
             {
-                _logger.LogInformation("Business Area values: {Values}", 
+                _logger.LogInformation("Business area values: {Values}", 
                     string.Join(", ", groupValues.Take(10).Select(v => $"{v.Name} ({v.Slug})")));
             }
             else
             {
-                _logger.LogWarning("No Business Area values loaded - check CMS category type name");
+                _logger.LogWarning("No Business area values loaded - check CMS category type name");
             }
 
             // Build CMS filter query string
@@ -335,6 +335,15 @@ public class ProductsController : Controller
 
             if (product.CategoryValues?.Any() == true)
             {
+                _logger.LogInformation("Product has {Count} category values assigned", product.CategoryValues.Count);
+                
+                // Log all category values for debugging
+                foreach (var cv in product.CategoryValues)
+                {
+                    _logger.LogInformation("Category Value: Name={Name}, Slug={Slug}, CategoryType={Type}", 
+                        cv.Name, cv.Slug, cv.CategoryType?.Name ?? "NULL");
+                }
+                
                 var groupedCategories = product.CategoryValues
                     .GroupBy(cv => cv.CategoryType?.Name ?? "Unknown")
                     .OrderBy(g => g.Key);
@@ -342,6 +351,9 @@ public class ProductsController : Controller
                 foreach (var group in groupedCategories)
                 {
                     var categoryType = group.First().CategoryType;
+                    _logger.LogInformation("Processing group: {GroupKey}, CategoryType is null: {IsNull}, Count: {Count}", 
+                        group.Key, categoryType == null, group.Count());
+                    
                     if (categoryType != null)
                     {
                         var info = new ProductCategoryInfo
@@ -350,11 +362,20 @@ public class ProductsController : Controller
                             CategoryTypeSlug = categoryType.Slug,
                             IsMultiLevel = categoryType.MultiLevel,
                             CategoryValueNames = group.Select(cv => cv.Name).ToList(),
-                            CategoryValueSlugs = group.Select(cv => cv.Slug).ToList()
+                            CategoryValueSlugs = group.Select(cv => cv.Slug).ToList(),
+                            CategoryValueDescriptions = group.Select(cv => cv.ShortDescription ?? string.Empty).ToList()
                         };
                         categoryInfo.Add(info);
+                        _logger.LogInformation("Added category group: {Name} with {Count} values", categoryType.Name, info.CategoryValueNames.Count);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Skipping category group '{GroupKey}' because CategoryType is null. Values in group: {Values}", 
+                            group.Key, string.Join(", ", group.Select(cv => cv.Name)));
                     }
                 }
+                
+                _logger.LogInformation("Final category info count: {Count}", categoryInfo.Count);
             }
 
             var viewModel = new ProductCategoriesViewModel
@@ -838,7 +859,7 @@ public class ProductsController : Controller
         {
             selectedFilters.Add(new SelectedFilter
             {
-                Category = "Business Area",
+                Category = "Business area",
                 Value = group,
                 DisplayText = group,
                 RemoveUrl = BuildRemoveFilterUrl(viewModel, "group", group)
@@ -850,7 +871,7 @@ public class ProductsController : Controller
         {
             selectedFilters.Add(new SelectedFilter
             {
-                Category = "Business Area",
+                Category = "Business area",
                 Value = subgroup,
                 DisplayText = $"{subgroup} (sub-area)",
                 RemoveUrl = BuildRemoveFilterUrl(viewModel, "subgroup", subgroup)
@@ -959,6 +980,7 @@ public class ProductsController : Controller
     }
 
     // GET: Products/Edit/{fipsid}
+    [HttpGet]
     public async Task<IActionResult> ProductEdit(string fipsid)
     {
         try

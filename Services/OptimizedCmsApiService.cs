@@ -466,7 +466,10 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             // Populate relations with minimal fields
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
+            "populate[category_values][fields][2]=short_description",
             "populate[category_values][populate][category_type][fields][0]=name",
+            "populate[category_values][populate][category_type][fields][1]=slug",
+            "populate[category_values][populate][category_type][fields][2]=multi_level",
             "populate[product_contacts][fields][0]=role",
             "populate[product_contacts][populate][users_permissions_user][fields][0]=first_name",
             "populate[product_contacts][populate][users_permissions_user][fields][1]=last_name",
@@ -552,7 +555,10 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             // Populate relations with minimal fields
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
+            "populate[category_values][fields][2]=short_description",
             "populate[category_values][populate][category_type][fields][0]=name",
+            "populate[category_values][populate][category_type][fields][1]=slug",
+            "populate[category_values][populate][category_type][fields][2]=multi_level",
             "populate[product_contacts][fields][0]=role",
             "populate[product_contacts][populate][users_permissions_user][fields][0]=first_name",
             "populate[product_contacts][populate][users_permissions_user][fields][1]=last_name",
@@ -638,7 +644,10 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             // Populate relations with minimal fields
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
+            "populate[category_values][fields][2]=short_description",
             "populate[category_values][populate][category_type][fields][0]=name",
+            "populate[category_values][populate][category_type][fields][1]=slug",
+            "populate[category_values][populate][category_type][fields][2]=multi_level",
             "populate[product_contacts][fields][0]=role",
             "populate[product_contacts][populate][users_permissions_user][fields][0]=first_name",
             "populate[product_contacts][populate][users_permissions_user][fields][1]=last_name",
