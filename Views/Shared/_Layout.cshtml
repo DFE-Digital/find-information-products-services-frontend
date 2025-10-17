@@ -2,6 +2,13 @@
 <!DOCTYPE html>
 <html lang="en" class="govuk-template--rebranded">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KQLN72S8');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FIPS</title>
@@ -48,6 +55,11 @@
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
 
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KQLN72S8"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
    
 
   @await Html.PartialAsync("_CookieBanner")
@@ -89,16 +101,27 @@
               Categories
             </a>
           </li>
-          <li class="govuk-service-navigation__item @(ViewData["ActiveNav"]?.ToString() == "admin" ? "govuk-service-navigation__item--active" : "")">
-            <a class="govuk-service-navigation__link" href="/admin">
-              Admin
-            </a>
-          </li>
+          
         </ul>
       </nav>
     </div>
   </div>
 </section>
+}
+
+@if ((ViewData.Model as BaseViewModel)?.IsHomepage != true) {
+<div class="govuk-phase-banner">
+<div class="govuk-width-container">
+        <p class="govuk-phase-banner__content">
+            <strong class="govuk-tag govuk-phase-banner__content__tag">
+      Beta
+    </strong>
+            <span class="govuk-phase-banner__text">
+      This is a new service. Find out how to <a class="govuk-link" href="/updates">improve missing or inaccurate information</a>.
+    </span>
+        </p>
+    </div>
+</div>
 }
 
 @RenderSection("BeforeContent", required: false)

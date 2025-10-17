@@ -1,14 +1,27 @@
+using System.Text.Json.Serialization;
+
 namespace FipsFrontend.Models
 {
     public class PageAbout
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        
+        [JsonPropertyName("meta_description")]
         public string MetaDescription { get; set; } = string.Empty;
+        
         public string Body { get; set; } = string.Empty;
+        
+        [JsonPropertyName("related_content")]
         public string RelatedContent { get; set; } = string.Empty;
+        
+        [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+        
+        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
+        
+        [JsonPropertyName("publishedAt")]
         public DateTime? PublishedAt { get; set; }
     }
 
@@ -16,11 +29,22 @@ namespace FipsFrontend.Models
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        
+        [JsonPropertyName("meta_description")]
         public string MetaDescription { get; set; } = string.Empty;
+        
         public string Body { get; set; } = string.Empty;
+        
+        [JsonPropertyName("related_content")]
         public string RelatedContent { get; set; } = string.Empty;
+        
+        [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+        
+        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
+        
+        [JsonPropertyName("publishedAt")]
         public DateTime? PublishedAt { get; set; }
     }
 
@@ -28,11 +52,22 @@ namespace FipsFrontend.Models
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        
+        [JsonPropertyName("meta_description")]
         public string MetaDescription { get; set; } = string.Empty;
+        
         public string Body { get; set; } = string.Empty;
+        
+        [JsonPropertyName("related_content")]
         public string RelatedContent { get; set; } = string.Empty;
+        
+        [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+        
+        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
+        
+        [JsonPropertyName("publishedAt")]
         public DateTime? PublishedAt { get; set; }
     }
 
@@ -40,11 +75,22 @@ namespace FipsFrontend.Models
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        
+        [JsonPropertyName("meta_description")]
         public string MetaDescription { get; set; } = string.Empty;
+        
         public string Body { get; set; } = string.Empty;
+        
+        [JsonPropertyName("related_content")]
         public string RelatedContent { get; set; } = string.Empty;
+        
+        [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+        
+        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
+        
+        [JsonPropertyName("publishedAt")]
         public DateTime? PublishedAt { get; set; }
     }
 
@@ -52,11 +98,22 @@ namespace FipsFrontend.Models
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
+        
+        [JsonPropertyName("meta_description")]
         public string MetaDescription { get; set; } = string.Empty;
+        
         public string Body { get; set; } = string.Empty;
+        
+        [JsonPropertyName("related_content")]
         public string RelatedContent { get; set; } = string.Empty;
+        
+        [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+        
+        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
+        
+        [JsonPropertyName("publishedAt")]
         public DateTime? PublishedAt { get; set; }
     }
 

@@ -130,6 +130,7 @@ public class CategoriesController : Controller
             {
                 CategoryTypes = new List<CategoryType>()
             };
+            ViewData["ActiveNav"] = "categories";
             return View(viewModel);
         }
     }
@@ -225,6 +226,7 @@ public class CategoriesController : Controller
                     CategoryTypes = categoryTypes ?? new List<CategoryType>()
                 };
 
+                ViewData["ActiveNav"] = "categories";
                 return View("Index", indexViewModel);
             }
 
@@ -387,7 +389,7 @@ public class CategoriesController : Controller
                     
                     viewModel.PageTitle = $"{string.Join(" - ", breadcrumbNames)}";
                     viewModel.Group = categoryType.Name;
-                    viewModel.PageDescription = $"Browse products in {currentParent.Name}";
+                    viewModel.PageDescription = currentParent.ShortDescription ?? $"Browse products in {currentParent.Name}";
                 }
                 else
                 {
@@ -401,6 +403,7 @@ public class CategoriesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading category detail for slug: {Slug}", slug);
+            ViewData["ActiveNav"] = "categories";
             return NotFound();
         }
     }
@@ -413,7 +416,7 @@ public class CategoriesController : Controller
             "phase" => $"phase={slug}",
             "channel" => $"channel={slug}",
             "type" => $"type={slug}",
-            "group" => $"group={slug}",
+            "business area" => $"group={slug}",
             "user group" => $"userGroup={slug}",
             _ => $"category={slug}"
         };

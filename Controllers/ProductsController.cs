@@ -44,7 +44,7 @@ public class ProductsController : Controller
             // Load category values for filters using individual API calls for each category type
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
             var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
             // Try different variations of user group category type names
             var userGroupVariations = new[] { "User group", "User Group", "User groups", "User Groups", "User Type", "User Types", "Audience", "Target Audience" };
             List<CategoryValue> userGroupValues = new List<CategoryValue>();
@@ -134,8 +134,19 @@ public class ProductsController : Controller
             }
 
             // Debug logging for category values
-            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, Group={GroupCount}, UserGroup={UserGroupCount}", 
+            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, BusinessArea={BusinessAreaCount}, UserGroup={UserGroupCount}", 
                 phaseValues.Count, channelValues.Count, groupValues.Count, userGroupValues.Count);
+            
+            // Additional debug logging for Business area values
+            if (groupValues.Any())
+            {
+                _logger.LogInformation("Business area values: {Values}", 
+                    string.Join(", ", groupValues.Take(10).Select(v => $"{v.Name} ({v.Slug})")));
+            }
+            else
+            {
+                _logger.LogWarning("No Business area values loaded - check CMS category type name");
+            }
 
             // Build CMS filter query string
             var filterQuery = BuildCmsFilterQuery(phase, group, subgroup, channel, type, cmdbStatus, parent, userGroup);
@@ -324,6 +335,15 @@ public class ProductsController : Controller
 
             if (product.CategoryValues?.Any() == true)
             {
+                _logger.LogInformation("Product has {Count} category values assigned", product.CategoryValues.Count);
+                
+                // Log all category values for debugging
+                foreach (var cv in product.CategoryValues)
+                {
+                    _logger.LogInformation("Category Value: Name={Name}, Slug={Slug}, CategoryType={Type}", 
+                        cv.Name, cv.Slug, cv.CategoryType?.Name ?? "NULL");
+                }
+                
                 var groupedCategories = product.CategoryValues
                     .GroupBy(cv => cv.CategoryType?.Name ?? "Unknown")
                     .OrderBy(g => g.Key);
@@ -331,6 +351,9 @@ public class ProductsController : Controller
                 foreach (var group in groupedCategories)
                 {
                     var categoryType = group.First().CategoryType;
+                    _logger.LogInformation("Processing group: {GroupKey}, CategoryType is null: {IsNull}, Count: {Count}", 
+                        group.Key, categoryType == null, group.Count());
+                    
                     if (categoryType != null)
                     {
                         var info = new ProductCategoryInfo
@@ -339,11 +362,20 @@ public class ProductsController : Controller
                             CategoryTypeSlug = categoryType.Slug,
                             IsMultiLevel = categoryType.MultiLevel,
                             CategoryValueNames = group.Select(cv => cv.Name).ToList(),
-                            CategoryValueSlugs = group.Select(cv => cv.Slug).ToList()
+                            CategoryValueSlugs = group.Select(cv => cv.Slug).ToList(),
+                            CategoryValueDescriptions = group.Select(cv => cv.ShortDescription ?? string.Empty).ToList()
                         };
                         categoryInfo.Add(info);
+                        _logger.LogInformation("Added category group: {Name} with {Count} values", categoryType.Name, info.CategoryValueNames.Count);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Skipping category group '{GroupKey}' because CategoryType is null. Values in group: {Values}", 
+                            group.Key, string.Join(", ", group.Select(cv => cv.Name)));
                     }
                 }
+                
+                _logger.LogInformation("Final category info count: {Count}", categoryInfo.Count);
             }
 
             var viewModel = new ProductCategoriesViewModel
@@ -445,12 +477,12 @@ public class ProductsController : Controller
             filtered = filtered.Where(p => cmdbStatus.Contains(p.State, StringComparer.OrdinalIgnoreCase));
         }
 
-        // Apply group/subgroup filters (based on category values with category type "Group")
+        // Apply group/subgroup filters (based on category values with category type "Business area")
         if (group?.Length > 0 || subgroup?.Length > 0)
         {
             filtered = filtered.Where(p =>
                 p.CategoryValues?.Any(cv =>
-                    cv.CategoryType?.Name.Equals("Group", StringComparison.OrdinalIgnoreCase) == true &&
+                    cv.CategoryType?.Name.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true &&
                     ((group?.Length > 0 && group.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) ||
                      (subgroup?.Length > 0 && subgroup.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)))
                 ) == true);
@@ -822,26 +854,26 @@ public class ProductsController : Controller
             });
         }
 
-        // Add group filters
+        // Add business area filters
         foreach (var group in viewModel.SelectedGroups)
         {
             selectedFilters.Add(new SelectedFilter
             {
-                Category = "Group",
+                Category = "Business area",
                 Value = group,
                 DisplayText = group,
                 RemoveUrl = BuildRemoveFilterUrl(viewModel, "group", group)
             });
         }
 
-        // Add subgroup filters
+        // Add sub-business area filters
         foreach (var subgroup in viewModel.SelectedSubgroups)
         {
             selectedFilters.Add(new SelectedFilter
             {
-                Category = "Group",
+                Category = "Business area",
                 Value = subgroup,
-                DisplayText = $"{subgroup} (subgroup)",
+                DisplayText = $"{subgroup} (sub-area)",
                 RemoveUrl = BuildRemoveFilterUrl(viewModel, "subgroup", subgroup)
             });
         }
@@ -948,6 +980,7 @@ public class ProductsController : Controller
     }
 
     // GET: Products/Edit/{fipsid}
+    [HttpGet]
     public async Task<IActionResult> ProductEdit(string fipsid)
     {
         try
@@ -968,7 +1001,7 @@ public class ProductsController : Controller
 
             // Get category values for all types
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
             var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
             var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
 
@@ -978,7 +1011,7 @@ public class ProductsController : Controller
 
             // Find current category values
             var currentPhase = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
-            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
             var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
             var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
 
@@ -1028,7 +1061,7 @@ public class ProductsController : Controller
                 // Reload the form data
                 var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
                 var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
                 var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
                 var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
                 // Note: Users API call removed since contacts section was removed
@@ -1117,7 +1150,7 @@ public class ProductsController : Controller
                 // Reload form data
                 var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
                 var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
                 var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
                 var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
                 // Note: Users API call removed since contacts section was removed
@@ -1139,7 +1172,7 @@ public class ProductsController : Controller
             // Reload form data
             var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
             var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
             var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
             // Note: Users API call removed since contacts section was removed
@@ -1171,7 +1204,7 @@ public class ProductsController : Controller
             // Reload category values
             var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
             var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
             var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
 

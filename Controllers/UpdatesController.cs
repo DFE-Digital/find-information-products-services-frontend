@@ -22,7 +22,7 @@ public class UpdatesController : Controller
     {
         try
         {
-            var pageUpdates = await _cmsApiService.GetAsync<ApiResponse<PageUpdates>>("page-updates");
+            var pageUpdates = await _cmsApiService.GetAsync<ApiResponse<PageUpdates>>("page-update");
             var viewModel = new UpdatesViewModel
             {
                 PageContent = pageUpdates?.Data

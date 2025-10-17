@@ -5,7 +5,7 @@ namespace FipsFrontend.Models
     public class CategoriesIndexViewModel : BaseViewModel
     {
         public List<CategoryType> CategoryTypes { get; set; } = new List<CategoryType>();
-        
+
         public CategoriesIndexViewModel()
         {
             PageTitle = "Browse categories";

@@ -4,7 +4,7 @@
 @{ ViewData["Description"] = Model.PageDescription; }
 
 @section BeforeContent {
-    <div class="dfe-masthead dfe-masthead--with-links">
+        <div class="dfe-masthead dfe-masthead--with-links govuk-!-padding-bottom-3 govuk-!-margin-bottom-3">
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
@@ -17,7 +17,7 @@
                             <tr class="govuk-table__row">
                                 <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Phase</th>
-                                <th class="govuk-table__header govuk-!-width-one-quarter">Group</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Business area</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Contacts</th>
                             </tr>
                         </thead>
@@ -47,9 +47,9 @@
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
-                                    <span class="govuk-visually-hidden">Group: </span>
+                                    <span class="govuk-visually-hidden">Business Area: </span>
                                     @{
-                                        var businessAreaCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+                                        var businessAreaCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
                                     }
                                     @if (businessAreaCategory != null)
                                     {
@@ -122,9 +122,10 @@
         </div>
     }
 
-    <form asp-action="ProductEdit" method="post" novalidate>
+    <form asp-action="ProductEdit" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
         @Html.AntiForgeryToken()
-        <input type="hidden" name="fipsid" value="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" />
+
+
         
         <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <h1 class="govuk-label-wrapper">
@@ -148,6 +149,7 @@
                    type="text" 
                    value="@Model.Title"
                    maxlength="255"
+
                    aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint" : "Title-hint")">
         </div>
 

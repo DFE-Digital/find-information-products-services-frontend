@@ -31,12 +31,15 @@ public class AboutController : Controller
             // Process markdown content in the controller
             if (viewModel.PageContent != null)
             {
+
+
+
                 _logger.LogInformation("Processing markdown content. Body length: {BodyLength}, RelatedContent length: {RelatedLength}", 
                     viewModel.PageContent.Body?.Length ?? 0, 
                     viewModel.PageContent.RelatedContent?.Length ?? 0);
                 
                 viewModel.ProcessedBody = GovUkMarkdownHelper.ToGovUkHtml(viewModel.PageContent.Body ?? "");
-                viewModel.ProcessedRelatedContent = GovUkMarkdownHelper.ToGovUkPlainList(viewModel.PageContent.RelatedContent ?? "");
+                viewModel.ProcessedRelatedContent = GovUkMarkdownHelper.ToGovUkHtml(viewModel.PageContent.RelatedContent ?? "");
                 
                 _logger.LogInformation("Processed content. ProcessedBody length: {ProcessedBodyLength}, ProcessedRelatedContent length: {ProcessedRelatedLength}", 
                     viewModel.ProcessedBody?.Length ?? 0, 

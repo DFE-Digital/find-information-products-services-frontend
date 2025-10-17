@@ -129,24 +129,43 @@ public class CmsApiService
             var json = JsonSerializer.Serialize(data);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             
+            _logger.LogInformation("POST Request to: {Url}", fullUrl);
+            _logger.LogInformation("POST Request body: {Json}", json);
+            
             // Use write API key for POST requests
             var writeApiKey = _configuration["CmsApi:WriteApiKey"];
+            if (string.IsNullOrEmpty(writeApiKey))
+            {
+                throw new InvalidOperationException("CmsApi:WriteApiKey is not configured");
+            }
+            
+            // Clear any existing authorization header and set the write API key
+            _httpClient.DefaultRequestHeaders.Authorization = null;
             _httpClient.DefaultRequestHeaders.Authorization = 
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", writeApiKey);
             
             var response = await _httpClient.PostAsync(fullUrl, content);
-            response.EnsureSuccessStatusCode();
             
-            var jsonContent = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(jsonContent, new JsonSerializerOptions
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation("POST Response status: {StatusCode}", response.StatusCode);
+            _logger.LogInformation("POST Response body: {Content}", responseContent);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("POST request failed with status {StatusCode}. Response: {Response}", 
+                    response.StatusCode, responseContent);
+                throw new HttpRequestException($"POST request failed with status {response.StatusCode}: {responseContent}");
+            }
+            
+            return JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error calling CMS API endpoint: {Endpoint}", endpoint);
-            return default;
+            _logger.LogError(ex, "Error calling CMS API POST endpoint: {Endpoint}. Message: {Message}", endpoint, ex.Message);
+            throw; // Re-throw instead of swallowing the exception
         }
     }
 
@@ -158,25 +177,45 @@ public class CmsApiService
             var json = JsonSerializer.Serialize(data);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             
+            _logger.LogInformation("PUT Request to: {Url}", fullUrl);
+            _logger.LogInformation("PUT Request body: {Json}", json);
+            
             // Use write API key for PUT requests
             var writeApiKey = _configuration["CmsApi:WriteApiKey"];
+            if (string.IsNullOrEmpty(writeApiKey))
+            {
+                throw new InvalidOperationException("CmsApi:WriteApiKey is not configured");
+            }
+            
+            // Clear any existing authorization header and set the write API key
+            _httpClient.DefaultRequestHeaders.Authorization = null;
             _httpClient.DefaultRequestHeaders.Authorization = 
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", writeApiKey);
             
-
-            var response = await _httpClient.PutAsync(fullUrl, content);
-            response.EnsureSuccessStatusCode();
+            _logger.LogInformation("Using WriteApiKey: {Key}", writeApiKey?.Substring(0, Math.Min(10, writeApiKey?.Length ?? 0)) + "...");
             
-            var jsonContent = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(jsonContent, new JsonSerializerOptions
+            var response = await _httpClient.PutAsync(fullUrl, content);
+            
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation("PUT Response status: {StatusCode}", response.StatusCode);
+            _logger.LogInformation("PUT Response body: {Content}", responseContent);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("PUT request failed with status {StatusCode}. Response: {Response}", 
+                    response.StatusCode, responseContent);
+                throw new HttpRequestException($"PUT request failed with status {response.StatusCode}: {responseContent}");
+            }
+            
+            return JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error calling CMS API endpoint: {Endpoint}", endpoint);
-            return default;
+            _logger.LogError(ex, "Error calling CMS API PUT endpoint: {Endpoint}. Message: {Message}", endpoint, ex.Message);
+            throw; // Re-throw instead of swallowing the exception
         }
     }
 

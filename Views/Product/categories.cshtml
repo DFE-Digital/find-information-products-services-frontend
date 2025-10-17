@@ -4,7 +4,7 @@
 }
 
 @section BeforeContent {
-    <div class="dfe-masthead dfe-masthead--with-links">
+       <div class="dfe-masthead dfe-masthead--with-links govuk-!-padding-bottom-3 govuk-!-margin-bottom-3">
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
@@ -17,7 +17,7 @@
                             <tr class="govuk-table__row">
                                 <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Phase</th>
-                                <th class="govuk-table__header govuk-!-width-one-quarter">Group</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">Business area</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Contacts</th>
                             </tr>
                         </thead>
@@ -91,54 +91,89 @@
 
 
    <div class="govuk-grid-column-three-quarters">
+
+   @{
+       var userGroupCategories = Model.CategoryInfo.Where(c => c.CategoryTypeName?.Equals("User group", StringComparison.OrdinalIgnoreCase) == true).ToList();
+       var otherCategories = Model.CategoryInfo.Where(c => !c.CategoryTypeName?.Equals("User group", StringComparison.OrdinalIgnoreCase) == true).ToList();
+   }
+
+   <h2 class="govuk-heading-m">Categories</h2>
+   <p class="govuk-body">This product has been assigned with the following categories:</p>
         
-        @if (Model.CategoryInfo.Any())
+        @if (otherCategories.Any())
         {
-            @foreach (var categoryInfo in Model.CategoryInfo)
-            {
-                <div class="govuk-!-margin-bottom-6">
-                    <h2 class="govuk-heading-m govuk-!-margin-bottom-3">@categoryInfo.CategoryTypeName</h2>
-                    
-                    @if (categoryInfo.CategoryValueNames.Any())
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Name</th>
+                        <th scope="col" class="govuk-table__header">Type</th>
+                        <th scope="col" class="govuk-table__header">Description</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    @foreach (var categoryInfo in otherCategories)
                     {
                         @for (int i = 0; i < categoryInfo.CategoryValueNames.Count; i++)
                         {
-                            <div class="govuk-grid-row govuk-!-margin-bottom-3">
-                                <div class="govuk-grid-column-one-third">
-                                    <div class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <a href="/products?@GetFilterParameter(categoryInfo.CategoryTypeName, categoryInfo.CategoryValueSlugs[i])" class="govuk-link govuk-link--no-visited-state">
                                         @categoryInfo.CategoryValueNames[i]
-                                    </div>
-                                </div>
-                                <div class="govuk-grid-column-two-thirds">
-                                    <div class="govuk-body">
-                                        <a href="/products?@GetFilterParameter(categoryInfo.CategoryTypeName, categoryInfo.CategoryValueSlugs[i])" class="govuk-link govuk-!-margin-right-4" rel="noopener noreferrer">
-                                            Other products
-                                        </a>
-                                        <a href="/categories/@categoryInfo.CategoryTypeSlug" class="govuk-link" rel="noopener noreferrer">
-                                            View description
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+                                    </a>
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @categoryInfo.CategoryTypeName
+                                </td>
+                                <td class="govuk-table__cell">
+                                    @categoryInfo.CategoryValueDescriptions[i]
+                                </td>
+                            </tr>
                         }
                     }
-                    else
-                    {
-                        <p class="govuk-body-s govuk-!-margin-bottom-0">No values assigned</p>
-                    }
-                </div>
-                
-                @if (categoryInfo != Model.CategoryInfo.Last())
-                {
-                    <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-bottom-6">
-                }
-            }
+                </tbody>
+            </table>
         }
         else
         {
             <div class="govuk-inset-text">
                 <p>No categories are currently assigned to this product.</p>
             </div>
+        }
+
+        @if (userGroupCategories.Any())
+        {
+            // Flatten and sort user groups alphabetically
+            var userGroups = userGroupCategories
+                .SelectMany(categoryInfo => categoryInfo.CategoryValueNames
+                    .Select((name, index) => new { 
+                        Name = name, 
+                        Slug = categoryInfo.CategoryValueSlugs[index],
+                        CategoryTypeName = categoryInfo.CategoryTypeName
+                    }))
+                .OrderBy(ug => ug.Name)
+                .ToList();
+            
+            <h2 class="govuk-heading-m govuk-!-margin-top-6">Users of this product</h2>
+            <p class="govuk-body">This product has been assigned with the following user groups as users of the product.</p>
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Name</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    @foreach (var userGroup in userGroups)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">
+                                <a href="/products?@GetFilterParameter(userGroup.CategoryTypeName, userGroup.Slug)" class="govuk-link govuk-link--no-visited-state">
+                                    @userGroup.Name
+                                </a>
+                            </td>                               
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
     </div>
 </div>

@@ -74,9 +74,9 @@ public class AdminController : Controller
     {
         try
         {
-            // Get Group and Phase category values for the form
+            // Get Business area and Phase category values for the form
             // No caching for admin operations
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", null) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", null) ?? new List<CategoryValue>();
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", null) ?? new List<CategoryValue>();
 
             // Find Demand phase and set it as selected by default
@@ -112,9 +112,9 @@ public class AdminController : Controller
         {
             if (!ModelState.IsValid)
             {
-                // Reload group and phase values for the form
+                // Reload business area and phase values for the form
                 var reloadDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", reloadDuration) ?? new List<CategoryValue>();
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", reloadDuration) ?? new List<CategoryValue>();
                 var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", reloadDuration) ?? new List<CategoryValue>();
                 model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
                 model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).OrderBy(cv => cv.SortOrder ?? int.MaxValue).ToList();
@@ -169,9 +169,9 @@ public class AdminController : Controller
             {
                 ModelState.AddModelError("", "Failed to create the product. Please try again.");
                 
-                // Reload group and phase values for the form
+                // Reload business area and phase values for the form
                 var errorReloadDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", errorReloadDuration) ?? new List<CategoryValue>();
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", errorReloadDuration) ?? new List<CategoryValue>();
                 var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", errorReloadDuration) ?? new List<CategoryValue>();
                 model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
                 model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).OrderBy(cv => cv.SortOrder ?? int.MaxValue).ToList();
@@ -186,9 +186,9 @@ public class AdminController : Controller
             _logger.LogError(ex, "Error creating product: {Title}", model.Title);
             ModelState.AddModelError("", "An error occurred while creating the product. Please try again.");
             
-            // Reload group and phase values for the form
+            // Reload business area and phase values for the form
             var catchReloadDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", catchReloadDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", catchReloadDuration) ?? new List<CategoryValue>();
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", catchReloadDuration) ?? new List<CategoryValue>();
             model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
             model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
@@ -727,13 +727,13 @@ public class AdminController : Controller
 
             // Get all available category values for each category type
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", null) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Group", null) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", null) ?? new List<CategoryValue>();
             var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", null) ?? new List<CategoryValue>();
             var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", null) ?? new List<CategoryValue>();
 
             // Get current category values for the product
             var currentPhase = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
-            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Group", StringComparison.OrdinalIgnoreCase) == true);
+            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
             var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
             var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
 

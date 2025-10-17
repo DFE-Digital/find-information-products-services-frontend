@@ -50,7 +50,7 @@
                                 @Model.ParentCategory.Name
                             </a>
                         </h2>
-                        <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
+                        <p class="dfe-chevron-card__description govuk-body govuk-body-s">@Model.ParentCategory.ShortDescription</p>
                         
                         <a class="dfe-chevron-card__link category-filter-link" 
                            href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug)" 
@@ -120,7 +120,7 @@
                                         @categoryValue.Name
                                     </a>
                                 </h2>
-                                <p class="dfe-chevron-card__description govuk-body govuk-body-s">View products in this category</p>
+                                <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryValue.ShortDescription</p>
                                 
                                 <a class="dfe-chevron-card__link category-filter-link" 
                                    href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug)" 
@@ -158,7 +158,7 @@
             "phase" => $"phase={slug}",
             "channel" => $"channel={slug}",
             "type" => $"type={slug}",
-            "group" => $"group={slug}",
+            "business area" => $"group={slug}",
             "user group" => $"userGroup={slug}",
             _ => $"category={slug}"
         };

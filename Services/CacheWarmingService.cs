@@ -118,7 +118,7 @@ public class CacheWarmingService : ICacheWarmingService
             }
 
             // Warm specific category filters
-            var filterTypes = new[] { "Phase", "Channel", "Group", "User group", "Type" };
+            var filterTypes = new[] { "Phase", "Channel", "Business area", "User group", "Type" };
             foreach (var filterType in filterTypes)
             {
                 var values = await _cmsApiService.GetCategoryValuesForFilter(filterType, TimeSpan.FromMinutes(15));

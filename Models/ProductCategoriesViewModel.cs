@@ -32,6 +32,7 @@ namespace FipsFrontend.Models
         public string CategoryTypeSlug { get; set; } = string.Empty;
         public List<string> CategoryValueNames { get; set; } = new List<string>();
         public List<string> CategoryValueSlugs { get; set; } = new List<string>();
+        public List<string> CategoryValueDescriptions { get; set; } = new List<string>();
         public bool IsMultiLevel { get; set; } = false;
     }
 }
