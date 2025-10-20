@@ -21,7 +21,7 @@ public class CategoriesController : Controller
         _configuration = configuration;
     }
 
-    [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)] // Cache for 10 minutes
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)] // Cache for 10 minutes
     public async Task<IActionResult> Index()
     {
         var startTime = DateTimeOffset.UtcNow;
