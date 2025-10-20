@@ -1,0 +1,289 @@
+@model ReviewProposedChangesViewModel
+@{
+    ViewData["Title"] = Model.PageTitle;
+}
+
+@section BeforeContent {
+    <div class="dfe-masthead dfe-masthead--with-links govuk-!-padding-bottom-3 govuk-!-margin-bottom-3">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" class="govuk-back-link">Back to product</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        Review proposed changes
+                    </h1>
+                    <p class="govuk-body-l">@Model.Product.Title</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Success
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        @TempData["SuccessMessage"]
+                    </p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="govuk-error-summary" data-module="govuk-error-summary">
+                <div role="alert">
+                    <h2 class="govuk-error-summary__title">
+                        There is a problem
+                    </h2>
+                    <div class="govuk-error-summary__body">
+                        <p>@TempData["ErrorMessage"]</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.ProposedChanges?.Any() == true)
+        {
+            <p class="govuk-body">There are @Model.ProposedChanges.Count pending change request(s) for this product.</p>
+
+            @foreach (var change in Model.ProposedChanges)
+            {
+                <div class="govuk-!-margin-bottom-8">
+                    <div class="govuk-summary-card">
+                        <div class="govuk-summary-card__title-wrapper">
+                            <h2 class="govuk-summary-card__title">
+                                Proposed change from @change.SubmitterName
+                            </h2>
+                        </div>
+                        <div class="govuk-summary-card__content">
+                            <dl class="govuk-summary-list">
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        Submitted by
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @change.SubmitterName (@change.SubmitterEmail)
+                                    </dd>
+                                </div>
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        Date requested
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @change.DateRequested.ToString("dd MMMM yyyy HH:mm")
+                                    </dd>
+                                </div>
+                                <div class="govuk-summary-list__row">
+                                    <dt class="govuk-summary-list__key">
+                                        Reason
+                                    </dt>
+                                    <dd class="govuk-summary-list__value">
+                                        @change.Notes
+                                    </dd>
+                                </div>
+                            </dl>
+
+                            <h3 class="govuk-heading-s govuk-!-margin-top-6">Proposed changes</h3>
+                            
+                            <form asp-action="ActionProposedChange" method="post" class="proposed-change-form" data-change-id="@change.DocumentId">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ProposedChangeId" value="@change.DocumentId" />
+
+                                @if (change.ProposedTitle != change.CurrentTitle)
+                                {
+                                    <div class="govuk-form-group">
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="apply_title_@change.DocumentId" name="FieldsToApply" type="checkbox" value="title">
+                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_title_@change.DocumentId">
+                                                Title
+                                            </label>
+                                        </div>
+                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
+                                            <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>Current:</strong> @change.CurrentTitle</p>
+                                            <p class="govuk-body-s"><strong>Proposed:</strong> @change.ProposedTitle</p>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (change.ProposedShortDescription != change.CurrentShortDescription)
+                                {
+                                    <div class="govuk-form-group">
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="apply_short_desc_@change.DocumentId" name="FieldsToApply" type="checkbox" value="short_description">
+                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_short_desc_@change.DocumentId">
+                                                Short description
+                                            </label>
+                                        </div>
+                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
+                                            <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>Current:</strong> @change.CurrentShortDescription</p>
+                                            <p class="govuk-body-s"><strong>Proposed:</strong> @change.ProposedShortDescription</p>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (change.ProposedLongDescription != change.CurrentLongDescription)
+                                {
+                                    <div class="govuk-form-group">
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="apply_long_desc_@change.DocumentId" name="FieldsToApply" type="checkbox" value="long_description">
+                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_long_desc_@change.DocumentId">
+                                                Long description
+                                            </label>
+                                        </div>
+                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
+                                            <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>Current:</strong> @(change.CurrentLongDescription ?? "(none)")</p>
+                                            <p class="govuk-body-s"><strong>Proposed:</strong> @(change.ProposedLongDescription ?? "(none)")</p>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (change.ProposedProductUrl != change.CurrentProductUrl)
+                                {
+                                    <div class="govuk-form-group">
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="apply_url_@change.DocumentId" name="FieldsToApply" type="checkbox" value="product_url">
+                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_url_@change.DocumentId">
+                                                Product URL
+                                            </label>
+                                        </div>
+                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
+                                            <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>Current:</strong> @(change.CurrentProductUrl ?? "(none)")</p>
+                                            <p class="govuk-body-s"><strong>Proposed:</strong> @(change.ProposedProductUrl ?? "(none)")</p>
+                                        </div>
+                                    </div>
+                                }
+
+                                @{
+                                    var currentCategoriesJson = System.Text.Json.JsonSerializer.Serialize(change.CurrentCategoryValues);
+                                    var proposedCategoriesJson = System.Text.Json.JsonSerializer.Serialize(change.ProposedCategoryValues);
+                                    var categoriesChanged = currentCategoriesJson != proposedCategoriesJson;
+                                }
+                                @if (categoriesChanged && change.ProposedCategoryValues?.Any() == true)
+                                {
+                                    <div class="govuk-form-group">
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="apply_categories_@change.DocumentId" name="FieldsToApply" type="checkbox" value="category_values">
+                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_categories_@change.DocumentId">
+                                                Categories
+                                            </label>
+                                        </div>
+                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
+                                            <p class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-1">Current:</p>
+                                            @if (change.CurrentCategoryValues?.Any() == true)
+                                            {
+                                                <ul class="govuk-list govuk-list--bullet govuk-body-s">
+                                                    @foreach (var cat in change.CurrentCategoryValues)
+                                                    {
+                                                        <li>@cat.CategoryType: @string.Join(", ", cat.CategoryValueNames)</li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <p class="govuk-body-s">(none)</p>
+                                            }
+                                            
+                                            <p class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-1 govuk-!-margin-top-2">Proposed:</p>
+                                            <ul class="govuk-list govuk-list--bullet govuk-body-s">
+                                                @foreach (var cat in change.ProposedCategoryValues)
+                                                {
+                                                    <li>@cat.CategoryType: @string.Join(", ", cat.CategoryValueNames)</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                }
+
+                                @{
+                                    var currentContactsJson = System.Text.Json.JsonSerializer.Serialize(change.CurrentProductContacts);
+                                    var proposedContactsJson = System.Text.Json.JsonSerializer.Serialize(change.ProposedProductContacts);
+                                    var contactsChanged = currentContactsJson != proposedContactsJson;
+                                }
+                                @if (contactsChanged && change.ProposedProductContacts?.Any() == true)
+                                {
+                                    <div class="govuk-form-group">
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input" id="apply_contacts_@change.DocumentId" name="FieldsToApply" type="checkbox" value="product_contacts">
+                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_contacts_@change.DocumentId">
+                                                Product contacts
+                                            </label>
+                                        </div>
+                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
+                                            <p class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-1">Current:</p>
+                                            @if (change.CurrentProductContacts?.Any() == true)
+                                            {
+                                                <ul class="govuk-list govuk-list--bullet govuk-body-s">
+                                                    @foreach (var contact in change.CurrentProductContacts)
+                                                    {
+                                                        <li>@contact.Role: @contact.UserName (@contact.UserEmail)</li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <p class="govuk-body-s">(none)</p>
+                                            }
+                                            
+                                            <p class="govuk-body-s govuk-!-font-weight-bold govuk-!-margin-bottom-1 govuk-!-margin-top-2">Proposed:</p>
+                                            <ul class="govuk-list govuk-list--bullet govuk-body-s">
+                                                @foreach (var contact in change.ProposedProductContacts)
+                                                {
+                                                    <li>@contact.Role: @contact.UserName (@contact.UserEmail)</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="govuk-form-group govuk-!-margin-top-6">
+                                    <label class="govuk-label govuk-label--s" for="AdminNotes_@change.DocumentId">
+                                        Admin notes (optional)
+                                    </label>
+                                    <div id="AdminNotes_@change.DocumentId-hint" class="govuk-hint">
+                                        Add any notes about this decision for future reference.
+                                    </div>
+                                    <textarea class="govuk-textarea" 
+                                              id="AdminNotes_@change.DocumentId" 
+                                              name="AdminNotes" 
+                                              rows="3"
+                                              maxlength="2000"
+                                              aria-describedby="AdminNotes_@change.DocumentId-hint"></textarea>
+                                </div>
+
+                                <div class="govuk-button-group">
+                                    <button class="govuk-button" data-module="govuk-button" type="submit" name="Action" value="approve">
+                                        Apply selected changes
+                                    </button>
+                                    <button class="govuk-button govuk-button--warning" data-module="govuk-button" type="submit" name="Action" value="reject">
+                                        Reject all changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="govuk-inset-text">
+                <p>There are no pending change requests for this product.</p>
+            </div>
+            <p class="govuk-body">
+                <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" class="govuk-link">Return to product overview</a>
+            </p>
+        }
+
+    </div>
+</div>
+

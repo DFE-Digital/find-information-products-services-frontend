@@ -81,10 +81,11 @@
                 <li class="dfe-vertical-nav__section-item">
                     <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)/categories">Categories</a>
                 </li>
-                @if (ViewData["AssuranceEnabled"] as bool? == true)
+               
+                @if (ViewData["EditProductEnabled"] as bool? == true)
                 {
-                    <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
-                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)/assurance">Assurance</a>
+                    <li class="dfe-vertical-nav__section-item">
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/ProposeChange">Propose a change</a>
                     </li>
                 }
             </ul>

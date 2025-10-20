@@ -1,5 +1,5 @@
 @using FipsFrontend.Helpers
-@model ProductEditViewModel
+@model ProposeChangeViewModel
 @{ ViewData["Title"] = Model.PageTitle; } 
 @{ ViewData["Description"] = Model.PageDescription; }
 
@@ -59,7 +59,7 @@
                                 <td class="govuk-table__cell">
                                     @if (Model.Product.ProductContacts?.Any() == true)
                                     {
-                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                        <span>@Model.Product.ProductContacts.Count contacts</span>
                                     }
                                     else
                                     {
@@ -96,7 +96,7 @@
                         <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance">Assurance</a>
                     </li>
                 }
-                <li class="dfe-vertical-nav__section-item">
+                <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
                     <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/ProposeChange">Propose a change</a>
                 </li>
             </ul>
@@ -122,111 +122,131 @@
         </div>
     }
 
-    <form asp-action="ProductEdit" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
+    <div class="govuk-inset-text">
+        <p>Use this form to propose changes to this product's information. An administrator will review your suggestions before they are applied.</p>
+    </div>
+
+    <form asp-action="ProposeChange" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
         @Html.AntiForgeryToken()
 
-
+        <h2 class="govuk-heading-m">Propose changes to product details</h2>
         
-        <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <h1 class="govuk-label-wrapper">
-                <label class="govuk-label govuk-label--m" for="Title">
-                    Product title
-                </label>
-            </h1>
-            <div id="Title-hint" class="govuk-hint">
-                This is the title of the product that will be displayed in search results and product results.
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedTitle"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedTitle">
+                Product title
+            </label>
+            <div id="ProposedTitle-hint" class="govuk-hint">
+                Current: @Model.Product.Title
             </div>
-            @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
+            @if (ViewData.ModelState["ProposedTitle"]?.Errors.Count > 0)
             {
                 <span class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
+                    @ViewData.ModelState["ProposedTitle"]?.Errors.First().ErrorMessage
                 </span>
             }
-            <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
-                   id="Title" 
-                   name="Title" 
+            <input class="govuk-input @(ViewData.ModelState["ProposedTitle"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedTitle" 
+                   name="ProposedTitle" 
                    type="text" 
-                   value="@Model.Title"
+                   value="@Model.ProposedTitle"
                    maxlength="255"
-
-                   aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint" : "Title-hint")">
+                   aria-describedby="@(ViewData.ModelState["ProposedTitle"]?.Errors.Count > 0 ? "ProposedTitle-error ProposedTitle-hint" : "ProposedTitle-hint")">
         </div>
 
-        <div class="govuk-form-group @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <h1 class="govuk-label-wrapper">
-                <label class="govuk-label govuk-label--m" for="ShortDescription">
-                    Short description
-                </label>
-            </h1>
-            <div id="ShortDescription-hint" class="govuk-hint">
-                This is the short description of the product that will be displayed in search results and product results.
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedShortDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedShortDescription">
+                Short description
+            </label>
+            <div id="ProposedShortDescription-hint" class="govuk-hint">
+                Current: @Model.Product.ShortDescription
             </div>
-            @if (ViewData.ModelState["ShortDescription"]?.Errors.Count > 0)
+            @if (ViewData.ModelState["ProposedShortDescription"]?.Errors.Count > 0)
             {
                 <span class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["ShortDescription"]?.Errors.First().ErrorMessage
+                    @ViewData.ModelState["ProposedShortDescription"]?.Errors.First().ErrorMessage
                 </span>
             }
-            <textarea class="govuk-textarea @(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
-                      id="ShortDescription" 
-                      name="ShortDescription" 
+            <textarea class="govuk-textarea @(ViewData.ModelState["ProposedShortDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="ProposedShortDescription" 
+                      name="ProposedShortDescription" 
                       rows="3"
                       maxlength="500"
-                      aria-describedby="@(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "ShortDescription-error ShortDescription-hint" : "ShortDescription-hint")">@Model.ShortDescription</textarea>
+                      aria-describedby="@(ViewData.ModelState["ProposedShortDescription"]?.Errors.Count > 0 ? "ProposedShortDescription-error ProposedShortDescription-hint" : "ProposedShortDescription-hint")">@Model.ProposedShortDescription</textarea>
         </div>
 
-        <div class="govuk-form-group @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <h1 class="govuk-label-wrapper">
-                <label class="govuk-label govuk-label--m" for="LongDescription">
-                    Long description
-                </label>
-            </h1>
-            <div id="LongDescription-hint" class="govuk-hint">
-                This is the long description of the product that will be displayed on the product detail page. It can be the same as the short description. 
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedLongDescription">
+                Long description
+            </label>
+            <div id="ProposedLongDescription-hint" class="govuk-hint">
+                Current: @(Model.Product.LongDescription ?? "(none)")
             </div>
-            @if (ViewData.ModelState["LongDescription"]?.Errors.Count > 0)
+            @if (ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0)
             {
                 <span class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["LongDescription"]?.Errors.First().ErrorMessage
+                    @ViewData.ModelState["ProposedLongDescription"]?.Errors.First().ErrorMessage
                 </span>
             }
-            <textarea class="govuk-textarea @(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
-                      id="LongDescription" 
-                      name="LongDescription" 
+            <textarea class="govuk-textarea @(ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="ProposedLongDescription" 
+                      name="ProposedLongDescription" 
                       rows="5"
                       maxlength="2000"
-                      aria-describedby="@(ViewData.ModelState["LongDescription"]?.Errors.Count > 0 ? "LongDescription-error LongDescription-hint" : "LongDescription-hint")">@Model.LongDescription</textarea>
+                      aria-describedby="@(ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0 ? "ProposedLongDescription-error ProposedLongDescription-hint" : "ProposedLongDescription-hint")">@Model.ProposedLongDescription</textarea>
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedProductUrl"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedProductUrl">
+                Product URL
+            </label>
+            <div id="ProposedProductUrl-hint" class="govuk-hint">
+                Current: @(Model.Product.ProductUrl ?? "(none)")
+            </div>
+            @if (ViewData.ModelState["ProposedProductUrl"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedProductUrl"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedProductUrl"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedProductUrl" 
+                   name="ProposedProductUrl" 
+                   type="url" 
+                   value="@Model.ProposedProductUrl"
+                   maxlength="500"
+                   aria-describedby="@(ViewData.ModelState["ProposedProductUrl"]?.Errors.Count > 0 ? "ProposedProductUrl-error ProposedProductUrl-hint" : "ProposedProductUrl-hint")">
         </div>
 
         @if (Model.AvailablePhases.Any())
         {
-            <div class="govuk-form-group @(ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <div class="govuk-form-group @(ViewData.ModelState["ProposedPhaseId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
                         Phase
                     </legend>
-                    <div id="SelectedPhaseId-hint" class="govuk-hint">
+                    <div id="ProposedPhaseId-hint" class="govuk-hint">
                         The current phase the product is in.
                     </div>
-                    @if (ViewData.ModelState["SelectedPhaseId"]?.Errors.Count > 0)
+                    @if (ViewData.ModelState["ProposedPhaseId"]?.Errors.Count > 0)
                     {
                         <span class="govuk-error-message">
                             <span class="govuk-visually-hidden">Error:</span>
-                            @ViewData.ModelState["SelectedPhaseId"]?.Errors.First().ErrorMessage
+                            @ViewData.ModelState["ProposedPhaseId"]?.Errors.First().ErrorMessage
                         </span>
                     }
                     <div class="govuk-radios" data-module="govuk-radios">
                         <div class="govuk-radios__item">
                             <input class="govuk-radios__input" 
-                                   id="SelectedPhaseId_0" 
-                                   name="SelectedPhaseId" 
+                                   id="ProposedPhaseId_0" 
+                                   name="ProposedPhaseId" 
                                    type="radio" 
                                    value=""
-                                   @(Model.SelectedPhaseId == null ? "checked" : "")>
-                            <label class="govuk-label govuk-radios__label" for="SelectedPhaseId_0">
+                                   @(Model.ProposedPhaseId == null ? "checked" : "")>
+                            <label class="govuk-label govuk-radios__label" for="ProposedPhaseId_0">
                                 No phase assigned
                             </label>
                         </div>
@@ -234,12 +254,12 @@
                         {
                             <div class="govuk-radios__item">
                                 <input class="govuk-radios__input" 
-                                       id="SelectedPhaseId_@phase.Id" 
-                                       name="SelectedPhaseId" 
+                                       id="ProposedPhaseId_@phase.Id" 
+                                       name="ProposedPhaseId" 
                                        type="radio" 
                                        value="@phase.Id"
-                                       @(Model.SelectedPhaseId == phase.Id ? "checked" : "")>
-                                <label class="govuk-label govuk-radios__label" for="SelectedPhaseId_@phase.Id">
+                                       @(Model.ProposedPhaseId == phase.Id ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="ProposedPhaseId_@phase.Id">
                                     @phase.Name
                                 </label>
                             </div>
@@ -251,30 +271,30 @@
 
         @if (Model.AvailableGroups.Any())
         {
-            <div class="govuk-form-group @(ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <div class="govuk-form-group @(ViewData.ModelState["ProposedGroupId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
                         Group assignment
                     </legend>
-                    <div id="SelectedGroupId-hint" class="govuk-hint">
+                    <div id="ProposedGroupId-hint" class="govuk-hint">
                         The area of DfE that is primarily responsible for the product.
                     </div>
-                    @if (ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0)
+                    @if (ViewData.ModelState["ProposedGroupId"]?.Errors.Count > 0)
                     {
                         <span class="govuk-error-message">
                             <span class="govuk-visually-hidden">Error:</span>
-                            @ViewData.ModelState["SelectedGroupId"]?.Errors.First().ErrorMessage
+                            @ViewData.ModelState["ProposedGroupId"]?.Errors.First().ErrorMessage
                         </span>
                     }
                     <div class="govuk-radios" data-module="govuk-radios">
                         <div class="govuk-radios__item">
                             <input class="govuk-radios__input" 
-                                   id="SelectedGroupId_0" 
-                                   name="SelectedGroupId" 
+                                   id="ProposedGroupId_0" 
+                                   name="ProposedGroupId" 
                                    type="radio" 
                                    value=""
-                                   @(Model.SelectedGroupId == null ? "checked" : "")>
-                            <label class="govuk-label govuk-radios__label" for="SelectedGroupId_0">
+                                   @(Model.ProposedGroupId == null ? "checked" : "")>
+                            <label class="govuk-label govuk-radios__label" for="ProposedGroupId_0">
                                 No group assigned
                             </label>
                         </div>
@@ -282,12 +302,12 @@
                         {
                             <div class="govuk-radios__item">
                                 <input class="govuk-radios__input" 
-                                       id="SelectedGroupId_@group.Id" 
-                                       name="SelectedGroupId" 
+                                       id="ProposedGroupId_@group.Id" 
+                                       name="ProposedGroupId" 
                                        type="radio" 
                                        value="@group.Id"
-                                       @(Model.SelectedGroupId == group.Id ? "checked" : "")>
-                                <label class="govuk-label govuk-radios__label" for="SelectedGroupId_@group.Id">
+                                       @(Model.ProposedGroupId == group.Id ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="ProposedGroupId_@group.Id">
                                     @group.Name
                                 </label>
                             </div>
@@ -299,19 +319,19 @@
 
         @if (Model.AvailableChannels.Any())
         {
-            <div class="govuk-form-group @(ViewData.ModelState["SelectedChannelIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <div class="govuk-form-group @(ViewData.ModelState["ProposedChannelIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
                         Channels
                     </legend>
-                    <div id="SelectedChannelIds-hint" class="govuk-hint">
+                    <div id="ProposedChannelIds-hint" class="govuk-hint">
                         Select all channels through which the product is delivered.
                     </div>
-                    @if (ViewData.ModelState["SelectedChannelIds"]?.Errors.Count > 0)
+                    @if (ViewData.ModelState["ProposedChannelIds"]?.Errors.Count > 0)
                     {
                         <span class="govuk-error-message">
                             <span class="govuk-visually-hidden">Error:</span>
-                            @ViewData.ModelState["SelectedChannelIds"]?.Errors.First().ErrorMessage
+                            @ViewData.ModelState["ProposedChannelIds"]?.Errors.First().ErrorMessage
                         </span>
                     }
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
@@ -319,12 +339,12 @@
                         {
                             <div class="govuk-checkboxes__item">
                                 <input class="govuk-checkboxes__input" 
-                                       id="SelectedChannelIds_@channel.Id" 
-                                       name="SelectedChannelIds" 
+                                       id="ProposedChannelIds_@channel.Id" 
+                                       name="ProposedChannelIds" 
                                        type="checkbox" 
                                        value="@channel.Id"
-                                       @(Model.SelectedChannelIds.Contains(channel.Id) ? "checked" : "")>
-                                <label class="govuk-label govuk-checkboxes__label" for="SelectedChannelIds_@channel.Id">
+                                       @(Model.ProposedChannelIds.Contains(channel.Id) ? "checked" : "")>
+                                <label class="govuk-label govuk-checkboxes__label" for="ProposedChannelIds_@channel.Id">
                                     @channel.Name
                                 </label>
                             </div>
@@ -336,19 +356,19 @@
 
         @if (Model.AvailableTypes.Any())
         {
-            <div class="govuk-form-group @(ViewData.ModelState["SelectedTypeIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <div class="govuk-form-group @(ViewData.ModelState["ProposedTypeIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset">
-                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
                         Types
                     </legend>
-                    <div id="SelectedTypeIds-hint" class="govuk-hint">
+                    <div id="ProposedTypeIds-hint" class="govuk-hint">
                         Select all types that apply to this product or service.
                     </div>
-                    @if (ViewData.ModelState["SelectedTypeIds"]?.Errors.Count > 0)
+                    @if (ViewData.ModelState["ProposedTypeIds"]?.Errors.Count > 0)
                     {
                         <span class="govuk-error-message">
                             <span class="govuk-visually-hidden">Error:</span>
-                            @ViewData.ModelState["SelectedTypeIds"]?.Errors.First().ErrorMessage
+                            @ViewData.ModelState["ProposedTypeIds"]?.Errors.First().ErrorMessage
                         </span>
                     }
                     <div class="govuk-checkboxes" data-module="govuk-checkboxes">
@@ -356,12 +376,12 @@
                         {
                             <div class="govuk-checkboxes__item">
                                 <input class="govuk-checkboxes__input" 
-                                       id="SelectedTypeIds_@type.Id" 
-                                       name="SelectedTypeIds" 
+                                       id="ProposedTypeIds_@type.Id" 
+                                       name="ProposedTypeIds" 
                                        type="checkbox" 
                                        value="@type.Id"
-                                       @(Model.SelectedTypeIds.Contains(type.Id) ? "checked" : "")>
-                                <label class="govuk-label govuk-checkboxes__label" for="SelectedTypeIds_@type.Id">
+                                       @(Model.ProposedTypeIds.Contains(type.Id) ? "checked" : "")>
+                                <label class="govuk-label govuk-checkboxes__label" for="ProposedTypeIds_@type.Id">
                                     @type.Name
                                 </label>
                             </div>
@@ -371,10 +391,31 @@
             </div>
         }
 
+        <div class="govuk-form-group @(ViewData.ModelState["Reason"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--m" for="Reason">
+                Reason for proposed changes
+            </label>
+            <div id="Reason-hint" class="govuk-hint">
+                Please explain why you're proposing these changes. This will help the reviewer understand your request.
+            </div>
+            @if (ViewData.ModelState["Reason"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["Reason"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <textarea class="govuk-textarea @(ViewData.ModelState["Reason"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="Reason" 
+                      name="Reason" 
+                      rows="5"
+                      maxlength="2000"
+                      aria-describedby="@(ViewData.ModelState["Reason"]?.Errors.Count > 0 ? "Reason-error Reason-hint" : "Reason-hint")">@Model.Reason</textarea>
+        </div>
 
         <div class="govuk-button-group">
-            <button class="govuk-button" data-module="govuk-button" type="submit" id="update-product-btn">
-                Update product
+            <button class="govuk-button" data-module="govuk-button" type="submit" id="submit-changes-btn">
+                Submit proposed changes
             </button>
             <a class="govuk-link govuk-link--no-visited-state" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)">Cancel</a>
         </div>
@@ -384,21 +425,3 @@
   </div>
 </div>
 
-<script nonce="@Context.Items["CSPNonce"]">
-document.addEventListener('DOMContentLoaded', function() {
-    const updateBtn = document.getElementById('update-product-btn');
-    const form = document.querySelector('form');
-    
-    if (updateBtn) {
-        updateBtn.addEventListener('click', function() {
-            console.log('Update button clicked');
-        });
-    }
-    
-    if (form) {
-        form.addEventListener('submit', function() {
-            console.log('Form submitting...');
-        });
-    }
-});
-</script>

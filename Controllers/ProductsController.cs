@@ -1231,4 +1231,493 @@ public class ProductsController : Controller
             return NotFound();
         }
     }
+
+    // GET: Products/ProposeChange/{fipsid}
+    [HttpGet]
+    public async Task<IActionResult> ProposeChange(string fipsid)
+    {
+        // Check if EditProduct feature is enabled (reusing same feature flag)
+        if (!_enabledFeatures.EditProduct)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            
+            // Get the product
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found for FIPS ID: {FipsId}", fipsid);
+                return NotFound();
+            }
+
+            // Get category values for all types
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            // Find current category values
+            var currentPhase = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
+            var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+            var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+
+            var viewModel = new ProposeChangeViewModel
+            {
+                Product = product,
+                ProposedTitle = product.Title,
+                ProposedShortDescription = product.ShortDescription,
+                ProposedLongDescription = product.LongDescription,
+                ProposedProductUrl = product.ProductUrl,
+                ProposedPhaseId = currentPhase?.Id,
+                ProposedGroupId = currentGroup?.Id,
+                ProposedChannelIds = currentChannels.Select(c => c.Id).ToList(),
+                ProposedTypeIds = currentTypes.Select(c => c.Id).ToList(),
+                AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList(),
+                AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList(),
+                AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList(),
+                AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList(),
+                PageTitle = $"Propose changes to {product.Title}",
+                PageDescription = $"Suggest changes to details, categories and contacts for {product.Title}"
+            };
+
+            // Convert product contacts to proposed format
+            if (product.ProductContacts?.Any() == true)
+            {
+                viewModel.ProposedProductContacts = product.ProductContacts.Select(pc => new ProposedProductContactModel
+                {
+                    Role = pc.Role,
+                    UserId = pc.UsersPermissionsUser?.Id,
+                    UserEmail = pc.UsersPermissionsUser?.Email,
+                    UserName = pc.UsersPermissionsUser?.DisplayName ?? $"{pc.UsersPermissionsUser?.FirstName} {pc.UsersPermissionsUser?.LastName}".Trim()
+                }).ToList();
+            }
+
+            ViewData["ActiveNav"] = "products";
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            return View("~/Views/Product/propose-change.cshtml", viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading propose change form for FIPS ID: {FipsId}", fipsid);
+            return NotFound();
+        }
+    }
+
+    // POST: Products/ProposeChange/{fipsid}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProposeChange(string fipsid, ProposeChangeViewModel model)
+    {
+        _logger.LogInformation("ProposeChange POST method called with FIPS ID: {FipsId}", fipsid);
+        
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                // Reload the form data
+                return await ReloadProposeChangeForm(fipsid, model);
+            }
+
+            // Get the current product to ensure we have the right data
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Get user email from claims
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value 
+                ?? User.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value 
+                ?? "unknown@example.com";
+            var userName = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value 
+                ?? User.Identity?.Name 
+                ?? "Unknown User";
+
+            // Build proposed category values changes
+            var proposedCategoryValues = new List<ProposedCategoryValueChange>();
+            var currentCategoryValues = new List<ProposedCategoryValueChange>();
+
+            // Get current category values
+            var currentPhase = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
+            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
+            var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+            var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
+
+            // Store current values
+            if (currentPhase != null)
+            {
+                currentCategoryValues.Add(new ProposedCategoryValueChange
+                {
+                    CategoryType = "Phase",
+                    CategoryValueIds = new List<int> { currentPhase.Id },
+                    CategoryValueNames = new List<string> { currentPhase.Name }
+                });
+            }
+            if (currentGroup != null)
+            {
+                currentCategoryValues.Add(new ProposedCategoryValueChange
+                {
+                    CategoryType = "Business area",
+                    CategoryValueIds = new List<int> { currentGroup.Id },
+                    CategoryValueNames = new List<string> { currentGroup.Name }
+                });
+            }
+            if (currentChannels.Any())
+            {
+                currentCategoryValues.Add(new ProposedCategoryValueChange
+                {
+                    CategoryType = "Channel",
+                    CategoryValueIds = currentChannels.Select(c => c.Id).ToList(),
+                    CategoryValueNames = currentChannels.Select(c => c.Name).ToList()
+                });
+            }
+            if (currentTypes.Any())
+            {
+                currentCategoryValues.Add(new ProposedCategoryValueChange
+                {
+                    CategoryType = "Type",
+                    CategoryValueIds = currentTypes.Select(t => t.Id).ToList(),
+                    CategoryValueNames = currentTypes.Select(t => t.Name).ToList()
+                });
+            }
+
+            // Get category values duration for lookups
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            
+            // Store proposed values
+            if (model.ProposedPhaseId.HasValue)
+            {
+                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+                var phase = phaseValues.FirstOrDefault(p => p.Id == model.ProposedPhaseId.Value);
+                if (phase != null)
+                {
+                    proposedCategoryValues.Add(new ProposedCategoryValueChange
+                    {
+                        CategoryType = "Phase",
+                        CategoryValueIds = new List<int> { phase.Id },
+                        CategoryValueNames = new List<string> { phase.Name }
+                    });
+                }
+            }
+            if (model.ProposedGroupId.HasValue)
+            {
+                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
+                var group = groupValues.FirstOrDefault(g => g.Id == model.ProposedGroupId.Value);
+                if (group != null)
+                {
+                    proposedCategoryValues.Add(new ProposedCategoryValueChange
+                    {
+                        CategoryType = "Business area",
+                        CategoryValueIds = new List<int> { group.Id },
+                        CategoryValueNames = new List<string> { group.Name }
+                    });
+                }
+            }
+            if (model.ProposedChannelIds?.Any() == true)
+            {
+                var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+                var channels = channelValues.Where(c => model.ProposedChannelIds.Contains(c.Id)).ToList();
+                if (channels.Any())
+                {
+                    proposedCategoryValues.Add(new ProposedCategoryValueChange
+                    {
+                        CategoryType = "Channel",
+                        CategoryValueIds = channels.Select(c => c.Id).ToList(),
+                        CategoryValueNames = channels.Select(c => c.Name).ToList()
+                    });
+                }
+            }
+            if (model.ProposedTypeIds?.Any() == true)
+            {
+                var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+                var types = typeValues.Where(t => model.ProposedTypeIds.Contains(t.Id)).ToList();
+                if (types.Any())
+                {
+                    proposedCategoryValues.Add(new ProposedCategoryValueChange
+                    {
+                        CategoryType = "Type",
+                        CategoryValueIds = types.Select(t => t.Id).ToList(),
+                        CategoryValueNames = types.Select(t => t.Name).ToList()
+                    });
+                }
+            }
+
+            // Build proposed contacts changes
+            var proposedProductContacts = model.ProposedProductContacts?.Select(pc => new ProposedContactChange
+            {
+                Role = pc.Role,
+                UserId = pc.UserId,
+                UserEmail = pc.UserEmail,
+                UserName = pc.UserName
+            }).ToList();
+
+            var currentProductContacts = product.ProductContacts?.Select(pc => new ProposedContactChange
+            {
+                Role = pc.Role,
+                UserId = pc.UsersPermissionsUser?.Id,
+                UserEmail = pc.UsersPermissionsUser?.Email,
+                UserName = pc.UsersPermissionsUser?.DisplayName ?? $"{pc.UsersPermissionsUser?.FirstName} {pc.UsersPermissionsUser?.LastName}".Trim()
+            }).ToList();
+
+            // Prepare the proposed change data for CMS API
+            var proposedChangeData = new
+            {
+                data = new
+                {
+                    product_id = product.Id,
+                    product_document_id = product.DocumentId,
+                    product_fips_id = product.FipsId,
+                    product_title = product.Title,
+                    submitter_email = userEmail,
+                    submitter_name = userName,
+                    date_requested = DateTime.UtcNow,
+                    status = "New",
+                    notes = model.Reason,
+                    proposed_title = model.ProposedTitle,
+                    proposed_short_description = model.ProposedShortDescription,
+                    proposed_long_description = model.ProposedLongDescription,
+                    proposed_product_url = model.ProposedProductUrl,
+                    current_title = product.Title,
+                    current_short_description = product.ShortDescription,
+                    current_long_description = product.LongDescription,
+                    current_product_url = product.ProductUrl,
+                    proposed_category_values = proposedCategoryValues.Any() ? proposedCategoryValues : null,
+                    current_category_values = currentCategoryValues.Any() ? currentCategoryValues : null,
+                    proposed_product_contacts = proposedProductContacts?.Any() == true ? proposedProductContacts : null,
+                    current_product_contacts = currentProductContacts?.Any() == true ? currentProductContacts : null
+                }
+            };
+
+            // Submit the proposed change via CMS API
+            try
+            {
+                var result = await _cmsApiService.PostAsync<ApiResponse<ProposedChange>>("proposed-changes", proposedChangeData);
+                
+                if (result?.Data != null)
+                {
+                    TempData["SuccessMessage"] = "Your proposed changes have been submitted successfully and will be reviewed by an administrator.";
+                    return RedirectToAction("ViewProduct", new { fipsid = fipsid });
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Failed to submit the proposed changes. Please try again.");
+                    return await ReloadProposeChangeForm(fipsid, model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to submit proposed change for product {FipsId}. Error: {ErrorMessage}", fipsid, ex.Message);
+                ModelState.AddModelError("", $"Failed to submit the proposed changes: {ex.Message}");
+                return await ReloadProposeChangeForm(fipsid, model);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing proposed change: {Title}", model.Product?.Title);
+            ModelState.AddModelError("", "An error occurred while processing your proposed changes. Please try again.");
+            return await ReloadProposeChangeForm(fipsid, model);
+        }
+    }
+
+    private async Task<IActionResult> ReloadProposeChangeForm(string fipsid, ProposeChangeViewModel model)
+    {
+        try
+        {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            model.Product = product;
+            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+            ViewData["ActiveNav"] = "products";
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            return View("~/Views/Product/propose-change.cshtml", model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reloading propose change form for FIPS ID: {FipsId}", fipsid);
+            return NotFound();
+        }
+    }
+
+    // GET: Products/ReviewProposedChanges/{fipsid}
+    [HttpGet]
+    public async Task<IActionResult> ReviewProposedChanges(string fipsid)
+    {
+        // Check if EditProduct feature is enabled (reusing same feature flag for admin functions)
+        if (!_enabledFeatures.EditProduct)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Get proposed changes for this product
+            var proposedChangesEndpoint = $"proposed-changes?filters[product_document_id][$eq]={product.DocumentId}&filters[status][$eq]=New&sort=date_requested:desc";
+            var proposedChangesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<ProposedChange>>(proposedChangesEndpoint);
+            
+            var viewModel = new ReviewProposedChangesViewModel
+            {
+                Product = product,
+                ProposedChanges = proposedChangesResponse?.Data ?? new List<ProposedChange>(),
+                PageTitle = $"Review proposed changes for {product.Title}",
+                PageDescription = $"Review and action suggested changes to {product.Title}"
+            };
+
+            ViewData["ActiveNav"] = "products";
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            return View("~/Views/Product/review-proposed-changes.cshtml", viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading proposed changes for FIPS ID: {FipsId}", fipsid);
+            return NotFound();
+        }
+    }
+
+    // POST: Products/ActionProposedChange
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ActionProposedChange(ProposedChangeActionModel model)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Invalid request.";
+                return RedirectToAction("Index");
+            }
+
+            // Get the proposed change
+            var proposedChangeResponse = await _cmsApiService.GetAsync<ApiResponse<ProposedChange>>($"proposed-changes/{model.ProposedChangeId}");
+            var proposedChange = proposedChangeResponse?.Data;
+            
+            if (proposedChange == null)
+            {
+                TempData["ErrorMessage"] = "Proposed change not found.";
+                return RedirectToAction("Index");
+            }
+
+            var fipsid = proposedChange.ProductFipsId ?? proposedChange.ProductDocumentId;
+
+            if (model.Action == "reject")
+            {
+                // Simply update the status to Rejected
+                var rejectData = new
+                {
+                    data = new
+                    {
+                        status = "Rejected",
+                        admin_notes = model.AdminNotes,
+                        actioned_by = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@example.com",
+                        actioned_date = DateTime.UtcNow
+                    }
+                };
+
+                await _cmsApiService.PutAsync<ApiResponse<ProposedChange>>($"proposed-changes/{model.ProposedChangeId}", rejectData);
+                TempData["SuccessMessage"] = "Proposed changes have been rejected.";
+            }
+            else if (model.Action == "approve")
+            {
+                // Get the product to update
+                var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+                var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid!, productDetailDuration);
+                
+                if (product == null)
+                {
+                    TempData["ErrorMessage"] = "Product not found.";
+                    return RedirectToAction("Index");
+                }
+
+                // Build update data based on selected fields
+                var updateData = new Dictionary<string, object?>();
+                
+                if (model.FieldsToApply.Contains("title") && !string.IsNullOrEmpty(proposedChange.ProposedTitle))
+                {
+                    updateData["title"] = proposedChange.ProposedTitle;
+                }
+                if (model.FieldsToApply.Contains("short_description") && !string.IsNullOrEmpty(proposedChange.ProposedShortDescription))
+                {
+                    updateData["short_description"] = proposedChange.ProposedShortDescription;
+                }
+                if (model.FieldsToApply.Contains("long_description"))
+                {
+                    updateData["long_description"] = proposedChange.ProposedLongDescription;
+                }
+                if (model.FieldsToApply.Contains("product_url"))
+                {
+                    updateData["product_url"] = proposedChange.ProposedProductUrl;
+                }
+                if (model.FieldsToApply.Contains("category_values") && proposedChange.ProposedCategoryValues?.Any() == true)
+                {
+                    var categoryValueIds = proposedChange.ProposedCategoryValues
+                        .SelectMany(pcv => pcv.CategoryValueIds)
+                        .ToList();
+                    updateData["category_values"] = categoryValueIds;
+                }
+
+                // Only update if there are changes to apply
+                if (updateData.Any())
+                {
+                    var productUpdateData = new
+                    {
+                        data = updateData
+                    };
+
+                    await _cmsApiService.PutAsync<ApiResponse<Product>>($"products/{product.DocumentId}", productUpdateData);
+                }
+
+                // Update the proposed change status
+                var approveData = new
+                {
+                    data = new
+                    {
+                        status = "Completed",
+                        admin_notes = model.AdminNotes,
+                        actioned_by = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@example.com",
+                        actioned_date = DateTime.UtcNow
+                    }
+                };
+
+                await _cmsApiService.PutAsync<ApiResponse<ProposedChange>>($"proposed-changes/{model.ProposedChangeId}", approveData);
+                TempData["SuccessMessage"] = "Selected changes have been applied successfully.";
+            }
+
+            return RedirectToAction("ReviewProposedChanges", new { fipsid = fipsid });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error actioning proposed change");
+            TempData["ErrorMessage"] = "An error occurred while processing the proposed change.";
+            return RedirectToAction("Index");
+        }
+    }
 }

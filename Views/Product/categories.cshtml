@@ -85,6 +85,12 @@
                         <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)/assurance">Assurance</a>
                     </li>
                 }
+                @if (ViewData["EditProductEnabled"] as bool? == true)
+                {
+                    <li class="dfe-vertical-nav__section-item">
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)/ProposeChange">Propose a change</a>
+                    </li>
+                }
             </ul>
         </nav>
     </div>
