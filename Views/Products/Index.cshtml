@@ -334,14 +334,17 @@
 
         <!-- Results Summary -->
         <div class="govuk-!-margin-bottom-4">
-            <p class="govuk-body">
-                Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount products and services
+         
+              <p class="govuk-body">Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount products and services
                 @if (Model.FilteredCount != Model.TotalCount)
                 {
                     <text>(filtered from @Model.TotalCount total)</text>
                 }
-            </p>
-        </div>
+                     </p>
+       
+             <div class="govuk-inset-text">     
+                     <p class="govuk-body">Find out <a class="govuk-link govuk-link--no-visited-state" href="/updates#add-a-missing-product-or-service">how to add </a>a missing product or service.</a></p>
+        </div>  </div>
 
         <!-- Products Grid -->
         @if (Model.Products.Any())

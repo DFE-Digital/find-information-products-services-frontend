@@ -14,14 +14,16 @@ public class ProductsController : Controller
     private readonly IOptimizedCmsApiService _optimizedCmsApiService;
     private readonly EnabledFeatures _enabledFeatures;
     private readonly IConfiguration _configuration;
+    private readonly INotifyService _notifyService;
 
-    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration)
+    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration, INotifyService notifyService)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
         _optimizedCmsApiService = optimizedCmsApiService;
         _enabledFeatures = enabledFeatures.Value;
         _configuration = configuration;
+        _notifyService = notifyService;
     }
 
     // GET: Products
@@ -388,6 +390,7 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
             return View("~/Views/Product/categories.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -426,6 +429,7 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
             return View("~/Views/Product/assurance.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -1034,6 +1038,7 @@ public class ProductsController : Controller
             };
 
             ViewData["ActiveNav"] = "products";
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
             return View("~/Views/Product/edit.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -1316,10 +1321,24 @@ public class ProductsController : Controller
     {
         _logger.LogInformation("ProposeChange POST method called with FIPS ID: {FipsId}", fipsid);
         
+        // Log all posted values for debugging
+        _logger.LogInformation("Posted form values:");
+        _logger.LogInformation("  ProposedTitle: '{Value}'", model.ProposedTitle ?? "(null)");
+        _logger.LogInformation("  ProposedShortDescription: '{Value}'", model.ProposedShortDescription ?? "(null)");
+        _logger.LogInformation("  ProposedLongDescription: '{Value}'", model.ProposedLongDescription?.Substring(0, Math.Min(100, model.ProposedLongDescription?.Length ?? 0)) ?? "(null)");
+        _logger.LogInformation("  ProposedProductUrl: '{Value}'", model.ProposedProductUrl ?? "(null)");
+        _logger.LogInformation("  ProposedPhaseId: {Value}", model.ProposedPhaseId?.ToString() ?? "(null)");
+        _logger.LogInformation("  ProposedGroupId: {Value}", model.ProposedGroupId?.ToString() ?? "(null)");
+        _logger.LogInformation("  ProposedChannelIds: [{Values}]", string.Join(", ", model.ProposedChannelIds ?? new List<int>()));
+        _logger.LogInformation("  ProposedTypeIds: [{Values}]", string.Join(", ", model.ProposedTypeIds ?? new List<int>()));
+        _logger.LogInformation("  Reason: '{Value}'", model.Reason ?? "(null)");
+        
         try
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                    string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
                 // Reload the form data
                 return await ReloadProposeChangeForm(fipsid, model);
             }
@@ -1332,13 +1351,36 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
-            // Get user email from claims
+            // Log all available claims for debugging
+            _logger.LogInformation("Available claims for user:");
+            foreach (var claim in User.Claims)
+            {
+                _logger.LogInformation("  Claim Type: {Type}, Value: {Value}", claim.Type, claim.Value);
+            }
+            _logger.LogInformation("User.Identity.Name: {Name}, User.Identity.IsAuthenticated: {IsAuth}", 
+                User.Identity?.Name ?? "null", User.Identity?.IsAuthenticated ?? false);
+            
+            // Get user email from claims - check multiple claim types
             var userEmail = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value 
-                ?? User.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value 
-                ?? "unknown@example.com";
-            var userName = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value 
+                ?? User.Claims.FirstOrDefault(c => c.Type == "email")?.Value
+                ?? User.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value
+                ?? User.Claims.FirstOrDefault(c => c.Type == "upn")?.Value
                 ?? User.Identity?.Name 
-                ?? "Unknown User";
+                ?? "test.user@education.gov.uk"; // Changed default for testing
+            
+            var userName = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value 
+                ?? User.Claims.FirstOrDefault(c => c.Type == "name")?.Value
+                ?? User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.GivenName)?.Value
+                ?? User.Identity?.Name 
+                ?? "Test User"; // Changed default for testing
+            
+            _logger.LogInformation("Processing proposed change from user: {UserName} ({UserEmail})", userName, userEmail);
+            
+            // Warning if using defaults
+            if (userEmail == "test.user@education.gov.uk")
+            {
+                _logger.LogWarning("Using default test user credentials - authentication may be disabled");
+            }
 
             // Build proposed category values changes
             var proposedCategoryValues = new List<ProposedCategoryValueChange>();
@@ -1449,72 +1491,96 @@ public class ProductsController : Controller
                 }
             }
 
-            // Build proposed contacts changes
-            var proposedProductContacts = model.ProposedProductContacts?.Select(pc => new ProposedContactChange
-            {
-                Role = pc.Role,
-                UserId = pc.UserId,
-                UserEmail = pc.UserEmail,
-                UserName = pc.UserName
-            }).ToList();
+            // Build proposed contacts changes for display
+            var proposedContactNames = model.ProposedProductContacts?
+                .Select(pc => $"{pc.Role}: {pc.UserName} ({pc.UserEmail})")
+                .ToList();
+            
+            var currentContactNames = product.ProductContacts?
+                .Select(pc => $"{pc.Role}: {pc.UsersPermissionsUser?.DisplayName ?? $"{pc.UsersPermissionsUser?.FirstName} {pc.UsersPermissionsUser?.LastName}".Trim()} ({pc.UsersPermissionsUser?.Email})")
+                .ToList();
 
-            var currentProductContacts = product.ProductContacts?.Select(pc => new ProposedContactChange
-            {
-                Role = pc.Role,
-                UserId = pc.UsersPermissionsUser?.Id,
-                UserEmail = pc.UsersPermissionsUser?.Email,
-                UserName = pc.UsersPermissionsUser?.DisplayName ?? $"{pc.UsersPermissionsUser?.FirstName} {pc.UsersPermissionsUser?.LastName}".Trim()
-            }).ToList();
-
-            // Prepare the proposed change data for CMS API
-            var proposedChangeData = new
-            {
-                data = new
-                {
-                    product_id = product.Id,
-                    product_document_id = product.DocumentId,
-                    product_fips_id = product.FipsId,
-                    product_title = product.Title,
-                    submitter_email = userEmail,
-                    submitter_name = userName,
-                    date_requested = DateTime.UtcNow,
-                    status = "New",
-                    notes = model.Reason,
-                    proposed_title = model.ProposedTitle,
-                    proposed_short_description = model.ProposedShortDescription,
-                    proposed_long_description = model.ProposedLongDescription,
-                    proposed_product_url = model.ProposedProductUrl,
-                    current_title = product.Title,
-                    current_short_description = product.ShortDescription,
-                    current_long_description = product.LongDescription,
-                    current_product_url = product.ProductUrl,
-                    proposed_category_values = proposedCategoryValues.Any() ? proposedCategoryValues : null,
-                    current_category_values = currentCategoryValues.Any() ? currentCategoryValues : null,
-                    proposed_product_contacts = proposedProductContacts?.Any() == true ? proposedProductContacts : null,
-                    current_product_contacts = currentProductContacts?.Any() == true ? currentProductContacts : null
-                }
-            };
-
-            // Submit the proposed change via CMS API
+            // Send email notification via GOV.UK Notify
             try
             {
-                var result = await _cmsApiService.PostAsync<ApiResponse<ProposedChange>>("proposed-changes", proposedChangeData);
+                // Build the change table for the email
+                var currentCategoryNames = currentCategoryValues
+                    .SelectMany(ccv => ccv.CategoryValueNames.Select(name => $"{ccv.CategoryType}: {name}"))
+                    .ToList();
+                var proposedCategoryNames = proposedCategoryValues
+                    .SelectMany(pcv => pcv.CategoryValueNames.Select(name => $"{pcv.CategoryType}: {name}"))
+                    .ToList();
+
+                // Log what we're sending to the change table builder
+                _logger.LogInformation("Building change table with:");
+                _logger.LogInformation("  Title: '{Current}' -> '{Proposed}'", product.Title, model.ProposedTitle);
+                _logger.LogInformation("  Short Desc: '{Current}' -> '{Proposed}'", product.ShortDescription, model.ProposedShortDescription);
+                _logger.LogInformation("  Long Desc: '{Current}' -> '{Proposed}'", 
+                    product.LongDescription?.Substring(0, Math.Min(50, product.LongDescription?.Length ?? 0)) ?? "(null)", 
+                    model.ProposedLongDescription?.Substring(0, Math.Min(50, model.ProposedLongDescription?.Length ?? 0)) ?? "(null)");
+                _logger.LogInformation("  Product URL: '{Current}' -> '{Proposed}'", product.ProductUrl, model.ProposedProductUrl);
+                _logger.LogInformation("  Current Categories ({Count}): {Categories}", currentCategoryNames.Count, string.Join(", ", currentCategoryNames));
+                _logger.LogInformation("  Proposed Categories ({Count}): {Categories}", proposedCategoryNames.Count, string.Join(", ", proposedCategoryNames));
+                _logger.LogInformation("  Current Contacts ({Count}): {Contacts}", currentContactNames?.Count ?? 0, string.Join(", ", currentContactNames ?? new List<string>()));
+                _logger.LogInformation("  Proposed Contacts ({Count}): {Contacts}", proposedContactNames?.Count ?? 0, string.Join(", ", proposedContactNames ?? new List<string>()));
+
+                var changeTableMarkdown = NotifyService.BuildChangeTableHtml(
+                    product.Title, 
+                    model.ProposedTitle,
+                    product.ShortDescription, 
+                    model.ProposedShortDescription,
+                    product.LongDescription, 
+                    model.ProposedLongDescription,
+                    product.ProductUrl, 
+                    model.ProposedProductUrl,
+                    currentCategoryNames, 
+                    proposedCategoryNames,
+                    currentContactNames, 
+                    proposedContactNames,
+                    null, // currentUserDescription - not available in Product model yet
+                    model.ProposedUserDescription,
+                    null, // currentServiceOwner - not available in Product model yet
+                    model.ProposedServiceOwner,
+                    null, // currentInformationAssetOwner - not available in Product model yet
+                    model.ProposedInformationAssetOwner,
+                    null, // currentDeliveryManager - not available in Product model yet
+                    model.ProposedDeliveryManager,
+                    null, // currentProductManager - not available in Product model yet
+                    model.ProposedProductManager);
                 
-                if (result?.Data != null)
-                {
-                    TempData["SuccessMessage"] = "Your proposed changes have been submitted successfully and will be reviewed by an administrator.";
-                    return RedirectToAction("ViewProduct", new { fipsid = fipsid });
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Failed to submit the proposed changes. Please try again.");
-                    return await ReloadProposeChangeForm(fipsid, model);
-                }
+                _logger.LogInformation("Generated change table markdown: {Markdown}", changeTableMarkdown);
+
+                // Build the entry link
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var entryLink = $"{baseUrl}/product/{fipsid}";
+
+                // Format requestor information
+                var requestorInfo = !string.IsNullOrEmpty(userEmail) 
+                    ? $"{userName} ({userEmail})" 
+                    : userName;
+
+                await _notifyService.SendProposedChangeEmailAsync(
+                    fipsid ?? product.DocumentId ?? "Unknown",
+                    product.Title,
+                    entryLink,
+                    changeTableMarkdown,
+                    requestorInfo,
+                    model.Reason);
+
+                _logger.LogInformation("Email notification sent successfully for proposed change to product {FipsId} from {Requestor}", fipsid, requestorInfo);
+
+                // Stay on the same page and show success message
+                ViewData["SuccessMessage"] = "Your proposed changes have been submitted successfully and will be reviewed by an administrator.";
+                
+                // Reload the form with fresh data
+                return await ReloadProposeChangeForm(fipsid, model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to submit proposed change for product {FipsId}. Error: {ErrorMessage}", fipsid, ex.Message);
+                _logger.LogError(ex, "Failed to send email notification for proposed change to product {FipsId}. Error: {ErrorMessage}", fipsid, ex.Message);
                 ModelState.AddModelError("", $"Failed to submit the proposed changes: {ex.Message}");
+                
+                // Stay on the same page and show error
                 return await ReloadProposeChangeForm(fipsid, model);
             }
         }
@@ -1561,163 +1627,4 @@ public class ProductsController : Controller
         }
     }
 
-    // GET: Products/ReviewProposedChanges/{fipsid}
-    [HttpGet]
-    public async Task<IActionResult> ReviewProposedChanges(string fipsid)
-    {
-        // Check if EditProduct feature is enabled (reusing same feature flag for admin functions)
-        if (!_enabledFeatures.EditProduct)
-        {
-            return NotFound();
-        }
-
-        try
-        {
-            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
-            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Get proposed changes for this product
-            var proposedChangesEndpoint = $"proposed-changes?filters[product_document_id][$eq]={product.DocumentId}&filters[status][$eq]=New&sort=date_requested:desc";
-            var proposedChangesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<ProposedChange>>(proposedChangesEndpoint);
-            
-            var viewModel = new ReviewProposedChangesViewModel
-            {
-                Product = product,
-                ProposedChanges = proposedChangesResponse?.Data ?? new List<ProposedChange>(),
-                PageTitle = $"Review proposed changes for {product.Title}",
-                PageDescription = $"Review and action suggested changes to {product.Title}"
-            };
-
-            ViewData["ActiveNav"] = "products";
-            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
-            return View("~/Views/Product/review-proposed-changes.cshtml", viewModel);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading proposed changes for FIPS ID: {FipsId}", fipsid);
-            return NotFound();
-        }
-    }
-
-    // POST: Products/ActionProposedChange
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ActionProposedChange(ProposedChangeActionModel model)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                TempData["ErrorMessage"] = "Invalid request.";
-                return RedirectToAction("Index");
-            }
-
-            // Get the proposed change
-            var proposedChangeResponse = await _cmsApiService.GetAsync<ApiResponse<ProposedChange>>($"proposed-changes/{model.ProposedChangeId}");
-            var proposedChange = proposedChangeResponse?.Data;
-            
-            if (proposedChange == null)
-            {
-                TempData["ErrorMessage"] = "Proposed change not found.";
-                return RedirectToAction("Index");
-            }
-
-            var fipsid = proposedChange.ProductFipsId ?? proposedChange.ProductDocumentId;
-
-            if (model.Action == "reject")
-            {
-                // Simply update the status to Rejected
-                var rejectData = new
-                {
-                    data = new
-                    {
-                        status = "Rejected",
-                        admin_notes = model.AdminNotes,
-                        actioned_by = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@example.com",
-                        actioned_date = DateTime.UtcNow
-                    }
-                };
-
-                await _cmsApiService.PutAsync<ApiResponse<ProposedChange>>($"proposed-changes/{model.ProposedChangeId}", rejectData);
-                TempData["SuccessMessage"] = "Proposed changes have been rejected.";
-            }
-            else if (model.Action == "approve")
-            {
-                // Get the product to update
-                var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
-                var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid!, productDetailDuration);
-                
-                if (product == null)
-                {
-                    TempData["ErrorMessage"] = "Product not found.";
-                    return RedirectToAction("Index");
-                }
-
-                // Build update data based on selected fields
-                var updateData = new Dictionary<string, object?>();
-                
-                if (model.FieldsToApply.Contains("title") && !string.IsNullOrEmpty(proposedChange.ProposedTitle))
-                {
-                    updateData["title"] = proposedChange.ProposedTitle;
-                }
-                if (model.FieldsToApply.Contains("short_description") && !string.IsNullOrEmpty(proposedChange.ProposedShortDescription))
-                {
-                    updateData["short_description"] = proposedChange.ProposedShortDescription;
-                }
-                if (model.FieldsToApply.Contains("long_description"))
-                {
-                    updateData["long_description"] = proposedChange.ProposedLongDescription;
-                }
-                if (model.FieldsToApply.Contains("product_url"))
-                {
-                    updateData["product_url"] = proposedChange.ProposedProductUrl;
-                }
-                if (model.FieldsToApply.Contains("category_values") && proposedChange.ProposedCategoryValues?.Any() == true)
-                {
-                    var categoryValueIds = proposedChange.ProposedCategoryValues
-                        .SelectMany(pcv => pcv.CategoryValueIds)
-                        .ToList();
-                    updateData["category_values"] = categoryValueIds;
-                }
-
-                // Only update if there are changes to apply
-                if (updateData.Any())
-                {
-                    var productUpdateData = new
-                    {
-                        data = updateData
-                    };
-
-                    await _cmsApiService.PutAsync<ApiResponse<Product>>($"products/{product.DocumentId}", productUpdateData);
-                }
-
-                // Update the proposed change status
-                var approveData = new
-                {
-                    data = new
-                    {
-                        status = "Completed",
-                        admin_notes = model.AdminNotes,
-                        actioned_by = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@example.com",
-                        actioned_date = DateTime.UtcNow
-                    }
-                };
-
-                await _cmsApiService.PutAsync<ApiResponse<ProposedChange>>($"proposed-changes/{model.ProposedChangeId}", approveData);
-                TempData["SuccessMessage"] = "Selected changes have been applied successfully.";
-            }
-
-            return RedirectToAction("ReviewProposedChanges", new { fipsid = fipsid });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error actioning proposed change");
-            TempData["ErrorMessage"] = "An error occurred while processing the proposed change.";
-            return RedirectToAction("Index");
-        }
-    }
 }

@@ -106,6 +106,21 @@ public class ProposeChangeViewModel : BaseViewModel
     [StringLength(500, ErrorMessage = "Product URL cannot exceed 500 characters")]
     public string? ProposedProductUrl { get; set; }
     
+    [StringLength(2000, ErrorMessage = "User description cannot exceed 2000 characters")]
+    public string? ProposedUserDescription { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Service Owner cannot exceed 255 characters")]
+    public string? ProposedServiceOwner { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Information Asset Owner cannot exceed 255 characters")]
+    public string? ProposedInformationAssetOwner { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Delivery Manager cannot exceed 255 characters")]
+    public string? ProposedDeliveryManager { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Product Manager cannot exceed 255 characters")]
+    public string? ProposedProductManager { get; set; }
+    
     [Required(ErrorMessage = "Please provide a reason for this change")]
     [StringLength(2000, ErrorMessage = "Reason cannot exceed 2000 characters")]
     public string Reason { get; set; } = string.Empty;

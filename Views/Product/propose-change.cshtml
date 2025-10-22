@@ -9,33 +9,22 @@
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
                     <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" class="govuk-back-link">Back to product</a>
-                    <h1 class="govuk-heading-l dfe-masthead--title">
+                    
+                     <span class="govuk-caption-m">@Model.Product.FipsId</span>
+                     <h1 class="govuk-heading-l dfe-masthead--title">
                         @Model.Product.Title
                     </h1>
                     <table class="govuk-table">
                         <thead class="govuk-table__head">
                             <tr class="govuk-table__row">
-                                <th class="govuk-table__header govuk-!-width-one-quarter">ID</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Phase</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Business area</th>
                                 <th class="govuk-table__header govuk-!-width-one-quarter">Contacts</th>
+                                <th class="govuk-table__header govuk-!-width-one-quarter">View product</th>
                             </tr>
                         </thead>
                         <tbody class="govuk-table__body">
                             <tr class="govuk-table__row">
-                                <td class="govuk-table__cell">
-                                    <span class="govuk-visually-hidden">UniqueID: </span>
-                                    <span title="@(Model.Product.FipsId ?? Model.Product.DocumentId)">
-                                        @if (!string.IsNullOrWhiteSpace(Model.Product.FipsId))
-                                        {
-                                            @Model.Product.FipsId
-                                        }
-                                        else
-                                        {
-                                            @Model.Product.DocumentId?.Substring(0, Math.Min(6, Model.Product.DocumentId?.Length ?? 0))
-                                        }
-                                    </span>
-                                </td>
                                 <td class="govuk-table__cell">
                                     <span class="govuk-visually-hidden">Phase: </span>
                                     @{
@@ -47,7 +36,7 @@
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
-                                    <span class="govuk-visually-hidden">Business Area: </span>
+                                    <span class="govuk-visually-hidden">Business area: </span>
                                     @{
                                         var businessAreaCategory = Model.Product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
                                     }
@@ -59,11 +48,22 @@
                                 <td class="govuk-table__cell">
                                     @if (Model.Product.ProductContacts?.Any() == true)
                                     {
-                                        <span>@Model.Product.ProductContacts.Count contacts</span>
+                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
                                     }
                                     else
                                     {
                                         <span>0 contacts</span>
+                                    }
+                                </td>
+                                <td class="govuk-table__cell">
+                                    <span class="govuk-visually-hidden">View product: </span>
+                                    @if (!string.IsNullOrWhiteSpace(Model.Product.ProductUrl))
+                                    {
+                                        <a href="@Model.Product.ProductUrl" class="govuk-link" target="_blank" rel="noopener noreferrer">View product</a>
+                                    }
+                                    else
+                                    {
+                                        <span>Not available</span>
                                     }
                                 </td>
                             </tr>
@@ -95,10 +95,13 @@
                     <li class="dfe-vertical-nav__section-item">
                         <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance">Assurance</a>
                     </li>
+                } 
+                @if (ViewData["EditProductEnabled"] as bool? == true)
+                {
+                    <li class="dfe-vertical-nav__section-item  dfe-vertical-nav__section-item--current">
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/propose-change">Propose a change</a>
+                    </li>
                 }
-                <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/ProposeChange">Propose a change</a>
-                </li>
             </ul>
         </nav>
 
@@ -106,7 +109,7 @@
 
   <div class="govuk-grid-column-three-quarters">
     
-    @if (TempData["SuccessMessage"] != null)
+    @if (ViewData["SuccessMessage"] != null)
     {
         <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
             <div class="govuk-notification-banner__header">
@@ -116,20 +119,44 @@
             </div>
             <div class="govuk-notification-banner__content">
                 <p class="govuk-notification-banner__heading">
-                    @TempData["SuccessMessage"]
+                    @ViewData["SuccessMessage"]
                 </p>
             </div>
         </div>
     }
+    
+    @if (ViewData.ModelState.ErrorCount > 0 && ViewData.ModelState[""]?.Errors.Count > 0)
+    {
+        <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-title" tabindex="-1" data-module="govuk-error-summary">
+            <h2 class="govuk-error-summary__title" id="error-summary-title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">
+                    @foreach (var error in ViewData.ModelState[""]?.Errors ?? new Microsoft.AspNetCore.Mvc.ModelBinding.ModelErrorCollection())
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
 
-    <div class="govuk-inset-text">
-        <p>Use this form to propose changes to this product's information. An administrator will review your suggestions before they are applied.</p>
-    </div>
+   
+   
 
     <form asp-action="ProposeChange" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
         @Html.AntiForgeryToken()
 
-        <h2 class="govuk-heading-m">Propose changes to product details</h2>
+        <h2 class="govuk-heading-l">Propose changes to product details</h2>
+
+             <p class="govuk-body">Use this form to propose changes to this product's information. An administrator will review your suggestions before they are applied.</p>
+ 
+<div class="govuk-inset-text">
+ This form should only be submitted by a permanent member of DfE staff.
+</div>
+
+
         
         <div class="govuk-form-group @(ViewData.ModelState["ProposedTitle"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <label class="govuk-label govuk-label--s" for="ProposedTitle">
@@ -390,6 +417,124 @@
                 </fieldset>
             </div>
         }
+
+        <h2 class="govuk-heading-m">Additional information</h2>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedUserDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedUserDescription">
+                Tell us in your own words who the users of the product are
+            </label>
+            <div id="ProposedUserDescription-hint" class="govuk-hint">
+                Describe who uses this product on a regular basis. For example, "Teachers, school leaders, or DfE Staff".
+            </div>
+            @if (ViewData.ModelState["ProposedUserDescription"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedUserDescription"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <textarea class="govuk-textarea @(ViewData.ModelState["ProposedUserDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
+                      id="ProposedUserDescription" 
+                      name="ProposedUserDescription" 
+                      rows="4"
+                      maxlength="2000"
+                      aria-describedby="@(ViewData.ModelState["ProposedUserDescription"]?.Errors.Count > 0 ? "ProposedUserDescription-error ProposedUserDescription-hint" : "ProposedUserDescription-hint")">@Model.ProposedUserDescription</textarea>
+        </div>
+
+        <h3 class="govuk-heading-s">If known, tell us:</h3>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedServiceOwner">
+                Service Owner
+            </label>
+            <div id="ProposedServiceOwner-hint" class="govuk-hint">
+                The person responsible for the overall service.
+            </div>
+            @if (ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedServiceOwner"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedServiceOwner" 
+                   name="ProposedServiceOwner" 
+                   type="text" 
+                   value="@Model.ProposedServiceOwner"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "ProposedServiceOwner-error ProposedServiceOwner-hint" : "ProposedServiceOwner-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedInformationAssetOwner">
+                Information Asset Owner
+            </label>
+            <div id="ProposedInformationAssetOwner-hint" class="govuk-hint">
+                The person responsible for the information assets.
+            </div>
+            @if (ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedInformationAssetOwner" 
+                   name="ProposedInformationAssetOwner" 
+                   type="text" 
+                   value="@Model.ProposedInformationAssetOwner"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "ProposedInformationAssetOwner-error ProposedInformationAssetOwner-hint" : "ProposedInformationAssetOwner-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedDeliveryManager">
+                Delivery Manager
+            </label>
+            <div id="ProposedDeliveryManager-hint" class="govuk-hint">
+                The person responsible for delivery of the product or service.
+            </div>
+            @if (ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedDeliveryManager"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedDeliveryManager" 
+                   name="ProposedDeliveryManager" 
+                   type="text" 
+                   value="@Model.ProposedDeliveryManager"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0 ? "ProposedDeliveryManager-error ProposedDeliveryManager-hint" : "ProposedDeliveryManager-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedProductManager">
+                Product Manager
+            </label>
+            <div id="ProposedProductManager-hint" class="govuk-hint">
+                The person responsible for the product strategy and roadmap.
+            </div>
+            @if (ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedProductManager"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedProductManager" 
+                   name="ProposedProductManager" 
+                   type="text" 
+                   value="@Model.ProposedProductManager"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0 ? "ProposedProductManager-error ProposedProductManager-hint" : "ProposedProductManager-hint")">
+        </div>
 
         <div class="govuk-form-group @(ViewData.ModelState["Reason"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <label class="govuk-label govuk-label--m" for="Reason">

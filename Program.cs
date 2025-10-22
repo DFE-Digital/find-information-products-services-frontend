@@ -95,6 +95,9 @@ builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
 builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
 // builder.Services.AddScoped<IApiLoggingService, NullApiLoggingService>();
 
+// Register GOV.UK Notify service
+builder.Services.AddScoped<INotifyService, NotifyService>();
+
 builder.Services.AddHttpContextAccessor();
 
 // Register Airtable service
@@ -278,6 +281,11 @@ app.MapControllerRoute(
     name: "product-edit",
     pattern: "product/{fipsid}/edit",
     defaults: new { controller = "Products", action = "ProductEdit" });
+
+app.MapControllerRoute(
+    name: "product-propose-change",
+    pattern: "product/{fipsid}/propose-change",
+    defaults: new { controller = "Products", action = "ProposeChange" });
 
 app.MapControllerRoute(
     name: "product-view",
