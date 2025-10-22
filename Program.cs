@@ -189,9 +189,12 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Show detailed errors in both development and production for debugging
+app.UseDeveloperExceptionPage();
+app.UseExceptionHandler("/Home/Error");
+
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FipsFrontend.Services;
 using FipsFrontend.Models;
+using System.Diagnostics;
 
 namespace FipsFrontend.Controllers;
 
@@ -65,7 +66,19 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View();
+        var exceptionHandlerPathFeature = HttpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+        
+        // Log the error
+        _logger.LogError(exception, "Unhandled exception occurred");
+        
+        // Return detailed error information for debugging
+        return View(new ErrorViewModel 
+        { 
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+            Exception = exception,
+            ExceptionDetails = exception?.ToString()
+        });
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
