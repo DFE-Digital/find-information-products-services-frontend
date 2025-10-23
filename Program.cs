@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using System.Threading.RateLimiting;
+using Microsoft.Graph;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -204,8 +205,8 @@ app.UseStatusCodePagesWithReExecute("/Home/NotFound");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Add maintenance middleware (check CMS availability)
-app.UseMiddleware<MaintenanceMiddleware>();
+// Add maintenance middleware (check CMS availability) - TEMPORARILY DISABLED FOR TESTING
+// app.UseMiddleware<MaintenanceMiddleware>();
 
 // Add security middleware
 app.UseMiddleware<SecurityMiddleware>();

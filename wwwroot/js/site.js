@@ -87,17 +87,52 @@ document.addEventListener('DOMContentLoaded', function() {
           timestamp: new Date().toISOString()
         });
         
-        // Here you would typically send the feedback to your server
-        // For now, we'll just show the thank you message
-        feedbackPanel.classList.remove('show');
-        feedbackPanel.setAttribute('aria-hidden', 'true');
-        thanksMessage.classList.add('show');
+        // Send feedback to the server
+        const submitButton = feedbackForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.textContent = 'Submitting...';
+        submitButton.disabled = true;
         
-        // Clear the form
-        textarea.value = '';
-        
-        // Focus on the thank you message for screen readers
-        thanksMessage.focus();
+        fetch('/Contact/SubmitFeedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            feedbackFormInput: feedbackText
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            feedbackPanel.classList.remove('show');
+            feedbackPanel.setAttribute('aria-hidden', 'true');
+            thanksMessage.classList.add('show');
+            
+            // Clear the form
+            textarea.value = '';
+            
+            // Focus on the thank you message for screen readers
+            thanksMessage.focus();
+            
+            console.log('Feedback submitted successfully');
+          } else {
+            // Show error message
+            alert('Sorry, there was an error submitting your feedback. Please try again.');
+            console.error('Feedback submission failed:', data.message);
+          }
+        })
+        .catch(error => {
+          // Show error message
+          alert('Sorry, there was an error submitting your feedback. Please try again.');
+          console.error('Feedback submission error:', error);
+        })
+        .finally(() => {
+          // Reset button state
+          submitButton.textContent = originalButtonText;
+          submitButton.disabled = false;
+        });
       }
     });
   }

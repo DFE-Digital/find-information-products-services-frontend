@@ -7,7 +7,7 @@ namespace FipsFrontend.Services;
 
 public interface IAirtableService
 {
-    Task<bool> SubmitFeedbackAsync(string feedback, string pageUrl, string service = "FIPS");
+    Task<bool> SubmitFeedbackAsync(string feedback, string pageUrl, string service = "FIPS", string? userEmail = null);
 }
 
 public class AirtableService : IAirtableService
@@ -27,27 +27,37 @@ public class AirtableService : IAirtableService
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.ApiKey}");
     }
 
-    public async Task<bool> SubmitFeedbackAsync(string feedback, string pageUrl, string service = "FIPS")
+    public async Task<bool> SubmitFeedbackAsync(string feedback, string pageUrl, string service = "FIPS", string? userEmail = null)
     {
         try
         {
+            _logger.LogInformation("AirtableService.SubmitFeedbackAsync called with feedback length: {FeedbackLength}", feedback?.Length ?? 0);
+            _logger.LogInformation("Airtable configuration - BaseId: {BaseId}, ApiKey: {ApiKey}, TableName: {TableName}", 
+                _config.BaseId, 
+                _config.ApiKey?.Substring(0, Math.Min(10, _config.ApiKey.Length)) + "...", 
+                _config.FeedbackTableName);
+
             var payload = new
             {
                 fields = new
                 {
                     Feedback = feedback,
                     Service = service,
-                    URL = pageUrl
+                    URL = pageUrl,
+                    UserID = userEmail
                 }
             };
 
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            _logger.LogInformation("Submitting feedback to Airtable: {Feedback}, Page: {PageUrl}, Service: {Service}", 
-                feedback, pageUrl, service);
+            _logger.LogInformation("Submitting feedback to Airtable: {Feedback}, Page: {PageUrl}, Service: {Service}, UserEmail: {UserEmail}", 
+                feedback, pageUrl, service, userEmail);
 
-            var response = await _httpClient.PostAsync($"{_config.FeedbackTableName}", content);
+            var requestUrl = $"{_config.FeedbackTableName}";
+            _logger.LogInformation("Making request to Airtable URL: {RequestUrl}", requestUrl);
+
+            var response = await _httpClient.PostAsync(requestUrl, content);
 
             if (response.IsSuccessStatusCode)
             {

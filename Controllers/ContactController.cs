@@ -67,20 +67,32 @@ public class ContactController : Controller
     {
         try
         {
+            _logger.LogInformation("SubmitFeedback endpoint called");
+            
+            if (model == null)
+            {
+                _logger.LogWarning("SubmitFeedback called with null model");
+                return Json(new { success = false, message = "Invalid request" });
+            }
+            
             if (string.IsNullOrWhiteSpace(model.FeedbackFormInput))
             {
+                _logger.LogWarning("SubmitFeedback called with empty feedback");
                 return Json(new { success = false, message = "Feedback cannot be empty" });
             }
 
             // Get the referring page URL
             var pageUrl = Request.Headers["Referer"].FirstOrDefault() ?? "Unknown";
             var service = "FIPS";
+            
+            // Get the signed-in user's email
+            var userEmail = User?.Identity?.Name ?? User?.FindFirst("email")?.Value ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
-            _logger.LogInformation("Feedback received: {Feedback}, Page: {PageUrl}, Service: {Service}", 
-                model.FeedbackFormInput, pageUrl, service);
+            _logger.LogInformation("Feedback received: {Feedback}, Page: {PageUrl}, Service: {Service}, UserEmail: {UserEmail}", 
+                model.FeedbackFormInput, pageUrl, service, userEmail);
 
             // Submit to Airtable
-            var success = await _airtableService.SubmitFeedbackAsync(model.FeedbackFormInput, pageUrl, service);
+            var success = await _airtableService.SubmitFeedbackAsync(model.FeedbackFormInput, pageUrl, service, userEmail);
 
             if (success)
             {
@@ -95,6 +107,7 @@ public class ContactController : Controller
         }
         catch (Exception ex)
         {
+             Console.WriteLine(ex.Message);
             _logger.LogError(ex, "Error processing feedback submission");
             return Json(new { success = false, message = "An error occurred while processing your feedback" });
         }

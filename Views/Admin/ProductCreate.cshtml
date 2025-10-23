@@ -5,38 +5,16 @@
 
 @section BeforeContent {
 
-  <div class="dfe-masthead govuk-!-padding-bottom-0">
+  <div class="dfe-masthead">
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-two-thirds">
                     <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
-                        Create new product
+                        Create new FIPS entry
                     </h1>
                 </div>
             </div>
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-full">
-                   <nav class="app-sub-navigation govuk-!-margin-top-5" aria-label="Application menu">
-                    <ul class="app-sub-navigation__list">
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin">Dashboard</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/products">Products</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/categories">Categories</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/users">Users</a>
-                        </li>
-                        <li class="app-sub-navigation__item">
-                            <a class="app-sub-navigation__link" href="/admin/settings">System settings</a>
-                        </li>   
-                    </ul>
-                </nav>
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -51,7 +29,7 @@
      
         <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
           <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/Admin/ProductCreate" data-action="create_product">
-            Create new product
+            Create new entry
           </a>
         </li>
        
@@ -130,12 +108,96 @@
                       aria-describedby="@(ViewData.ModelState["ShortDescription"]?.Errors.Count > 0 ? "ShortDescription-error ShortDescription-hint" : "ShortDescription-hint")">@Model.ShortDescription</textarea>
         </div>
 
+        <h2 class="govuk-heading-m">Key people</h2>
 
-        <div class="govuk-inset-text">
-            <p class="govuk-body">
-                <strong>Default stage:</strong> New products will be automatically assigned to the <strong>Demand</strong> stage. 
-                Once the request has gone through Triage, it will be updated to the <strong>Triage</strong> stage and assigned to the appropriate Group.
-            </p>
+        <p class="govuk-body">
+            Add the details of the people responsible for the product, if known.
+        </p>
+
+        
+
+    <div class="govuk-form-group @(ViewData.ModelState["ServiceOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+        <label class="govuk-label govuk-label--s" for="ServiceOwner">
+            Service Owner email address
+        </label>
+        <div id="ServiceOwner-hint" class="govuk-hint">
+            The person responsible for the overall service delivery and management.
+        </div>
+        @if (ViewData.ModelState["ServiceOwner"]?.Errors.Count > 0)
+        {
+            <span class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                @ViewData.ModelState["ServiceOwner"]?.Errors.First().ErrorMessage
+            </span>
+        }
+        <input class="govuk-input @(ViewData.ModelState["ServiceOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+               asp-for="ServiceOwner" 
+               id="ServiceOwner" 
+               type="email" 
+               aria-describedby="@(ViewData.ModelState["ServiceOwner"]?.Errors.Count > 0 ? "ServiceOwner-error ServiceOwner-hint" : "ServiceOwner-hint")">
+    </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["InformationAssetOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="InformationAssetOwner">
+                Information Asset Owner email address
+            </label>
+            <div id="InformationAssetOwner-hint" class="govuk-hint">
+                The person responsible for the information asset and its security.
+            </div>
+            @if (ViewData.ModelState["InformationAssetOwner"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["InformationAssetOwner"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["InformationAssetOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   asp-for="InformationAssetOwner" 
+                   id="InformationAssetOwner" 
+                   type="email" 
+                   aria-describedby="@(ViewData.ModelState["InformationAssetOwner"]?.Errors.Count > 0 ? "InformationAssetOwner-error InformationAssetOwner-hint" : "InformationAssetOwner-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="DeliveryManager">
+                Delivery Manager email address
+            </label>
+            <div id="DeliveryManager-hint" class="govuk-hint">
+                The person responsible for the delivery and development of the product.
+            </div>
+            @if (ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["DeliveryManager"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   asp-for="DeliveryManager" 
+                   id="DeliveryManager" 
+                   type="email" 
+                   aria-describedby="@(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "DeliveryManager-error DeliveryManager-hint" : "DeliveryManager-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProductManager">
+                Product Manager email address
+            </label>
+            <div id="ProductManager-hint" class="govuk-hint">
+                The person responsible for the product strategy and roadmap.
+            </div>
+            @if (ViewData.ModelState["ProductManager"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProductManager"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   asp-for="ProductManager" 
+                   id="ProductManager" 
+                   type="email" 
+                   aria-describedby="@(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "ProductManager-error ProductManager-hint" : "ProductManager-hint")">
         </div>
 
         @if (Model.AvailablePhases.Any())
@@ -180,7 +242,7 @@
             <div class="govuk-form-group @(ViewData.ModelState["SelectedGroupId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset">
                     <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                        Group assignment
+                        Business area
                     </legend>
                     <div id="SelectedGroupId-hint" class="govuk-hint">
                         The area of DfE that is primarily responsible for the product.
@@ -193,17 +255,7 @@
                         </span>
                     }
                     <div class="govuk-radios" data-module="govuk-radios">
-                        <div class="govuk-radios__item">
-                            <input class="govuk-radios__input" 
-                                   id="SelectedGroupId_0" 
-                                   name="SelectedGroupId" 
-                                   type="radio" 
-                                   value=""
-                                   @(Model.SelectedGroupId == null ? "checked" : "")>
-                            <label class="govuk-label govuk-radios__label" for="SelectedGroupId_0">
-                                No group assigned (will be assigned during Triage)
-                            </label>
-                        </div>
+                 
                         @foreach (var group in Model.AvailableGroups.OrderBy(g => g.Name))
                         {
                             <div class="govuk-radios__item">
