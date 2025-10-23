@@ -31,12 +31,6 @@
                     <div class="moj-filter__header-title">
                         <h2 class="govuk-heading-m">Filter</h2>
                     </div>
-                    <div class="moj-filter__header-action">
-                        @if (Model.SelectedFilters.Any())
-                        {
-                            <p><a class="govuk-link govuk-link--no-visited-state" href="/products">Clear filters</a></p>
-                        }
-                    </div>
                 </div>
 
                 <div class="moj-filter__content">
@@ -462,7 +456,7 @@
                                 </li>
                                 @if (startPage > 2)
                                 {
-                                    <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                                    <li class="govuk-pagination__item govuk-pagination__item--ellipsis" aria-label="Omitted pages 2 to @(startPage - 1)">…</li>
                                 }
                             }
                             
@@ -492,7 +486,7 @@
                             {
                                 @if (endPage < Model.TotalPages - 1)
                                 {
-                                    <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                                    <li class="govuk-pagination__item govuk-pagination__item--ellipsis" aria-label="Omitted pages @(endPage + 1) to @(Model.TotalPages - 1)">…</li>
                                 }
                                 <li class="govuk-pagination__item">
                                     <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
@@ -675,6 +669,15 @@
         
         .filter-toggle-button:hover {
             background-color: #f3f2f1;
+        }
+        
+        .filter-toggle-button:focus {
+            outline: 3px solid #fd0;
+            outline-offset: 0;
+            background-color: #fd0;
+            text-decoration: underline;
+            text-decoration-thickness: 3px;
+            text-underline-offset: 2px;
         }
         
         .filter-toggle-icon {

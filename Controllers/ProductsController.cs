@@ -1301,6 +1301,28 @@ public class ProductsController : Controller
                     UserEmail = pc.UsersPermissionsUser?.Email,
                     UserName = pc.UsersPermissionsUser?.DisplayName ?? $"{pc.UsersPermissionsUser?.FirstName} {pc.UsersPermissionsUser?.LastName}".Trim()
                 }).ToList();
+
+                // Populate individual role fields from current contacts
+                foreach (var contact in product.ProductContacts)
+                {
+                    var userName = contact.UsersPermissionsUser?.DisplayName ?? $"{contact.UsersPermissionsUser?.FirstName} {contact.UsersPermissionsUser?.LastName}".Trim();
+                    
+                    switch (contact.Role?.ToLowerInvariant())
+                    {
+                        case "senior_responsible_owner":
+                            viewModel.ProposedServiceOwner = userName;
+                            break;
+                        case "delivery_manager":
+                            viewModel.ProposedDeliveryManager = userName;
+                            break;
+                        case "information_asset_owner":
+                            viewModel.ProposedInformationAssetOwner = userName;
+                            break;
+                        case "product_manager":
+                            viewModel.ProposedProductManager = userName;
+                            break;
+                    }
+                }
             }
 
             ViewData["ActiveNav"] = "products";
@@ -1565,7 +1587,8 @@ public class ProductsController : Controller
                     entryLink,
                     changeTableMarkdown,
                     requestorInfo,
-                    model.Reason);
+                    model.Reason,
+                    product.CmdbSysId);
 
                 _logger.LogInformation("Email notification sent successfully for proposed change to product {FipsId} from {Requestor}", fipsid, requestorInfo);
 
@@ -1615,6 +1638,35 @@ public class ProductsController : Controller
             model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
             model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
             model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+            // Populate individual role fields from current contacts if not already set
+            if (product.ProductContacts?.Any() == true)
+            {
+                foreach (var contact in product.ProductContacts)
+                {
+                    var userName = contact.UsersPermissionsUser?.DisplayName ?? $"{contact.UsersPermissionsUser?.FirstName} {contact.UsersPermissionsUser?.LastName}".Trim();
+                    
+                    switch (contact.Role?.ToLowerInvariant())
+                    {
+                        case "senior_responsible_owner":
+                            if (string.IsNullOrEmpty(model.ProposedServiceOwner))
+                                model.ProposedServiceOwner = userName;
+                            break;
+                        case "delivery_manager":
+                            if (string.IsNullOrEmpty(model.ProposedDeliveryManager))
+                                model.ProposedDeliveryManager = userName;
+                            break;
+                        case "information_asset_owner":
+                            if (string.IsNullOrEmpty(model.ProposedInformationAssetOwner))
+                                model.ProposedInformationAssetOwner = userName;
+                            break;
+                        case "product_manager":
+                            if (string.IsNullOrEmpty(model.ProposedProductManager))
+                                model.ProposedProductManager = userName;
+                            break;
+                    }
+                }
+            }
 
             ViewData["ActiveNav"] = "products";
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;

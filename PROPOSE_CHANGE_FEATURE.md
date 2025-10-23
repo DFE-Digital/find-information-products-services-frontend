@@ -20,6 +20,7 @@ When a user submits a proposed change, an email is sent with the following param
 - **entryLink**: Full URL to the product page
 - **change**: A Markdown-formatted table showing before/after values
 - **requestor**: The name and email of the signed-in user making the request (e.g., "John Smith (john.smith@education.gov.uk)")
+- **cmdb**: Information about CMDB registration status
 
 The email includes changes to:
 - Product title
@@ -122,6 +123,7 @@ The GOV.UK Notify template (ID: `changeEntry`) should include the following plac
 - `((requestor))`: The name and email of the person making the request
 - `((change))`: The change table (supports Markdown formatting)
 - `((notes))`: Optional - reason for the change
+- `((cmdb))`: CMDB registration status information
 
 Example template content:
 ```
@@ -134,6 +136,9 @@ Proposed changes:
 
 Reason for changes:
 ((notes))
+
+CMDB Status:
+((cmdb))
 ```
 
 ## Dependencies

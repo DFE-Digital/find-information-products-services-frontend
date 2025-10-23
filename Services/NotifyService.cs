@@ -12,7 +12,8 @@ public interface INotifyService
         string entryLink,
         string changeTableHtml,
         string requestor,
-        string? additionalNotes = null);
+        string? additionalNotes = null,
+        string? cmdbSysId = null);
 }
 
 public class NotifyService : INotifyService
@@ -41,7 +42,8 @@ public class NotifyService : INotifyService
         string entryLink,
         string changeTableHtml,
         string requestor,
-        string? additionalNotes = null)
+        string? additionalNotes = null,
+        string? cmdbSysId = null)
     {
         try
         {
@@ -71,6 +73,16 @@ public class NotifyService : INotifyService
             if (!string.IsNullOrEmpty(additionalNotes))
             {
                 personalisation["notes"] = additionalNotes;
+            }
+
+            // Add CMDB information
+            if (!string.IsNullOrEmpty(cmdbSysId))
+            {
+                personalisation["cmdb"] = "This is a CMDB registered product. Any changes to the title, description or contacts will need to be made through Service Now.";
+            }
+            else
+            {
+                personalisation["cmdb"] = "This product is not registered in the CMDB. All details can be changed in the CMS.";
             }
 
             _logger.LogInformation("Sending proposed change notification email for FIPS ID: {FipsId} from requestor: {Requestor}", fipsId, requestor);
@@ -169,12 +181,12 @@ public class NotifyService : INotifyService
             changes.Add($"User Description\n\nCurrent:\n{current}\n\nProposed:\n{proposed}");
         }
 
-        // Service Owner - show if different
+        // Senior Responsible Officer - show if different
         if (!string.Equals(currentServiceOwner, proposedServiceOwner, StringComparison.Ordinal))
         {
             var current = string.IsNullOrWhiteSpace(currentServiceOwner) ? "(empty)" : currentServiceOwner;
             var proposed = string.IsNullOrWhiteSpace(proposedServiceOwner) ? "(empty)" : proposedServiceOwner;
-            changes.Add($"Service Owner\n\nCurrent:\n{current}\n\nProposed:\n{proposed}");
+            changes.Add($"Senior Responsible Officer\n\nCurrent:\n{current}\n\nProposed:\n{proposed}");
         }
 
         // Information Asset Owner - show if different

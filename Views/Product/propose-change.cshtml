@@ -277,7 +277,7 @@
                                 No phase assigned
                             </label>
                         </div>
-                        @foreach (var phase in Model.AvailablePhases.OrderBy(p => p.Name))
+                        @foreach (var phase in Model.AvailablePhases.OrderBy(p => p.SortOrder))
                         {
                             <div class="govuk-radios__item">
                                 <input class="govuk-radios__input" 
@@ -301,10 +301,10 @@
             <div class="govuk-form-group @(ViewData.ModelState["ProposedGroupId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <fieldset class="govuk-fieldset">
                     <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
-                        Group assignment
+                        Business area
                     </legend>
                     <div id="ProposedGroupId-hint" class="govuk-hint">
-                        The area of DfE that is primarily responsible for the product.
+                        The area or portfolio of DfE that is primarily responsible for the product.
                     </div>
                     @if (ViewData.ModelState["ProposedGroupId"]?.Errors.Count > 0)
                     {
@@ -322,7 +322,7 @@
                                    value=""
                                    @(Model.ProposedGroupId == null ? "checked" : "")>
                             <label class="govuk-label govuk-radios__label" for="ProposedGroupId_0">
-                                No group assigned
+                                No business area assigned
                             </label>
                         </div>
                         @foreach (var group in Model.AvailableGroups.OrderBy(g => g.Name))
@@ -389,7 +389,7 @@
                         Types
                     </legend>
                     <div id="ProposedTypeIds-hint" class="govuk-hint">
-                        Select all types that apply to this product or service.
+                        Select all types of service delivery and functionality that apply to this product or service.
                     </div>
                     @if (ViewData.ModelState["ProposedTypeIds"]?.Errors.Count > 0)
                     {
@@ -442,60 +442,18 @@
                       aria-describedby="@(ViewData.ModelState["ProposedUserDescription"]?.Errors.Count > 0 ? "ProposedUserDescription-error ProposedUserDescription-hint" : "ProposedUserDescription-hint")">@Model.ProposedUserDescription</textarea>
         </div>
 
-        <h3 class="govuk-heading-s">If known, tell us:</h3>
-
-        <div class="govuk-form-group @(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label class="govuk-label govuk-label--s" for="ProposedServiceOwner">
-                Service Owner
-            </label>
-            <div id="ProposedServiceOwner-hint" class="govuk-hint">
-                The person responsible for the overall service.
-            </div>
-            @if (ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0)
-            {
-                <span class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["ProposedServiceOwner"]?.Errors.First().ErrorMessage
-                </span>
-            }
-            <input class="govuk-input @(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
-                   id="ProposedServiceOwner" 
-                   name="ProposedServiceOwner" 
-                   type="text" 
-                   value="@Model.ProposedServiceOwner"
-                   maxlength="255"
-                   aria-describedby="@(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "ProposedServiceOwner-error ProposedServiceOwner-hint" : "ProposedServiceOwner-hint")">
-        </div>
-
-        <div class="govuk-form-group @(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label class="govuk-label govuk-label--s" for="ProposedInformationAssetOwner">
-                Information Asset Owner
-            </label>
-            <div id="ProposedInformationAssetOwner-hint" class="govuk-hint">
-                The person responsible for the information assets.
-            </div>
-            @if (ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0)
-            {
-                <span class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.First().ErrorMessage
-                </span>
-            }
-            <input class="govuk-input @(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
-                   id="ProposedInformationAssetOwner" 
-                   name="ProposedInformationAssetOwner" 
-                   type="text" 
-                   value="@Model.ProposedInformationAssetOwner"
-                   maxlength="255"
-                   aria-describedby="@(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "ProposedInformationAssetOwner-error ProposedInformationAssetOwner-hint" : "ProposedInformationAssetOwner-hint")">
-        </div>
+        <h3 class="govuk-heading-s">Tell us if any of the team roles have changed</h3>
 
         <div class="govuk-form-group @(ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <label class="govuk-label govuk-label--s" for="ProposedDeliveryManager">
                 Delivery Manager
             </label>
             <div id="ProposedDeliveryManager-hint" class="govuk-hint">
-                The person responsible for delivery of the product or service.
+                Current: @{
+                    var dmContact = Model.Product.ProductContacts?.FirstOrDefault(pc => pc.Role == "delivery_manager");
+                    var dmName = dmContact?.UsersPermissionsUser?.DisplayName ?? $"{dmContact?.UsersPermissionsUser?.FirstName} {dmContact?.UsersPermissionsUser?.LastName}".Trim();
+                    @(string.IsNullOrEmpty(dmName) ? "(empty)" : dmName)
+                }
             </div>
             @if (ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0)
             {
@@ -513,12 +471,43 @@
                    aria-describedby="@(ViewData.ModelState["ProposedDeliveryManager"]?.Errors.Count > 0 ? "ProposedDeliveryManager-error ProposedDeliveryManager-hint" : "ProposedDeliveryManager-hint")">
         </div>
 
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedInformationAssetOwner">
+                Information Asset Owner
+            </label>
+            <div id="ProposedInformationAssetOwner-hint" class="govuk-hint">
+                Current: @{
+                    var iaoContact = Model.Product.ProductContacts?.FirstOrDefault(pc => pc.Role == "information_asset_owner");
+                    var iaoName = iaoContact?.UsersPermissionsUser?.DisplayName ?? $"{iaoContact?.UsersPermissionsUser?.FirstName} {iaoContact?.UsersPermissionsUser?.LastName}".Trim();
+                    @(string.IsNullOrEmpty(iaoName) ? "(empty)" : iaoName)
+                }
+            </div>
+            @if (ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedInformationAssetOwner" 
+                   name="ProposedInformationAssetOwner" 
+                   type="text" 
+                   value="@Model.ProposedInformationAssetOwner"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["ProposedInformationAssetOwner"]?.Errors.Count > 0 ? "ProposedInformationAssetOwner-error ProposedInformationAssetOwner-hint" : "ProposedInformationAssetOwner-hint")">
+        </div>
+
         <div class="govuk-form-group @(ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <label class="govuk-label govuk-label--s" for="ProposedProductManager">
                 Product Manager
             </label>
             <div id="ProposedProductManager-hint" class="govuk-hint">
-                The person responsible for the product strategy and roadmap.
+                Current: @{
+                    var pmContact = Model.Product.ProductContacts?.FirstOrDefault(pc => pc.Role == "product_manager");
+                    var pmName = pmContact?.UsersPermissionsUser?.DisplayName ?? $"{pmContact?.UsersPermissionsUser?.FirstName} {pmContact?.UsersPermissionsUser?.LastName}".Trim();
+                    @(string.IsNullOrEmpty(pmName) ? "(empty)" : pmName)
+                }
             </div>
             @if (ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0)
             {
@@ -534,6 +523,33 @@
                    value="@Model.ProposedProductManager"
                    maxlength="255"
                    aria-describedby="@(ViewData.ModelState["ProposedProductManager"]?.Errors.Count > 0 ? "ProposedProductManager-error ProposedProductManager-hint" : "ProposedProductManager-hint")">
+        </div>
+
+        <div class="govuk-form-group @(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+            <label class="govuk-label govuk-label--s" for="ProposedServiceOwner">
+                Senior Responsible Officer
+            </label>
+            <div id="ProposedServiceOwner-hint" class="govuk-hint">
+                Current: @{
+                    var sroContact = Model.Product.ProductContacts?.FirstOrDefault(pc => pc.Role == "senior_responsible_owner");
+                    var sroName = sroContact?.UsersPermissionsUser?.DisplayName ?? $"{sroContact?.UsersPermissionsUser?.FirstName} {sroContact?.UsersPermissionsUser?.LastName}".Trim();
+                    @(string.IsNullOrEmpty(sroName) ? "(empty)" : sroName)
+                }
+            </div>
+            @if (ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0)
+            {
+                <span class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span>
+                    @ViewData.ModelState["ProposedServiceOwner"]?.Errors.First().ErrorMessage
+                </span>
+            }
+            <input class="govuk-input @(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "govuk-input--error" : "")" 
+                   id="ProposedServiceOwner" 
+                   name="ProposedServiceOwner" 
+                   type="text" 
+                   value="@Model.ProposedServiceOwner"
+                   maxlength="255"
+                   aria-describedby="@(ViewData.ModelState["ProposedServiceOwner"]?.Errors.Count > 0 ? "ProposedServiceOwner-error ProposedServiceOwner-hint" : "ProposedServiceOwner-hint")">
         </div>
 
         <div class="govuk-form-group @(ViewData.ModelState["Reason"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -569,4 +585,5 @@
 
   </div>
 </div>
+
 
