@@ -50,9 +50,13 @@ public class AirtableService : IAirtableService
 
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            _logger.LogInformation("JSON payload being sent to Airtable: {JsonPayload}", json);
 
             _logger.LogInformation("Submitting feedback to Airtable: {Feedback}, Page: {PageUrl}, Service: {Service}, UserEmail: {UserEmail}", 
                 feedback, pageUrl, service, userEmail);
+            
+            _logger.LogInformation("UserID field value being sent to Airtable: {UserID}", userEmail ?? "null");
 
             var requestUrl = $"{_config.FeedbackTableName}";
             _logger.LogInformation("Making request to Airtable URL: {RequestUrl}", requestUrl);

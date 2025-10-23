@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
 using System.Threading.RateLimiting;
-using Microsoft.Graph;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,18 +21,11 @@ builder.Logging.AddFile("logs/app-{Date}.log");
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// Temporarily disable authentication for development
-// TODO: Re-enable authentication when Azure AD is properly configured
+// Enable Azure AD authentication
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
-// Add basic authentication services without Azure AD - DISABLED FOR TESTING
-// builder.Services.AddAuthentication("Cookies")
-//     .AddCookie("Cookies", options =>
-//     {
-//         options.LoginPath = "/Home/Index";
-//         options.LogoutPath = "/Home/Index";
-//         options.AccessDeniedPath = "/Home/Index";
-//     });
-// builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 
 // Configure HTTP client for CMS API with optimizations
 builder.Services.AddHttpClient<CmsApiService>(client =>
@@ -235,10 +227,11 @@ app.Use(async (context, next) =>
         $"style-src 'self' 'nonce-{nonce}' https://rsms.me; " +
         $"img-src 'self' data: https:; " +
         $"font-src 'self' data: https://rsms.me; " +
-        $"connect-src 'self' https://*.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://dc.applicationinsights.azure.com https://dc.services.visualstudio.com https://az416426.vo.msecnd.net; " +
+        $"connect-src 'self' https://*.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://dc.applicationinsights.azure.com https://dc.services.visualstudio.com https://az416426.vo.msecnd.net https://login.microsoftonline.com https://graph.microsoft.com; " +
+        $"frame-src 'self' https://login.microsoftonline.com; " +
         $"frame-ancestors 'none'; " +
         $"base-uri 'self'; " +
-        $"form-action 'self'; " +
+        $"form-action 'self' https://login.microsoftonline.com; " +
         $"object-src 'none'; " +
         $"upgrade-insecure-requests";
     
@@ -259,9 +252,9 @@ app.Use(async (context, next) =>
 
 app.UseRouting();
 
-// Use authentication middleware - DISABLED FOR TESTING
-// app.UseAuthentication();
-// app.UseAuthorization();
+// Use authentication middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSession();
 
