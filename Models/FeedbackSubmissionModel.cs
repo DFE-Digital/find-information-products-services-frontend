@@ -5,6 +5,6 @@ namespace FipsFrontend.Models;
 public class FeedbackSubmissionModel
 {
     [Required]
-    [StringLength(400, ErrorMessage = "Feedback cannot exceed 400 characters")]
+    [StringLength(1000, ErrorMessage = "Feedback cannot exceed 1000 characters")]
     public string FeedbackFormInput { get; set; } = string.Empty;
 }

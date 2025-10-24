@@ -159,18 +159,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
             <div class="dfe-feedback-panel" id="feedback-panel" aria-hidden="true" aria-labelledby="feedback-form-heading" nonce="@Html.GetNonce()">
               <form id="feedback-form" novalidate>
+                <div class="govuk-error-summary" id="feedback-error-summary" aria-labelledby="feedback-error-summary-title" role="alert" data-module="govuk-error-summary" style="display: none;">
+                  <h2 class="govuk-error-summary__title" id="feedback-error-summary-title">
+                    There is a problem
+                  </h2>
+                  <div class="govuk-error-summary__body">
+                    <ul class="govuk-list govuk-error-summary__list">
+                      <li>
+                        <a href="#feedback_form_input">Your feedback must be 1000 characters or fewer</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
                 <fieldset class="govuk-fieldset">
                   <legend class="govuk-fieldset__legend govuk-fieldset__legend--m" id="feedback-form-heading">
                     What do you want to tell us?
                   </legend>
-                  <div class="govuk-character-count" data-module="govuk-character-count" data-maxlength="400">
-                    <div class="govuk-form-group">
+                  <div class="govuk-character-count" data-module="govuk-character-count" data-maxlength="1000">
+                    <div class="govuk-form-group" id="feedback_form_group">
                       <label class="govuk-label govuk-visually-hidden" for="feedback_form_input">
                         Your feedback
                       </label>
-                      <textarea class="govuk-textarea govuk-js-character-count" id="feedback_form_input" name="feedback_form_input" rows="5" aria-describedby="feedback_form_input-info" required aria-required="true"></textarea>
+                      <div class="govuk-hint">
+                        You can include what you like about this page, something you think is missing, or something you think is wrong.
+                      </div>
+                      <span class="govuk-error-message" id="feedback_form_input-error" style="display: none;">
+                        <span class="govuk-visually-hidden">Error:</span> Your feedback must be 1000 characters or fewer
+                      </span>
+                      <textarea class="govuk-textarea govuk-js-character-count" id="feedback_form_input" name="feedback_form_input" rows="7" aria-describedby="feedback_form_input-info" required aria-required="true"></textarea>
                       <div id="feedback_form_input-info" class="govuk-hint govuk-character-count__message">
-                        You can enter up to 400 characters
+                        You can enter up to 1000 characters
                       </div>
                     </div>
                   </div>
