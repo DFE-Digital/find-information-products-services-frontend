@@ -119,7 +119,7 @@
             </div>
             <div class="govuk-notification-banner__content">
                 <p class="govuk-notification-banner__heading">
-                    @ViewData["SuccessMessage"]
+                    Your proposed changes have been submitted. The FIPS team may contact you if additional action or information is needed.
                 </p>
             </div>
         </div>
@@ -148,9 +148,9 @@
     <form asp-action="ProposeChange" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
         @Html.AntiForgeryToken()
 
-        <h2 class="govuk-heading-l">Propose changes to product details</h2>
+        <h2 class="govuk-heading-l">Propose a change to product details</h2>
 
-             <p class="govuk-body">Use this form to propose changes to this product's information. An administrator will review your suggestions before they are applied.</p>
+             <p class="govuk-body">Use this form to propose changes to this product's information. An administrator will review your suggestions before they are added.</p>
  
 <div class="govuk-inset-text">
  This form should only be submitted by a permanent member of DfE staff.
@@ -425,7 +425,7 @@
                 Tell us in your own words who the users of the product are
             </label>
             <div id="ProposedUserDescription-hint" class="govuk-hint">
-                Describe who uses this product on a regular basis. For example, "Teachers, school leaders, or DfE Staff".
+                Describe who uses this product on a regular basis. For example, Teachers, school leaders, or DfE Staff.
             </div>
             @if (ViewData.ModelState["ProposedUserDescription"]?.Errors.Count > 0)
             {
@@ -557,7 +557,7 @@
                 Reason for proposed changes
             </label>
             <div id="Reason-hint" class="govuk-hint">
-                Please explain why you're proposing these changes. This will help the reviewer understand your request.
+                Tell us why you're proposing these changes. This will help the reviewer understand your request.
             </div>
             @if (ViewData.ModelState["Reason"]?.Errors.Count > 0)
             {
