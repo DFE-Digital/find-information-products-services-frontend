@@ -1679,4 +1679,171 @@ public class ProductsController : Controller
         }
     }
 
+    // GET: Products/RequestNewEntry
+    [HttpGet]
+    public async Task<IActionResult> RequestNewEntry()
+    {
+        // Check if EditProduct feature is enabled (reusing same feature flag for now)
+        if (!_enabledFeatures.EditProduct)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            var viewModel = new RequestNewEntryViewModel
+            {
+                AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList(),
+                AvailableBusinessAreas = groupValues.Where(cv => cv.Enabled).ToList(),
+                AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList(),
+                AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList(),
+                PageTitle = "Request a new product entry",
+                PageDescription = "Submit a request to add a new product to FIPS"
+            };
+
+            ViewData["ActiveNav"] = "products";
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            return View("~/Views/Product/request-new-entry.cshtml", viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading request new entry form");
+            return NotFound();
+        }
+    }
+
+    // POST: Products/RequestNewEntry
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RequestNewEntry(RequestNewEntryViewModel model)
+    {
+        _logger.LogInformation("RequestNewEntry POST method called");
+        
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                    string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                // Reload the form data
+                return await ReloadRequestNewEntryForm(model);
+            }
+
+            // Get user information
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value 
+                ?? User.Claims.FirstOrDefault(c => c.Type == "email")?.Value
+                ?? User.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value
+                ?? User.Claims.FirstOrDefault(c => c.Type == "upn")?.Value
+                ?? User.Identity?.Name 
+                ?? "test.user@education.gov.uk";
+            
+            var userName = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value 
+                ?? User.Claims.FirstOrDefault(c => c.Type == "name")?.Value
+                ?? User.Identity?.Name
+                ?? "Test User";
+
+            // Format requestor information
+            var requestorInfo = !string.IsNullOrEmpty(userEmail) 
+                ? $"{userName} ({userEmail})" 
+                : userName;
+
+            // Get category values for selected options
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            // Build friendly names for selected values
+            var phaseName = model.PhaseId.HasValue 
+                ? phaseValues.FirstOrDefault(pv => pv.Id == model.PhaseId.Value)?.Name 
+                : null;
+            
+            var businessAreaName = model.BusinessAreaId.HasValue 
+                ? groupValues.FirstOrDefault(gv => gv.Id == model.BusinessAreaId.Value)?.Name 
+                : null;
+            
+            var channelNames = model.ChannelIds.Any() 
+                ? string.Join(", ", channelValues.Where(cv => model.ChannelIds.Contains(cv.Id)).Select(cv => cv.Name)) 
+                : null;
+            
+            var typeNames = model.TypeIds.Any() 
+                ? string.Join(", ", typeValues.Where(tv => model.TypeIds.Contains(tv.Id)).Select(tv => tv.Name)) 
+                : null;
+
+            try
+            {
+                await _notifyService.SendNewEntryRequestEmailAsync(
+                    requestorInfo,
+                    model.Title,
+                    model.Description,
+                    phaseName,
+                    businessAreaName,
+                    channelNames,
+                    typeNames,
+                    model.ServiceUrl,
+                    model.Users,
+                    model.DeliveryManager,
+                    model.ProductManager,
+                    model.SeniorResponsibleOfficer,
+                    model.Notes);
+
+                _logger.LogInformation("New entry request email sent successfully for title: {Title} from {Requestor}", model.Title, requestorInfo);
+
+                // Show success message and stay on the page
+                ViewData["SuccessMessage"] = "Your new product entry request has been submitted successfully. The FIPS team will review your request and may contact you if additional information is needed.";
+                
+                // Clear the form by creating a new empty model but keep the available options
+                return await ReloadRequestNewEntryForm(new RequestNewEntryViewModel());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send new entry request email for title: {Title}. Error: {ErrorMessage}", model.Title, ex.Message);
+                ModelState.AddModelError("", $"Failed to submit the new entry request: {ex.Message}");
+                
+                return await ReloadRequestNewEntryForm(model);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing new entry request: {Title}", model.Title);
+            ModelState.AddModelError("", "An error occurred while processing your new entry request. Please try again.");
+            return await ReloadRequestNewEntryForm(model);
+        }
+    }
+
+    private async Task<IActionResult> ReloadRequestNewEntryForm(RequestNewEntryViewModel model)
+    {
+        try
+        {
+            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
+            
+            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
+            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
+            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
+            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
+
+            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableBusinessAreas = groupValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
+            model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
+
+            ViewData["ActiveNav"] = "products";
+            ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            return View("~/Views/Product/request-new-entry.cshtml", model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reloading request new entry form");
+            return NotFound();
+        }
+    }
+
 }

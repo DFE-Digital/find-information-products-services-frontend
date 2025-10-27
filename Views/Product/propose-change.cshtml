@@ -198,31 +198,9 @@
             <textarea class="govuk-textarea @(ViewData.ModelState["ProposedShortDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
                       id="ProposedShortDescription" 
                       name="ProposedShortDescription" 
-                      rows="3"
+                      rows="10"
                       maxlength="500"
                       aria-describedby="@(ViewData.ModelState["ProposedShortDescription"]?.Errors.Count > 0 ? "ProposedShortDescription-error ProposedShortDescription-hint" : "ProposedShortDescription-hint")">@Model.ProposedShortDescription</textarea>
-        </div>
-
-        <div class="govuk-form-group @(ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
-            <label class="govuk-label govuk-label--s" for="ProposedLongDescription">
-                Long description
-            </label>
-            <div id="ProposedLongDescription-hint" class="govuk-hint">
-                Current: @(Model.Product.LongDescription ?? "(none)")
-            </div>
-            @if (ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0)
-            {
-                <span class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span>
-                    @ViewData.ModelState["ProposedLongDescription"]?.Errors.First().ErrorMessage
-                </span>
-            }
-            <textarea class="govuk-textarea @(ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" 
-                      id="ProposedLongDescription" 
-                      name="ProposedLongDescription" 
-                      rows="5"
-                      maxlength="2000"
-                      aria-describedby="@(ViewData.ModelState["ProposedLongDescription"]?.Errors.Count > 0 ? "ProposedLongDescription-error ProposedLongDescription-hint" : "ProposedLongDescription-hint")">@Model.ProposedLongDescription</textarea>
         </div>
 
         <div class="govuk-form-group @(ViewData.ModelState["ProposedProductUrl"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">

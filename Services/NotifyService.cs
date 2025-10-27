@@ -14,6 +14,21 @@ public interface INotifyService
         string requestor,
         string? additionalNotes = null,
         string? cmdbSysId = null);
+    
+    Task<EmailNotificationResponse> SendNewEntryRequestEmailAsync(
+        string requestor,
+        string title,
+        string description,
+        string? phase,
+        string? businessArea,
+        string? channels,
+        string? type,
+        string? serviceUrl,
+        string? users,
+        string? deliveryManager,
+        string? productManager,
+        string? sro,
+        string notes);
 }
 
 public class NotifyService : INotifyService
@@ -230,6 +245,70 @@ public class NotifyService : INotifyService
             return text ?? string.Empty;
 
         return text.Substring(0, maxLength - 3) + "...";
+    }
+    
+    public async Task<EmailNotificationResponse> SendNewEntryRequestEmailAsync(
+        string requestor,
+        string title,
+        string description,
+        string? phase,
+        string? businessArea,
+        string? channels,
+        string? type,
+        string? serviceUrl,
+        string? users,
+        string? deliveryManager,
+        string? productManager,
+        string? sro,
+        string notes)
+    {
+        try
+        {
+            var templateId = _configuration["Notify:Templates:newEntry"];
+            if (string.IsNullOrEmpty(templateId))
+            {
+                throw new InvalidOperationException("GOV.UK Notify template ID for 'newEntry' not configured");
+            }
+
+            var recipientEmail = _configuration["Notify:FIPSMailbox"];
+            if (string.IsNullOrEmpty(recipientEmail))
+            {
+                throw new InvalidOperationException("FIPS mailbox email address not configured. Please set Notify:FIPSMailbox in appsettings.json");
+            }
+
+            // Build the personalisation dictionary for the template
+            var personalisation = new Dictionary<string, dynamic>
+            {
+                { "requestor", requestor },
+                { "title", title },
+                { "description", description },
+                { "phase", phase ?? "(not specified)" },
+                { "businessArea", businessArea ?? "(not specified)" },
+                { "channels", channels ?? "(not specified)" },
+                { "type", type ?? "(not specified)" },
+                { "serviceURL", serviceUrl ?? "(not specified)" },
+                { "users", users ?? "(not specified)" },
+                { "deliveryManager", deliveryManager ?? "(not specified)" },
+                { "productManager", productManager ?? "(not specified)" },
+                { "sro", sro ?? "(not specified)" },
+                { "notes", notes }
+            };
+
+            _logger.LogInformation("Sending new entry request notification email for title: {Title} from requestor: {Requestor}", title, requestor);
+            
+            // Send the email
+            var response = await Task.Run(() => 
+                _notifyClient.SendEmail(recipientEmail, templateId, personalisation));
+
+            _logger.LogInformation("New entry request email notification sent successfully. Notification ID: {NotificationId}", response.id);
+            
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send new entry request notification email for title: {Title}", title);
+            throw;
+        }
     }
 }
 
