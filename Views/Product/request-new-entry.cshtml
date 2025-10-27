@@ -120,7 +120,7 @@
                     Product title
                 </label>
                 <div id="Title-hint" class="govuk-hint">
-                    The official name of the product or service
+                    The official name of the product or service.
                 </div>
                 @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
                 {
@@ -137,7 +137,7 @@
                     Description
                 </label>
                 <div id="Description-hint" class="govuk-hint">
-                    Provide a clear description of what the product does and who it serves
+                    Provide a clear description of what the product does and who it serves.
                 </div>
                 @if (ViewData.ModelState["Description"]?.Errors.Count > 0)
                 {
@@ -151,10 +151,10 @@
 
             <div class="govuk-form-group @(ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
                 <label class="govuk-label govuk-label--s" for="ServiceUrl">
-                    Service URL (optional)
+                    Product URL (optional)
                 </label>
                 <div id="ServiceUrl-hint" class="govuk-hint">
-                    The web address where the product or service can be accessed
+                    The web address where the product or service can be accessed.
                 </div>
                 @if (ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0)
                 {
@@ -176,7 +176,7 @@
                             Phase
                         </legend>
                         <div id="PhaseId-hint" class="govuk-hint">
-                            The current phase the product is in
+                            The current phase the product is in.
                         </div>
                         @if (ViewData.ModelState["PhaseId"]?.Errors.Count > 0)
                         {
@@ -214,7 +214,7 @@
                             Business area
                         </legend>
                         <div id="BusinessAreaId-hint" class="govuk-hint">
-                            The area or portfolio of DfE that is primarily responsible for the product
+                            The area or portfolio of DfE that is primarily responsible for the product.
                         </div>
                         @if (ViewData.ModelState["BusinessAreaId"]?.Errors.Count > 0)
                         {
@@ -252,7 +252,7 @@
                             Channels (optional)
                         </legend>
                         <div id="ChannelIds-hint" class="govuk-hint">
-                            Select all channels through which the product is delivered
+                            Select all channels through which the product is delivered.
                         </div>
                         @if (ViewData.ModelState["ChannelIds"]?.Errors.Count > 0)
                         {
@@ -284,7 +284,7 @@
                             Types (optional)
                         </legend>
                         <div id="TypeIds-hint" class="govuk-hint">
-                            Select all types of service delivery and functionality that apply to this product or service
+                            Select all types of service delivery and functionality that apply to this product or service.
                         </div>
                         @if (ViewData.ModelState["TypeIds"]?.Errors.Count > 0)
                         {
@@ -377,7 +377,7 @@
                     Notes
                 </label>
                 <div id="Notes-hint" class="govuk-hint">
-                    Provide any additional information that would help the FIPS team understand this request
+                    Provide any additional information that would help the FIPS team understand this request.
                 </div>
                 @if (ViewData.ModelState["Notes"]?.Errors.Count > 0)
                 {
