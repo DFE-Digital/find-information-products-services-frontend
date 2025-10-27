@@ -156,7 +156,7 @@
  This form should only be submitted by a permanent member of DfE staff.
 </div>
 
-
+        <h2 class="govuk-heading-m">Product details</h2>
         
         <div class="govuk-form-group @(ViewData.ModelState["ProposedTitle"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
             <label class="govuk-label govuk-label--s" for="ProposedTitle">
@@ -225,6 +225,8 @@
                    maxlength="500"
                    aria-describedby="@(ViewData.ModelState["ProposedProductUrl"]?.Errors.Count > 0 ? "ProposedProductUrl-error ProposedProductUrl-hint" : "ProposedProductUrl-hint")">
         </div>
+
+        <h2 class="govuk-heading-m">Product classification</h2>
 
         @if (Model.AvailablePhases.Any())
         {

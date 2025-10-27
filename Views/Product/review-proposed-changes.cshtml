@@ -99,6 +99,8 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="ProposedChangeId" value="@change.DocumentId" />
 
+                                <h4 class="govuk-heading-s govuk-!-margin-top-4">Product details</h4>
+
                                 @if (change.ProposedTitle != change.CurrentTitle)
                                 {
                                     <div class="govuk-form-group">
@@ -146,6 +148,8 @@
                                         </div>
                                     </div>
                                 }
+
+                                <h4 class="govuk-heading-s govuk-!-margin-top-4">Product classification</h4>
 
                                 @{
                                     var currentCategoriesJson = System.Text.Json.JsonSerializer.Serialize(change.CurrentCategoryValues);
