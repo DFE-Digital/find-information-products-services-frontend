@@ -21,18 +21,11 @@ builder.Logging.AddFile("logs/app-{Date}.log");
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// Temporarily disable authentication for development
-// TODO: Re-enable authentication when Azure AD is properly configured
+// Enable Azure AD authentication
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
-// Add basic authentication services without Azure AD - DISABLED FOR TESTING
-// builder.Services.AddAuthentication("Cookies")
-//     .AddCookie("Cookies", options =>
-//     {
-//         options.LoginPath = "/Home/Index";
-//         options.LogoutPath = "/Home/Index";
-//         options.AccessDeniedPath = "/Home/Index";
-//     });
-// builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 
 // Configure HTTP client for CMS API with optimizations
 builder.Services.AddHttpClient<CmsApiService>(client =>
@@ -94,6 +87,9 @@ builder.Services.AddScoped<ISecurityLoggingService, SecurityLoggingService>();
 // Register API logging service - ENABLED FOR PERFORMANCE MONITORING
 builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
 // builder.Services.AddScoped<IApiLoggingService, NullApiLoggingService>();
+
+// Register GOV.UK Notify service
+builder.Services.AddScoped<INotifyService, NotifyService>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -186,9 +182,12 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// Show detailed errors in both development and production for debugging
+app.UseDeveloperExceptionPage();
+app.UseExceptionHandler("/Home/Error");
+
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -198,8 +197,8 @@ app.UseStatusCodePagesWithReExecute("/Home/NotFound");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Add maintenance middleware (check CMS availability)
-app.UseMiddleware<MaintenanceMiddleware>();
+// Add maintenance middleware (check CMS availability) - TEMPORARILY DISABLED FOR TESTING
+// app.UseMiddleware<MaintenanceMiddleware>();
 
 // Add security middleware
 app.UseMiddleware<SecurityMiddleware>();
@@ -228,10 +227,11 @@ app.Use(async (context, next) =>
         $"style-src 'self' 'nonce-{nonce}' https://rsms.me; " +
         $"img-src 'self' data: https:; " +
         $"font-src 'self' data: https://rsms.me; " +
-        $"connect-src 'self' https://*.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://dc.applicationinsights.azure.com https://dc.services.visualstudio.com https://az416426.vo.msecnd.net; " +
+        $"connect-src 'self' https://*.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://dc.applicationinsights.azure.com https://dc.services.visualstudio.com https://az416426.vo.msecnd.net https://login.microsoftonline.com https://graph.microsoft.com; " +
+        $"frame-src 'self' https://login.microsoftonline.com; " +
         $"frame-ancestors 'none'; " +
         $"base-uri 'self'; " +
-        $"form-action 'self'; " +
+        $"form-action 'self' https://login.microsoftonline.com; " +
         $"object-src 'none'; " +
         $"upgrade-insecure-requests";
     
@@ -252,9 +252,9 @@ app.Use(async (context, next) =>
 
 app.UseRouting();
 
-// Use authentication middleware - DISABLED FOR TESTING
-// app.UseAuthentication();
-// app.UseAuthorization();
+// Use authentication middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSession();
 
@@ -278,6 +278,11 @@ app.MapControllerRoute(
     name: "product-edit",
     pattern: "product/{fipsid}/edit",
     defaults: new { controller = "Products", action = "ProductEdit" });
+
+app.MapControllerRoute(
+    name: "product-propose-change",
+    pattern: "product/{fipsid}/propose-change",
+    defaults: new { controller = "Products", action = "ProposeChange" });
 
 app.MapControllerRoute(
     name: "product-view",

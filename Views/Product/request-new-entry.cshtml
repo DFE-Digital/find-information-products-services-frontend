@@ -1,0 +1,403 @@
+@model RequestNewEntryViewModel
+@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Description"] = Model.PageDescription; }
+
+@section BeforeContent {
+    <div class="dfe-masthead dfe-masthead--with-links govuk-!-padding-bottom-3 govuk-!-margin-bottom-3">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <a href="/products" class="govuk-back-link">Back to products</a>
+                    <h1 class="govuk-heading-l dfe-masthead--title">
+                        Request a new product entry
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        
+        @if (ViewData["SuccessMessage"] != null)
+        {
+            <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+                <div class="govuk-notification-banner__header">
+                    <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                        Success
+                    </h2>
+                </div>
+                <div class="govuk-notification-banner__content">
+                    <p class="govuk-notification-banner__heading">
+                        Your new product entry request has been submitted. The FIPS team will review your request and may contact you if additional information is needed.
+                    </p>
+                </div>
+            </div>
+        }
+        
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-title" tabindex="-1" data-module="govuk-error-summary">
+                <h2 class="govuk-error-summary__title" id="error-summary-title">
+                    There is a problem
+                </h2>
+                <div class="govuk-error-summary__body">
+                    <ul class="govuk-list govuk-error-summary__list">
+                        @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#Title">@ViewData.ModelState["Title"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["Description"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#Description">@ViewData.ModelState["Description"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#ServiceUrl">@ViewData.ModelState["ServiceUrl"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["PhaseId"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#PhaseId_0">@ViewData.ModelState["PhaseId"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["BusinessAreaId"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#BusinessAreaId_0">@ViewData.ModelState["BusinessAreaId"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["ChannelIds"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#ChannelIds">@ViewData.ModelState["ChannelIds"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["TypeIds"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#TypeIds">@ViewData.ModelState["TypeIds"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["Users"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#Users">@ViewData.ModelState["Users"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#DeliveryManager">@ViewData.ModelState["DeliveryManager"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["ProductManager"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#ProductManager">@ViewData.ModelState["ProductManager"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#SeniorResponsibleOfficer">@ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState["Notes"]?.Errors.Count > 0)
+                        {
+                            <li><a href="#Notes">@ViewData.ModelState["Notes"]?.Errors.First().ErrorMessage</a></li>
+                        }
+                        @if (ViewData.ModelState[""]?.Errors.Count > 0)
+                        {
+                            @foreach (var error in ViewData.ModelState[""].Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
+        <form asp-action="RequestNewEntry" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <p class="govuk-body">Use this form to request a new product to be added to FIPS. An administrator will review your request before it is added.</p>
+
+            <div class="govuk-inset-text">
+                This form should only be submitted by a permanent member of DfE staff.
+            </div>
+
+            <h2 class="govuk-heading-m">Product details</h2>
+
+            <div class="govuk-form-group @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="Title">
+                    Product title
+                </label>
+                <div id="Title-hint" class="govuk-hint">
+                    The official name of the product or service
+                </div>
+                @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="Title" name="Title" type="text" value="@Model.Title" maxlength="255" aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint" : "Title-hint")">
+            </div>
+
+            <div class="govuk-form-group @(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="Description">
+                    Description
+                </label>
+                <div id="Description-hint" class="govuk-hint">
+                    Provide a clear description of what the product does and who it serves
+                </div>
+                @if (ViewData.ModelState["Description"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["Description"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <textarea class="govuk-textarea @(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" id="Description" name="Description" rows="5" maxlength="2000" aria-describedby="@(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "Description-error Description-hint" : "Description-hint")">@Model.Description</textarea>
+            </div>
+
+            <div class="govuk-form-group @(ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="ServiceUrl">
+                    Service URL (optional)
+                </label>
+                <div id="ServiceUrl-hint" class="govuk-hint">
+                    The web address where the product or service can be accessed
+                </div>
+                @if (ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["ServiceUrl"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <input class="govuk-input @(ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ServiceUrl" name="ServiceUrl" type="url" value="@Model.ServiceUrl" maxlength="500" aria-describedby="@(ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0 ? "ServiceUrl-error ServiceUrl-hint" : "ServiceUrl-hint")">
+            </div>
+
+            <h2 class="govuk-heading-m">Product classification</h2>
+
+            @if (Model.AvailablePhases.Any())
+            {
+                <div class="govuk-form-group @(ViewData.ModelState["PhaseId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            Phase
+                        </legend>
+                        <div id="PhaseId-hint" class="govuk-hint">
+                            The current phase the product is in
+                        </div>
+                        @if (ViewData.ModelState["PhaseId"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span>
+                                @ViewData.ModelState["PhaseId"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <div class="govuk-radios" data-module="govuk-radios">
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" id="PhaseId_0" name="PhaseId" type="radio" value="" @(Model.PhaseId == null ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="PhaseId_0">
+                                    No phase assigned
+                                </label>
+                            </div>
+                            @foreach (var phase in Model.AvailablePhases.OrderBy(p => p.SortOrder))
+                            {
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="PhaseId_@phase.Id" name="PhaseId" type="radio" value="@phase.Id" @(Model.PhaseId == phase.Id ? "checked" : "")>
+                                    <label class="govuk-label govuk-radios__label" for="PhaseId_@phase.Id">
+                                        @phase.Name
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </fieldset>
+                </div>
+            }
+
+            @if (Model.AvailableBusinessAreas.Any())
+            {
+                <div class="govuk-form-group @(ViewData.ModelState["BusinessAreaId"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            Business area
+                        </legend>
+                        <div id="BusinessAreaId-hint" class="govuk-hint">
+                            The area or portfolio of DfE that is primarily responsible for the product
+                        </div>
+                        @if (ViewData.ModelState["BusinessAreaId"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span>
+                                @ViewData.ModelState["BusinessAreaId"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <div class="govuk-radios" data-module="govuk-radios">
+                            <div class="govuk-radios__item">
+                                <input class="govuk-radios__input" id="BusinessAreaId_0" name="BusinessAreaId" type="radio" value="" @(Model.BusinessAreaId == null ? "checked" : "")>
+                                <label class="govuk-label govuk-radios__label" for="BusinessAreaId_0">
+                                    No business area assigned
+                                </label>
+                            </div>
+                            @foreach (var group in Model.AvailableBusinessAreas.OrderBy(g => g.Name))
+                            {
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="BusinessAreaId_@group.Id" name="BusinessAreaId" type="radio" value="@group.Id" @(Model.BusinessAreaId == group.Id ? "checked" : "")>
+                                    <label class="govuk-label govuk-radios__label" for="BusinessAreaId_@group.Id">
+                                        @group.Name
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </fieldset>
+                </div>
+            }
+
+            @if (Model.AvailableChannels.Any())
+            {
+                <div class="govuk-form-group @(ViewData.ModelState["ChannelIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            Channels (optional)
+                        </legend>
+                        <div id="ChannelIds-hint" class="govuk-hint">
+                            Select all channels through which the product is delivered
+                        </div>
+                        @if (ViewData.ModelState["ChannelIds"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span>
+                                @ViewData.ModelState["ChannelIds"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                            @foreach (var channel in Model.AvailableChannels.OrderBy(c => c.Name))
+                            {
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="ChannelIds_@channel.Id" name="ChannelIds" type="checkbox" value="@channel.Id" @(Model.ChannelIds.Contains(channel.Id) ? "checked" : "")>
+                                    <label class="govuk-label govuk-checkboxes__label" for="ChannelIds_@channel.Id">
+                                        @channel.Name
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </fieldset>
+                </div>
+            }
+
+            @if (Model.AvailableTypes.Any())
+            {
+                <div class="govuk-form-group @(ViewData.ModelState["TypeIds"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            Types (optional)
+                        </legend>
+                        <div id="TypeIds-hint" class="govuk-hint">
+                            Select all types of service delivery and functionality that apply to this product or service
+                        </div>
+                        @if (ViewData.ModelState["TypeIds"]?.Errors.Count > 0)
+                        {
+                            <span class="govuk-error-message">
+                                <span class="govuk-visually-hidden">Error:</span>
+                                @ViewData.ModelState["TypeIds"]?.Errors.First().ErrorMessage
+                            </span>
+                        }
+                        <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                            @foreach (var type in Model.AvailableTypes.OrderBy(t => t.Name))
+                            {
+                                <div class="govuk-checkboxes__item">
+                                    <input class="govuk-checkboxes__input" id="TypeIds_@type.Id" name="TypeIds" type="checkbox" value="@type.Id" @(Model.TypeIds.Contains(type.Id) ? "checked" : "")>
+                                    <label class="govuk-label govuk-checkboxes__label" for="TypeIds_@type.Id">
+                                        @type.Name
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </fieldset>
+                </div>
+            }
+
+            <h2 class="govuk-heading-m">Additional information</h2>
+
+            <div class="govuk-form-group @(ViewData.ModelState["Users"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="Users">
+                    Tell us in your own words who the users of the product are (optional)
+                </label>
+                <div id="Users-hint" class="govuk-hint">
+                    Describe who uses this product on a regular basis. For example, Teachers, school leaders, or DfE Staff.
+                </div>
+                @if (ViewData.ModelState["Users"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["Users"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <textarea class="govuk-textarea @(ViewData.ModelState["Users"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" id="Users" name="Users" rows="4" maxlength="2000" aria-describedby="@(ViewData.ModelState["Users"]?.Errors.Count > 0 ? "Users-error Users-hint" : "Users-hint")">@Model.Users</textarea>
+            </div>
+
+            <h3 class="govuk-heading-s">Team roles (optional)</h3>
+            <p class="govuk-body">Provide information about the team roles if known.</p>
+
+            <div class="govuk-form-group @(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="DeliveryManager">
+                    Delivery Manager
+                </label>
+                @if (ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["DeliveryManager"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <input class="govuk-input @(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="DeliveryManager" name="DeliveryManager" type="text" value="@Model.DeliveryManager" maxlength="255" aria-describedby="@(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "DeliveryManager-error" : "")">
+            </div>
+
+            <div class="govuk-form-group @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="ProductManager">
+                    Product Manager
+                </label>
+                @if (ViewData.ModelState["ProductManager"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["ProductManager"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <input class="govuk-input @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ProductManager" name="ProductManager" type="text" value="@Model.ProductManager" maxlength="255" aria-describedby="@(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "ProductManager-error" : "")">
+            </div>
+
+            <div class="govuk-form-group @(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--s" for="SeniorResponsibleOfficer">
+                    Senior Responsible Officer
+                </label>
+                @if (ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <input class="govuk-input @(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="SeniorResponsibleOfficer" name="SeniorResponsibleOfficer" type="text" value="@Model.SeniorResponsibleOfficer" maxlength="255" aria-describedby="@(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "SeniorResponsibleOfficer-error" : "")">
+            </div>
+
+            <div class="govuk-form-group @(ViewData.ModelState["Notes"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
+                <label class="govuk-label govuk-label--m" for="Notes">
+                    Notes
+                </label>
+                <div id="Notes-hint" class="govuk-hint">
+                    Provide any additional information that would help the FIPS team understand this request
+                </div>
+                @if (ViewData.ModelState["Notes"]?.Errors.Count > 0)
+                {
+                    <span class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>
+                        @ViewData.ModelState["Notes"]?.Errors.First().ErrorMessage
+                    </span>
+                }
+                <textarea class="govuk-textarea @(ViewData.ModelState["Notes"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" id="Notes" name="Notes" rows="5" maxlength="2000" aria-describedby="@(ViewData.ModelState["Notes"]?.Errors.Count > 0 ? "Notes-error Notes-hint" : "Notes-hint")">@Model.Notes</textarea>
+            </div>
+
+            <div class="govuk-button-group">
+                <button class="govuk-button" data-module="govuk-button" type="submit" id="submit-request-btn">
+                    Submit request
+                </button>
+                <a class="govuk-link govuk-link--no-visited-state" href="/products">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+

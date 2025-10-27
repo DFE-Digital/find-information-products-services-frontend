@@ -106,6 +106,21 @@ public class ProposeChangeViewModel : BaseViewModel
     [StringLength(500, ErrorMessage = "Product URL cannot exceed 500 characters")]
     public string? ProposedProductUrl { get; set; }
     
+    [StringLength(2000, ErrorMessage = "User description cannot exceed 2000 characters")]
+    public string? ProposedUserDescription { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Senior Responsible Officer cannot exceed 255 characters")]
+    public string? ProposedServiceOwner { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Information Asset Owner cannot exceed 255 characters")]
+    public string? ProposedInformationAssetOwner { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Delivery Manager cannot exceed 255 characters")]
+    public string? ProposedDeliveryManager { get; set; }
+    
+    [StringLength(255, ErrorMessage = "Product Manager cannot exceed 255 characters")]
+    public string? ProposedProductManager { get; set; }
+    
     [Required(ErrorMessage = "Please provide a reason for this change")]
     [StringLength(2000, ErrorMessage = "Reason cannot exceed 2000 characters")]
     public string Reason { get; set; } = string.Empty;
@@ -125,6 +140,75 @@ public class ProposeChangeViewModel : BaseViewModel
     // Product contacts
     public List<ProposedProductContactModel> ProposedProductContacts { get; set; } = new List<ProposedProductContactModel>();
     public List<UsersPermissionsUser> AvailableUsers { get; set; } = new List<UsersPermissionsUser>();
+    
+    // Helper properties for current role values
+    public string? CurrentServiceOwner 
+    { 
+        get 
+        {
+            var contact = Product?.ProductContacts?.FirstOrDefault(pc => pc.Role?.Equals("senior_responsible_owner", StringComparison.OrdinalIgnoreCase) == true);
+            if (contact?.UsersPermissionsUser == null) return null;
+            
+            var displayName = contact.UsersPermissionsUser.DisplayName;
+            if (!string.IsNullOrEmpty(displayName)) return displayName;
+            
+            var firstName = contact.UsersPermissionsUser.FirstName ?? "";
+            var lastName = contact.UsersPermissionsUser.LastName ?? "";
+            var fullName = $"{firstName} {lastName}".Trim();
+            return string.IsNullOrEmpty(fullName) ? null : fullName;
+        }
+    }
+    
+    public string? CurrentInformationAssetOwner 
+    { 
+        get 
+        {
+            var contact = Product?.ProductContacts?.FirstOrDefault(pc => pc.Role?.Equals("information_asset_owner", StringComparison.OrdinalIgnoreCase) == true);
+            if (contact?.UsersPermissionsUser == null) return null;
+            
+            var displayName = contact.UsersPermissionsUser.DisplayName;
+            if (!string.IsNullOrEmpty(displayName)) return displayName;
+            
+            var firstName = contact.UsersPermissionsUser.FirstName ?? "";
+            var lastName = contact.UsersPermissionsUser.LastName ?? "";
+            var fullName = $"{firstName} {lastName}".Trim();
+            return string.IsNullOrEmpty(fullName) ? null : fullName;
+        }
+    }
+    
+    public string? CurrentDeliveryManager 
+    { 
+        get 
+        {
+            var contact = Product?.ProductContacts?.FirstOrDefault(pc => pc.Role?.Equals("delivery_manager", StringComparison.OrdinalIgnoreCase) == true);
+            if (contact?.UsersPermissionsUser == null) return null;
+            
+            var displayName = contact.UsersPermissionsUser.DisplayName;
+            if (!string.IsNullOrEmpty(displayName)) return displayName;
+            
+            var firstName = contact.UsersPermissionsUser.FirstName ?? "";
+            var lastName = contact.UsersPermissionsUser.LastName ?? "";
+            var fullName = $"{firstName} {lastName}".Trim();
+            return string.IsNullOrEmpty(fullName) ? null : fullName;
+        }
+    }
+    
+    public string? CurrentProductManager 
+    { 
+        get 
+        {
+            var contact = Product?.ProductContacts?.FirstOrDefault(pc => pc.Role?.Equals("product_manager", StringComparison.OrdinalIgnoreCase) == true);
+            if (contact?.UsersPermissionsUser == null) return null;
+            
+            var displayName = contact.UsersPermissionsUser.DisplayName;
+            if (!string.IsNullOrEmpty(displayName)) return displayName;
+            
+            var firstName = contact.UsersPermissionsUser.FirstName ?? "";
+            var lastName = contact.UsersPermissionsUser.LastName ?? "";
+            var fullName = $"{firstName} {lastName}".Trim();
+            return string.IsNullOrEmpty(fullName) ? null : fullName;
+        }
+    }
     
     public ProposeChangeViewModel()
     {

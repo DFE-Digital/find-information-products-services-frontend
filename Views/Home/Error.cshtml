@@ -1,9 +1,10 @@
+@model ErrorViewModel
 @{
     ViewData["Title"] = "Error";
 }
 
 <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-grid-column-full">
         <h1 class="govuk-heading-xl">Error</h1>
         <h2 class="govuk-heading-l">An error occurred while processing your request.</h2>
         
@@ -12,6 +13,31 @@
             <p class="govuk-body">
                 <strong>Request ID:</strong> <code>@Model.RequestId</code>
             </p>
+        }
+
+        @if (Model?.ShowException == true)
+        {
+            <div class="govuk-inset-text">
+                <h3 class="govuk-heading-s">Exception Details</h3>
+                <p class="govuk-body">
+                    <strong>Type:</strong> @Model.Exception?.GetType().Name<br>
+                    <strong>Message:</strong> @Model.Exception?.Message
+                </p>
+            </div>
+        }
+
+        @if (Model?.ShowExceptionDetails == true)
+        {
+            <details class="govuk-details">
+                <summary class="govuk-details__summary">
+                    <span class="govuk-details__summary-text">
+                        Full Exception Stack Trace
+                    </span>
+                </summary>
+                <div class="govuk-details__text">
+                    <pre class="govuk-body" style="white-space: pre-wrap; font-family: monospace; background-color: #f3f2f1; padding: 1rem; overflow-x: auto;">@Model.ExceptionDetails</pre>
+                </div>
+            </details>
         }
     </div>
 </div>

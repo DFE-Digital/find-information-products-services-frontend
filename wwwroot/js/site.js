@@ -46,6 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
       feedbackPanel.setAttribute('aria-hidden', 'false');
       thanksMessage.classList.remove('show');
       
+      // Clear any validation errors when opening the panel
+      const formGroup = document.getElementById('feedback_form_group');
+      const errorSummary = document.getElementById('feedback-error-summary');
+      const errorMessage = document.getElementById('feedback_form_input-error');
+      const textarea = document.getElementById('feedback_form_input');
+      
+      if (formGroup && errorSummary && errorMessage && textarea) {
+        formGroup.classList.remove('govuk-form-group--error');
+        textarea.classList.remove('govuk-textarea--error');
+        errorSummary.style.display = 'none';
+        errorMessage.style.display = 'none';
+        
+        // Reset aria-describedby
+        textarea.setAttribute('aria-describedby', 'feedback_form_input-info');
+      }
+      
       // Track feedback panel opened
       trackEvent('FeedbackPanelOpened', {
         page: window.location.pathname,
@@ -53,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       // Focus on the textarea
-      const textarea = feedbackForm.querySelector('textarea');
       if (textarea) {
         textarea.focus();
       }
@@ -65,6 +80,22 @@ document.addEventListener('DOMContentLoaded', function() {
       feedbackPanel.classList.remove('show');
       feedbackPanel.setAttribute('aria-hidden', 'true');
       
+      // Clear any validation errors
+      const formGroup = document.getElementById('feedback_form_group');
+      const errorSummary = document.getElementById('feedback-error-summary');
+      const errorMessage = document.getElementById('feedback_form_input-error');
+      const textarea = document.getElementById('feedback_form_input');
+      
+      if (formGroup && errorSummary && errorMessage && textarea) {
+        formGroup.classList.remove('govuk-form-group--error');
+        textarea.classList.remove('govuk-textarea--error');
+        errorSummary.style.display = 'none';
+        errorMessage.style.display = 'none';
+        
+        // Reset aria-describedby
+        textarea.setAttribute('aria-describedby', 'feedback_form_input-info');
+      }
+      
       // Track feedback panel cancelled
       trackEvent('FeedbackPanelCancelled', {
         page: window.location.pathname,
@@ -72,12 +103,82 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 
+    // Function to show validation errors
+    function showFeedbackError() {
+      const formGroup = document.getElementById('feedback_form_group');
+      const errorSummary = document.getElementById('feedback-error-summary');
+      const errorMessage = document.getElementById('feedback_form_input-error');
+      const textarea = document.getElementById('feedback_form_input');
+      
+      if (formGroup && errorSummary && errorMessage && textarea) {
+        formGroup.classList.add('govuk-form-group--error');
+        textarea.classList.add('govuk-textarea--error');
+        errorSummary.style.display = 'block';
+        errorMessage.style.display = 'block';
+        
+        // Update aria-describedby to include error message
+        const currentDescribedBy = textarea.getAttribute('aria-describedby') || '';
+        if (!currentDescribedBy.includes('feedback_form_input-error')) {
+          textarea.setAttribute('aria-describedby', 'feedback_form_input-error ' + currentDescribedBy);
+        }
+        
+        // Focus on error summary for screen readers
+        errorSummary.focus();
+      }
+    }
+    
+    // Function to hide validation errors
+    function hideFeedbackError() {
+      const formGroup = document.getElementById('feedback_form_group');
+      const errorSummary = document.getElementById('feedback-error-summary');
+      const errorMessage = document.getElementById('feedback_form_input-error');
+      const textarea = document.getElementById('feedback_form_input');
+      
+      if (formGroup && errorSummary && errorMessage && textarea) {
+        formGroup.classList.remove('govuk-form-group--error');
+        textarea.classList.remove('govuk-textarea--error');
+        errorSummary.style.display = 'none';
+        errorMessage.style.display = 'none';
+        
+        // Update aria-describedby to remove error message
+        const currentDescribedBy = textarea.getAttribute('aria-describedby') || '';
+        textarea.setAttribute('aria-describedby', currentDescribedBy.replace('feedback_form_input-error', '').trim());
+      }
+    }
+    
+    // Clear errors when user starts typing and is under limit
+    const textarea = feedbackForm.querySelector('textarea');
+    if (textarea) {
+      textarea.addEventListener('input', function() {
+        if (this.value.length <= 1000) {
+          hideFeedbackError();
+        }
+      });
+    }
+    
     // Handle form submission
     feedbackForm.addEventListener('submit', function(e) {
       e.preventDefault();
       
       const textarea = feedbackForm.querySelector('textarea');
       const feedbackText = textarea.value.trim();
+      
+      // Validate character count
+      if (feedbackText.length > 1000) {
+        showFeedbackError();
+        
+        // Track validation error
+        trackEvent('FeedbackValidationError', {
+          page: window.location.pathname,
+          characterCount: feedbackText.length,
+          timestamp: new Date().toISOString()
+        });
+        
+        return;
+      }
+      
+      // Clear any existing errors
+      hideFeedbackError();
       
       if (feedbackText) {
         // Track feedback submission
@@ -87,17 +188,53 @@ document.addEventListener('DOMContentLoaded', function() {
           timestamp: new Date().toISOString()
         });
         
-        // Here you would typically send the feedback to your server
-        // For now, we'll just show the thank you message
-        feedbackPanel.classList.remove('show');
-        feedbackPanel.setAttribute('aria-hidden', 'true');
-        thanksMessage.classList.add('show');
+        // Send feedback to the server
+        const submitButton = feedbackForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        submitButton.textContent = 'Submitting...';
+        submitButton.disabled = true;
         
-        // Clear the form
-        textarea.value = '';
-        
-        // Focus on the thank you message for screen readers
-        thanksMessage.focus();
+        fetch('/Contact/SubmitFeedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            feedbackFormInput: feedbackText
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Show success message
+            feedbackPanel.classList.remove('show');
+            feedbackPanel.setAttribute('aria-hidden', 'true');
+            thanksMessage.classList.add('show');
+            
+            // Clear the form and errors
+            textarea.value = '';
+            hideFeedbackError();
+            
+            // Focus on the thank you message for screen readers
+            thanksMessage.focus();
+            
+            console.log('Feedback submitted successfully');
+          } else {
+            // Show error message
+            alert('Sorry, there was an error submitting your feedback. Please try again.');
+            console.error('Feedback submission failed:', data.message);
+          }
+        })
+        .catch(error => {
+          // Show error message
+          alert('Sorry, there was an error submitting your feedback. Please try again.');
+          console.error('Feedback submission error:', error);
+        })
+        .finally(() => {
+          // Reset button state
+          submitButton.textContent = originalButtonText;
+          submitButton.disabled = false;
+        });
       }
     });
   }

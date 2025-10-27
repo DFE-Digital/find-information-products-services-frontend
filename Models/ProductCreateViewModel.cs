@@ -11,6 +11,18 @@ namespace FipsFrontend.Models
         [StringLength(500, ErrorMessage = "Short description cannot exceed 500 characters")]
         public string ShortDescription { get; set; } = string.Empty;
 
+        [StringLength(255, ErrorMessage = "Service Owner cannot exceed 255 characters")]
+        public string? ServiceOwner { get; set; }
+
+        [StringLength(255, ErrorMessage = "Information Asset Owner cannot exceed 255 characters")]
+        public string? InformationAssetOwner { get; set; }
+
+        [StringLength(255, ErrorMessage = "Delivery Manager cannot exceed 255 characters")]
+        public string? DeliveryManager { get; set; }
+
+        [StringLength(255, ErrorMessage = "Product Manager cannot exceed 255 characters")]
+        public string? ProductManager { get; set; }
+
         public string State { get; set; } = "Active";
 
         public int? SelectedGroupId { get; set; }

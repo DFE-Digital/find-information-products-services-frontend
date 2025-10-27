@@ -131,22 +131,6 @@
                                     </div>
                                 }
 
-                                @if (change.ProposedLongDescription != change.CurrentLongDescription)
-                                {
-                                    <div class="govuk-form-group">
-                                        <div class="govuk-checkboxes__item">
-                                            <input class="govuk-checkboxes__input" id="apply_long_desc_@change.DocumentId" name="FieldsToApply" type="checkbox" value="long_description">
-                                            <label class="govuk-label govuk-checkboxes__label govuk-!-font-weight-bold" for="apply_long_desc_@change.DocumentId">
-                                                Long description
-                                            </label>
-                                        </div>
-                                        <div class="govuk-!-margin-left-4 govuk-!-margin-top-2">
-                                            <p class="govuk-body-s govuk-!-margin-bottom-1"><strong>Current:</strong> @(change.CurrentLongDescription ?? "(none)")</p>
-                                            <p class="govuk-body-s"><strong>Proposed:</strong> @(change.ProposedLongDescription ?? "(none)")</p>
-                                        </div>
-                                    </div>
-                                }
-
                                 @if (change.ProposedProductUrl != change.CurrentProductUrl)
                                 {
                                     <div class="govuk-form-group">
