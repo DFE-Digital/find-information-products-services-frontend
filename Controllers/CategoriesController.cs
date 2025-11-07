@@ -345,25 +345,33 @@ public class CategoriesController : Controller
                 {
                     var currentSlug = slugParts[i];
                     var parentId = currentParent?.DocumentId;
-                    
-                    // For the first sub-level (i=1), look for root items in allValues (which has only root items)
-                    // For deeper levels, look for children of the current parent in allValuesForNavigation
-                    var searchCollection = (i == 1) ? allValues : allValuesForNavigation;
-                    
-                    
-                    var foundCategory = searchCollection.FirstOrDefault(v => 
-                        v.Slug == currentSlug && 
-                        ((i == 1 && v.Parent == null) || (i > 1 && v.Parent?.DocumentId == parentId)));
-                    
+
+                    CategoryValue? foundCategory = null;
+
+                    if (i == 1)
+                    {
+                        // Prefer items flagged as root, but fall back to any match so we can handle data where a top-level slug has a parent set in error
+                        foundCategory = allValues.FirstOrDefault(v => v.Slug == currentSlug && v.Parent == null)
+                            ?? allValuesForNavigation.FirstOrDefault(v => v.Slug == currentSlug);
+
+                        if (foundCategory != null && foundCategory.Parent != null)
+                        {
+                            _logger.LogInformation("Top-level slug {Slug} has parent {ParentId}; continuing navigation using stored hierarchy", currentSlug, foundCategory.Parent.DocumentId);
+                        }
+                    }
+                    else
+                    {
+                        foundCategory = allValuesForNavigation.FirstOrDefault(v => v.Slug == currentSlug && v.Parent?.DocumentId == parentId);
+                    }
+
                     if (foundCategory == null)
                     {
                         _logger.LogWarning("Category not found: {Slug} with parent {ParentId} (level {Level})", currentSlug, parentId, i);
                         return NotFound();
                     }
-                    
+
                     currentParent = foundCategory;
                     breadcrumbNames.Add(foundCategory.Name);
-                    
                 }
                 
                 if (currentParent != null)
