@@ -48,7 +48,7 @@
                                 <td class="govuk-table__cell">
                                     @if (Model.Product.ProductContacts?.Any() == true)
                                     {
-                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                        <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
                                     }
                                     else
                                     {
