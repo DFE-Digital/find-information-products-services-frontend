@@ -97,10 +97,8 @@ public class ProposeChangeViewModel : BaseViewModel
     [StringLength(255, ErrorMessage = "Title cannot exceed 255 characters")]
     public string? ProposedTitle { get; set; }
     
-    [StringLength(500, ErrorMessage = "Short description cannot exceed 500 characters")]
     public string? ProposedShortDescription { get; set; }
     
-    [StringLength(2000, ErrorMessage = "Long description cannot exceed 2000 characters")]
     public string? ProposedLongDescription { get; set; }
     
     [StringLength(500, ErrorMessage = "Product URL cannot exceed 500 characters")]
