@@ -102,11 +102,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // Add search query if provided - optimized for performance
         if (!string.IsNullOrEmpty(searchQuery))
         {
-            // Use $startsWithi for case-insensitive search on title field (most common search)
-            queryParams.Add($"filters[title][$startsWithi]={Uri.EscapeDataString(searchQuery)}");
-            
-            // Only search other fields if title search doesn't return enough results
-            // This will be handled by the fallback search if needed
+            // Use a case-insensitive substring search across multiple relevant fields
+            queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][1][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][2][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][3][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][4][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
 
         // Add filters if provided
@@ -250,11 +251,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // Add search query if provided - optimized for performance
         if (!string.IsNullOrEmpty(searchQuery))
         {
-            // Use $startsWithi for case-insensitive search on title field (most common search)
-            queryParams.Add($"filters[title][$startsWithi]={Uri.EscapeDataString(searchQuery)}");
-            
-            // Only search other fields if title search doesn't return enough results
-            // This will be handled by the fallback search if needed
+            // Use case-insensitive substring matching on the title field only
+            queryParams.Add($"filters[title][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
 
         // Add filters if provided
@@ -681,6 +679,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             
             var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
             var product = result?.Data?.FirstOrDefault();
+
+            Console.WriteLine(jsonContent);
             
             // Cache the result if cache duration is specified
             if (cacheDuration.HasValue && product != null)
