@@ -85,7 +85,7 @@
                                 <!-- Multi-level category with children - use chevron card -->
                                 <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
                                     <a class="govuk-link govuk-link--no-visited-state category-link" 
-                                       href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug"
+                                       href="/categories/@Model.CurrentSlug/@categoryValue.Slug"
                                        data-category-name="@categoryValue.Name"
                                        data-category-slug="@categoryValue.Slug"
                                        data-category-type="@Model.CategoryType.Name"
@@ -96,7 +96,7 @@
                                 <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryValue.Children.Count sub-categories</p>
                                 
                                 <a class="dfe-chevron-card__link category-link" 
-                                   href="/categories/@Model.CategoryType.Slug/@categoryValue.Slug" 
+                                   href="/categories/@Model.CurrentSlug/@categoryValue.Slug" 
                                    aria-hidden="true" 
                                    tabindex="-1"
                                    data-category-name="@categoryValue.Name"

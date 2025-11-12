@@ -63,7 +63,7 @@ public class CategoriesController : Controller
                     _logger.LogInformation("=== PROCESSING CATEGORY TYPE: {Name} ===", categoryType.Name);
                     
                     // Get all values for this category type - optimized to return only needed fields
-                    var valuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryType.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
+                    var valuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryType.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc&pagination[pageSize]=200";
                     _logger.LogInformation("Values API URL: {Url}", valuesUrl);
                     
                     var valuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(valuesUrl);
@@ -175,7 +175,7 @@ public class CategoriesController : Controller
                         _logger.LogInformation("=== PROCESSING CATEGORY TYPE: {Name} ===", ct.Name);
                         
                         // Get all values for this category type - filter for root items only (no parent) - optimized
-                        var valuesUrl = $"category-values?filters[category_type][slug][$eq]={ct.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
+                        var valuesUrl = $"category-values?filters[category_type][slug][$eq]={ct.Slug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc&pagination[pageSize]=200";
                         _logger.LogInformation("Values API URL: {Url}", valuesUrl);
                         
                         var valuesResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(valuesUrl);
@@ -259,7 +259,7 @@ public class CategoriesController : Controller
             };
 
             // Get all published and enabled category values for this type with optimized population
-            var allValuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
+            var allValuesUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&filters[parent][$null]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc&pagination[pageSize]=200";
             _logger.LogInformation("=== DETAIL VALUES API CALL ===");
             _logger.LogInformation("URL: {Url}", allValuesUrl);
             
@@ -320,7 +320,7 @@ public class CategoriesController : Controller
             else
             {
                 // Multi-level navigation - need to get ALL values (not just root items) to find children - optimized
-                var allValuesForNavigationUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
+                var allValuesForNavigationUrl = $"category-values?filters[category_type][slug][$eq]={categoryTypeSlug}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc&pagination[pageSize]=200";
                 _logger.LogInformation("=== MULTI-LEVEL NAVIGATION API CALL ===");
                 _logger.LogInformation("URL: {Url}", allValuesForNavigationUrl);
                 
@@ -351,8 +351,10 @@ public class CategoriesController : Controller
                     if (i == 1)
                     {
                         // Prefer items flagged as root, but fall back to any match so we can handle data where a top-level slug has a parent set in error
-                        foundCategory = allValues.FirstOrDefault(v => v.Slug == currentSlug && v.Parent == null)
-                            ?? allValuesForNavigation.FirstOrDefault(v => v.Slug == currentSlug);
+                        foundCategory = allValues.FirstOrDefault(v =>
+                                string.Equals(v.Slug, currentSlug, StringComparison.OrdinalIgnoreCase) && v.Parent == null)
+                            ?? allValuesForNavigation.FirstOrDefault(v =>
+                                string.Equals(v.Slug, currentSlug, StringComparison.OrdinalIgnoreCase));
 
                         if (foundCategory != null && foundCategory.Parent != null)
                         {
@@ -361,7 +363,28 @@ public class CategoriesController : Controller
                     }
                     else
                     {
-                        foundCategory = allValuesForNavigation.FirstOrDefault(v => v.Slug == currentSlug && v.Parent?.DocumentId == parentId);
+                        foundCategory = allValuesForNavigation.FirstOrDefault(v =>
+                            string.Equals(v.Slug, currentSlug, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(v.Parent?.DocumentId, parentId, StringComparison.OrdinalIgnoreCase));
+                    }
+
+                    if (foundCategory == null)
+                    {
+                        _logger.LogWarning("Category slug {Slug} (level {Level}, expected parent {ParentId}) not found in navigation cache, attempting direct lookup", currentSlug, i, parentId ?? "<root>");
+                        var fallbackCategory = await _cmsApiService.GetCategoryValueBySlugAsync(categoryTypeSlug, currentSlug, parentId);
+
+                        if (fallbackCategory != null)
+                        {
+                            if (parentId != null && !string.Equals(fallbackCategory.Parent?.DocumentId, parentId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                _logger.LogWarning("Fallback category {Slug} has unexpected parent {ParentId}, expected {ExpectedParentId}", currentSlug, fallbackCategory.Parent?.DocumentId, parentId);
+                            }
+                            else
+                            {
+                                foundCategory = fallbackCategory;
+                                _logger.LogInformation("Fallback lookup succeeded for slug {Slug}", currentSlug);
+                            }
+                        }
                     }
 
                     if (foundCategory == null)
@@ -380,19 +403,28 @@ public class CategoriesController : Controller
                     
                     // Get children directly from API instead of filtering all records - optimized
                     _logger.LogInformation("Current parent DocumentId: {DocumentId}", currentParent.DocumentId);
-                    var childrenUrl = $"category-values?filters[parent][documentId][$eq]={currentParent.DocumentId}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc";
+                    var childrenUrl = $"category-values?filters[parent][documentId][$eq]={currentParent.DocumentId}&filters[publishedAt][$notNull]=true&filters[enabled]=true&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[children][fields][0]=name&populate[children][fields][1]=slug&sort=sort_order:asc&pagination[pageSize]=200";
                     _logger.LogInformation("=== CHILDREN API CALL ===");
                     _logger.LogInformation("URL: {Url}", childrenUrl);
                     
                     var childrenResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(childrenUrl);
                     var children = childrenResponse?.Data ?? new List<CategoryValue>();
                     _logger.LogInformation("Found {Count} children for parent {ParentName}", children.Count, currentParent.Name);
+                    foreach (var child in children)
+                    {
+                        _logger.LogInformation("Child category: {Name} (Slug: {Slug}, Enabled: {Enabled}, PublishedAt: {PublishedAt}, DocumentId: {DocumentId})",
+                            child.Name, child.Slug, child.Enabled, child.PublishedAt, child.DocumentId);
+                    }
                     viewModel.CategoryValues = children;
                     
                     if (currentParent.Parent != null)
                     {
                         // Parent is a string DocumentId, so compare with DocumentId
-                        viewModel.SiblingCategories = allValuesForNavigation.Where(v => v.Parent?.DocumentId == currentParent.Parent.DocumentId && v.DocumentId != currentParent.DocumentId).ToList();
+                        viewModel.SiblingCategories = allValuesForNavigation
+                            .Where(v =>
+                                string.Equals(v.Parent?.DocumentId, currentParent.Parent.DocumentId, StringComparison.OrdinalIgnoreCase) &&
+                                !string.Equals(v.DocumentId, currentParent.DocumentId, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
                     }
                     
                     viewModel.PageTitle = $"{string.Join(" - ", breadcrumbNames)}";
