@@ -1,7 +1,5 @@
 sessionStorage.setItem('clarityID', 't9ijn4cqjo');
-sessionStorage.setItem('googleID', 'G-RK6GSMSJ6V');
 const cID = sessionStorage.getItem('clarityID');
-const gID = sessionStorage.getItem('googleID');
 
 window.dataLayer = window.dataLayer || [];
 
@@ -803,47 +801,10 @@ const getCookieValue = (name) => (
   document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')
     ?.pop() || '')
 
-// Google Analytics
-function gtag() {
-
-  window.dataLayer = window.dataLayer || [];
-  function gtag() { dataLayer.push(arguments); }
-  gtag('js', new Date());
-
-  gtag('config', 'G-RK6GSMSJ6V');
-
-}
-
-// MS Clarity - removed old implementation
-
 // Send analytics
 function sendAnalytics() {
   console.log('Loading analytics scripts...');
-  console.log('Google Analytics ID:', gID);
   console.log('Microsoft Clarity ID:', cID);
-  
-  // Load Google Analytics script if not already loaded
-  if (!document.querySelector('script[src*="googletagmanager.com"]')) {
-    const gaScript = document.createElement('script');
-    gaScript.async = true;
-    gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${gID}`;
-    document.head.appendChild(gaScript);
-    
-    gaScript.onload = function() {
-      console.log('Google Analytics script loaded');
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      window.gtag = gtag;
-      gtag('js', new Date());
-      gtag('config', gID);
-    };
-  } else {
-    // Script already loaded, just configure
-    if (typeof gtag !== 'undefined') {
-      gtag('js', new Date());
-      gtag('config', gID);
-    }
-  }
   
   // Load Microsoft Clarity script if not already loaded
   if (!window.clarity) {

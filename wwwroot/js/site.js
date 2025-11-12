@@ -31,6 +31,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Feedback form functionality
+function showElement(element) {
+    if (element) {
+        element.removeAttribute('hidden');
+    }
+}
+
+function hideElement(element) {
+    if (element) {
+        if (!element.hasAttribute('hidden')) {
+            element.setAttribute('hidden', '');
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const feedbackLink = document.getElementById('feedback-link');
   const feedbackPanel = document.getElementById('feedback-panel');
@@ -55,8 +69,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (formGroup && errorSummary && errorMessage && textarea) {
         formGroup.classList.remove('govuk-form-group--error');
         textarea.classList.remove('govuk-textarea--error');
-        errorSummary.style.display = 'none';
-        errorMessage.style.display = 'none';
+        hideElement(errorSummary);
+        hideElement(errorMessage);
         
         // Reset aria-describedby
         textarea.setAttribute('aria-describedby', 'feedback_form_input-info');
@@ -89,8 +103,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (formGroup && errorSummary && errorMessage && textarea) {
         formGroup.classList.remove('govuk-form-group--error');
         textarea.classList.remove('govuk-textarea--error');
-        errorSummary.style.display = 'none';
-        errorMessage.style.display = 'none';
+        hideElement(errorSummary);
+        hideElement(errorMessage);
         
         // Reset aria-describedby
         textarea.setAttribute('aria-describedby', 'feedback_form_input-info');
@@ -113,8 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (formGroup && errorSummary && errorMessage && textarea) {
         formGroup.classList.add('govuk-form-group--error');
         textarea.classList.add('govuk-textarea--error');
-        errorSummary.style.display = 'block';
-        errorMessage.style.display = 'block';
+        showElement(errorSummary);
+        showElement(errorMessage);
         
         // Update aria-describedby to include error message
         const currentDescribedBy = textarea.getAttribute('aria-describedby') || '';
@@ -137,8 +151,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (formGroup && errorSummary && errorMessage && textarea) {
         formGroup.classList.remove('govuk-form-group--error');
         textarea.classList.remove('govuk-textarea--error');
-        errorSummary.style.display = 'none';
-        errorMessage.style.display = 'none';
+        hideElement(errorSummary);
+        hideElement(errorMessage);
         
         // Update aria-describedby to remove error message
         const currentDescribedBy = textarea.getAttribute('aria-describedby') || '';
