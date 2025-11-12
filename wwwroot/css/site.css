@@ -28,3 +28,8 @@ body {
   white-space: nowrap;
   line-height: 60px;
 }
+
+.gtm-inline-hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
