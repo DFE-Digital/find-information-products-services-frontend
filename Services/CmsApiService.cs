@@ -514,6 +514,27 @@ public class CmsApiService
         }
     }
 
+    public async Task<CategoryValue?> GetCategoryValueBySlugAsync(string categoryTypeSlug, string slug, string? parentDocumentId = null, TimeSpan? cacheDuration = null)
+    {
+        var endpointBuilder = new StringBuilder();
+        endpointBuilder.Append("category-values?");
+        endpointBuilder.Append($"filters[slug][$eq]={Uri.EscapeDataString(slug)}");
+        endpointBuilder.Append("&filters[publishedAt][$notNull]=true&filters[enabled]=true");
+
+        if (!string.IsNullOrWhiteSpace(parentDocumentId))
+        {
+            endpointBuilder.Append($"&filters[parent][documentId][$eq]={Uri.EscapeDataString(parentDocumentId)}");
+        }
+
+        endpointBuilder.Append("&populate[parent][fields][0]=name&populate[parent][fields][1]=slug&populate[parent][fields][2]=documentId");
+        endpointBuilder.Append("&populate[children][fields][0]=name&populate[children][fields][1]=slug&populate[children][fields][2]=documentId");
+        endpointBuilder.Append("&sort=sort_order:asc&pagination[pageSize]=200");
+
+        var endpoint = endpointBuilder.ToString();
+        var response = await GetAsync<ApiCollectionResponse<CategoryValue>>(endpoint, cacheDuration);
+        return response?.Data?.FirstOrDefault();
+    }
+
     /// <summary>
     /// Get CMDB entries that don't have corresponding CMS products
     /// </summary>
