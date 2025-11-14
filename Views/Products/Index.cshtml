@@ -1236,4 +1236,41 @@
     
         });
     </script>
+
+    <style nonce="@Html.GetNonce()">
+document.querySelector('form').addEventListener('submit', function() {
+  var form = this;
+
+  // Capture text inputs
+  var keywords = form.querySelector('#keywords')?.value || '';
+  var userAutocomplete = form.querySelector('#user-autocomplete')?.value || '';
+
+  // Helper function to get checked IDs from a container
+  function getCheckedIds(containerSelector) {
+    var container = form.querySelector(containerSelector);
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.id);
+  }
+
+  // Separate arrays for each filter group
+  var channelFilters = getCheckedIds('#channel-filter');
+  var phaseFilters = getCheckedIds('#phase-filter');
+  var typeFilters = getCheckedIds('#type-filter');
+  var groupFilters = getCheckedIds('#group-filter');
+
+  // Push structured data to dataLayer
+  dataLayer.push({
+    event: 'formData',
+    formId: form.id || '',
+    formUrl: window.location.href,
+    keywords: keywords,
+    userAutocomplete: userAutocomplete,
+    channelFilters: channelFilters,
+    phaseFilters: phaseFilters,
+    typeFilters: typeFilters,
+    groupFilters: groupFilters
+  });
+});
+</script>
 }
