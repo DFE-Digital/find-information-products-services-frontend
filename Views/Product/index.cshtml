@@ -108,13 +108,13 @@
        
         <h2 class="govuk-heading-m">Description</h2>
         
-        @if (!string.IsNullOrEmpty(Model.Product.LongDescription))
-        {
-            <pre class="govuk-body pre-wrap-text">@Model.Product.LongDescription</pre>
-        }
-        else if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
+        @if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
         {
             <pre class="govuk-body pre-wrap-text">@Model.Product.ShortDescription</pre>
+        }
+        else if (!string.IsNullOrEmpty(Model.Product.LongDescription))
+        {
+            <pre class="govuk-body pre-wrap-text">@Model.Product.LongDescription</pre>
         }
 
       
