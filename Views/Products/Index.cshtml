@@ -238,6 +238,24 @@ document.querySelector('form').addEventListener('submit', function() {
                             }
                         </div>
                     }
+                    
+                    @if (Model.GroupOptions != null && Model.GroupOptions.Any())
+                    {
+                        <div class="govuk-checkboxes__divider">or</div>
+                        <div class="govuk-checkboxes__item">
+                            <input class="govuk-checkboxes__input filter-checkbox"
+                                   id="group-not-categorised"
+                                   name="group"
+                                   type="checkbox"
+                                   value="__not_categorised__"
+                                   data-filter-type="group"
+                                   data-filter-value="__not_categorised__"
+                                   @(Model.SelectedGroups.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) ? "checked" : "")>
+                            <label class="govuk-label govuk-checkboxes__label" for="group-not-categorised">
+                                Not categorised
+                            </label>
+                        </div>
+                    }
                 </div>
             </fieldset>
         </div>
@@ -274,6 +292,23 @@ document.querySelector('form').addEventListener('submit', function() {
                                                    @(channel.IsSelected ? "checked" : "")>
                                             <label class="govuk-label govuk-checkboxes__label" for="channel-@channel.Value.ToLower().Replace(" ", "-")">
                                                 @channel.Text
+                                            </label>
+                                        </div>
+                                    }
+                                    @if (Model.ChannelOptions != null && Model.ChannelOptions.Any())
+                                    {
+                                        <div class="govuk-checkboxes__divider">or</div>
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="channel-not-categorised" 
+                                                   name="channel" 
+                                                   type="checkbox" 
+                                                   value="__not_categorised__" 
+                                                   data-filter-type="channel"
+                                                   data-filter-value="__not_categorised__"
+                                                   @(Model.SelectedChannels.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="channel-not-categorised">
+                                                Not categorised
                                             </label>
                                         </div>
                                     }
@@ -315,6 +350,23 @@ document.querySelector('form').addEventListener('submit', function() {
                                             </label>
                                         </div>
                                     }
+                                    @if (Model.PhaseOptions != null && Model.PhaseOptions.Any())
+                                    {
+                                        <div class="govuk-checkboxes__divider">or</div>
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="phase-not-categorised" 
+                                                   name="phase" 
+                                                   type="checkbox" 
+                                                   value="__not_categorised__" 
+                                                   data-filter-type="phase"
+                                                   data-filter-value="__not_categorised__"
+                                                   @(Model.SelectedPhases.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="phase-not-categorised">
+                                                Not categorised
+                                            </label>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -349,6 +401,23 @@ document.querySelector('form').addEventListener('submit', function() {
                                                    @(type.IsSelected ? "checked" : "")>
                                             <label class="govuk-label govuk-checkboxes__label" for="type-@type.Value.ToLower().Replace(" ", "-")">
                                                 @type.Text
+                                            </label>
+                                        </div>
+                                    }
+                                    @if (Model.TypeOptions != null && Model.TypeOptions.Any())
+                                    {
+                                        <div class="govuk-checkboxes__divider">or</div>
+                                        <div class="govuk-checkboxes__item">
+                                            <input class="govuk-checkboxes__input filter-checkbox" 
+                                                   id="type-not-categorised" 
+                                                   name="type" 
+                                                   type="checkbox" 
+                                                   value="__not_categorised__" 
+                                                   data-filter-type="type"
+                                                   data-filter-value="__not_categorised__"
+                                                   @(Model.SelectedTypes.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) ? "checked" : "")>
+                                            <label class="govuk-label govuk-checkboxes__label" for="type-not-categorised">
+                                                Not categorised
                                             </label>
                                         </div>
                                     }

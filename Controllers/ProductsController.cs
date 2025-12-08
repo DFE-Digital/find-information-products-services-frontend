@@ -166,23 +166,37 @@ public class ProductsController : Controller
             // Add state filter (default to Active for public products page)
             serverFilters["state"] = new[] { "Active" };
             
-            // Convert category filters to server-side format
-            if (phase?.Length > 0)
+            // Track which filters have "not categorised" selected for client-side filtering
+            var hasNotCategorisedPhase = phase?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
+            var hasNotCategorisedChannel = channel?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
+            var hasNotCategorisedType = type?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
+            var hasNotCategorisedGroup = group?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
+            
+            // Convert category filters to server-side format, excluding "__not_categorised__" values
+            var phaseFilters = phase?.Where(p => !p.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
+            if (phaseFilters?.Length > 0)
             {
-                serverFilters["category_values.slug"] = phase;
+                serverFilters["category_values.slug"] = phaseFilters;
             }
-            if (channel?.Length > 0)
+            
+            var channelFilters = channel?.Where(c => !c.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
+            if (channelFilters?.Length > 0)
             {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(channel).ToArray();
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(channelFilters).ToArray();
             }
-            if (type?.Length > 0)
+            
+            var typeFilters = type?.Where(t => !t.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
+            if (typeFilters?.Length > 0)
             {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(type).ToArray();
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(typeFilters).ToArray();
             }
-            if (group?.Length > 0)
+            
+            var groupFilters = group?.Where(g => !g.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
+            if (groupFilters?.Length > 0)
             {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(group).ToArray();
+                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(groupFilters).ToArray();
             }
+            
             if (subgroup?.Length > 0)
             {
                 serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(subgroup).ToArray();
@@ -202,11 +216,180 @@ public class ProductsController : Controller
             
             var cacheDuration = !string.IsNullOrEmpty(keywords) ? searchDuration : productsDuration;
             
-            // Get products with server-side filtering and pagination
-            var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
-            filteredProducts = result.Products;
-            filteredTotalCount = result.TotalCount;
-            totalCount = result.TotalCount;
+            // If "not categorised" filters are active, we need to get all products and filter client-side
+            // because we need to check for absence of category values, then paginate
+            if (hasNotCategorisedPhase || hasNotCategorisedChannel || hasNotCategorisedType || hasNotCategorisedGroup)
+            {
+                // Build filters excluding category types we're checking for "not categorised"
+                var filtersForNotCategorised = new Dictionary<string, string[]>();
+                filtersForNotCategorised["state"] = new[] { "Active" };
+                
+                // Only include category filters for types we're NOT checking "not categorised" for
+                var categorySlugFiltersForQuery = new List<string>();
+                
+                if (!hasNotCategorisedPhase && phaseFilters?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(phaseFilters);
+                }
+                if (!hasNotCategorisedChannel && channelFilters?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(channelFilters);
+                }
+                if (!hasNotCategorisedType && typeFilters?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(typeFilters);
+                }
+                if (!hasNotCategorisedGroup && groupFilters?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(groupFilters);
+                }
+                if (subgroup?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(subgroup);
+                }
+                if (parent?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(parent);
+                }
+                if (userGroup?.Length > 0)
+                {
+                    categorySlugFiltersForQuery.AddRange(userGroup);
+                }
+                
+                if (categorySlugFiltersForQuery.Count > 0)
+                {
+                    filtersForNotCategorised["category_values.slug"] = categorySlugFiltersForQuery.ToArray();
+                }
+                
+                // Get ALL products matching other filters (not paginated yet) with full details
+                // Use a large page size to get all products in one or few requests
+                var largePageSize = 1000;
+                var allProductsResult = await _optimizedCmsApiService.GetProductsForListingAsync2(1, largePageSize, keywords, filtersForNotCategorised, cacheDuration);
+                var allProducts = allProductsResult.Products;
+                
+                // If there are more pages, fetch them
+                var totalPagesNeeded = (int)Math.Ceiling((double)allProductsResult.TotalCount / largePageSize);
+                if (totalPagesNeeded > 1)
+                {
+                    var additionalProducts = new List<Product>();
+                    for (int pageNum = 2; pageNum <= totalPagesNeeded; pageNum++)
+                    {
+                        var pageResult = await _optimizedCmsApiService.GetProductsForListingAsync2(pageNum, largePageSize, keywords, filtersForNotCategorised, cacheDuration);
+                        additionalProducts.AddRange(pageResult.Products);
+                    }
+                    allProducts = allProducts.Concat(additionalProducts).ToList();
+                }
+                
+                // Note: Keyword and category filters are already applied by GetProductsForListingAsync2
+                // We only need to apply the "not categorised" filters client-side now
+                
+                // Now apply "not categorised" filters with OR logic
+                filteredProducts = allProducts.Where(p =>
+                {
+                    // Check Phase filter with OR logic
+                    if (hasNotCategorisedPhase || (phaseFilters?.Length > 0))
+                    {
+                        // Check if product has ANY Phase category value
+                        var hasPhase = p.CategoryValues?.Any(cv => 
+                            cv.CategoryType != null && 
+                            cv.CategoryType.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase)) == true;
+                        
+                        // Check if product matches regular Phase filters
+                        var matchesPhaseFilter = false;
+                        if (phaseFilters?.Length > 0)
+                        {
+                            matchesPhaseFilter = p.CategoryValues?.Any(cv => 
+                                cv.CategoryType != null &&
+                                cv.CategoryType.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase) &&
+                                phaseFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
+                        }
+                        
+                        // OR logic: match regular filter OR (not categorised selected AND no phase)
+                        var phaseMatch = matchesPhaseFilter || (hasNotCategorisedPhase && !hasPhase);
+                        if (!phaseMatch) return false;
+                    }
+                    
+                    // Check Channel filter with OR logic
+                    if (hasNotCategorisedChannel || (channelFilters?.Length > 0))
+                    {
+                        var hasChannel = p.CategoryValues?.Any(cv => 
+                            cv.CategoryType != null && 
+                            cv.CategoryType.Name.Equals("Channel", StringComparison.OrdinalIgnoreCase)) == true;
+                        
+                        var matchesChannelFilter = false;
+                        if (channelFilters?.Length > 0)
+                        {
+                            matchesChannelFilter = p.CategoryValues?.Any(cv => 
+                                cv.CategoryType != null &&
+                                cv.CategoryType.Name.Equals("Channel", StringComparison.OrdinalIgnoreCase) &&
+                                channelFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
+                        }
+                        
+                        var channelMatch = matchesChannelFilter || (hasNotCategorisedChannel && !hasChannel);
+                        if (!channelMatch) return false;
+                    }
+                    
+                    // Check Type filter with OR logic
+                    if (hasNotCategorisedType || (typeFilters?.Length > 0))
+                    {
+                        var hasType = p.CategoryValues?.Any(cv => 
+                            cv.CategoryType != null && 
+                            cv.CategoryType.Name.Equals("Type", StringComparison.OrdinalIgnoreCase)) == true;
+                        
+                        var matchesTypeFilter = false;
+                        if (typeFilters?.Length > 0)
+                        {
+                            matchesTypeFilter = p.CategoryValues?.Any(cv => 
+                                cv.CategoryType != null &&
+                                cv.CategoryType.Name.Equals("Type", StringComparison.OrdinalIgnoreCase) &&
+                                typeFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
+                        }
+                        
+                        var typeMatch = matchesTypeFilter || (hasNotCategorisedType && !hasType);
+                        if (!typeMatch) return false;
+                    }
+                    
+                    // Check Business area filter with OR logic
+                    if (hasNotCategorisedGroup || (groupFilters?.Length > 0))
+                    {
+                        var hasBusinessArea = p.CategoryValues?.Any(cv => 
+                            cv.CategoryType != null && 
+                            cv.CategoryType.Name.Equals("Business area", StringComparison.OrdinalIgnoreCase)) == true;
+                        
+                        var matchesGroupFilter = false;
+                        if (groupFilters?.Length > 0)
+                        {
+                            matchesGroupFilter = p.CategoryValues?.Any(cv => 
+                                cv.CategoryType != null &&
+                                cv.CategoryType.Name.Equals("Business area", StringComparison.OrdinalIgnoreCase) &&
+                                groupFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
+                        }
+                        
+                        var groupMatch = matchesGroupFilter || (hasNotCategorisedGroup && !hasBusinessArea);
+                        if (!groupMatch) return false;
+                    }
+                    
+                    return true;
+                }).ToList();
+                
+                // Calculate total count before pagination
+                filteredTotalCount = filteredProducts.Count;
+                totalCount = filteredProducts.Count;
+                
+                // Apply pagination after filtering
+                filteredProducts = filteredProducts
+                    .Skip((cmsPage - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+            }
+            else
+            {
+                // No "not categorised" filters, use normal server-side filtering and pagination
+                var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
+                filteredProducts = result.Products;
+                filteredTotalCount = result.TotalCount;
+                totalCount = result.TotalCount;
+            }
 
             // Ensure view model properties are initialized
             viewModel.PhaseOptions = new List<FilterOption>();
@@ -278,14 +461,17 @@ public class ProductsController : Controller
         }
     }
 
-    // GET: Products/View/{fipsid}
-    public async Task<IActionResult> ViewProduct(string fipsid)
+    // GET: Products/View/{fipsid} or Products/View?ref={documentId}
+    // Supports both route parameter and query parameter 'ref' for documentId
+    public async Task<IActionResult> ViewProduct(string fipsid, [FromQuery(Name = "ref")] string? refParam)
     {
+        // Use 'ref' query parameter if provided, otherwise use route parameter
+        var productId = refParam ?? fipsid;
 
-        Console.WriteLine("fipsid: " + fipsid);
+        Console.WriteLine("productId: " + productId);
 
-        // Check if documentId is null or empty
-        if (string.IsNullOrEmpty(fipsid))
+        // Check if productId is null or empty
+        if (string.IsNullOrEmpty(productId))
         {
             return NotFound();
         }
@@ -293,8 +479,9 @@ public class ProductsController : Controller
         try
         {
             var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
-            // Find product by fips_id - optimized to return only needed fields
-            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
+            // Find product by fips_id or documentId - optimized to return only needed fields
+            // GetProductByFipsIdAsync can handle both FipsId and DocumentId
+            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(productId, productDetailDuration);
 
             if (product == null)
             {
@@ -314,7 +501,7 @@ public class ProductsController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading product details for FIPS ID: {FipsId}", fipsid);
+            _logger.LogError(ex, "Error loading product details for Product ID: {ProductId}", productId);
             return NotFound();
         }
     }
@@ -786,16 +973,24 @@ public class ProductsController : Controller
         // Add phase filters
         foreach (var phase in viewModel.SelectedPhases)
         {
-            var phaseOption = viewModel.PhaseOptions.FirstOrDefault(p => p.Value.Equals(phase, StringComparison.OrdinalIgnoreCase));
-            var displayText = phaseOption?.Text ?? phase; // Use option text or fallback to slug
-
-            // Remove count from display text if present
-            if (displayText.Contains(" ("))
+            string displayText;
+            if (phase.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase))
             {
-                var lastParenIndex = displayText.LastIndexOf(" (");
-                if (lastParenIndex > 0)
+                displayText = "Not categorised";
+            }
+            else
+            {
+                var phaseOption = viewModel.PhaseOptions.FirstOrDefault(p => p.Value.Equals(phase, StringComparison.OrdinalIgnoreCase));
+                displayText = phaseOption?.Text ?? phase; // Use option text or fallback to slug
+
+                // Remove count from display text if present
+                if (displayText.Contains(" ("))
                 {
-                    displayText = displayText.Substring(0, lastParenIndex);
+                    var lastParenIndex = displayText.LastIndexOf(" (");
+                    if (lastParenIndex > 0)
+                    {
+                        displayText = displayText.Substring(0, lastParenIndex);
+                    }
                 }
             }
 
@@ -811,16 +1006,24 @@ public class ProductsController : Controller
         // Add channel filters
         foreach (var channel in viewModel.SelectedChannels)
         {
-            var channelOption = viewModel.ChannelOptions.FirstOrDefault(c => c.Value.Equals(channel, StringComparison.OrdinalIgnoreCase));
-            var displayText = channelOption?.Text ?? channel; // Use option text or fallback to slug
-
-            // Remove count from display text if present
-            if (displayText.Contains(" ("))
+            string displayText;
+            if (channel.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase))
             {
-                var lastParenIndex = displayText.LastIndexOf(" (");
-                if (lastParenIndex > 0)
+                displayText = "Not categorised";
+            }
+            else
+            {
+                var channelOption = viewModel.ChannelOptions.FirstOrDefault(c => c.Value.Equals(channel, StringComparison.OrdinalIgnoreCase));
+                displayText = channelOption?.Text ?? channel; // Use option text or fallback to slug
+
+                // Remove count from display text if present
+                if (displayText.Contains(" ("))
                 {
-                    displayText = displayText.Substring(0, lastParenIndex);
+                    var lastParenIndex = displayText.LastIndexOf(" (");
+                    if (lastParenIndex > 0)
+                    {
+                        displayText = displayText.Substring(0, lastParenIndex);
+                    }
                 }
             }
 
@@ -836,16 +1039,24 @@ public class ProductsController : Controller
         // Add type filters
         foreach (var type in viewModel.SelectedTypes)
         {
-            var typeOption = viewModel.TypeOptions.FirstOrDefault(t => t.Value.Equals(type, StringComparison.OrdinalIgnoreCase));
-            var displayText = typeOption?.Text ?? type; // Use option text or fallback to slug
-
-            // Remove count from display text if present
-            if (displayText.Contains(" ("))
+            string displayText;
+            if (type.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase))
             {
-                var lastParenIndex = displayText.LastIndexOf(" (");
-                if (lastParenIndex > 0)
+                displayText = "Not categorised";
+            }
+            else
+            {
+                var typeOption = viewModel.TypeOptions.FirstOrDefault(t => t.Value.Equals(type, StringComparison.OrdinalIgnoreCase));
+                displayText = typeOption?.Text ?? type; // Use option text or fallback to slug
+
+                // Remove count from display text if present
+                if (displayText.Contains(" ("))
                 {
-                    displayText = displayText.Substring(0, lastParenIndex);
+                    var lastParenIndex = displayText.LastIndexOf(" (");
+                    if (lastParenIndex > 0)
+                    {
+                        displayText = displayText.Substring(0, lastParenIndex);
+                    }
                 }
             }
 
@@ -861,11 +1072,22 @@ public class ProductsController : Controller
         // Add business area filters
         foreach (var group in viewModel.SelectedGroups)
         {
+            string displayText;
+            if (group.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase))
+            {
+                displayText = "Not categorised";
+            }
+            else
+            {
+                var groupOption = viewModel.GroupOptions?.FirstOrDefault(g => g.Value.Equals(group, StringComparison.OrdinalIgnoreCase));
+                displayText = groupOption?.Text ?? group;
+            }
+
             selectedFilters.Add(new SelectedFilter
             {
                 Category = "Business area",
                 Value = group,
-                DisplayText = group,
+                DisplayText = displayText,
                 RemoveUrl = BuildRemoveFilterUrl(viewModel, "group", group)
             });
         }
