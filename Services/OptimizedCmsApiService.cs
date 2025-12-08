@@ -609,7 +609,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
     public async Task<Product?> GetProductByFipsIdAsync(string fipsId, TimeSpan? cacheDuration = null)
     {
-        var cacheKey = $"product_fips_{fipsId}";
+        // Support both FipsId and DocumentId lookups
+        // DocumentId format is typically alphanumeric (e.g., "h7pjd1dx4hwvjm9zg6bv2gci")
+        // FipsId format is typically "XXX-###" (e.g., "ABC-123")
+        var isDocumentId = !string.IsNullOrEmpty(fipsId) && !System.Text.RegularExpressions.Regex.IsMatch(fipsId, @"^[A-Z]{3}-\d{3}$");
+        
+        var cacheKey = isDocumentId ? $"product_doc_{fipsId}" : $"product_fips_{fipsId}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -617,14 +622,25 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             var cachedResult = await _cacheService.GetAsync<Product>(cacheKey);
             if (cachedResult != null)
             {
-                _logger.LogInformation("CACHE HIT: Product by FIPS ID {FipsId}", fipsId);
+                _logger.LogInformation("CACHE HIT: Product by {Type} {Id}", isDocumentId ? "DocumentId" : "FIPS ID", fipsId);
                 return cachedResult;
             }
         }
 
-        var queryParams = new List<string>
+        var queryParams = new List<string>();
+        
+        // Use documentId filter if it looks like a DocumentId, otherwise use fips_id filter
+        if (isDocumentId)
         {
-            $"filters[fips_id][$eq]={Uri.EscapeDataString(fipsId)}",
+            queryParams.Add($"filters[documentId][$eq]={Uri.EscapeDataString(fipsId)}");
+        }
+        else
+        {
+            queryParams.Add($"filters[fips_id][$eq]={Uri.EscapeDataString(fipsId)}");
+        }
+        
+        queryParams.AddRange(new List<string>
+        {
             // Essential fields for detailed view
             "fields[0]=id",
             "fields[1]=documentId",
@@ -657,7 +673,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[product_assurances][fields][3]=date_of_assurance",
             "populate[product_assurances][fields][4]=outcome",
             "populate[product_assurances][fields][5]=phase"
-        };
+        });
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
@@ -686,7 +702,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             if (cacheDuration.HasValue && product != null)
             {
                 await _cacheService.SetAsync(cacheKey, product, cacheDuration.Value);
-                _logger.LogInformation("CACHED: Product by FIPS ID {FipsId} for {Duration}", fipsId, cacheDuration.Value);
+                _logger.LogInformation("CACHED: Product by {Type} {Id} for {Duration}", isDocumentId ? "DocumentId" : "FIPS ID", fipsId, cacheDuration.Value);
             }
             
             return product;
