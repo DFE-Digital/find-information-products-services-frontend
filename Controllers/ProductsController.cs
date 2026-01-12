@@ -174,41 +174,18 @@ public class ProductsController : Controller
             
             // Convert category filters to server-side format, excluding "__not_categorised__" values
             var phaseFilters = phase?.Where(p => !p.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (phaseFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = phaseFilters;
-            }
-            
             var channelFilters = channel?.Where(c => !c.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (channelFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(channelFilters).ToArray();
-            }
-            
             var typeFilters = type?.Where(t => !t.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (typeFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(typeFilters).ToArray();
-            }
-            
             var groupFilters = group?.Where(g => !g.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (groupFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(groupFilters).ToArray();
-            }
             
-            if (subgroup?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(subgroup).ToArray();
-            }
-            if (parent?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(parent).ToArray();
-            }
-            if (userGroup?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(userGroup).ToArray();
-            }
+            // Count how many filter categories are active
+            int activeCategoryCount = 0;
+            if (phaseFilters?.Length > 0) activeCategoryCount++;
+            if (channelFilters?.Length > 0) activeCategoryCount++;
+            if (typeFilters?.Length > 0) activeCategoryCount++;
+            if (groupFilters?.Length > 0 || subgroup?.Length > 0) activeCategoryCount++;
+            if (parent?.Length > 0) activeCategoryCount++;
+            if (userGroup?.Length > 0) activeCategoryCount++;
 
             // Use optimized service for search with caching and server-side filtering
             var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
@@ -216,9 +193,10 @@ public class ProductsController : Controller
             
             var cacheDuration = !string.IsNullOrEmpty(keywords) ? searchDuration : productsDuration;
             
-            // If "not categorised" filters are active, we need to get all products and filter client-side
-            // because we need to check for absence of category values, then paginate
-            if (hasNotCategorisedPhase || hasNotCategorisedChannel || hasNotCategorisedType || hasNotCategorisedGroup)
+            // Use client-side filtering if:
+            // 1. "not categorised" filters are active (need to check for absence of values)
+            // 2. Multiple filter categories are active (need AND logic between categories, OR within)
+            if (hasNotCategorisedPhase || hasNotCategorisedChannel || hasNotCategorisedType || hasNotCategorisedGroup || activeCategoryCount > 1)
             {
                 // Build filters excluding category types we're checking for "not categorised"
                 var filtersForNotCategorised = new Dictionary<string, string[]>();
@@ -384,7 +362,36 @@ public class ProductsController : Controller
             }
             else
             {
-                // No "not categorised" filters, use normal server-side filtering and pagination
+                // Single category filter or no category filters - can use server-side filtering
+                // Add the single active category filter to serverFilters
+                if (phaseFilters?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = phaseFilters;
+                }
+                else if (channelFilters?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = channelFilters;
+                }
+                else if (typeFilters?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = typeFilters;
+                }
+                else if (groupFilters?.Length > 0 || subgroup?.Length > 0)
+                {
+                    var businessAreaFilters = new List<string>();
+                    if (groupFilters?.Length > 0) businessAreaFilters.AddRange(groupFilters);
+                    if (subgroup?.Length > 0) businessAreaFilters.AddRange(subgroup);
+                    serverFilters["category_values.slug"] = businessAreaFilters.ToArray();
+                }
+                else if (parent?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = parent;
+                }
+                else if (userGroup?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = userGroup;
+                }
+                
                 var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
                 filteredProducts = result.Products;
                 filteredTotalCount = result.TotalCount;
@@ -817,7 +824,7 @@ public class ProductsController : Controller
                 viewModel.PhaseOptions.Add(new FilterOption
                 {
                     Value = pv.Slug,
-                    Text = actualCount > 0 ? $"{pv.Name} ({actualCount})" : pv.Name,
+                    Text = pv.Name,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedPhases.Contains(pv.Slug, StringComparer.OrdinalIgnoreCase)
                 });
@@ -841,7 +848,7 @@ public class ProductsController : Controller
                 viewModel.ChannelOptions.Add(new FilterOption
                 {
                     Value = cv.Slug,
-                    Text = actualCount > 0 ? $"{cv.Name} ({actualCount})" : cv.Name,
+                    Text = cv.Name,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedChannels.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)
                 });
@@ -867,7 +874,7 @@ public class ProductsController : Controller
                 viewModel.TypeOptions.Add(new FilterOption
                 {
                     Value = tv.Slug,
-                    Text = actualCount > 0 ? $"{tv.Name} ({actualCount})" : tv.Name,
+                    Text = tv.Name,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedTypes.Contains(tv.Slug, StringComparer.OrdinalIgnoreCase)
                 });
@@ -879,7 +886,7 @@ public class ProductsController : Controller
         viewModel.CmdbStatusOptions = stateGroups.Select(g => new FilterOption
         {
             Value = g.Key,
-            Text = $"{g.Key} ({g.Count()})",
+            Text = g.Key,
             Count = g.Count(),
             IsSelected = viewModel.SelectedCmdbStatuses.Contains(g.Key, StringComparer.OrdinalIgnoreCase)
         }).ToList();
@@ -961,7 +968,7 @@ public class ProductsController : Controller
                 viewModel.UserGroupOptions.Add(new FilterOption
                 {
                     Value = gv.Slug,
-                    Text = actualCount > 0 ? $"{displayText} ({actualCount})" : displayText,
+                    Text = displayText,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedUserGroups.Contains(gv.Slug, StringComparer.OrdinalIgnoreCase),
                     ParentName = gv.Parent?.Name,
