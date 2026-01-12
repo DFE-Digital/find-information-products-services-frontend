@@ -470,7 +470,7 @@ public class ProductsController : Controller
 
     // GET: Products/View/{fipsid} or Products/View?ref={documentId}
     // Supports both route parameter and query parameter 'ref' for documentId
-    public async Task<IActionResult> ViewProduct(string fipsid, [FromQuery(Name = "ref")] string? refParam)
+    public async Task<IActionResult> ViewProduct(string fipsid, [FromQuery(Name = "ref")] string? refParam, [FromQuery] string? returnUrl)
     {
         // Use 'ref' query parameter if provided, otherwise use route parameter
         var productId = refParam ?? fipsid;
@@ -495,6 +495,18 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
+            // Capture return URL - either from query parameter or from referrer
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                var referrer = Request.Headers["Referer"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(referrer) && 
+                    referrer.Contains("/products") && 
+                    (referrer.Contains("?") || referrer.Contains("&")))
+                {
+                    returnUrl = referrer;
+                }
+            }
+
             var viewModel = new ProductViewModel
             {
                 Product = product,
@@ -504,6 +516,7 @@ public class ProductsController : Controller
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/index.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -513,7 +526,7 @@ public class ProductsController : Controller
         }
     }
 
-    public async Task<IActionResult> ProductCategories(string fipsid)
+    public async Task<IActionResult> ProductCategories(string fipsid, [FromQuery] string? returnUrl)
     {
         try
         {
@@ -585,6 +598,7 @@ public class ProductsController : Controller
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/categories.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -594,7 +608,7 @@ public class ProductsController : Controller
         }
     }
 
-    public async Task<IActionResult> ProductAssurance(string fipsid)
+    public async Task<IActionResult> ProductAssurance(string fipsid, [FromQuery] string? returnUrl)
     {
         // Check if Assurance feature is enabled
         if (!_enabledFeatures.Assurance)
@@ -624,6 +638,7 @@ public class ProductsController : Controller
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/assurance.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -1263,7 +1278,7 @@ public class ProductsController : Controller
 
     // GET: Products/Edit/{fipsid}
     [HttpGet]
-    public async Task<IActionResult> ProductEdit(string fipsid)
+    public async Task<IActionResult> ProductEdit(string fipsid, [FromQuery] string? returnUrl)
     {
         try
         {
@@ -1317,6 +1332,7 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/edit.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -1517,7 +1533,7 @@ public class ProductsController : Controller
 
     // GET: Products/ProposeChange/{fipsid}
     [HttpGet]
-    public async Task<IActionResult> ProposeChange(string fipsid)
+    public async Task<IActionResult> ProposeChange(string fipsid, [FromQuery] string? returnUrl)
     {
         // Check if EditProduct feature is enabled (reusing same feature flag)
         if (!_enabledFeatures.EditProduct)
@@ -1605,6 +1621,7 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/propose-change.cshtml", viewModel);
         }
         catch (Exception ex)
