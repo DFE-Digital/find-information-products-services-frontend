@@ -7,7 +7,7 @@ namespace FipsFrontend.Models
         public ProductsViewModel()
         {
             HideNavigation = false;
-            PageTitle = "Search and filter products and services";
+            PageTitle = "Search and filter products";
             PageDescription = "Find information about products and services";
         }
 

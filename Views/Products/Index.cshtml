@@ -44,6 +44,8 @@ document.querySelector('form').addEventListener('submit', function() {
 </script>
 }
 
+
+
 @section BeforeContent {
 <div class="dfe-masthead">
         <div class="govuk-width-container">
@@ -74,36 +76,9 @@ document.querySelector('form').addEventListener('submit', function() {
 
                 <div class="moj-filter__content">
                     
-                    @if (Model.SelectedFilters.Any())
-                    {
-                        <div class="moj-filter__selected">
-                            <div class="moj-filter__selected-heading">
-                                <div class="moj-filter__heading-title">
-                                    <h2 class="govuk-heading-m">Selected filters</h2>
-                                </div>
-                                <div class="moj-filter__heading-action">
-                                    <p><a class="govuk-link govuk-link--no-visited-state" href="/products">Clear filters</a></p>
-                                </div>
-                            </div>
-
-                            @foreach (var filterGroup in Model.SelectedFilters.GroupBy(f => f.Category))
-                            {
-                                <h3 class="govuk-heading-s govuk-!-margin-bottom-0">@filterGroup.Key</h3>
-                                <ul class="moj-filter-tags">
-                                    @foreach (var filter in filterGroup)
-                                    {
-                                        <li><a class="moj-filter__tag" href="@filter.RemoveUrl"><span class="govuk-visually-hidden">Remove this filter</span> @filter.DisplayText</a></li>
-                                    }
-                                </ul>
-                            }
-                        </div>
-                    }
-
                     <div class="moj-filter__options">
                         
-                        <button type="submit" class="govuk-button" data-module="govuk-button">
-                            Apply filters
-                        </button>
+                   
 
                         <!-- Product name search -->
                         <div class="govuk-form-group">
@@ -425,6 +400,10 @@ document.querySelector('form').addEventListener('submit', function() {
                             </div>
                         }
 
+                       
+ <button type="submit" class="govuk-button govuk-!-margin-top-5 govuk-!-margin-bottom-0" data-module="govuk-button">
+                            Apply filters
+                        </button>
 
                     </div>
                 </div>
@@ -434,19 +413,89 @@ document.querySelector('form').addEventListener('submit', function() {
 
     <div class="govuk-grid-column-two-thirds">
 
+        <!-- Applied Filters Display -->
+        @if (Model.SelectedFilters.Any())
+        {
+            <div class="applied-filters-panel">
+                <h2 class="govuk-heading-m govuk-!-margin-bottom-4">
+                    @Model.FilteredCount @(Model.FilteredCount == 1 ? "result" : "results") for your selected filters
+                </h2>
+                
+                @foreach (var filterGroup in Model.SelectedFilters.GroupBy(f => f.Category))
+                {
+                    <div class="govuk-!-margin-bottom-3">
+                        <h3 class="govuk-heading-xs filter-category-heading">@filterGroup.Key</h3>
+                        <div class="filter-group-container">
+                            @foreach (var filter in filterGroup)
+                            {
+                                <a href="@filter.RemoveUrl" class="filter-badge">
+                                    <span>@filter.DisplayText</span>
+                                    <span class="filter-badge-close" aria-hidden="true">×</span>
+                                    <span class="govuk-visually-hidden">Remove @filter.DisplayText filter</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                
+                <div class="clear-filters-section">
+                    <a href="/products" class="govuk-link govuk-link--no-visited-state" style="font-weight: 600; font-size: 16px;">
+                        Clear all filters
+                    </a>
+                </div>
+            </div>
+        }
+
+
+
         <!-- Results Summary -->
         <div class="govuk-!-margin-bottom-4">
-         
-              <p class="govuk-body">Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount products and services
-                @if (Model.FilteredCount != Model.TotalCount)
-                {
-                    <text>(filtered from @Model.TotalCount total)</text>
-                }
-                     </p>
+            @if (!Model.SelectedFilters.Any())
+            {
+                <h2 class="govuk-heading-m">All products and services</h2>
+
+                        <details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Missing a product or service?
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+  If you cannot find a product or service, make a <a class="govuk-link govuk-link--no-visited-state" href="/products/requestnewentry" rel="noopener noreferrer">request for a new product entry</a>.
+   </div>
+</details>
+                <p class="govuk-body">
+                    Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount results
+                    @if (Model.FilteredCount != Model.TotalCount)
+                    {
+                        <text>(filtered from @Model.TotalCount total)</text>
+                    }
+                </p>
+            }
+            else
+            {
+
+                        <details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Missing a product or service?
+    </span>
+  </summary>
+  <div class="govuk-details__text">
+  If you cannot find a product or service, make a <a class="govuk-link govuk-link--no-visited-state" href="/products/requestnewentry" rel="noopener noreferrer">request for a new product entry</a>.
+   </div>
+</details>
+
+
+                <p class="govuk-body">
+                    Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount results
+                </p>
+            }
+        </div>
+
+
        
-             <div class="govuk-inset-text">     
-                     <p class="govuk-body">If you cannot find a product or service <a class="govuk-link govuk-link--no-visited-state" href="/products/requestnewentry" rel="noopener noreferrer">make a request</a> to add a new entry.</p>
-        </div>  </div>
+    
 
         <!-- Products Grid -->
         @if (Model.Products.Any())
@@ -479,8 +528,7 @@ document.querySelector('form').addEventListener('submit', function() {
 
                             <!-- Meta information -->
                             <div class="govuk-!-margin-top-2">
-                                <span class="govuk-tag govuk-tag--grey govuk-!-font-size-16">@product.FipsId</span>
-                                @{
+                             @{
                                     var phaseCategoryValue = product.CategoryValues?.FirstOrDefault(cv => 
                                         cv.CategoryType?.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
                                     var phaseDisplay = phaseCategoryValue?.Name ?? "No phase";
@@ -491,8 +539,23 @@ document.querySelector('form').addEventListener('submit', function() {
                                 }
                                 else
                                 {
-                                <span class="govuk-tag govuk-tag--red govuk-!-font-size-16">@phaseDisplay</span>
+                                <span class="govuk-tag govuk-tag--grey govuk-!-font-size-16">@phaseDisplay</span>
                                 }
+
+                                @{
+                                    var businessAreaCategory = product.CategoryValues?.FirstOrDefault(cv => 
+                                        cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
+                                    var businessAreaDisplay = businessAreaCategory?.Name ?? "Not categorised";
+                                }
+                                @if (businessAreaDisplay != "Not categorised")
+                                {
+                                    <span class="govuk-tag govuk-tag--blue govuk-!-font-size-16">@businessAreaDisplay</span>
+                                }
+                                else
+                                {
+                                    <span class="govuk-tag govuk-tag--grey govuk-!-font-size-16">@businessAreaDisplay</span>
+                                }
+                               
                             </div>
 
                             <a class="dfe-chevron-card__link product-link" 
@@ -798,6 +861,66 @@ document.querySelector('form').addEventListener('submit', function() {
         .moj-filter-group:last-child {
             border-bottom: none;
             margin-bottom: 0;
+        }
+        .govuk-tag {    max-width: fit-content !important;    }
+        
+        /* Applied Filters Panel */
+        .applied-filters-panel {
+            border: 2px solid #b1b4b6;
+            padding: 20px;
+            background-color: #f3f2f1;
+            margin-bottom: 30px;
+        }
+        
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #1d70b8;
+            color: white;
+            padding: 8px 14px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .filter-badge:hover {
+            background-color: #003078;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .filter-badge:focus {
+            background-color: #003078;
+            color: white;
+            outline: 3px solid #fd0;
+            outline-offset: 0;
+        }
+        
+        .filter-badge-close {
+            margin-left: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 1;
+        }
+        
+        .filter-group-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-category-heading {
+            color: #505a5f;
+            margin-bottom: 8px;
+        }
+        
+        .clear-filters-section {
+            border-top: 1px solid #b1b4b6;
+            padding-top: 15px;
+            margin-top: 20px;
         }
     </style>
     <script nonce="@Html.GetNonce()">
