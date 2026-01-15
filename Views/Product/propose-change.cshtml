@@ -8,7 +8,7 @@
         <div class="govuk-width-container">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
-                    <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" class="govuk-back-link">Back to product</a>
+                    <a href="@GetBackLink(ViewData["ReturnUrl"]?.ToString())" class="govuk-back-link">@GetBackLinkText(ViewData["ReturnUrl"]?.ToString())</a>
                     
                      <span class="govuk-caption-m">@Model.Product.FipsId</span>
                      <h1 class="govuk-heading-l dfe-masthead--title">
@@ -85,21 +85,21 @@
             </button>
             <ul class="dfe-vertical-nav__section" id="side-navigation">
                 <li class="dfe-vertical-nav__section-item">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)">Overview</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Overview</a>
                 </li>
                 <li class="dfe-vertical-nav__section-item">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/categories">Categories</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/categories@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Categories</a>
                 </li>
                 @if (ViewData["AssuranceEnabled"] as bool? == true)
                 {
                     <li class="dfe-vertical-nav__section-item">
-                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance">Assurance</a>
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Assurance</a>
                     </li>
                 } 
                 @if (ViewData["EditProductEnabled"] as bool? == true)
                 {
                     <li class="dfe-vertical-nav__section-item  dfe-vertical-nav__section-item--current">
-                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/propose-change">Propose a change</a>
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/propose-change@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Propose a change</a>
                     </li>
                 }
             </ul>
@@ -557,7 +557,7 @@
             <button class="govuk-button" data-module="govuk-button" type="submit" id="submit-changes-btn">
                 Submit proposed changes
             </button>
-            <a class="govuk-link govuk-link--no-visited-state" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)">Cancel</a>
+            <a class="govuk-link govuk-link--no-visited-state" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Cancel</a>
         </div>
 
     </form>
@@ -565,4 +565,43 @@
   </div>
 </div>
 
-
+@functions {
+    public string GetBackLink(string? returnUrl)
+    {
+        // If returnUrl is provided, use it
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            return returnUrl;
+        }
+        
+        // Otherwise return to product detail page
+        return $"/product/{(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)}";
+    }
+    
+    public string GetBackLinkText(string? returnUrl)
+    {
+        // If returnUrl is provided, check if it has filters
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            if (returnUrl.Contains("/products") && (returnUrl.Contains("?") || returnUrl.Contains("&")))
+            {
+                return "Back to results";
+            }
+            else if (returnUrl.Contains("/products"))
+            {
+                return "Back to products";
+            }
+        }
+        
+        return "Back to product";
+    }
+    
+    public string GetReturnUrlQueryString(string? returnUrl)
+    {
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            return $"?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        }
+        return string.Empty;
+    }
+}

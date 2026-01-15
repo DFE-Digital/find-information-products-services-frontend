@@ -249,9 +249,9 @@ $govuk-font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
     font-weight: normal;
 }
 
-.filter-toggle-button[aria-expanded="true"] .filter-toggle-icon {
-    transform: rotate(180deg);
-}
+// .filter-toggle-button[aria-expanded="true"] .filter-toggle-icon {
+//     transform: rotate(180deg);
+// }
 
 .filter-toggle-button[aria-expanded="true"] {
     border-bottom: none;

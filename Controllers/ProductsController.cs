@@ -174,41 +174,18 @@ public class ProductsController : Controller
             
             // Convert category filters to server-side format, excluding "__not_categorised__" values
             var phaseFilters = phase?.Where(p => !p.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (phaseFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = phaseFilters;
-            }
-            
             var channelFilters = channel?.Where(c => !c.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (channelFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(channelFilters).ToArray();
-            }
-            
             var typeFilters = type?.Where(t => !t.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (typeFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(typeFilters).ToArray();
-            }
-            
             var groupFilters = group?.Where(g => !g.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            if (groupFilters?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(groupFilters).ToArray();
-            }
             
-            if (subgroup?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(subgroup).ToArray();
-            }
-            if (parent?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(parent).ToArray();
-            }
-            if (userGroup?.Length > 0)
-            {
-                serverFilters["category_values.slug"] = (serverFilters.ContainsKey("category_values.slug") ? serverFilters["category_values.slug"].ToList() : new List<string>()).Concat(userGroup).ToArray();
-            }
+            // Count how many filter categories are active
+            int activeCategoryCount = 0;
+            if (phaseFilters?.Length > 0) activeCategoryCount++;
+            if (channelFilters?.Length > 0) activeCategoryCount++;
+            if (typeFilters?.Length > 0) activeCategoryCount++;
+            if (groupFilters?.Length > 0 || subgroup?.Length > 0) activeCategoryCount++;
+            if (parent?.Length > 0) activeCategoryCount++;
+            if (userGroup?.Length > 0) activeCategoryCount++;
 
             // Use optimized service for search with caching and server-side filtering
             var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
@@ -216,9 +193,10 @@ public class ProductsController : Controller
             
             var cacheDuration = !string.IsNullOrEmpty(keywords) ? searchDuration : productsDuration;
             
-            // If "not categorised" filters are active, we need to get all products and filter client-side
-            // because we need to check for absence of category values, then paginate
-            if (hasNotCategorisedPhase || hasNotCategorisedChannel || hasNotCategorisedType || hasNotCategorisedGroup)
+            // Use client-side filtering if:
+            // 1. "not categorised" filters are active (need to check for absence of values)
+            // 2. Multiple filter categories are active (need AND logic between categories, OR within)
+            if (hasNotCategorisedPhase || hasNotCategorisedChannel || hasNotCategorisedType || hasNotCategorisedGroup || activeCategoryCount > 1)
             {
                 // Build filters excluding category types we're checking for "not categorised"
                 var filtersForNotCategorised = new Dictionary<string, string[]>();
@@ -384,7 +362,36 @@ public class ProductsController : Controller
             }
             else
             {
-                // No "not categorised" filters, use normal server-side filtering and pagination
+                // Single category filter or no category filters - can use server-side filtering
+                // Add the single active category filter to serverFilters
+                if (phaseFilters?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = phaseFilters;
+                }
+                else if (channelFilters?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = channelFilters;
+                }
+                else if (typeFilters?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = typeFilters;
+                }
+                else if (groupFilters?.Length > 0 || subgroup?.Length > 0)
+                {
+                    var businessAreaFilters = new List<string>();
+                    if (groupFilters?.Length > 0) businessAreaFilters.AddRange(groupFilters);
+                    if (subgroup?.Length > 0) businessAreaFilters.AddRange(subgroup);
+                    serverFilters["category_values.slug"] = businessAreaFilters.ToArray();
+                }
+                else if (parent?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = parent;
+                }
+                else if (userGroup?.Length > 0)
+                {
+                    serverFilters["category_values.slug"] = userGroup;
+                }
+                
                 var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
                 filteredProducts = result.Products;
                 filteredTotalCount = result.TotalCount;
@@ -463,7 +470,7 @@ public class ProductsController : Controller
 
     // GET: Products/View/{fipsid} or Products/View?ref={documentId}
     // Supports both route parameter and query parameter 'ref' for documentId
-    public async Task<IActionResult> ViewProduct(string fipsid, [FromQuery(Name = "ref")] string? refParam)
+    public async Task<IActionResult> ViewProduct(string fipsid, [FromQuery(Name = "ref")] string? refParam, [FromQuery] string? returnUrl)
     {
         // Use 'ref' query parameter if provided, otherwise use route parameter
         var productId = refParam ?? fipsid;
@@ -488,6 +495,18 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
+            // Capture return URL - either from query parameter or from referrer
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                var referrer = Request.Headers["Referer"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(referrer) && 
+                    referrer.Contains("/products") && 
+                    (referrer.Contains("?") || referrer.Contains("&")))
+                {
+                    returnUrl = referrer;
+                }
+            }
+
             var viewModel = new ProductViewModel
             {
                 Product = product,
@@ -497,6 +516,7 @@ public class ProductsController : Controller
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/index.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -506,7 +526,7 @@ public class ProductsController : Controller
         }
     }
 
-    public async Task<IActionResult> ProductCategories(string fipsid)
+    public async Task<IActionResult> ProductCategories(string fipsid, [FromQuery] string? returnUrl)
     {
         try
         {
@@ -578,6 +598,7 @@ public class ProductsController : Controller
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/categories.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -587,7 +608,7 @@ public class ProductsController : Controller
         }
     }
 
-    public async Task<IActionResult> ProductAssurance(string fipsid)
+    public async Task<IActionResult> ProductAssurance(string fipsid, [FromQuery] string? returnUrl)
     {
         // Check if Assurance feature is enabled
         if (!_enabledFeatures.Assurance)
@@ -617,6 +638,7 @@ public class ProductsController : Controller
             ViewData["ActiveNav"] = "products";
             ViewData["AssuranceEnabled"] = _enabledFeatures.Assurance;
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/assurance.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -710,7 +732,10 @@ public class ProductsController : Controller
         {
             foreach (var p in phase)
             {
-                filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(p)}");
+                if (!string.IsNullOrEmpty(p))
+                {
+                    filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(p)}");
+                }
             }
         }
 
@@ -719,7 +744,10 @@ public class ProductsController : Controller
         {
             foreach (var c in channel)
             {
-                filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(c)}");
+                if (!string.IsNullOrEmpty(c))
+                {
+                    filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(c)}");
+                }
             }
         }
 
@@ -728,7 +756,10 @@ public class ProductsController : Controller
         {
             foreach (var t in type)
             {
-                filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(t)}");
+                if (!string.IsNullOrEmpty(t))
+                {
+                    filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(t)}");
+                }
             }
         }
 
@@ -737,7 +768,10 @@ public class ProductsController : Controller
         {
             foreach (var s in cmdbStatus)
             {
-                filters.Add($"filters[state][$eq]={Uri.EscapeDataString(s)}");
+                if (!string.IsNullOrEmpty(s))
+                {
+                    filters.Add($"filters[state][$eq]={Uri.EscapeDataString(s)}");
+                }
             }
         }
 
@@ -745,8 +779,8 @@ public class ProductsController : Controller
         if (group?.Length > 0 || subgroup?.Length > 0)
         {
             var allGroupSlugs = new List<string>();
-            if (group?.Length > 0) allGroupSlugs.AddRange(group);
-            if (subgroup?.Length > 0) allGroupSlugs.AddRange(subgroup);
+            if (group?.Length > 0) allGroupSlugs.AddRange(group.Where(g => !string.IsNullOrEmpty(g)));
+            if (subgroup?.Length > 0) allGroupSlugs.AddRange(subgroup.Where(sg => !string.IsNullOrEmpty(sg)));
 
             foreach (var g in allGroupSlugs)
             {
@@ -759,7 +793,10 @@ public class ProductsController : Controller
         {
             foreach (var p in parent)
             {
-                filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(p)}");
+                if (!string.IsNullOrEmpty(p))
+                {
+                    filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(p)}");
+                }
             }
         }
 
@@ -768,7 +805,10 @@ public class ProductsController : Controller
         {
             foreach (var u in userGroup)
             {
-                filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(u)}");
+                if (!string.IsNullOrEmpty(u))
+                {
+                    filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(u)}");
+                }
             }
         }
 
@@ -799,7 +839,7 @@ public class ProductsController : Controller
                 viewModel.PhaseOptions.Add(new FilterOption
                 {
                     Value = pv.Slug,
-                    Text = actualCount > 0 ? $"{pv.Name} ({actualCount})" : pv.Name,
+                    Text = pv.Name,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedPhases.Contains(pv.Slug, StringComparer.OrdinalIgnoreCase)
                 });
@@ -823,7 +863,7 @@ public class ProductsController : Controller
                 viewModel.ChannelOptions.Add(new FilterOption
                 {
                     Value = cv.Slug,
-                    Text = actualCount > 0 ? $"{cv.Name} ({actualCount})" : cv.Name,
+                    Text = cv.Name,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedChannels.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)
                 });
@@ -849,7 +889,7 @@ public class ProductsController : Controller
                 viewModel.TypeOptions.Add(new FilterOption
                 {
                     Value = tv.Slug,
-                    Text = actualCount > 0 ? $"{tv.Name} ({actualCount})" : tv.Name,
+                    Text = tv.Name,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedTypes.Contains(tv.Slug, StringComparer.OrdinalIgnoreCase)
                 });
@@ -861,7 +901,7 @@ public class ProductsController : Controller
         viewModel.CmdbStatusOptions = stateGroups.Select(g => new FilterOption
         {
             Value = g.Key,
-            Text = $"{g.Key} ({g.Count()})",
+            Text = g.Key,
             Count = g.Count(),
             IsSelected = viewModel.SelectedCmdbStatuses.Contains(g.Key, StringComparer.OrdinalIgnoreCase)
         }).ToList();
@@ -943,7 +983,7 @@ public class ProductsController : Controller
                 viewModel.UserGroupOptions.Add(new FilterOption
                 {
                     Value = gv.Slug,
-                    Text = actualCount > 0 ? $"{displayText} ({actualCount})" : displayText,
+                    Text = displayText,
                     Count = actualCount,
                     IsSelected = viewModel.SelectedUserGroups.Contains(gv.Slug, StringComparer.OrdinalIgnoreCase),
                     ParentName = gv.Parent?.Name,
@@ -1176,30 +1216,61 @@ public class ProductsController : Controller
         if (!string.IsNullOrEmpty(viewModel.Keywords))
             queryParams.Add($"keywords={Uri.EscapeDataString(viewModel.Keywords)}");
 
-        // Add other filters except the one being removed
-        var otherPhases = viewModel.SelectedPhases.Where(p => p != value).ToArray();
-        if (otherPhases.Length > 0)
-            queryParams.AddRange(otherPhases.Select(p => $"phase={Uri.EscapeDataString(p)}"));
+        // Add phase filters (exclude only if this is the filter being removed)
+        var phasesToInclude = filterType.Equals("phase", StringComparison.OrdinalIgnoreCase) 
+            ? viewModel.SelectedPhases.Where(p => !p.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedPhases.ToArray();
+        if (phasesToInclude.Length > 0)
+            queryParams.AddRange(phasesToInclude.Select(p => $"phase={Uri.EscapeDataString(p)}"));
 
-        var otherGroups = viewModel.SelectedGroups.Where(g => g != value).ToArray();
-        if (otherGroups.Length > 0)
-            queryParams.AddRange(otherGroups.Select(g => $"group={Uri.EscapeDataString(g)}"));
+        // Add group filters (exclude only if this is the filter being removed)
+        var groupsToInclude = filterType.Equals("group", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedGroups.Where(g => !g.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedGroups.ToArray();
+        if (groupsToInclude.Length > 0)
+            queryParams.AddRange(groupsToInclude.Select(g => $"group={Uri.EscapeDataString(g)}"));
 
-        var otherSubgroups = viewModel.SelectedSubgroups.Where(sg => sg != value).ToArray();
-        if (otherSubgroups.Length > 0)
-            queryParams.AddRange(otherSubgroups.Select(sg => $"subgroup={Uri.EscapeDataString(sg)}"));
+        // Add subgroup filters (exclude only if this is the filter being removed)
+        var subgroupsToInclude = filterType.Equals("subgroup", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedSubgroups.Where(sg => !sg.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedSubgroups.ToArray();
+        if (subgroupsToInclude.Length > 0)
+            queryParams.AddRange(subgroupsToInclude.Select(sg => $"subgroup={Uri.EscapeDataString(sg)}"));
 
-        var otherCmdbStatuses = viewModel.SelectedCmdbStatuses.Where(s => s != value).ToArray();
-        if (otherCmdbStatuses.Length > 0)
-            queryParams.AddRange(otherCmdbStatuses.Select(s => $"cmdbStatus={Uri.EscapeDataString(s)}"));
+        // Add channel filters (exclude only if this is the filter being removed)
+        var channelsToInclude = filterType.Equals("channel", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedChannels.Where(c => !c.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedChannels.ToArray();
+        if (channelsToInclude.Length > 0)
+            queryParams.AddRange(channelsToInclude.Select(c => $"channel={Uri.EscapeDataString(c)}"));
 
-        var otherCmdbGroups = viewModel.SelectedCmdbGroups.Where(g => g != value).ToArray();
-        if (otherCmdbGroups.Length > 0)
-            queryParams.AddRange(otherCmdbGroups.Select(g => $"parent={Uri.EscapeDataString(g)}"));
+        // Add type filters (exclude only if this is the filter being removed)
+        var typesToInclude = filterType.Equals("type", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedTypes.Where(t => !t.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedTypes.ToArray();
+        if (typesToInclude.Length > 0)
+            queryParams.AddRange(typesToInclude.Select(t => $"type={Uri.EscapeDataString(t)}"));
 
-        var otherUserGroups = viewModel.SelectedUserGroups.Where(ug => ug != value).ToArray();
-        if (otherUserGroups.Length > 0)
-            queryParams.AddRange(otherUserGroups.Select(ug => $"userGroup={Uri.EscapeDataString(ug)}"));
+        // Add CMDB status filters (exclude only if this is the filter being removed)
+        var cmdbStatusesToInclude = filterType.Equals("cmdbStatus", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedCmdbStatuses.Where(s => !s.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedCmdbStatuses.ToArray();
+        if (cmdbStatusesToInclude.Length > 0)
+            queryParams.AddRange(cmdbStatusesToInclude.Select(s => $"cmdbStatus={Uri.EscapeDataString(s)}"));
+
+        // Add CMDB parent/group filters (exclude only if this is the filter being removed)
+        var cmdbGroupsToInclude = filterType.Equals("parent", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedCmdbGroups.Where(g => !g.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedCmdbGroups.ToArray();
+        if (cmdbGroupsToInclude.Length > 0)
+            queryParams.AddRange(cmdbGroupsToInclude.Select(g => $"parent={Uri.EscapeDataString(g)}"));
+
+        // Add user group filters (exclude only if this is the filter being removed)
+        var userGroupsToInclude = filterType.Equals("userGroup", StringComparison.OrdinalIgnoreCase)
+            ? viewModel.SelectedUserGroups.Where(ug => !ug.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
+            : viewModel.SelectedUserGroups.ToArray();
+        if (userGroupsToInclude.Length > 0)
+            queryParams.AddRange(userGroupsToInclude.Select(ug => $"userGroup={Uri.EscapeDataString(ug)}"));
 
         var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
         return $"/products{queryString}";
@@ -1207,7 +1278,7 @@ public class ProductsController : Controller
 
     // GET: Products/Edit/{fipsid}
     [HttpGet]
-    public async Task<IActionResult> ProductEdit(string fipsid)
+    public async Task<IActionResult> ProductEdit(string fipsid, [FromQuery] string? returnUrl)
     {
         try
         {
@@ -1261,6 +1332,7 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/edit.cshtml", viewModel);
         }
         catch (Exception ex)
@@ -1461,7 +1533,7 @@ public class ProductsController : Controller
 
     // GET: Products/ProposeChange/{fipsid}
     [HttpGet]
-    public async Task<IActionResult> ProposeChange(string fipsid)
+    public async Task<IActionResult> ProposeChange(string fipsid, [FromQuery] string? returnUrl)
     {
         // Check if EditProduct feature is enabled (reusing same feature flag)
         if (!_enabledFeatures.EditProduct)
@@ -1549,6 +1621,7 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
             return View("~/Views/Product/propose-change.cshtml", viewModel);
         }
         catch (Exception ex)
