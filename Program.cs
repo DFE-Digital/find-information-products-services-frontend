@@ -218,17 +218,21 @@ app.Use(async (context, next) =>
     }
     
     // Content Security Policy - Enhanced for better security
+    // Note: 'unsafe-inline' is required for Google Tag Manager which dynamically injects scripts
+    // Important: We cannot use both 'nonce' and 'unsafe-inline' in the same directive - when a nonce is present,
+    // 'unsafe-inline' is ignored by the browser. So we use 'unsafe-inline' for GTM compatibility.
+    // The nonce is still generated and stored in context.Items for potential future use, but not included in CSP.
     var nonce = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
     context.Items["Nonce"] = nonce;
     
     context.Response.Headers["Content-Security-Policy"] = 
         $"default-src 'self'; " +
-        $"script-src 'self' 'nonce-{nonce}' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms https://az416426.vo.msecnd.net; " +
-        $"style-src 'self' 'nonce-{nonce}' https://rsms.me; " +
+        $"script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com https://*.google.com https://*.clarity.ms https://*.applicationinsights.azure.com https://*.vo.msecnd.net; " +
+        $"style-src 'self' 'unsafe-inline' https://rsms.me https://*.googleapis.com; " +
         $"img-src 'self' data: https:; " +
-        $"font-src 'self' data: https://rsms.me; " +
-        $"connect-src 'self' https://*.clarity.ms https://www.google-analytics.com https://region1.google-analytics.com https://analytics.google.com https://dc.applicationinsights.azure.com https://dc.services.visualstudio.com https://az416426.vo.msecnd.net https://login.microsoftonline.com https://graph.microsoft.com; " +
-        $"frame-src 'self' https://login.microsoftonline.com; " +
+        $"font-src 'self' data: https://rsms.me https://*.googleapis.com https://*.gstatic.com; " +
+        $"connect-src 'self' https://*.googletagmanager.com https://*.google-analytics.com https://*.google.com https://*.clarity.ms https://*.applicationinsights.azure.com https://*.vo.msecnd.net https://*.services.visualstudio.com https://login.microsoftonline.com https://graph.microsoft.com; " +
+        $"frame-src 'self' https://*.googletagmanager.com https://login.microsoftonline.com; " +
         $"frame-ancestors 'none'; " +
         $"base-uri 'self'; " +
         $"form-action 'self' https://login.microsoftonline.com; " +
