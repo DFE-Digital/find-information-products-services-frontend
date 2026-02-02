@@ -6,6 +6,7 @@ namespace FipsFrontend.Models
     {
         public Product Product { get; set; } = new Product();
         public List<ProductCategoryInfo> CategoryInfo { get; set; } = new List<ProductCategoryInfo>();
+        public List<SearchTerm> SearchTerms { get; set; } = new List<SearchTerm>();
         
         // Available category values for editing
         public List<CategoryValue> AvailablePhases { get; set; } = new List<CategoryValue>();
@@ -33,6 +34,9 @@ namespace FipsFrontend.Models
         public List<string> CategoryValueNames { get; set; } = new List<string>();
         public List<string> CategoryValueSlugs { get; set; } = new List<string>();
         public List<string> CategoryValueDescriptions { get; set; } = new List<string>();
+        public List<string> CategoryValueDocumentIds { get; set; } = new List<string>();
+        public List<string> CategoryValueSearchTexts { get; set; } = new List<string>();
+        public Dictionary<string, List<SearchTerm>> CategoryValueSearchTerms { get; set; } = new Dictionary<string, List<SearchTerm>>();
         public bool IsMultiLevel { get; set; } = false;
     }
 }

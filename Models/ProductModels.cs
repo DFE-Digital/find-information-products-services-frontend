@@ -3,6 +3,33 @@ using System.Text.Json;
 
 namespace FipsFrontend.Models;
 
+public class SearchTerm
+{
+    public int Id { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
+    [JsonPropertyName("search_term")]
+    public string SearchTermText { get; set; } = string.Empty;
+    [JsonPropertyName("result_count")]
+    public int ResultCount { get; set; }
+    [JsonPropertyName("results")]
+    public List<SearchTermResult>? Results { get; set; }
+    [JsonPropertyName("ip_address")]
+    public string? IpAddress { get; set; }
+    [JsonPropertyName("user_agent")]
+    public string? UserAgent { get; set; }
+    [JsonPropertyName("timestamp")]
+    public DateTime Timestamp { get; set; }
+}
+
+public class SearchTermResult
+{
+    [JsonPropertyName("documentId")]
+    public string DocumentId { get; set; } = string.Empty;
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+}
+
 [DataClassification(DataClassification.Internal, "Product information for internal DfE use")]
 public class Product
 {
@@ -46,6 +73,8 @@ public class CategoryValue
     public string Slug { get; set; } = string.Empty;
     [JsonPropertyName("short_description")]
     public string? ShortDescription { get; set; }
+    [JsonPropertyName("search_text")]
+    public string? SearchText { get; set; }
     public bool Enabled { get; set; } = true;
     [JsonPropertyName("sort_order")]
     public int? SortOrder { get; set; }

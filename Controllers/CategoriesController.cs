@@ -448,16 +448,45 @@ public class CategoriesController : Controller
         }
     }
 
-    public IActionResult Filter(string categoryType, string slug)
+    public async Task<IActionResult> Filter(string categoryType, string slug)
     {
-        // Redirect to products page with appropriate filter
+        // For user groups, get the category value name and use it as a search term
+        if (categoryType.ToLower() == "user group")
+        {
+            try
+            {
+                // Get the category type slug first
+                var categoryTypeResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryType>>(
+                    $"category-types?filters[name][$eq]={Uri.EscapeDataString(categoryType)}&filters[publishedAt][$notNull]=true"
+                );
+                var categoryTypeObj = categoryTypeResponse?.Data?.FirstOrDefault();
+                var categoryTypeSlug = categoryTypeObj?.Slug ?? "user-group";
+                
+                // Get the category value by slug to get its name - also filter by category type
+                var categoryValueUrl = $"category-values?filters[slug][$eq]={Uri.EscapeDataString(slug)}&filters[category_type][slug][$eq]={Uri.EscapeDataString(categoryTypeSlug)}&filters[publishedAt][$notNull]=true&filters[enabled]=true&fields[0]=name&fields[1]=slug&pagination[pageSize]=1";
+                var categoryValueResponse = await _cmsApiService.GetAsync<ApiCollectionResponse<CategoryValue>>(categoryValueUrl);
+                var categoryValue = categoryValueResponse?.Data?.FirstOrDefault();
+                
+                if (categoryValue != null && !string.IsNullOrEmpty(categoryValue.Name))
+                {
+                    return Redirect($"/products?keywords={Uri.EscapeDataString(categoryValue.Name)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not fetch category value name for slug {Slug}, falling back to slug", slug);
+            }
+            // Fallback to slug if name not found
+            return Redirect($"/products?keywords={Uri.EscapeDataString(slug)}");
+        }
+        
+        // Redirect to products page with appropriate filter for other category types
         var filterParam = categoryType.ToLower() switch
         {
             "phase" => $"phase={slug}",
             "channel" => $"channel={slug}",
             "type" => $"type={slug}",
             "business area" => $"group={slug}",
-            "user group" => $"userGroup={slug}",
             _ => $"category={slug}"
         };
 

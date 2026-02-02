@@ -12,7 +12,6 @@ document.querySelector('form').addEventListener('submit', function() {
 
   // Capture text inputs
   var keywords = form.querySelector('#keywords')?.value || '';
-  var userAutocomplete = form.querySelector('#user-autocomplete')?.value || '';
 
   // Helper function to get checked IDs from a container
   function getCheckedIds(containerSelector) {
@@ -34,7 +33,6 @@ document.querySelector('form').addEventListener('submit', function() {
     formId: form.id || '',
     formUrl: window.location.href,
     keywords: keywords,
-    userAutocomplete: userAutocomplete,
     channelFilters: channelFilters,
     phaseFilters: phaseFilters,
     typeFilters: typeFilters,
@@ -83,34 +81,9 @@ document.querySelector('form').addEventListener('submit', function() {
                         <!-- Product name search -->
                         <div class="govuk-form-group">
                             <label class="govuk-label govuk-label--s" for="keywords">
-                                Product name
+                                Search
                             </label>
                             <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Model.Keywords" data-search-type="product_name">
-                        </div>
-
-                        <!-- User groups autocomplete -->
-                        <div class="govuk-form-group">
-                            <label class="govuk-label govuk-label--s" for="user-autocomplete">
-                                User groups
-                            </label>
-                            <div id="user-autocomplete-container">
-                                <!-- This will be replaced by accessible-autocomplete -->
-                            </div>
-                            <div id="user-groups-no-data" class="govuk-hint">
-                                No user groups available for filtering.
-                            </div>
-
-                            <!-- Selected users will appear here as checkboxes -->
-                            <div id="selected-users-container">
-                                <fieldset class="govuk-fieldset">
-                                    <legend class="govuk-fieldset__legend govuk-fieldset__legend--xs">
-                                        Selected user types
-                                    </legend>
-                                    <div class="govuk-checkboxes govuk-checkboxes--small" id="selected-users-list">
-                                        <!-- Selected users will be dynamically added here -->
-                                    </div>
-                                </fieldset>
-                            </div>
                         </div>
 
                         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
@@ -588,7 +561,6 @@ document.querySelector('form').addEventListener('submit', function() {
                                 type = Model.SelectedTypes,
                                 cmdbStatus = Model.SelectedCmdbStatuses,
                                 parent = Model.SelectedCmdbGroups,
-                                userGroup = Model.SelectedUserGroups,
                                 page = Model.CurrentPage - 1
                             })" rel="prev">
                                 <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
@@ -619,7 +591,6 @@ document.querySelector('form').addEventListener('submit', function() {
                                         type = Model.SelectedTypes,
                                         cmdbStatus = Model.SelectedCmdbStatuses,
                                         parent = Model.SelectedCmdbGroups,
-                                        userGroup = Model.SelectedUserGroups,
                                         page = 1
                                     })" aria-label="Page 1">
                                         1
@@ -644,7 +615,6 @@ document.querySelector('form').addEventListener('submit', function() {
                                         type = Model.SelectedTypes,
                                         cmdbStatus = Model.SelectedCmdbStatuses,
                                         parent = Model.SelectedCmdbGroups,
-                                        userGroup = Model.SelectedUserGroups,
                                         page = i
                                     })" aria-label="Page @i" @(i == Model.CurrentPage ? "aria-current=\"page\"" : "")>
                                         @i
@@ -669,7 +639,6 @@ document.querySelector('form').addEventListener('submit', function() {
                                         type = Model.SelectedTypes,
                                         cmdbStatus = Model.SelectedCmdbStatuses,
                                         parent = Model.SelectedCmdbGroups,
-                                        userGroup = Model.SelectedUserGroups,
                                         page = Model.TotalPages
                                     })" aria-label="Page @Model.TotalPages">
                                         @Model.TotalPages
@@ -691,7 +660,6 @@ document.querySelector('form').addEventListener('submit', function() {
                                 type = Model.SelectedTypes,
                                 cmdbStatus = Model.SelectedCmdbStatuses,
                                 parent = Model.SelectedCmdbGroups,
-                                userGroup = Model.SelectedUserGroups,
                                 page = Model.CurrentPage + 1
                             })" rel="next">
                                 <span class="govuk-pagination__link-title">
@@ -797,14 +765,6 @@ document.querySelector('form').addEventListener('submit', function() {
         }
         
         /* Inline styles moved here for CSP compliance */
-        #user-groups-no-data {
-            display: none;
-        }
-        
-        #selected-users-container {
-            margin-top: 15px;
-            display: none;
-        }
         
         #phase-filter {
             display: none;
@@ -1031,284 +991,7 @@ document.querySelector('form').addEventListener('submit', function() {
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - starting initialization...');
             
-            // User groups data passed from controller (hierarchical)
-            let userGroupsData = [];
-            try {
-                const rawData = @Html.Raw(Json.Serialize(Model.UserGroupOptions?.Select(u => new { 
-                    id = u.Value, 
-                    label = u.Text.Replace(" (" + u.Count + ")", ""),
-                    count = u.Count,
-                    searchText = u.Text.Replace(" (" + u.Count + ")", "").ToLower(),
-                    parentName = u.ParentName,
-                    hasChildren = u.HasChildren,
-                    childCount = u.ChildCount
-                }) ?? Enumerable.Empty<object>()));
-                
-                userGroupsData = rawData || [];
-                console.log('User groups data loaded:', userGroupsData.length, 'items');
-                console.log('Raw user groups data:', userGroupsData);
-                
-                // If no data, show a message
-                if (userGroupsData.length === 0) {
-                    console.warn('No user groups data available');
-                    const noDataElement = document.getElementById('user-groups-no-data');
-                    if (noDataElement) {
-                        noDataElement.style.display = 'block';
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading user groups data:', error);
-                userGroupsData = [];
-            }
-            
-            // Array to store selected users
-            let selectedUsers = [];
-            
-            // Parse existing selections from URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const existingUsers = urlParams.getAll('userGroup');
-            if (existingUsers.length > 0) {
-                existingUsers.forEach(userId => {
-                    const user = userGroupsData.find(u => u.id === userId);
-                    if (user) {
-                        selectedUsers.push(user);
-                    }
-                });
-                updateSelectedUsersDisplay();
-            }
-            
-            // Function to update the displayed selected users
-            function updateSelectedUsersDisplay() {
-                const container = document.getElementById('selected-users-container');
-                const list = document.getElementById('selected-users-list');
-                
-                if (selectedUsers.length === 0) {
-                    container.style.display = 'none';
-                    return;
-                }
-                
-                container.style.display = 'block';
-                list.innerHTML = '';
-                
-                selectedUsers.forEach((user, index) => {
-                    const checkboxItem = document.createElement('div');
-                    checkboxItem.className = 'govuk-checkboxes__item';
-                    
-                    const checkbox = document.createElement('input');
-                    checkbox.className = 'govuk-checkboxes__input';
-                    checkbox.type = 'checkbox';
-                    checkbox.name = 'userGroup';
-                    checkbox.value = user.id;
-                    checkbox.id = 'user-' + index;
-                    checkbox.checked = true;
-                    
-                    const label = document.createElement('label');
-                    label.className = 'govuk-label govuk-checkboxes__label';
-                    label.setAttribute('for', 'user-' + index);
-                    label.textContent = user.label;
-                    
-                    checkboxItem.appendChild(checkbox);
-                    checkboxItem.appendChild(label);
-                    list.appendChild(checkboxItem);
-                });
-            }
-            
-            // Function to add a user to the selected list
-            function addUser(user) {
-                // Check if user is already selected
-                const alreadySelected = selectedUsers.some(u => u.id === user.id);
-                if (!alreadySelected) {
-                    selectedUsers.push(user);
-                    updateSelectedUsersDisplay();
-                }
-            }
-
-            // Custom search function that filters by labels
-            function source(query, populateResults) {
-                console.log('Source function called with query:', query);
-                console.log('Available userGroupsData:', userGroupsData.length, 'items');
-                
-                if (!query || query.length < 2) {
-                    populateResults([]);
-                    return;
-                }
-                
-                const searchTerm = query.toLowerCase();
-                console.log('Searching for:', searchTerm);
-                
-                const filteredResults = userGroupsData.filter(function(item) {
-                    // Exclude already selected users
-                    const alreadySelected = selectedUsers.some(u => u.id === item.id);
-                    if (alreadySelected) return false;
-                    
-                    const matches = item.searchText.includes(searchTerm);
-                    if (matches) {
-                        console.log('Match found:', item.label, 'parentName:', item.parentName, 'hasChildren:', item.hasChildren, 'childCount:', item.childCount);
-                    }
-                    return matches;
-                }).sort(function(a, b) {
-                    // Sort alphabetically by label
-                    return a.label.localeCompare(b.label);
-                });
-                
-                console.log('Filtered results:', filteredResults.length);
-                
-                // Add "Add all" option at the top if there are results
-                const results = [];
-                if (filteredResults.length > 0) {
-                    results.push({
-                        id: 'add-all',
-                        label: `Add all ${filteredResults.length} user groups`,
-                        isAddAll: true,
-                        count: filteredResults.length
-                    });
-                }
-                
-                // Add the actual results (limit to 14 to make room for "Add all")
-                results.push(...filteredResults.slice(0, 14));
-                populateResults(results);
-            }
-            
-            // Check if accessible autocomplete is available
-            if (typeof accessibleAutocomplete === 'undefined') {
-                console.error('Accessible autocomplete library not loaded');
-                // Create fallback input
-                const container = document.getElementById('user-autocomplete-container');
-                container.innerHTML = '<input class="govuk-input" type="text" id="user-fallback" name="userGroup" placeholder="Start typing to search user groups...">';
-                return;
-            }
-            
-            try {
-                console.log('Initializing accessible autocomplete...');
-                console.log('Container element:', document.querySelector('#user-autocomplete-container'));
-                console.log('User groups data available:', userGroupsData.length);
-                
-                // Don't initialize if no data
-                if (userGroupsData.length === 0) {
-                    console.log('No user groups data, skipping autocomplete initialization');
-                    const noDataElement = document.getElementById('user-groups-no-data');
-                    if (noDataElement) {
-                        noDataElement.style.display = 'block';
-                    }
-                    return;
-                }
-                
-                // Initialize accessible autocomplete
-                accessibleAutocomplete({
-                    element: document.querySelector('#user-autocomplete-container'),
-                    id: 'user-autocomplete',
-                    name: 'user-display', // Different name to avoid conflict
-                    source: source,
-                    minLength: 2,
-                            templates: {
-                                inputValue: function(suggestion) {
-                                    return suggestion && suggestion.label ? suggestion.label : suggestion;
-                                },
-                                suggestion: function(suggestion) {
-                                    console.log('Template suggestion called with:', suggestion);
-                                    if (suggestion && suggestion.label) {
-                                        if (suggestion.isAddAll) {
-                                            // Show "Add all" option with special styling
-                                            return `<div class="autocomplete-suggestion autocomplete-add-all">
-                                                <div class="autocomplete-add-all-text">${suggestion.label}</div>
-                                            </div>`;
-                                        } else if (suggestion.parentName) {
-                                            // Show child name as main text, parent as meta
-                                            console.log('Rendering child with parent:', suggestion.label, suggestion.parentName);
-                                            // Extract just the child name without the parent in brackets
-                                            const childName = suggestion.label.replace(/\s*\([^)]*\)$/, '');
-                                            return `<div class="autocomplete-suggestion">
-                                                <div class="autocomplete-child-name">${childName}</div>
-                                                <div class="autocomplete-parent-name">${suggestion.parentName}</div>
-                                            </div>`;
-                                        } else if (suggestion.hasChildren && suggestion.childCount > 0) {
-                                            // Show parent name with child count - treat like child entries for consistency
-                                            console.log('Rendering parent with children:', suggestion.label, suggestion.childCount);
-                                            return `<div class="autocomplete-suggestion">
-                                                <div class="autocomplete-child-name">${suggestion.label}</div>
-                                                <div class="autocomplete-parent-name">${suggestion.childCount} sub user-groups</div>
-                                            </div>`;
-                                        } else {
-                                            // Show just the main text, no meta
-                                            console.log('Rendering simple entry:', suggestion.label);
-                                            return `<div class="autocomplete-suggestion">
-                                                <div class="autocomplete-parent-name">${suggestion.label}</div>
-                                            </div>`;
-                                        }
-                                    }
-                                    return suggestion;
-                                }
-                            },
-                    onConfirm: function(confirmed) {
-                        if (confirmed && confirmed.id) {
-                            if (confirmed.isAddAll) {
-                                // Add all filtered results
-                                const searchTerm = document.querySelector('#user-autocomplete')?.value?.toLowerCase() || '';
-                                const filteredResults = userGroupsData.filter(function(item) {
-                                    const alreadySelected = selectedUsers.some(u => u.id === item.id);
-                                    if (alreadySelected) return false;
-                                    return item.searchText.includes(searchTerm);
-                                });
-                                
-                                filteredResults.forEach(function(item) {
-                                    addUser(item);
-                                });
-                                
-                                // Clear input and close dropdown
-                                setTimeout(function() {
-                                    const input = document.querySelector('#user-autocomplete');
-                                    if (input) {
-                                        input.value = '';
-                                        input.blur();
-                                    }
-                                }, 100);
-                            } else {
-                                addUser(confirmed);
-                                // Clear input and keep dropdown open
-                                setTimeout(function() {
-                                    const input = document.querySelector('#user-autocomplete');
-                                    if (input) {
-                                        input.value = '';
-                                        input.focus();
-                                        // Trigger a new search with empty value to close dropdown
-                                        const event = new Event('input', { bubbles: true });
-                                        input.dispatchEvent(event);
-                                    }
-                                }, 100);
-                            }
-                        } else if (typeof confirmed === 'string') {
-                            // Handle case where user types something that doesn't match
-                            const match = userGroupsData.find(function(user) {
-                                return user.label.toLowerCase() === confirmed.toLowerCase();
-                            });
-                            if (match) {
-                                addUser(match);
-                                // Clear input and keep dropdown open
-                                setTimeout(function() {
-                                    const input = document.querySelector('#user-autocomplete');
-                                    if (input) {
-                                        input.value = '';
-                                        input.focus();
-                                        const event = new Event('input', { bubbles: true });
-                                        input.dispatchEvent(event);
-                                    }
-                                }, 100);
-                            }
-                        }
-                    },
-                    showNoOptionsFound: true,
-                    showAllValues: false,
-                    displayMenu: 'overlay',
-                    placeholder: ''
-                });
-                
-                console.log('Accessible autocomplete initialized successfully');
-            } catch (error) {
-                console.error('Error initializing autocomplete:', error);
-                // Create fallback input on error
-                const container = document.getElementById('user-autocomplete-container');
-                container.innerHTML = '<input class="govuk-input" type="text" id="user-fallback" name="userGroup" placeholder="Start typing to search user groups...">';
-            }
+            // User groups autocomplete removed: global search now uses product keywords only
 
             // Initialize MOJ filter
             if (typeof moj !== 'undefined' && moj.Modules && moj.Modules.Filter) {
