@@ -91,6 +91,9 @@ builder.Services.AddScoped<IApiLoggingService, ApiLoggingService>();
 // Register GOV.UK Notify service
 builder.Services.AddScoped<INotifyService, NotifyService>();
 
+// Register search term logging service
+builder.Services.AddScoped<ISearchTermLoggingService, SearchTermLoggingService>();
+
 builder.Services.AddHttpContextAccessor();
 
 // Register Airtable service

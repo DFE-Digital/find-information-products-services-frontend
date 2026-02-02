@@ -15,8 +15,9 @@ public class ProductsController : Controller
     private readonly EnabledFeatures _enabledFeatures;
     private readonly IConfiguration _configuration;
     private readonly INotifyService _notifyService;
+    private readonly ISearchTermLoggingService _searchTermLoggingService;
 
-    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration, INotifyService notifyService)
+    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration, INotifyService notifyService, ISearchTermLoggingService searchTermLoggingService)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
@@ -24,11 +25,12 @@ public class ProductsController : Controller
         _enabledFeatures = enabledFeatures.Value;
         _configuration = configuration;
         _notifyService = notifyService;
+        _searchTermLoggingService = searchTermLoggingService;
     }
 
     // GET: Products
     public async Task<IActionResult> Index(string? keywords, string[]? phase, string[]? group, string[]? subgroup,
-        string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent, string[]? userGroup, int page = 1)
+        string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent, int page = 1)
     {
         try
         {
@@ -47,97 +49,10 @@ public class ProductsController : Controller
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
             var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
             var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
-            // Try different variations of user group category type names
-            var userGroupVariations = new[] { "User group", "User Group", "User groups", "User Groups", "User Type", "User Types", "Audience", "Target Audience" };
-            List<CategoryValue> userGroupValues = new List<CategoryValue>();
-            
-            foreach (var variation in userGroupVariations)
-            {
-                var values = await _optimizedCmsApiService.GetCategoryValuesForFilter(variation, categoryValuesDuration) ?? new List<CategoryValue>();
-                if (values.Any())
-                {
-                    _logger.LogInformation("Found {Count} values for category type '{Type}'", values.Count, variation);
-                    
-                    // Search specifically for "Social worker" in these values
-                    var socialWorkerExact = values.FirstOrDefault(v => v.Name.Equals("Social worker", StringComparison.OrdinalIgnoreCase));
-                    if (socialWorkerExact != null)
-                    {
-                        _logger.LogInformation("✅ Found exact 'Social worker' entry: '{Name}' (Slug: {Slug})", socialWorkerExact.Name, socialWorkerExact.Slug);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("❌ 'Social worker' not found in {Count} values for category type '{Type}'", values.Count, variation);
-                        
-                        // Log all values that contain "social" to help debug
-                        var socialRelated = values.Where(v => v.Name.ToLower().Contains("social")).ToList();
-                        if (socialRelated.Any())
-                        {
-                            _logger.LogInformation("Social-related entries found:");
-                            foreach (var social in socialRelated)
-                            {
-                                _logger.LogInformation("  - '{Name}' (Slug: {Slug})", social.Name, social.Slug);
-                            }
-                        }
-                    }
-                    
-                    // Log first few values to see what we're getting
-                    var firstFew = values.Take(5);
-                    foreach (var value in firstFew)
-                    {
-                        _logger.LogInformation("Sample user group value: '{Name}' (Slug: {Slug})", value.Name, value.Slug);
-                    }
-                    userGroupValues = values;
-                    break;
-                }
-                else
-                {
-                    _logger.LogInformation("No values found for category type '{Type}'", variation);
-                }
-            }
-            
-            // Always check for "Social worker" specifically, even if we found user group values
-            _logger.LogInformation("Searching for 'Social worker' in all category values...");
-            var allCategoryValues = await _optimizedCmsApiService.GetAllCategoryValues(categoryValuesDuration) ?? new List<CategoryValue>();
-            var socialWorkerValues = allCategoryValues.Where(cv => 
-                cv.Name.Equals("Social worker", StringComparison.OrdinalIgnoreCase) ||
-                cv.Name.Contains("Social worker", StringComparison.OrdinalIgnoreCase)
-            ).ToList();
-            
-            if (socialWorkerValues.Any())
-            {
-                _logger.LogInformation("Found {Count} 'Social worker' related values:", socialWorkerValues.Count);
-                foreach (var value in socialWorkerValues)
-                {
-                    _logger.LogInformation("Social worker value: '{Name}' (Slug: {Slug}, CategoryType: {CategoryType})", 
-                        value.Name, value.Slug, value.CategoryType?.Name ?? "Unknown");
-                }
-            }
-            else
-            {
-                _logger.LogWarning("No 'Social worker' values found in any category type");
-                
-                // Log total count of all category values
-                _logger.LogInformation("Total category values in CMS: {Count}", allCategoryValues.Count);
-                
-                // Log all category types and their counts
-                var categoryTypeCounts = allCategoryValues.GroupBy(cv => cv.CategoryType?.Name ?? "Unknown")
-                    .Select(g => new { Type = g.Key, Count = g.Count() })
-                    .OrderBy(x => x.Type);
-                
-                foreach (var typeCount in categoryTypeCounts)
-                {
-                    _logger.LogInformation("Category type '{Type}': {Count} values", typeCount.Type, typeCount.Count);
-                }
-            }
-            
-            if (!userGroupValues.Any())
-            {
-                _logger.LogWarning("No user group values found for any of the tested category type names");
-            }
 
             // Debug logging for category values
-            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, BusinessArea={BusinessAreaCount}, UserGroup={UserGroupCount}", 
-                phaseValues.Count, channelValues.Count, groupValues.Count, userGroupValues.Count);
+            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, BusinessArea={BusinessAreaCount}", 
+                phaseValues.Count, channelValues.Count, groupValues.Count);
             
             // Additional debug logging for Business area values
             if (groupValues.Any())
@@ -151,7 +66,7 @@ public class ProductsController : Controller
             }
 
             // Build CMS filter query string
-            var filterQuery = BuildCmsFilterQuery(phase, group, subgroup, channel, type, cmdbStatus, parent, userGroup);
+            var filterQuery = BuildCmsFilterQuery(phase, group, subgroup, channel, type, cmdbStatus, parent);
 
             // Get filtered products with count in a single call (cache for 5 minutes)
             var pageSize = 25;
@@ -185,7 +100,6 @@ public class ProductsController : Controller
             if (typeFilters?.Length > 0) activeCategoryCount++;
             if (groupFilters?.Length > 0 || subgroup?.Length > 0) activeCategoryCount++;
             if (parent?.Length > 0) activeCategoryCount++;
-            if (userGroup?.Length > 0) activeCategoryCount++;
 
             // Use optimized service for search with caching and server-side filtering
             var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
@@ -228,10 +142,6 @@ public class ProductsController : Controller
                 if (parent?.Length > 0)
                 {
                     categorySlugFiltersForQuery.AddRange(parent);
-                }
-                if (userGroup?.Length > 0)
-                {
-                    categorySlugFiltersForQuery.AddRange(userGroup);
                 }
                 
                 if (categorySlugFiltersForQuery.Count > 0)
@@ -387,10 +297,6 @@ public class ProductsController : Controller
                 {
                     serverFilters["category_values.slug"] = parent;
                 }
-                else if (userGroup?.Length > 0)
-                {
-                    serverFilters["category_values.slug"] = userGroup;
-                }
                 
                 var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
                 filteredProducts = result.Products;
@@ -405,7 +311,6 @@ public class ProductsController : Controller
             viewModel.TypeOptions = new List<FilterOption>();
             viewModel.CmdbStatusOptions = new List<FilterOption>();
             viewModel.CmdbGroupOptions = new List<FilterOption>();
-            viewModel.UserGroupOptions = new List<FilterOption>();
             viewModel.SelectedFilters = new List<SelectedFilter>();
 
             // Set up view model
@@ -429,14 +334,30 @@ public class ProductsController : Controller
             viewModel.SelectedTypes = type?.ToList() ?? new List<string>();
             viewModel.SelectedCmdbStatuses = cmdbStatus?.ToList() ?? new List<string>();
             viewModel.SelectedCmdbGroups = parent?.ToList() ?? new List<string>();
-            viewModel.SelectedUserGroups = userGroup?.ToList() ?? new List<string>();
 
             // Build filter options - get all products for counting, not just the current page
             var allProductsForCounting = await _optimizedCmsApiService.GetProductsForFilterCountsAsync(productsDuration, "Active");
-            await BuildFilterOptions(viewModel, allProductsForCounting, phaseValues, channelValues, groupValues, userGroupValues);
+            await BuildFilterOptions(viewModel, allProductsForCounting, phaseValues, channelValues, groupValues);
 
             // Build selected filters for display
             BuildSelectedFilters(viewModel);
+
+            // Log search term (non-blocking, with rate limiting and deduplication)
+            if (!string.IsNullOrWhiteSpace(keywords))
+            {
+                var ipAddress = GetClientIpAddress();
+                var userAgent = Request.Headers["User-Agent"].ToString();
+                // Extract product document IDs and titles from results
+                var searchResults = filteredProducts?
+                    .Where(p => !string.IsNullOrEmpty(p.DocumentId))
+                    .Select(p => new SearchResult
+                    {
+                        DocumentId = p.DocumentId ?? string.Empty,
+                        Title = p.Title ?? string.Empty
+                    })
+                    .ToList();
+                _searchTermLoggingService.LogSearchTerm(keywords, filteredTotalCount, searchResults, ipAddress, userAgent);
+            }
 
             ViewData["ActiveNav"] = "products";
             return View(viewModel);
@@ -572,10 +493,26 @@ public class ProductsController : Controller
                             IsMultiLevel = categoryType.MultiLevel,
                             CategoryValueNames = group.Select(cv => cv.Name).ToList(),
                             CategoryValueSlugs = group.Select(cv => cv.Slug).ToList(),
-                            CategoryValueDescriptions = group.Select(cv => cv.ShortDescription ?? string.Empty).ToList()
+                            CategoryValueDescriptions = group.Select(cv => cv.ShortDescription ?? string.Empty).ToList(),
+                            CategoryValueDocumentIds = group.Select(cv => cv.DocumentId ?? string.Empty).ToList(),
+                            CategoryValueSearchTexts = group.Select(cv => cv.SearchText ?? string.Empty).ToList()
                         };
                         categoryInfo.Add(info);
                         _logger.LogInformation("Added category group: {Name} with {Count} values", categoryType.Name, info.CategoryValueNames.Count);
+                        
+                        // Log search_text values for debugging - check both the model and the mapped list
+                        foreach (var cv in group)
+                        {
+                            _logger.LogInformation("  Category value '{Name}' (DocumentId: {DocId}): cv.SearchText = '{SearchText}' (null: {IsNull})", 
+                                cv.Name, cv.DocumentId ?? "null", cv.SearchText ?? "(null)", cv.SearchText == null);
+                        }
+                        
+                        for (int i = 0; i < info.CategoryValueNames.Count; i++)
+                        {
+                            var searchText = i < info.CategoryValueSearchTexts.Count ? info.CategoryValueSearchTexts[i] : "(not found)";
+                            _logger.LogInformation("  Mapped Category value '{Name}': search_text = '{SearchText}'", 
+                                info.CategoryValueNames[i], searchText ?? "(null)");
+                        }
                     }
                     else
                     {
@@ -587,10 +524,13 @@ public class ProductsController : Controller
                 _logger.LogInformation("Final category info count: {Count}", categoryInfo.Count);
             }
 
+            // No need to fetch search terms - we just display the search_text from category values
+
             var viewModel = new ProductCategoriesViewModel
             {
                 Product = product,
                 CategoryInfo = categoryInfo,
+                SearchTerms = new List<SearchTerm>(), // Not used anymore - search terms are now per category value
                 PageTitle = $"{product.Title} - Categories",
                 PageDescription = $"View all categories and values assigned to {product.Title}"
             };
@@ -648,7 +588,7 @@ public class ProductsController : Controller
         }
     }
     private List<Product> ApplyFilters(List<Product> products, string? keywords, string[]? phase, string[]? group,
-        string[]? subgroup, string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent, string[]? userGroup)
+        string[]? subgroup, string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent)
     {
         var filtered = products.AsEnumerable();
 
@@ -710,20 +650,11 @@ public class ProductsController : Controller
                 ) == true);
         }
 
-        // Apply user group filter (based on category values)
-        if (userGroup?.Length > 0)
-        {
-            filtered = filtered.Where(p =>
-                p.CategoryValues?.Any(cv =>
-                    userGroup.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)
-                ) == true);
-        }
-
         return filtered.ToList();
     }
 
     private string BuildCmsFilterQuery(string[]? phase, string[]? group, string[]? subgroup, string[]? channel,
-        string[]? type, string[]? cmdbStatus, string[]? parent, string[]? userGroup)
+        string[]? type, string[]? cmdbStatus, string[]? parent)
     {
         var filters = new List<string>();
 
@@ -800,24 +731,12 @@ public class ProductsController : Controller
             }
         }
 
-        // Apply user group filter (based on category values)
-        if (userGroup?.Length > 0)
-        {
-            foreach (var u in userGroup)
-            {
-                if (!string.IsNullOrEmpty(u))
-                {
-                    filters.Add($"filters[category_values][slug][$in]={Uri.EscapeDataString(u)}");
-                }
-            }
-        }
-
         return string.Join("&", filters);
     }
 
     private async Task BuildFilterOptions(ProductsViewModel viewModel, List<Product> allProductsForCounting,
         List<CategoryValue> phaseValues, List<CategoryValue> channelValues,
-        List<CategoryValue> groupValues, List<CategoryValue> userGroupValues)
+        List<CategoryValue> groupValues)
     {
         _logger.LogInformation("Building filter options with provided products for counting");
         _logger.LogInformation("Loaded {Count} products for filter counting", allProductsForCounting.Count);
@@ -952,52 +871,6 @@ public class ProductsController : Controller
         }
 
         // CMDB group options removed - not needed for the specified category types
-
-        // Build user group options from specific user group values (hierarchical)
-        _logger.LogInformation("Processing {Count} user group values", userGroupValues.Count);
-
-        if (userGroupValues.Any())
-        {
-            viewModel.UserGroupOptions = new List<FilterOption>();
-            foreach (var gv in userGroupValues)
-            {
-                var displayText = gv.Name;
-                var parentInfo = "";
-
-                // Add parent information for child values
-                if (gv.Parent != null)
-                {
-                    parentInfo = $" ({gv.Parent.Name})";
-                    displayText = $"{gv.Name} {parentInfo}";
-                }
-
-                // Count products with this user group value locally (much faster)
-                var actualCount = allProductsForCounting.Count(p => p.CategoryValues?.Any(categoryValue =>
-                    categoryValue.Slug.Equals(gv.Slug, StringComparison.OrdinalIgnoreCase)) == true);
-
-                _logger.LogDebug("User group '{Name}' (slug: {Slug}) has {Count} products", gv.Name, gv.Slug, actualCount);
-
-                // Count children for this user group
-                var childCount = userGroupValues.Count(child => child.Parent?.Slug == gv.Slug);
-                
-                viewModel.UserGroupOptions.Add(new FilterOption
-                {
-                    Value = gv.Slug,
-                    Text = displayText,
-                    Count = actualCount,
-                    IsSelected = viewModel.SelectedUserGroups.Contains(gv.Slug, StringComparer.OrdinalIgnoreCase),
-                    ParentName = gv.Parent?.Name,
-                    HasChildren = childCount > 0,
-                    ChildCount = childCount
-                });
-            }
-            
-            _logger.LogInformation("Added {Count} user group options to view model", viewModel.UserGroupOptions.Count);
-        }
-        else
-        {
-            _logger.LogWarning("No user group values found - UserGroupOptions will be empty");
-        }
     }
 
     private int CountProductsWithCategoryValue(List<Product> products, string categoryValueSlug)
@@ -1009,6 +882,18 @@ public class ProductsController : Controller
     private void BuildSelectedFilters(ProductsViewModel viewModel)
     {
         var selectedFilters = new List<SelectedFilter>();
+
+        // Add search term (keywords) filter
+        if (!string.IsNullOrWhiteSpace(viewModel.Keywords))
+        {
+            selectedFilters.Add(new SelectedFilter
+            {
+                Category = "Search term",
+                Value = viewModel.Keywords,
+                DisplayText = viewModel.Keywords,
+                RemoveUrl = BuildRemoveFilterUrl(viewModel, "keywords", viewModel.Keywords)
+            });
+        }
 
         // Add phase filters
         foreach (var phase in viewModel.SelectedPhases)
@@ -1181,31 +1066,6 @@ public class ProductsController : Controller
             });
         }
 
-        // Add user group filters
-        foreach (var userGroup in viewModel.SelectedUserGroups)
-        {
-            var userGroupOption = viewModel.UserGroupOptions.FirstOrDefault(ug => ug.Value.Equals(userGroup, StringComparison.OrdinalIgnoreCase));
-            var displayText = userGroupOption?.Text ?? userGroup; // Use option text or fallback to slug
-
-            // Remove count from display text if present
-            if (displayText.Contains(" ("))
-            {
-                var lastParenIndex = displayText.LastIndexOf(" (");
-                if (lastParenIndex > 0)
-                {
-                    displayText = displayText.Substring(0, lastParenIndex);
-                }
-            }
-
-            selectedFilters.Add(new SelectedFilter
-            {
-                Category = "User groups",
-                Value = userGroup,
-                DisplayText = displayText,
-                RemoveUrl = BuildRemoveFilterUrl(viewModel, "userGroup", userGroup)
-            });
-        }
-
         viewModel.SelectedFilters = selectedFilters;
     }
 
@@ -1213,7 +1073,8 @@ public class ProductsController : Controller
     {
         var queryParams = new List<string>();
 
-        if (!string.IsNullOrEmpty(viewModel.Keywords))
+        // Add keywords (exclude only if this is the keywords filter being removed)
+        if (!string.IsNullOrEmpty(viewModel.Keywords) && !filterType.Equals("keywords", StringComparison.OrdinalIgnoreCase))
             queryParams.Add($"keywords={Uri.EscapeDataString(viewModel.Keywords)}");
 
         // Add phase filters (exclude only if this is the filter being removed)
@@ -1264,13 +1125,6 @@ public class ProductsController : Controller
             : viewModel.SelectedCmdbGroups.ToArray();
         if (cmdbGroupsToInclude.Length > 0)
             queryParams.AddRange(cmdbGroupsToInclude.Select(g => $"parent={Uri.EscapeDataString(g)}"));
-
-        // Add user group filters (exclude only if this is the filter being removed)
-        var userGroupsToInclude = filterType.Equals("userGroup", StringComparison.OrdinalIgnoreCase)
-            ? viewModel.SelectedUserGroups.Where(ug => !ug.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
-            : viewModel.SelectedUserGroups.ToArray();
-        if (userGroupsToInclude.Length > 0)
-            queryParams.AddRange(userGroupsToInclude.Select(ug => $"userGroup={Uri.EscapeDataString(ug)}"));
 
         var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
         return $"/products{queryString}";
@@ -2139,6 +1993,27 @@ public class ProductsController : Controller
             _logger.LogError(ex, "Error reloading request new entry form");
             return NotFound();
         }
+    }
+
+    /// <summary>
+    /// Gets the client IP address from the request, handling proxy headers.
+    /// </summary>
+    private string GetClientIpAddress()
+    {
+        // Check for forwarded IP first (for load balancers/proxies)
+        var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(forwardedFor))
+        {
+            return forwardedFor.Split(',')[0].Trim();
+        }
+
+        var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(realIp))
+        {
+            return realIp;
+        }
+
+        return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
     }
 
 }

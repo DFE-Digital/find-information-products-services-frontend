@@ -40,6 +40,11 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         _apiKey = _configuration["CmsApi:ReadApiKey"] ?? throw new InvalidOperationException("CmsApi:ReadApiKey not configured");
         
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+        
+        // Log CMS endpoint on startup
+        var baseUrl = _httpClient.BaseAddress?.ToString() ?? "Not set";
+        Console.WriteLine($"[OptimizedCmsApiService] Connecting to CMS endpoint: {baseUrl}");
+        _logger.LogInformation("OptimizedCmsApiService initialized - CMS Base URL: {BaseUrl}", baseUrl);
     }
 
     public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
@@ -76,38 +81,71 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][populate][category_type][fields][0]=name"
         };
 
-        // Add state filter - default to Active only if no filters are provided at all
-        if (filters == null)
+        // Handle state filter and search query together
+        // When both exist, we need to use $and to combine state filter with $or search
+        bool hasStateFilter = filters != null && filters.ContainsKey("state");
+        bool hasSearchQuery = !string.IsNullOrEmpty(searchQuery);
+        
+        if (hasStateFilter && hasSearchQuery)
         {
-            queryParams.Add("filters[state][$eq]=Active");
+            // Combine state filter with search using $and
+            var stateValue = filters["state"].Length == 1 ? filters["state"][0] : null;
+            if (stateValue != null)
+            {
+                queryParams.Add($"filters[$and][0][state][$eq]={Uri.EscapeDataString(stateValue)}");
+            }
+            else
+            {
+                // Multiple state values
+                for (int i = 0; i < filters["state"].Length; i++)
+                {
+                    queryParams.Add($"filters[$and][0][state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
+                }
+            }
+            
+            // Add search query as second $and condition
+            // Search in product search_text (includes product synonyms) and category_value search_text (includes category synonyms)
+            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
-        else if (filters.ContainsKey("state"))
+        else if (hasStateFilter)
         {
-            // State filter is explicitly provided, use it
+            // Only state filter, no search
             if (filters["state"].Length == 1)
             {
-                // Single state value - use $eq
                 queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(filters["state"][0])}");
             }
             else
             {
-                // Multiple state values - use $in
                 for (int i = 0; i < filters["state"].Length; i++)
                 {
                     queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
                 }
             }
         }
-
-        // Add search query if provided - optimized for performance
-        if (!string.IsNullOrEmpty(searchQuery))
+        else if (hasSearchQuery)
         {
-            // Use a case-insensitive substring search across multiple relevant fields
-            queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$or][1][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$or][2][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$or][3][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$or][4][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Only search query, no explicit state filter (default to Active)
+            queryParams.Add($"filters[$and][0][state][$eq]=Active");
+            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        }
+        else if (filters == null)
+        {
+            // No filters and no search - default to Active
+            queryParams.Add("filters[state][$eq]=Active");
         }
 
         // Add filters if provided
@@ -117,11 +155,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             {
                 if (filter.Key == "state")
                 {
-                    // Handle state filters
-                    for (int i = 0; i < filter.Value.Length; i++)
-                    {
-                        queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
-                    }
+                    // State filter already handled above, skip to avoid duplication
+                    continue;
                 }
                 else if (filter.Key == "category_values.slug")
                 {
@@ -144,6 +179,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
+
+        // Log the query for debugging
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            _logger.LogInformation("Search query for '{SearchQuery}': {Url}", searchQuery, url);
+        }
 
         try
         {
@@ -194,7 +235,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
     public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
     {
         // Create cache key based on parameters
-        var cacheKey = $"products_listing2_{page}_{pageSize}_{searchQuery ?? "null"}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? new string[0])}";
+        var cacheKey = $"products_listing3_{page}_{pageSize}_{searchQuery ?? "null"}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? new string[0])}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -225,34 +266,70 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][populate][category_type][fields][0]=name"
         };
 
-        // Add state filter - default to Active only if no filters are provided at all
-        if (filters == null)
+        // When both exist, we need to use $and to combine state filter with $or search
+        bool hasStateFilter = filters != null && filters.ContainsKey("state");
+        bool hasSearchQuery = !string.IsNullOrEmpty(searchQuery);
+        
+        if (hasStateFilter && hasSearchQuery)
         {
-            queryParams.Add("filters[state][$eq]=Active");
-        }
-        else if (filters.ContainsKey("state"))
-        {
-            // State filter is explicitly provided, use it
-            if (filters["state"].Length == 1)
+            // Combine state filter with search using $and
+            var stateValue = filters!["state"].Length == 1 ? filters["state"][0] : null;
+            if (stateValue != null)
             {
-                // Single state value - use $eq
+                queryParams.Add($"filters[$and][0][state][$eq]={Uri.EscapeDataString(stateValue)}");
+            }
+            else
+            {
+                // Multiple state values
+                for (int i = 0; i < filters["state"].Length; i++)
+                {
+                    queryParams.Add($"filters[$and][0][state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
+                }
+            }
+            
+            // Add search query as second $and condition
+            // Search in product search_text (includes product synonyms) and category_value search_text (includes category synonyms)
+            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        }
+        else if (hasStateFilter)
+        {
+            // Only state filter, no search
+            if (filters!["state"].Length == 1)
+            {
                 queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(filters["state"][0])}");
             }
             else
             {
-                // Multiple state values - use $in
                 for (int i = 0; i < filters["state"].Length; i++)
                 {
                     queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
                 }
             }
         }
-
-        // Add search query if provided - optimized for performance
-        if (!string.IsNullOrEmpty(searchQuery))
+        else if (hasSearchQuery)
         {
-            // Use case-insensitive substring matching on the title field only
-            queryParams.Add($"filters[title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Only search query, no explicit state filter (default to Active)
+            queryParams.Add($"filters[$and][0][state][$eq]=Active");
+            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        }
+        else if (filters == null)
+        {
+            // No filters and no search - default to Active
+            queryParams.Add("filters[state][$eq]=Active");
         }
 
         // Add filters if provided
@@ -262,11 +339,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             {
                 if (filter.Key == "state")
                 {
-                    // Handle state filters
-                    for (int i = 0; i < filter.Value.Length; i++)
-                    {
-                        queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
-                    }
+                    // State filter already handled above, skip to avoid duplication
+                    continue;
                 }
                 else if (filter.Key == "category_values.slug")
                 {
@@ -289,6 +363,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
+
+        // Log the query for debugging
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            _logger.LogInformation("Search query for '{SearchQuery}': {Url}", searchQuery, url);
+        }
 
         try
         {
@@ -368,9 +448,14 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
 
         // Use broader search with $containsi on multiple fields
-        queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
-        queryParams.Add($"filters[$or][1][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-        queryParams.Add($"filters[$or][2][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        // Note: Component fields (synonyms) can't be filtered via REST API, use search_text instead
+        queryParams.Add($"filters[$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        // Search in category value names and search_text (includes synonyms)
+        queryParams.Add($"filters[$or][4][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][5][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
 
         // Add filters if provided
         if (filters != null)
@@ -379,11 +464,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             {
                 if (filter.Key == "state")
                 {
-                    // Handle state filters
-                    for (int i = 0; i < filter.Value.Length; i++)
-                    {
-                        queryParams.Add($"filters[state][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
-                    }
+                    // State filter already handled above, skip to avoid duplication
+                    continue;
                 }
                 else if (filter.Key == "category_values.slug")
                 {
@@ -406,6 +488,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
+
+        // Log the query for debugging
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            _logger.LogInformation("Search query for '{SearchQuery}': {Url}", searchQuery, url);
+        }
 
         try
         {
@@ -465,6 +553,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
             "populate[category_values][fields][2]=short_description",
+            "populate[category_values][fields][3]=documentId",
+            "populate[category_values][fields][4]=search_text",
             "populate[category_values][populate][category_type][fields][0]=name",
             "populate[category_values][populate][category_type][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][2]=multi_level",
@@ -554,6 +644,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
             "populate[category_values][fields][2]=short_description",
+            "populate[category_values][fields][3]=documentId",
+            "populate[category_values][fields][4]=search_text",
             "populate[category_values][populate][category_type][fields][0]=name",
             "populate[category_values][populate][category_type][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][2]=multi_level",
@@ -614,7 +706,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // FipsId format is typically "XXX-###" (e.g., "ABC-123")
         var isDocumentId = !string.IsNullOrEmpty(fipsId) && !System.Text.RegularExpressions.Regex.IsMatch(fipsId, @"^[A-Z]{3}-\d{3}$");
         
-        var cacheKey = isDocumentId ? $"product_doc_{fipsId}" : $"product_fips_{fipsId}";
+        // Changed cache key to force refresh after adding search_text field
+        var cacheKey = isDocumentId ? $"product_doc_v2_{fipsId}" : $"product_fips_v2_{fipsId}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -659,6 +752,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
             "populate[category_values][fields][2]=short_description",
+            "populate[category_values][fields][3]=documentId",
+            "populate[category_values][fields][4]=search_text",
             "populate[category_values][populate][category_type][fields][0]=name",
             "populate[category_values][populate][category_type][fields][1]=slug",
             "populate[category_values][populate][category_type][fields][2]=multi_level",
@@ -696,7 +791,45 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
             var product = result?.Data?.FirstOrDefault();
 
-            Console.WriteLine(jsonContent);
+            // Debug: Log category values with search_text
+            if (product?.CategoryValues != null)
+            {
+                foreach (var cv in product.CategoryValues)
+                {
+                    _logger.LogInformation("Category value '{Name}' (DocumentId: {DocId}): SearchText = '{SearchText}'", 
+                        cv.Name, cv.DocumentId ?? "null", cv.SearchText ?? "(null)");
+                }
+            }
+            
+            // Log raw JSON for category values to see what the API is returning
+            try
+            {
+                using var doc = JsonDocument.Parse(jsonContent);
+                if (doc.RootElement.TryGetProperty("data", out var data) && data.GetArrayLength() > 0)
+                {
+                    var productData = data[0];
+                    if (productData.TryGetProperty("attributes", out var attrs) && 
+                        attrs.TryGetProperty("category_values", out var catValues))
+                    {
+                        if (catValues.TryGetProperty("data", out var catDataArray))
+                        {
+                            foreach (var catValue in catDataArray.EnumerateArray())
+                            {
+                                if (catValue.TryGetProperty("attributes", out var catAttrs))
+                                {
+                                    var name = catAttrs.TryGetProperty("name", out var n) ? n.GetString() : "unknown";
+                                    var searchText = catAttrs.TryGetProperty("search_text", out var st) ? st.GetString() : "(not in response)";
+                                    _logger.LogInformation("API returned category value '{Name}': search_text = '{SearchText}'", name, searchText ?? "(null)");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse JSON for debugging");
+            }
             
             // Cache the result if cache duration is specified
             if (cacheDuration.HasValue && product != null)
@@ -1193,12 +1326,19 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         if (!string.IsNullOrEmpty(searchQuery))
         {
             // Use $containsi for case-insensitive search across title and fips_id fields
-            queryParams.Add($"filters[$or][0][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$or][1][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$or][2][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
 
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
+
+        // Log the query for debugging
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            _logger.LogInformation("Search query for '{SearchQuery}': {Url}", searchQuery, url);
+        }
 
         try
         {

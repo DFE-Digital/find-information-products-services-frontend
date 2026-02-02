@@ -23,6 +23,10 @@ public class CmsApiService
         _cache = cache;
         _cacheTracking = new Dictionary<string, CacheItemInfo>();
         _baseUrl = _configuration["CmsApi:BaseUrl"] ?? "http://localhost:1337/api";
+        
+        // Log CMS endpoint on startup
+        Console.WriteLine($"[CmsApiService] Connecting to CMS endpoint: {_baseUrl}");
+        _logger.LogInformation("CmsApiService initialized - CMS Base URL: {BaseUrl}", _baseUrl);
     }
 
     public async Task<T?> GetAsync<T>(string endpoint, TimeSpan? cacheDuration = null)
@@ -584,6 +588,132 @@ public class CmsApiService
         {
             _logger.LogError(ex, "Error unlinking CMDB sys_id from product {ProductId}", productId);
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets product documentIds that have a specific category value
+    /// </summary>
+    public async Task<List<string>> GetProductDocumentIdsByCategoryValueAsync(string categoryValueDocumentId, string? categoryValueSlug = null, TimeSpan? cacheDuration = null)
+    {
+        try
+        {
+            // Try filtering by documentId first
+            var endpoint = $"products?filters[category_values][documentId][$eq]={Uri.EscapeDataString(categoryValueDocumentId)}&fields[0]=documentId&fields[1]=title&pagination[pageSize]=1000";
+            _logger.LogInformation("Fetching products for category value {DocumentId} from endpoint: {Endpoint}", categoryValueDocumentId, endpoint);
+            var response = await GetAsync<ApiCollectionResponse<Product>>(endpoint, cacheDuration);
+            
+            // If no results and we have a slug, try filtering by slug instead
+            if ((response?.Data == null || !response.Data.Any()) && !string.IsNullOrEmpty(categoryValueSlug))
+            {
+                _logger.LogInformation("No products found by documentId, trying slug: {Slug}", categoryValueSlug);
+                endpoint = $"products?filters[category_values][slug][$eq]={Uri.EscapeDataString(categoryValueSlug)}&fields[0]=documentId&fields[1]=title&pagination[pageSize]=1000";
+                response = await GetAsync<ApiCollectionResponse<Product>>(endpoint, cacheDuration);
+            }
+            
+            if (response?.Data == null || !response.Data.Any())
+            {
+                _logger.LogWarning("No products found for category value {DocumentId} (slug: {Slug})", categoryValueDocumentId, categoryValueSlug ?? "null");
+                return new List<string>();
+            }
+
+            var documentIds = response.Data
+                .Where(p => !string.IsNullOrEmpty(p.DocumentId))
+                .Select(p => p.DocumentId!)
+                .Distinct()
+                .ToList();
+            
+            _logger.LogInformation("Found {Count} products for category value {DocumentId}: {DocumentIds}", 
+                documentIds.Count, categoryValueDocumentId, string.Join(", ", documentIds.Take(10)));
+            
+            // Also log product titles for debugging
+            var productsWithTitles = response.Data
+                .Where(p => !string.IsNullOrEmpty(p.DocumentId))
+                .Select(p => $"{p.Title} ({p.DocumentId})")
+                .Take(5)
+                .ToList();
+            _logger.LogInformation("Sample products: {Products}", string.Join(", ", productsWithTitles));
+            
+            return documentIds;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching products for category value {DocumentId}", categoryValueDocumentId);
+            return new List<string>();
+        }
+    }
+
+    /// <summary>
+    /// Gets all search terms (for filtering by category value)
+    /// </summary>
+    public async Task<List<SearchTerm>> GetAllSearchTermsAsync(TimeSpan? cacheDuration = null)
+    {
+        try
+        {
+            // Fetch recent search terms (limit to 100 most recent)
+            var endpoint = $"search-terms?sort=timestamp:desc&pagination[pageSize]=100";
+            _logger.LogInformation("Fetching all search terms from: {Endpoint}", endpoint);
+            var response = await GetAsync<ApiCollectionResponse<SearchTerm>>(endpoint, cacheDuration);
+            
+            if (response?.Data == null)
+            {
+                _logger.LogWarning("No search terms data returned from API");
+                return new List<SearchTerm>();
+            }
+
+            _logger.LogInformation("Fetched {Count} total search terms from API", response.Data.Count);
+            return response.Data;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching all search terms");
+            return new List<SearchTerm>();
+        }
+    }
+
+    /// <summary>
+    /// Gets search terms that returned this product in their results
+    /// </summary>
+    public async Task<List<SearchTerm>> GetSearchTermsForProductAsync(string productDocumentId, TimeSpan? cacheDuration = null)
+    {
+        try
+        {
+            // Fetch recent search terms (limit to 100 most recent)
+            var endpoint = $"search-terms?sort=timestamp:desc&pagination[pageSize]=100";
+            _logger.LogInformation("Fetching search terms from: {Endpoint}", endpoint);
+            var response = await GetAsync<ApiCollectionResponse<SearchTerm>>(endpoint, cacheDuration);
+            
+            if (response?.Data == null)
+            {
+                _logger.LogWarning("No search terms data returned from API");
+                return new List<SearchTerm>();
+            }
+
+            _logger.LogInformation("Fetched {Count} total search terms from API", response.Data.Count);
+
+            // Filter search terms where results contain this product's documentId
+            var matchingSearchTerms = response.Data
+                .Where(st => st.Results != null && st.Results.Any(r => r.DocumentId == productDocumentId))
+                .ToList();
+
+            _logger.LogInformation("Found {Count} search terms matching product {DocumentId}", matchingSearchTerms.Count, productDocumentId);
+            
+            // Log first few results for debugging
+            if (response.Data.Any() && response.Data.First().Results != null)
+            {
+                var firstResult = response.Data.First();
+                _logger.LogInformation("First search term: '{Term}', Results count: {Count}, First result DocumentId: {DocId}", 
+                    firstResult.SearchTermText, 
+                    firstResult.Results?.Count ?? 0,
+                    firstResult.Results?.FirstOrDefault()?.DocumentId ?? "null");
+            }
+
+            return matchingSearchTerms;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching search terms for product {DocumentId}", productDocumentId);
+            return new List<SearchTerm>();
         }
     }
 

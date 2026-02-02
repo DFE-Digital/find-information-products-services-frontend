@@ -24,7 +24,6 @@ namespace FipsFrontend.Models
         public List<string> SelectedTypes { get; set; } = new List<string>();
         public List<string> SelectedCmdbStatuses { get; set; } = new List<string>();
         public List<string> SelectedCmdbGroups { get; set; } = new List<string>();
-        public List<string> SelectedUserGroups { get; set; } = new List<string>();
         
         // Available filter options
         public List<FilterOption> PhaseOptions { get; set; } = new List<FilterOption>();
@@ -33,7 +32,6 @@ namespace FipsFrontend.Models
         public List<FilterOption> TypeOptions { get; set; } = new List<FilterOption>();
         public List<FilterOption> CmdbStatusOptions { get; set; } = new List<FilterOption>();
         public List<FilterOption> CmdbGroupOptions { get; set; } = new List<FilterOption>();
-        public List<FilterOption> UserGroupOptions { get; set; } = new List<FilterOption>();
         
         // Selected filters for display
         public List<SelectedFilter> SelectedFilters { get; set; } = new List<SelectedFilter>();

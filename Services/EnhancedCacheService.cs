@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using System.Collections.Concurrent;
 
 namespace FipsFrontend.Services;
 
@@ -196,7 +197,7 @@ public class EnhancedCacheService : IEnhancedCacheService
     private readonly IDistributedCache _distributedCache;
     private readonly ICacheConfigurationService _configService;
     private readonly ILogger<EnhancedCacheService> _logger;
-    private readonly Dictionary<string, CacheEntryInfo> _cacheTracking;
+    private readonly ConcurrentDictionary<string, CacheEntryInfo> _cacheTracking;
 
     public EnhancedCacheService(
         IMemoryCache memoryCache,
@@ -208,7 +209,7 @@ public class EnhancedCacheService : IEnhancedCacheService
         _distributedCache = distributedCache;
         _configService = configService;
         _logger = logger;
-        _cacheTracking = new Dictionary<string, CacheEntryInfo>();
+        _cacheTracking = new ConcurrentDictionary<string, CacheEntryInfo>();
     }
 
     public async Task<T?> GetAsync<T>(string key)
@@ -316,7 +317,7 @@ public class EnhancedCacheService : IEnhancedCacheService
         {
             _memoryCache.Remove(cacheKey);
             await _distributedCache.RemoveAsync(cacheKey);
-            _cacheTracking.Remove(cacheKey);
+            _cacheTracking.TryRemove(cacheKey, out _);
             
             _logger.LogDebug("Removed from cache: {Key}", cacheKey);
         }

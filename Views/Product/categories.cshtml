@@ -1,4 +1,5 @@
 @model FipsFrontend.Models.ProductCategoriesViewModel
+@using System
 @{
     ViewData["Title"] = $"{Model.Product.Title} - Categories";
 }
@@ -156,13 +157,16 @@
 
         @if (userGroupCategories.Any())
         {
-            // Flatten and sort user groups alphabetically
+            // Flatten and sort user groups alphabetically, including documentIds and search terms
             var userGroups = userGroupCategories
                 .SelectMany(categoryInfo => categoryInfo.CategoryValueNames
                     .Select((name, index) => new { 
                         Name = name, 
                         Slug = categoryInfo.CategoryValueSlugs[index],
-                        CategoryTypeName = categoryInfo.CategoryTypeName
+                        DocumentId = index < categoryInfo.CategoryValueDocumentIds.Count ? categoryInfo.CategoryValueDocumentIds[index] : string.Empty,
+                        SearchText = index < categoryInfo.CategoryValueSearchTexts.Count ? categoryInfo.CategoryValueSearchTexts[index] : string.Empty,
+                        CategoryTypeName = categoryInfo.CategoryTypeName,
+                        CategoryInfo = categoryInfo
                     }))
                 .OrderBy(ug => ug.Name)
                 .ToList();
@@ -178,11 +182,55 @@
                 <tbody class="govuk-table__body">
                     @foreach (var userGroup in userGroups)
                     {
+                        // Get search_text from the categoryInfo - find the matching category value
+                        var categoryInfo = userGroupCategories.FirstOrDefault(c => c.CategoryValueNames.Contains(userGroup.Name));
+                        var categoryValueIndex = categoryInfo != null ? categoryInfo.CategoryValueNames.IndexOf(userGroup.Name) : -1;
+                        var searchText = categoryValueIndex >= 0 && 
+                                        categoryInfo != null &&
+                                        categoryValueIndex < categoryInfo.CategoryValueSearchTexts.Count
+                            ? categoryInfo.CategoryValueSearchTexts[categoryValueIndex]
+                            : string.Empty;
+                        
+                        // Debug: Also try from userGroup.SearchText
+                        if (string.IsNullOrEmpty(searchText))
+                        {
+                            searchText = userGroup.SearchText ?? string.Empty;
+                        }
+                        
+                        // Split the comma-separated search_text values
+                        var searchTextValues = !string.IsNullOrWhiteSpace(searchText)
+                            ? searchText.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(v => v.Trim())
+                                .Where(v => !string.IsNullOrWhiteSpace(v))
+                                .ToList()
+                            : new List<string>();
+                        var searchTextCount = searchTextValues.Count;
+                        
                         <tr class="govuk-table__row">
                             <td class="govuk-table__cell">
-                                <a href="/products?@GetFilterParameter(userGroup.CategoryTypeName, userGroup.Slug)" class="govuk-link govuk-link--no-visited-state">
-                                    @userGroup.Name
-                                </a>
+                                <div>
+                                    <a href="/products?keywords=@Uri.EscapeDataString(userGroup.Name)" class="govuk-link govuk-link--no-visited-state">
+                                        @userGroup.Name
+                                    </a>
+                                    @if (searchTextCount > 0)
+                                    {
+                                        <details class="govuk-details govuk-!-margin-top-2" data-module="govuk-details">
+                                            <summary class="govuk-details__summary">
+                                                <span class="govuk-details__summary-text">
+                                                    Search terms (@searchTextCount)
+                                                </span>
+                                            </summary>
+                                            <div class="govuk-details__text">
+                                                <ul class="govuk-list">
+                                                    @foreach (var searchTerm in searchTextValues)
+                                                    {
+                                                        <li>@searchTerm</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </details>
+                                    }
+                                </div>
                             </td>                               
                         </tr>
                     }
