@@ -6,7 +6,7 @@ namespace FipsFrontend.Services;
 public interface IOptimizedCmsApiService
 {
     Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
-    Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
+    Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, IEnumerable<string>? searchTerms = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByIdAsync(int id, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null);
     Task<Product?> GetProductByFipsIdAsync(string fipsId, TimeSpan? cacheDuration = null);
@@ -232,10 +232,20 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
     }
 
-    public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
+    public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync2(int page = 1, int pageSize = 25, IEnumerable<string>? searchTerms = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
     {
+        var searchTermList = searchTerms?.Where(t => !string.IsNullOrWhiteSpace(t))
+                                        .Select(t => t.Trim())
+                                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                                        .ToList() 
+                            ?? new List<string>();
+        var hasSearchQuery = searchTermList.Any();
+        // Combined string representation for logging and broader search fallback
+        var searchQuery = hasSearchQuery ? string.Join(", ", searchTermList) : null;
+        var searchKeyForCache = hasSearchQuery ? string.Join("|", searchTermList) : "null";
+
         // Create cache key based on parameters
-        var cacheKey = $"products_listing3_{page}_{pageSize}_{searchQuery ?? "null"}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? new string[0])}";
+        var cacheKey = $"products_listing3_{page}_{pageSize}_{searchKeyForCache}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? Array.Empty<string>())}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -268,7 +278,6 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
         // When both exist, we need to use $and to combine state filter with $or search
         bool hasStateFilter = filters != null && filters.ContainsKey("state");
-        bool hasSearchQuery = !string.IsNullOrEmpty(searchQuery);
         
         if (hasStateFilter && hasSearchQuery)
         {
@@ -287,16 +296,22 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 }
             }
             
-            // Add search query as second $and condition
+            // Add search queries as second $and condition
             // Search in product search_text (includes product synonyms) and category_value search_text (includes category synonyms)
-            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Each term is OR-ed within itself, and multiple terms are OR-ed together
+            for (int termIndex = 0; termIndex < searchTermList.Count; termIndex++)
+            {
+                var term = Uri.EscapeDataString(searchTermList[termIndex]);
+                var baseIndex = termIndex * 8;
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 0}][search_text][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 1}][title][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 2}][short_description][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 3}][long_description][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 4}][fips_id][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 5}][documentId][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 6}][category_values][name][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 7}][category_values][search_text][$containsi]={term}");
+            }
         }
         else if (hasStateFilter)
         {
@@ -317,14 +332,19 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             // Only search query, no explicit state filter (default to Active)
             queryParams.Add($"filters[$and][0][state][$eq]=Active");
-            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
-            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            for (int termIndex = 0; termIndex < searchTermList.Count; termIndex++)
+            {
+                var term = Uri.EscapeDataString(searchTermList[termIndex]);
+                var baseIndex = termIndex * 8;
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 0}][search_text][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 1}][title][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 2}][short_description][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 3}][long_description][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 4}][fips_id][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 5}][documentId][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 6}][category_values][name][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 7}][category_values][search_text][$containsi]={term}");
+            }
         }
         else if (filters == null)
         {

@@ -11,7 +11,6 @@
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-full">
                     <a href="@GetBackLink(ViewData["ReturnUrl"]?.ToString())" class="govuk-back-link">@GetBackLinkText(ViewData["ReturnUrl"]?.ToString())</a>
-                     <span class="govuk-caption-m">@Model.Product.FipsId</span>
                     <h1 class="govuk-heading-l dfe-masthead--title">
                         @Model.Product.Title
                     </h1>
@@ -165,15 +164,23 @@
     </span>
   </summary>
   <div class="govuk-details__text">
-            @if (!string.IsNullOrEmpty(Model.Product.FipsId) || !string.IsNullOrEmpty(Model.Product.CmdbSysId))
+        @if (!string.IsNullOrEmpty(Model.Product.FipsId) ||
+             !string.IsNullOrEmpty(Model.Product.CmdbSysId) ||
+             !string.IsNullOrEmpty(Model.Product.DocumentId))
         {
-           
             <dl class="govuk-summary-list">
                 @if (!string.IsNullOrEmpty(Model.Product.FipsId))
                 {
                     <div class="govuk-summary-list__row">
                         <dt class="govuk-summary-list__key">FIPS ID</dt>
                         <dd class="govuk-summary-list__value">@Model.Product.FipsId</dd>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Product.DocumentId))
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">Document ID</dt>
+                        <dd class="govuk-summary-list__value">@Model.Product.DocumentId</dd>
                     </div>
                 }
                 <div class="govuk-summary-list__row">
@@ -191,9 +198,8 @@
                 </div>
             </dl>
         }
-        </div>
-        </div>
-        </details>
+  </div>
+</details>
 
     </div>
 </div>

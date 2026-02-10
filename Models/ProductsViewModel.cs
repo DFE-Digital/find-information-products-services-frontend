@@ -17,6 +17,7 @@ namespace FipsFrontend.Models
         
         // Filter properties
         public string? Keywords { get; set; }
+        public List<string> KeywordTerms { get; set; } = new List<string>();
         public List<string> SelectedPhases { get; set; } = new List<string>();
         public List<string> SelectedGroups { get; set; } = new List<string>();
         public List<string> SelectedSubgroups { get; set; } = new List<string>();
@@ -24,6 +25,7 @@ namespace FipsFrontend.Models
         public List<string> SelectedTypes { get; set; } = new List<string>();
         public List<string> SelectedCmdbStatuses { get; set; } = new List<string>();
         public List<string> SelectedCmdbGroups { get; set; } = new List<string>();
+        public bool IsUserGroupSearch { get; set; }
         
         // Available filter options
         public List<FilterOption> PhaseOptions { get; set; } = new List<FilterOption>();

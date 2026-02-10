@@ -104,6 +104,7 @@ public class ProposeChangeViewModel : BaseViewModel
     [StringLength(500, ErrorMessage = "Product URL cannot exceed 500 characters")]
     public string? ProposedProductUrl { get; set; }
     
+    [Required(ErrorMessage = "Please describe who the users of the product are")]
     [StringLength(2000, ErrorMessage = "User description cannot exceed 2000 characters")]
     public string? ProposedUserDescription { get; set; }
     
