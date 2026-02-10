@@ -16,8 +16,9 @@ public class ProductsController : Controller
     private readonly IConfiguration _configuration;
     private readonly INotifyService _notifyService;
     private readonly ISearchTermLoggingService _searchTermLoggingService;
+    private readonly IServiceAssessmentsService _assessmentsService;
 
-    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration, INotifyService notifyService, ISearchTermLoggingService searchTermLoggingService)
+    public ProductsController(ILogger<ProductsController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IOptions<EnabledFeatures> enabledFeatures, IConfiguration configuration, INotifyService notifyService, ISearchTermLoggingService searchTermLoggingService, IServiceAssessmentsService assessmentsService)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
@@ -26,15 +27,23 @@ public class ProductsController : Controller
         _configuration = configuration;
         _notifyService = notifyService;
         _searchTermLoggingService = searchTermLoggingService;
+        _assessmentsService = assessmentsService;
     }
 
     // GET: Products
     public async Task<IActionResult> Index(string? keywords, string[]? phase, string[]? group, string[]? subgroup,
-        string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent, int page = 1)
+        string[]? channel, string[]? type, string[]? cmdbStatus, string[]? parent, int page = 1, string? searchSource = null)
     {
         try
         {
             var viewModel = new ProductsViewModel();
+
+            // Normalise and parse the raw keywords into a list of terms
+            var rawKeywords = keywords;
+            var parsedKeywords = ParseKeywords(rawKeywords);
+
+            // Track whether this search originated from a user group category view
+            viewModel.IsUserGroupSearch = string.Equals(searchSource, "userGroup", StringComparison.OrdinalIgnoreCase);
 
             // Get cache durations from configuration
             var categoryTypesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryTypes", 15));
@@ -105,7 +114,7 @@ public class ProductsController : Controller
             var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
             var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
             
-            var cacheDuration = !string.IsNullOrEmpty(keywords) ? searchDuration : productsDuration;
+            var cacheDuration = parsedKeywords.Any() ? searchDuration : productsDuration;
             
             // Use client-side filtering if:
             // 1. "not categorised" filters are active (need to check for absence of values)
@@ -152,7 +161,7 @@ public class ProductsController : Controller
                 // Get ALL products matching other filters (not paginated yet) with full details
                 // Use a large page size to get all products in one or few requests
                 var largePageSize = 1000;
-                var allProductsResult = await _optimizedCmsApiService.GetProductsForListingAsync2(1, largePageSize, keywords, filtersForNotCategorised, cacheDuration);
+                var allProductsResult = await _optimizedCmsApiService.GetProductsForListingAsync2(1, largePageSize, parsedKeywords, filtersForNotCategorised, cacheDuration);
                 var allProducts = allProductsResult.Products;
                 
                 // If there are more pages, fetch them
@@ -162,7 +171,7 @@ public class ProductsController : Controller
                     var additionalProducts = new List<Product>();
                     for (int pageNum = 2; pageNum <= totalPagesNeeded; pageNum++)
                     {
-                        var pageResult = await _optimizedCmsApiService.GetProductsForListingAsync2(pageNum, largePageSize, keywords, filtersForNotCategorised, cacheDuration);
+                        var pageResult = await _optimizedCmsApiService.GetProductsForListingAsync2(pageNum, largePageSize, parsedKeywords, filtersForNotCategorised, cacheDuration);
                         additionalProducts.AddRange(pageResult.Products);
                     }
                     allProducts = allProducts.Concat(additionalProducts).ToList();
@@ -298,7 +307,7 @@ public class ProductsController : Controller
                     serverFilters["category_values.slug"] = parent;
                 }
                 
-                var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, keywords, serverFilters, cacheDuration);
+                var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, parsedKeywords, serverFilters, cacheDuration);
                 filteredProducts = result.Products;
                 filteredTotalCount = result.TotalCount;
                 totalCount = result.TotalCount;
@@ -326,7 +335,8 @@ public class ProductsController : Controller
 
 
             // Set filter values
-            viewModel.Keywords = keywords;
+            viewModel.Keywords = rawKeywords;
+            viewModel.KeywordTerms = parsedKeywords;
             viewModel.SelectedPhases = phase?.ToList() ?? new List<string>();
             viewModel.SelectedGroups = group?.ToList() ?? new List<string>();
             viewModel.SelectedSubgroups = subgroup?.ToList() ?? new List<string>();
@@ -559,6 +569,8 @@ public class ProductsController : Controller
         try
         {
             var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
+            var assessmentsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Assessments", 15));
+            
             // Find product by fips_id with product assurances populated - optimized for assurance view
             var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
 
@@ -567,10 +579,73 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
+            // Start with any product assurances already stored in CMS
+            var combinedAssurances = product.ProductAssurances != null
+                ? new List<ProductAssurance>(product.ProductAssurances)
+                : new List<ProductAssurance>();
+
+            // Hydrate additional assessments directly from Service Assessment Service by product DocumentId
+            if (!string.IsNullOrEmpty(product.DocumentId))
+            {
+                try
+                {
+                    var filters = new Dictionary<string, string[]>
+                    {
+                        ["documentId"] = new[] { product.DocumentId }
+                    };
+
+                    // Use a reasonably large page size to capture multiple assessments for this product
+                    var (assessments, _) = await _assessmentsService.GetAssessmentsSummaryAsync(
+                        page: 1,
+                        pageSize: 50,
+                        searchQuery: null,
+                        filters: filters,
+                        cacheDuration: assessmentsDuration
+                    );
+
+                    if (assessments.Any())
+                    {
+                        // Avoid duplicates using ExternalUrl / Url as the key where available
+                        var existingUrls = new HashSet<string>(
+                            combinedAssurances
+                                .Where(a => !string.IsNullOrEmpty(a.ExternalUrl))
+                                .Select(a => a.ExternalUrl!),
+                            StringComparer.OrdinalIgnoreCase
+                        );
+
+                        foreach (var assessment in assessments)
+                        {
+                            if (!string.IsNullOrEmpty(assessment.Url) && existingUrls.Contains(assessment.Url))
+                            {
+                                continue;
+                            }
+
+                            var assurance = new ProductAssurance
+                            {
+                                DocumentId = assessment.DocumentId,
+                                AssuranceType = assessment.Type,
+                                ExternalUrl = assessment.Url,
+                                DateOfAssurance = assessment.EndDate ?? assessment.StartDate,
+                                Outcome = assessment.Status,
+                                Phase = assessment.Phase
+                            };
+
+                            combinedAssurances.Add(assurance);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load additional assessments from Service Assessment Service for product documentId {DocumentId}", product.DocumentId);
+                }
+            }
+
             var viewModel = new ProductAssuranceViewModel
             {
                 Product = product,
-                ProductAssurances = product.ProductAssurances ?? new List<ProductAssurance>(),
+                ProductAssurances = combinedAssurances
+                    .OrderByDescending(a => a.DateOfAssurance ?? DateTime.MinValue)
+                    .ToList(),
                 PageTitle = $"{product.Title} - Assurance",
                 PageDescription = $"View assurance information for {product.Title}"
             };
@@ -883,12 +958,26 @@ public class ProductsController : Controller
     {
         var selectedFilters = new List<SelectedFilter>();
 
-        // Add search term (keywords) filter
-        if (!string.IsNullOrWhiteSpace(viewModel.Keywords))
+        // Add search term (keywords) filters
+        if (viewModel.KeywordTerms != null && viewModel.KeywordTerms.Any())
         {
+            foreach (var term in viewModel.KeywordTerms)
+            {
+                selectedFilters.Add(new SelectedFilter
+                {
+                    Category = viewModel.IsUserGroupSearch ? "User group" : "Search term",
+                    Value = term,
+                    DisplayText = term,
+                    RemoveUrl = BuildRemoveFilterUrl(viewModel, "keywords", term)
+                });
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(viewModel.Keywords))
+        {
+            // Fallback: single badge using raw keywords if parsing did not yield terms
             selectedFilters.Add(new SelectedFilter
             {
-                Category = "Search term",
+                Category = viewModel.IsUserGroupSearch ? "User group" : "Search term",
                 Value = viewModel.Keywords,
                 DisplayText = viewModel.Keywords,
                 RemoveUrl = BuildRemoveFilterUrl(viewModel, "keywords", viewModel.Keywords)
@@ -1069,13 +1158,60 @@ public class ProductsController : Controller
         viewModel.SelectedFilters = selectedFilters;
     }
 
+    /// <summary>
+    /// Parse a free-text keyword query into discrete search terms.
+    /// - Only comma-separated segments are treated as separate OR terms (e.g. "Discovery, Alpha").
+    /// - Words like "and" / "or" are left inside the terms and not treated as operators.
+    /// </summary>
+    private static List<string> ParseKeywords(string? rawKeywords)
+    {
+        if (string.IsNullOrWhiteSpace(rawKeywords))
+        {
+            return new List<string>();
+        }
+
+        // Split on commas to get primary OR terms
+        var segments = rawKeywords
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (segments.Count == 0)
+        {
+            return new List<string>();
+        }
+
+        return segments;
+    }
+
     private string BuildRemoveFilterUrl(ProductsViewModel viewModel, string filterType, string value)
     {
         var queryParams = new List<string>();
 
-        // Add keywords (exclude only if this is the keywords filter being removed)
-        if (!string.IsNullOrEmpty(viewModel.Keywords) && !filterType.Equals("keywords", StringComparison.OrdinalIgnoreCase))
-            queryParams.Add($"keywords={Uri.EscapeDataString(viewModel.Keywords)}");
+        // Handle keywords separately so individual keyword badges can remove a single term
+        string? newKeywords = viewModel.Keywords;
+        if (!string.IsNullOrEmpty(viewModel.Keywords))
+        {
+            if (filterType.Equals("keywords", StringComparison.OrdinalIgnoreCase))
+            {
+                // Remove only the keyword term represented by this badge
+                var terms = ParseKeywords(viewModel.Keywords);
+                var updatedTerms = terms
+                    .Where(t => !t.Equals(value, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                newKeywords = updatedTerms.Any()
+                    ? string.Join(", ", updatedTerms)
+                    : null;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(newKeywords))
+        {
+            queryParams.Add($"keywords={Uri.EscapeDataString(newKeywords)}");
+        }
 
         // Add phase filters (exclude only if this is the filter being removed)
         var phasesToInclude = filterType.Equals("phase", StringComparison.OrdinalIgnoreCase) 

@@ -156,7 +156,7 @@
         // For user groups, use the name as a search term instead of slug as category filter
         if (categoryTypeName.ToLower() == "user group" && !string.IsNullOrEmpty(name))
         {
-            return $"keywords={Uri.EscapeDataString(name)}";
+            return $"keywords={Uri.EscapeDataString(name)}&searchSource=userGroup";
         }
         
         return categoryTypeName.ToLower() switch

@@ -469,7 +469,7 @@ public class CategoriesController : Controller
                 
                 if (categoryValue != null && !string.IsNullOrEmpty(categoryValue.Name))
                 {
-                    return Redirect($"/products?keywords={Uri.EscapeDataString(categoryValue.Name)}");
+                    return Redirect($"/products?keywords={Uri.EscapeDataString(categoryValue.Name)}&searchSource=userGroup");
                 }
             }
             catch (Exception ex)
@@ -477,7 +477,7 @@ public class CategoriesController : Controller
                 _logger.LogWarning(ex, "Could not fetch category value name for slug {Slug}, falling back to slug", slug);
             }
             // Fallback to slug if name not found
-            return Redirect($"/products?keywords={Uri.EscapeDataString(slug)}");
+            return Redirect($"/products?keywords={Uri.EscapeDataString(slug)}&searchSource=userGroup");
         }
         
         // Redirect to products page with appropriate filter for other category types
