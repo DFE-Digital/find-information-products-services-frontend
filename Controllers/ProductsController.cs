@@ -589,17 +589,8 @@ public class ProductsController : Controller
             {
                 try
                 {
-                    var filters = new Dictionary<string, string[]>
-                    {
-                        ["documentId"] = new[] { product.DocumentId }
-                    };
-
-                    // Use a reasonably large page size to capture multiple assessments for this product
-                    var (assessments, _) = await _assessmentsService.GetAssessmentsSummaryAsync(
-                        page: 1,
-                        pageSize: 50,
-                        searchQuery: null,
-                        filters: filters,
+                    var assessments = await _assessmentsService.GetAssessmentsByDocumentIdAsync(
+                        product.DocumentId,
                         cacheDuration: assessmentsDuration
                     );
 
@@ -626,7 +617,7 @@ public class ProductsController : Controller
                                 AssuranceType = assessment.Type,
                                 ExternalUrl = assessment.Url,
                                 DateOfAssurance = assessment.EndDate ?? assessment.StartDate,
-                                Outcome = assessment.Status,
+                                Outcome = !string.IsNullOrEmpty(assessment.Outcome) ? assessment.Outcome : assessment.Status,
                                 Phase = assessment.Phase
                             };
 

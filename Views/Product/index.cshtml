@@ -47,9 +47,16 @@
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
-                                    @if (Model.Product.ProductContacts?.Any() == true)
+                                    @{
+                                        var totalContacts = (Model.Product.ServiceOwner?.Count ?? 0) +
+                                                             (Model.Product.ProductManager?.Count ?? 0) +
+                                                             (Model.Product.DeliveryManager?.Count ?? 0) +
+                                                             (Model.Product.InformationAssetOwner?.Count ?? 0) +
+                                                             (Model.Product.SeniorResponsibleOfficer?.Count ?? 0);
+                                    }
+                                    @if (totalContacts > 0)
                                     {
-                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                        <a href="#contacts" class="govuk-link" rel="noopener noreferrer">@totalContacts contacts</a>
                                     }
                                     else
                                     {
@@ -109,43 +116,123 @@
        
         <h2 class="govuk-heading-m">Description</h2>
         
-        @if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
-        {
-            <pre class="govuk-body pre-wrap-text">@Model.Product.ShortDescription</pre>
-        }
-        else if (!string.IsNullOrEmpty(Model.Product.LongDescription))
+        @if (!string.IsNullOrEmpty(Model.Product.LongDescription))
         {
             <pre class="govuk-body pre-wrap-text">@Model.Product.LongDescription</pre>
+        }
+        else if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
+        {
+            <pre class="govuk-body pre-wrap-text">@Model.Product.ShortDescription</pre>
         }
 
       
 
         <h2 class="govuk-heading-m" id="contacts">Responsibilities and contacts</h2>
 
-        @if (Model.Product.ProductContacts?.Any() == true)
+        @{
+            var serviceOwners = Model.Product.ServiceOwner?.Where(so => so != null).ToList() ?? new List<EntraUser>();
+            var productManagers = Model.Product.ProductManager?.Where(pm => pm != null).ToList() ?? new List<EntraUser>();
+            var deliveryManagers = Model.Product.DeliveryManager?.Where(dm => dm != null).ToList() ?? new List<EntraUser>();
+            var informationAssetOwners = Model.Product.InformationAssetOwner?.Where(iao => iao != null).ToList() ?? new List<EntraUser>();
+            var seniorResponsibleOfficers = Model.Product.SeniorResponsibleOfficer?.Where(sro => sro != null).ToList() ?? new List<EntraUser>();
+            
+            var hasContacts = serviceOwners.Any() || productManagers.Any() || deliveryManagers.Any() || 
+                             informationAssetOwners.Any() || seniorResponsibleOfficers.Any();
+        }
+
+        @if (hasContacts)
         {
             <dl class="govuk-summary-list">
-                @foreach (var contact in Model.Product.ProductContacts)
+                @foreach (var serviceOwner in serviceOwners)
                 {
                     <div class="govuk-summary-list__row">
                         <dt class="govuk-summary-list__key">
-                            @if (!string.IsNullOrEmpty(contact.Role))
-                            {
-                                @GetFriendlyRoleName(contact.Role)
-                            }
-                            else
-                            {
-                                @(contact.UsersPermissionsUser?.DisplayName ?? contact.UsersPermissionsUser?.FirstName + " " + contact.UsersPermissionsUser?.LastName ?? "Contact")
-                            }
+                            Service Owner
                         </dt>
                         <dd class="govuk-summary-list__value">
-                            @if (!string.IsNullOrEmpty(contact.UsersPermissionsUser?.Email))
+                            @if (!string.IsNullOrEmpty(serviceOwner.EmailAddress))
                             {
-                                <a href="mailto:@contact.UsersPermissionsUser.Email" class="govuk-link" rel="noopener noreferrer">@(contact.UsersPermissionsUser?.DisplayName ?? contact.UsersPermissionsUser?.FirstName + " " + contact.UsersPermissionsUser?.LastName ?? contact.UsersPermissionsUser?.Email)</a>
+                                <a href="mailto:@serviceOwner.EmailAddress" class="govuk-link" rel="noopener noreferrer">@GetEntraUserDisplayName(serviceOwner)</a>
                             }
                             else
                             {
-                                @(contact.UsersPermissionsUser?.DisplayName ?? contact.UsersPermissionsUser?.FirstName + " " + contact.UsersPermissionsUser?.LastName ?? "Contact")
+                                @GetEntraUserDisplayName(serviceOwner)
+                            }
+                        </dd>
+                    </div>
+                }
+
+                @foreach (var productManager in productManagers)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Product Manager
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @if (!string.IsNullOrEmpty(productManager.EmailAddress))
+                            {
+                                <a href="mailto:@productManager.EmailAddress" class="govuk-link" rel="noopener noreferrer">@GetEntraUserDisplayName(productManager)</a>
+                            }
+                            else
+                            {
+                                @GetEntraUserDisplayName(productManager)
+                            }
+                        </dd>
+                    </div>
+                }
+
+                @foreach (var deliveryManager in deliveryManagers)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Delivery Manager
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @if (!string.IsNullOrEmpty(deliveryManager.EmailAddress))
+                            {
+                                <a href="mailto:@deliveryManager.EmailAddress" class="govuk-link" rel="noopener noreferrer">@GetEntraUserDisplayName(deliveryManager)</a>
+                            }
+                            else
+                            {
+                                @GetEntraUserDisplayName(deliveryManager)
+                            }
+                        </dd>
+                    </div>
+                }
+
+                @foreach (var informationAssetOwner in informationAssetOwners)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Information Asset Owner
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @if (!string.IsNullOrEmpty(informationAssetOwner.EmailAddress))
+                            {
+                                <a href="mailto:@informationAssetOwner.EmailAddress" class="govuk-link" rel="noopener noreferrer">@GetEntraUserDisplayName(informationAssetOwner)</a>
+                            }
+                            else
+                            {
+                                @GetEntraUserDisplayName(informationAssetOwner)
+                            }
+                        </dd>
+                    </div>
+                }
+
+                @foreach (var seniorResponsibleOfficer in seniorResponsibleOfficers)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Senior Responsible Officer
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            @if (!string.IsNullOrEmpty(seniorResponsibleOfficer.EmailAddress))
+                            {
+                                <a href="mailto:@seniorResponsibleOfficer.EmailAddress" class="govuk-link" rel="noopener noreferrer">@GetEntraUserDisplayName(seniorResponsibleOfficer)</a>
+                            }
+                            else
+                            {
+                                @GetEntraUserDisplayName(seniorResponsibleOfficer)
                             }
                         </dd>
                     </div>
@@ -273,5 +360,33 @@
             "service_owner" => "Service Owner",
             _ => role // Return original if no mapping found
         };
+    }
+
+    public string GetEntraUserDisplayName(EntraUser? user)
+    {
+        if (user == null)
+        {
+            return "Contact";
+        }
+
+        if (!string.IsNullOrWhiteSpace(user.DisplayName))
+        {
+            return user.DisplayName;
+        }
+
+        var firstName = user.FirstName?.Trim() ?? string.Empty;
+        var lastName = user.LastName?.Trim() ?? string.Empty;
+        var fullName = $"{firstName} {lastName}".Trim();
+        if (!string.IsNullOrWhiteSpace(fullName))
+        {
+            return fullName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(user.EmailAddress))
+        {
+            return user.EmailAddress;
+        }
+
+        return "Contact";
     }
 }

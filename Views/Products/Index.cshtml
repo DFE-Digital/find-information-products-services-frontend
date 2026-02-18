@@ -489,7 +489,11 @@ document.querySelector('form').addEventListener('submit', function() {
                                 </a>
                             </h3>
                             <p class="dfe-chevron-card__description govuk-body govuk-body-s">
-                                @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                @if (!string.IsNullOrEmpty(product.LongDescription))
+                                {
+                                    @(product.LongDescription.Length > 100 ? product.LongDescription.Substring(0, 100) + "..." : product.LongDescription)
+                                }
+                                else if (!string.IsNullOrEmpty(product.ShortDescription))
                                 {
                                     @(product.ShortDescription.Length > 100 ? product.ShortDescription.Substring(0, 100) + "..." : product.ShortDescription)
                                 }

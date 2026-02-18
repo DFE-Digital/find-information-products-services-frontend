@@ -7,6 +7,7 @@ public interface IServiceAssessmentsService
 {
     Task<(List<AssessmentSummary> Assessments, int TotalCount)> GetAssessmentsSummaryAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null);
     Task<Assessment?> GetAssessmentByIdAsync(int id, TimeSpan? cacheDuration = null);
+    Task<List<AssessmentSummary>> GetAssessmentsByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null);
     Task<List<string>> GetAvailableTypesAsync(TimeSpan? cacheDuration = null);
     Task<List<string>> GetAvailablePhasesAsync(TimeSpan? cacheDuration = null);
     Task<List<string>> GetAvailableStatusesAsync(TimeSpan? cacheDuration = null);
@@ -182,6 +183,169 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
         {
             _logger.LogError(ex, "Error fetching assessment detail from SAS API for ID: {Id}", id);
             throw;
+        }
+    }
+
+    public async Task<List<AssessmentSummary>> GetAssessmentsByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null)
+    {
+        var cacheKey = $"assessments_by_documentid_{documentId}";
+        
+        // Try to get from cache first
+        if (cacheDuration.HasValue)
+        {
+            var cachedResult = await _cacheService.GetAsync<List<AssessmentSummary>?>(cacheKey);
+            if (cachedResult != null)
+            {
+                _logger.LogDebug("Retrieved assessments by documentId from cache for key: {CacheKey}", cacheKey);
+                return cachedResult;
+            }
+        }
+
+        try
+        {
+            // The _baseUrl from config is "https://service-assessments.education.gov.uk/api/product/"
+            // So we just need to append the documentId
+            var encodedDocumentId = Uri.EscapeDataString(documentId);
+            var baseUrl = _baseUrl.TrimEnd('/');
+            var url = $"{baseUrl}/{encodedDocumentId}";
+            
+            _logger.LogInformation("Fetching assessments by documentId from: {Url} for documentId: {DocumentId}. BaseUrl was: {BaseUrl}", 
+                url, documentId, _baseUrl);
+
+            var response = await _httpClient.GetAsync(url);
+            
+            _logger.LogInformation("API response status: {StatusCode} for documentId: {DocumentId}", response.StatusCode, documentId);
+            
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning("No assessments found for documentId: {DocumentId} (404)", documentId);
+                return new List<AssessmentSummary>();
+            }
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("API call failed with status {StatusCode} for documentId {DocumentId}. Response: {ErrorContent}", 
+                    response.StatusCode, documentId, errorContent);
+                return new List<AssessmentSummary>();
+            }
+
+            var jsonContent = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation("Received JSON response length: {Length} for documentId: {DocumentId}. First 500 chars: {Preview}", 
+                jsonContent.Length, documentId, jsonContent.Length > 500 ? jsonContent.Substring(0, 500) : jsonContent);
+            
+            // Try direct deserialization first (for simple JSON format)
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                var directAssessments = JsonSerializer.Deserialize<List<AssessmentSummary>>(jsonContent, options);
+                if (directAssessments != null && directAssessments.Any())
+                {
+                    _logger.LogInformation("Successfully deserialized {Count} assessments directly for documentId: {DocumentId}", 
+                        directAssessments.Count, documentId);
+                    // Cache the result
+                    if (cacheDuration.HasValue)
+                    {
+                        await _cacheService.SetAsync(cacheKey, directAssessments, cacheDuration.Value);
+                        _logger.LogDebug("Cached assessments by documentId for key: {CacheKey}", cacheKey);
+                    }
+                    return directAssessments;
+                }
+                else
+                {
+                    _logger.LogWarning("Direct deserialization returned null or empty list for documentId: {DocumentId}", documentId);
+                }
+            }
+            catch (JsonException ex)
+            {
+                // If direct deserialization fails, try parsing as Strapi format
+                _logger.LogDebug("Direct deserialization failed for documentId {DocumentId}: {Error}. Trying Strapi format parsing", 
+                    documentId, ex.Message);
+            }
+
+            // Fallback to Strapi format parsing
+            var jsonDocument = JsonDocument.Parse(jsonContent);
+            var assessments = new List<AssessmentSummary>();
+
+            _logger.LogDebug("Parsing JSON as Strapi format. Root element type: {ValueKind}", jsonDocument.RootElement.ValueKind);
+
+            // Handle different response formats
+            // Format 1: Direct array
+            if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                _logger.LogDebug("Parsing as direct array format");
+                foreach (var item in jsonDocument.RootElement.EnumerateArray())
+                {
+                    var assessment = ParseAssessmentSummary(item);
+                    if (assessment != null)
+                    {
+                        assessments.Add(assessment);
+                    }
+                }
+            }
+            // Format 2: Wrapped in data property
+            else if (jsonDocument.RootElement.TryGetProperty("data", out var dataElement))
+            {
+                _logger.LogDebug("Parsing as 'data' wrapped format");
+                if (dataElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in dataElement.EnumerateArray())
+                    {
+                        var assessment = ParseAssessmentSummary(item);
+                        if (assessment != null)
+                        {
+                            assessments.Add(assessment);
+                        }
+                    }
+                }
+            }
+            // Format 3: Wrapped in assessments property (API response format)
+            else if (jsonDocument.RootElement.TryGetProperty("assessments", out var assessmentsElement))
+            {
+                _logger.LogDebug("Parsing as 'assessments' wrapped format");
+                if (assessmentsElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var item in assessmentsElement.EnumerateArray())
+                    {
+                        // Try API format first (direct properties like AssessmentID, Name, etc.)
+                        var assessment = ParseAssessmentSummaryFromApiFormat(item);
+                        if (assessment == null)
+                        {
+                            // Fallback to Strapi format
+                            assessment = ParseAssessmentSummary(item);
+                        }
+                        if (assessment != null)
+                        {
+                            assessments.Add(assessment);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Unknown JSON format for documentId {DocumentId}. Root element properties: {Properties}", 
+                    documentId, string.Join(", ", jsonDocument.RootElement.EnumerateObject().Select(p => p.Name)));
+            }
+            
+            _logger.LogInformation("Parsed {Count} assessments from Strapi format for documentId: {DocumentId}", 
+                assessments.Count, documentId);
+
+            // Cache the result
+            if (cacheDuration.HasValue)
+            {
+                await _cacheService.SetAsync(cacheKey, assessments, cacheDuration.Value);
+                _logger.LogDebug("Cached assessments by documentId for key: {CacheKey}", cacheKey);
+            }
+
+            return assessments;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching assessments by documentId from SAS API for documentId: {DocumentId}", documentId);
+            return new List<AssessmentSummary>();
         }
     }
 
@@ -458,6 +622,156 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
             }
 
             return assessment;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private static AssessmentSummary? ParseAssessmentSummaryFromApiFormat(JsonElement element)
+    {
+        try
+        {
+            // API format has properties directly on the object (not in "attributes")
+            // Properties: AssessmentID, FIPS_ID, Name, Type, Phase, Status, Description, etc.
+            
+            var assessment = new AssessmentSummary();
+
+            // AssessmentID maps to Id
+            if (element.TryGetProperty("AssessmentID", out var assessmentIdElement))
+            {
+                assessment.Id = assessmentIdElement.GetInt32();
+            }
+
+            // FIPS_ID maps to DocumentId
+            if (element.TryGetProperty("FIPS_ID", out var fipsIdElement))
+            {
+                assessment.DocumentId = fipsIdElement.GetString();
+            }
+
+            // Name maps to Title
+            if (element.TryGetProperty("Name", out var nameElement))
+            {
+                assessment.Title = nameElement.GetString() ?? string.Empty;
+            }
+            // Also check for Title (case-insensitive)
+            else if (element.TryGetProperty("title", out var titleElement))
+            {
+                assessment.Title = titleElement.GetString() ?? string.Empty;
+            }
+
+            // Type
+            if (element.TryGetProperty("Type", out var typeElement))
+            {
+                assessment.Type = typeElement.GetString() ?? string.Empty;
+            }
+            else if (element.TryGetProperty("type", out var typeElementLower))
+            {
+                assessment.Type = typeElementLower.GetString() ?? string.Empty;
+            }
+
+            // Phase
+            if (element.TryGetProperty("Phase", out var phaseElement))
+            {
+                assessment.Phase = phaseElement.GetString() ?? string.Empty;
+            }
+            else if (element.TryGetProperty("phase", out var phaseElementLower))
+            {
+                assessment.Phase = phaseElementLower.GetString() ?? string.Empty;
+            }
+
+            // Status
+            if (element.TryGetProperty("Status", out var statusElement))
+            {
+                assessment.Status = statusElement.GetString() ?? string.Empty;
+            }
+            else if (element.TryGetProperty("status", out var statusElementLower))
+            {
+                assessment.Status = statusElementLower.GetString() ?? string.Empty;
+            }
+
+            // Outcome
+            if (element.TryGetProperty("Outcome", out var outcomeElement))
+            {
+                assessment.Outcome = outcomeElement.GetString();
+            }
+            else if (element.TryGetProperty("outcome", out var outcomeElementLower))
+            {
+                assessment.Outcome = outcomeElementLower.GetString();
+            }
+
+            // Description
+            if (element.TryGetProperty("Description", out var descriptionElement))
+            {
+                assessment.Description = descriptionElement.GetString() ?? string.Empty;
+            }
+            else if (element.TryGetProperty("description", out var descriptionElementLower))
+            {
+                assessment.Description = descriptionElementLower.GetString() ?? string.Empty;
+            }
+
+            // StartDate
+            if (element.TryGetProperty("StartDate", out var startDateElement) && startDateElement.ValueKind != JsonValueKind.Null)
+            {
+                if (startDateElement.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(startDateElement.GetString(), out var startDate))
+                    {
+                        assessment.StartDate = startDate;
+                    }
+                }
+            }
+            else if (element.TryGetProperty("startDate", out var startDateElementLower) && startDateElementLower.ValueKind != JsonValueKind.Null)
+            {
+                if (startDateElementLower.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(startDateElementLower.GetString(), out var startDate))
+                    {
+                        assessment.StartDate = startDate;
+                    }
+                }
+            }
+
+            // EndDate
+            if (element.TryGetProperty("EndDate", out var endDateElement) && endDateElement.ValueKind != JsonValueKind.Null)
+            {
+                if (endDateElement.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(endDateElement.GetString(), out var endDate))
+                    {
+                        assessment.EndDate = endDate;
+                    }
+                }
+            }
+            else if (element.TryGetProperty("endDate", out var endDateElementLower) && endDateElementLower.ValueKind != JsonValueKind.Null)
+            {
+                if (endDateElementLower.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(endDateElementLower.GetString(), out var endDate))
+                    {
+                        assessment.EndDate = endDate;
+                    }
+                }
+            }
+
+            // URL
+            if (element.TryGetProperty("Url", out var urlElement))
+            {
+                assessment.Url = urlElement.GetString();
+            }
+            else if (element.TryGetProperty("url", out var urlElementLower))
+            {
+                assessment.Url = urlElementLower.GetString();
+            }
+
+            // Only return if we have at least an ID or Title
+            if (assessment.Id > 0 || !string.IsNullOrEmpty(assessment.Title))
+            {
+                return assessment;
+            }
+
+            return null;
         }
         catch (Exception)
         {
