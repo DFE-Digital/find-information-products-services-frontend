@@ -49,6 +49,16 @@ public class Product
     public List<CategoryValue>? CategoryValues { get; set; }
     [JsonPropertyName("product_contacts")]
     public List<ProductContact>? ProductContacts { get; set; }
+    [JsonPropertyName("service_owner")]
+    public List<EntraUser>? ServiceOwner { get; set; }
+    [JsonPropertyName("product_manager")]
+    public List<EntraUser>? ProductManager { get; set; }
+    [JsonPropertyName("delivery_manager")]
+    public List<EntraUser>? DeliveryManager { get; set; }
+    [JsonPropertyName("Information_asset_owner")]
+    public List<EntraUser>? InformationAssetOwner { get; set; }
+    [JsonPropertyName("senior_responsible_officer")]
+    public List<EntraUser>? SeniorResponsibleOfficer { get; set; }
     [JsonPropertyName("product_assurances")]
     public List<ProductAssurance>? ProductAssurances { get; set; }
     [JsonPropertyName("cmdb_last_sync")]
@@ -62,6 +72,21 @@ public class Product
     public DateTime? UpdatedAt { get; set; }
     [JsonPropertyName("publishedAt")]
     public DateTime? PublishedAt { get; set; }
+}
+
+public class EntraUser
+{
+    public int Id { get; set; }
+    [JsonPropertyName("documentId")]
+    public string? DocumentId { get; set; }
+    [JsonPropertyName("displayName")]
+    public string? DisplayName { get; set; }
+    [JsonPropertyName("firstName")]
+    public string? FirstName { get; set; }
+    [JsonPropertyName("lastName")]
+    public string? LastName { get; set; }
+    [JsonPropertyName("emailAddress")]
+    public string? EmailAddress { get; set; }
 }
 
 public class CategoryValue

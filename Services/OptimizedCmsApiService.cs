@@ -71,7 +71,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "sort=title:asc",
             // Only essential fields for listing
             "fields[0]=title",
-            "fields[1]=short_description", 
+            "fields[1]=long_description", 
             "fields[2]=fips_id",
             "fields[3]=documentId",
             "fields[4]=state",
@@ -266,7 +266,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "sort=title:asc",
             // Only essential fields for listing
             "fields[0]=title",
-            "fields[1]=short_description", 
+            "fields[1]=long_description", 
             "fields[2]=fips_id",
             "fields[3]=documentId",
             "fields[4]=state",
@@ -540,7 +540,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
     public async Task<Product?> GetProductByIdAsync(int id, TimeSpan? cacheDuration = null)
     {
-        var cacheKey = $"product_detail_{id}";
+        var cacheKey = $"product_detail_v2_{id}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -583,6 +583,26 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[product_contacts][populate][users_permissions_user][fields][1]=last_name",
             "populate[product_contacts][populate][users_permissions_user][fields][2]=display_name",
             "populate[product_contacts][populate][users_permissions_user][fields][3]=email",
+            "populate[service_owner][fields][0]=displayName",
+            "populate[service_owner][fields][1]=firstName",
+            "populate[service_owner][fields][2]=lastName",
+            "populate[service_owner][fields][3]=emailAddress",
+            "populate[product_manager][fields][0]=displayName",
+            "populate[product_manager][fields][1]=firstName",
+            "populate[product_manager][fields][2]=lastName",
+            "populate[product_manager][fields][3]=emailAddress",
+            "populate[delivery_manager][fields][0]=displayName",
+            "populate[delivery_manager][fields][1]=firstName",
+            "populate[delivery_manager][fields][2]=lastName",
+            "populate[delivery_manager][fields][3]=emailAddress",
+            "populate[Information_asset_owner][fields][0]=displayName",
+            "populate[Information_asset_owner][fields][1]=firstName",
+            "populate[Information_asset_owner][fields][2]=lastName",
+            "populate[Information_asset_owner][fields][3]=emailAddress",
+            "populate[senior_responsible_officer][fields][0]=displayName",
+            "populate[senior_responsible_officer][fields][1]=firstName",
+            "populate[senior_responsible_officer][fields][2]=lastName",
+            "populate[senior_responsible_officer][fields][3]=emailAddress",
             "populate[product_assurances][fields][0]=assurance_type",
             "populate[product_assurances][fields][1]=external_id",
             "populate[product_assurances][fields][2]=external_url",
@@ -603,6 +623,9 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             
             var jsonContent = await response.Content.ReadAsStringAsync();
             
+            // Log the raw JSON response for debugging
+            _logger.LogInformation("Raw API Response for product {Id}: {JsonContent}", id, jsonContent);
+            
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -611,6 +634,18 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             
             var result = JsonSerializer.Deserialize<ApiResponse<Product>>(jsonContent, options);
             var product = result?.Data;
+            
+            // Log the deserialized product contact fields for debugging
+            if (product != null)
+            {
+                _logger.LogInformation("Product {Id} - ServiceOwner count: {Count}, ProductManager count: {PmCount}, DeliveryManager count: {DmCount}, InformationAssetOwner count: {IaoCount}, SeniorResponsibleOfficer count: {SroCount}",
+                    id,
+                    product.ServiceOwner?.Count ?? 0,
+                    product.ProductManager?.Count ?? 0,
+                    product.DeliveryManager?.Count ?? 0,
+                    product.InformationAssetOwner?.Count ?? 0,
+                    product.SeniorResponsibleOfficer?.Count ?? 0);
+            }
             
             // Cache the result if cache duration is specified
             if (cacheDuration.HasValue && product != null)
@@ -630,7 +665,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
     public async Task<Product?> GetProductByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null)
     {
-        var cacheKey = $"product_document_{documentId}";
+        var cacheKey = $"product_document_v2_{documentId}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -674,6 +709,26 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[product_contacts][populate][users_permissions_user][fields][1]=last_name",
             "populate[product_contacts][populate][users_permissions_user][fields][2]=display_name",
             "populate[product_contacts][populate][users_permissions_user][fields][3]=email",
+            "populate[service_owner][fields][0]=displayName",
+            "populate[service_owner][fields][1]=firstName",
+            "populate[service_owner][fields][2]=lastName",
+            "populate[service_owner][fields][3]=emailAddress",
+            "populate[product_manager][fields][0]=displayName",
+            "populate[product_manager][fields][1]=firstName",
+            "populate[product_manager][fields][2]=lastName",
+            "populate[product_manager][fields][3]=emailAddress",
+            "populate[delivery_manager][fields][0]=displayName",
+            "populate[delivery_manager][fields][1]=firstName",
+            "populate[delivery_manager][fields][2]=lastName",
+            "populate[delivery_manager][fields][3]=emailAddress",
+            "populate[Information_asset_owner][fields][0]=displayName",
+            "populate[Information_asset_owner][fields][1]=firstName",
+            "populate[Information_asset_owner][fields][2]=lastName",
+            "populate[Information_asset_owner][fields][3]=emailAddress",
+            "populate[senior_responsible_officer][fields][0]=displayName",
+            "populate[senior_responsible_officer][fields][1]=firstName",
+            "populate[senior_responsible_officer][fields][2]=lastName",
+            "populate[senior_responsible_officer][fields][3]=emailAddress",
             "populate[product_assurances][fields][0]=assurance_type",
             "populate[product_assurances][fields][1]=external_id",
             "populate[product_assurances][fields][2]=external_url",
@@ -726,8 +781,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // FipsId format is typically "XXX-###" (e.g., "ABC-123")
         var isDocumentId = !string.IsNullOrEmpty(fipsId) && !System.Text.RegularExpressions.Regex.IsMatch(fipsId, @"^[A-Z]{3}-\d{3}$");
         
-        // Changed cache key to force refresh after adding search_text field
-        var cacheKey = isDocumentId ? $"product_doc_v2_{fipsId}" : $"product_fips_v2_{fipsId}";
+        // Changed cache key to force refresh after adding new contact fields (product_manager, delivery_manager, Information_asset_owner, senior_responsible_officer)
+        var cacheKey = isDocumentId ? $"product_doc_v4_{fipsId}" : $"product_fips_v4_{fipsId}";
         
         // Try to get from cache first
         if (cacheDuration.HasValue)
@@ -782,6 +837,26 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "populate[product_contacts][populate][users_permissions_user][fields][1]=last_name",
             "populate[product_contacts][populate][users_permissions_user][fields][2]=display_name",
             "populate[product_contacts][populate][users_permissions_user][fields][3]=email",
+            "populate[service_owner][fields][0]=displayName",
+            "populate[service_owner][fields][1]=firstName",
+            "populate[service_owner][fields][2]=lastName",
+            "populate[service_owner][fields][3]=emailAddress",
+            "populate[product_manager][fields][0]=displayName",
+            "populate[product_manager][fields][1]=firstName",
+            "populate[product_manager][fields][2]=lastName",
+            "populate[product_manager][fields][3]=emailAddress",
+            "populate[delivery_manager][fields][0]=displayName",
+            "populate[delivery_manager][fields][1]=firstName",
+            "populate[delivery_manager][fields][2]=lastName",
+            "populate[delivery_manager][fields][3]=emailAddress",
+            "populate[Information_asset_owner][fields][0]=displayName",
+            "populate[Information_asset_owner][fields][1]=firstName",
+            "populate[Information_asset_owner][fields][2]=lastName",
+            "populate[Information_asset_owner][fields][3]=emailAddress",
+            "populate[senior_responsible_officer][fields][0]=displayName",
+            "populate[senior_responsible_officer][fields][1]=firstName",
+            "populate[senior_responsible_officer][fields][2]=lastName",
+            "populate[senior_responsible_officer][fields][3]=emailAddress",
             "populate[product_assurances][fields][0]=assurance_type",
             "populate[product_assurances][fields][1]=external_id",
             "populate[product_assurances][fields][2]=external_url",
@@ -802,6 +877,32 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             
             var jsonContent = await response.Content.ReadAsStringAsync();
             
+            // Log a snippet of the JSON response for debugging (first 500 chars to see structure)
+            var jsonSnippet = jsonContent.Length > 500 ? jsonContent.Substring(0, 500) + "..." : jsonContent;
+            _logger.LogInformation("API Response snippet for product {FipsId}: {JsonSnippet}", fipsId, jsonSnippet);
+            
+            // Check if contact fields are present in the raw JSON
+            if (jsonContent.Contains("service_owner") || jsonContent.Contains("serviceOwner"))
+            {
+                _logger.LogInformation("Found service_owner field in JSON response");
+            }
+            if (jsonContent.Contains("product_manager") || jsonContent.Contains("productManager"))
+            {
+                _logger.LogInformation("Found product_manager field in JSON response");
+            }
+            if (jsonContent.Contains("delivery_manager") || jsonContent.Contains("deliveryManager"))
+            {
+                _logger.LogInformation("Found delivery_manager field in JSON response");
+            }
+            if (jsonContent.Contains("Information_asset_owner") || jsonContent.Contains("informationAssetOwner"))
+            {
+                _logger.LogInformation("Found Information_asset_owner field in JSON response");
+            }
+            if (jsonContent.Contains("senior_responsible_officer") || jsonContent.Contains("seniorResponsibleOfficer"))
+            {
+                _logger.LogInformation("Found senior_responsible_officer field in JSON response");
+            }
+            
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -810,6 +911,18 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             
             var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
             var product = result?.Data?.FirstOrDefault();
+            
+            // Log the deserialized product contact fields for debugging
+            if (product != null)
+            {
+                _logger.LogInformation("Product {FipsId} - ServiceOwner count: {Count}, ProductManager count: {PmCount}, DeliveryManager count: {DmCount}, InformationAssetOwner count: {IaoCount}, SeniorResponsibleOfficer count: {SroCount}",
+                    fipsId,
+                    product.ServiceOwner?.Count ?? 0,
+                    product.ProductManager?.Count ?? 0,
+                    product.DeliveryManager?.Count ?? 0,
+                    product.InformationAssetOwner?.Count ?? 0,
+                    product.SeniorResponsibleOfficer?.Count ?? 0);
+            }
 
             // Debug: Log category values with search_text
             if (product?.CategoryValues != null)
