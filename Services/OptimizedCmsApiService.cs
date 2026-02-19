@@ -78,7 +78,20 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             // Minimal populate for categories (just names)
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
-            "populate[category_values][populate][category_type][fields][0]=name"
+            "populate[category_values][populate][category_type][fields][0]=name",
+            // Populate user fields for search functionality
+            "populate[service_owner][fields][0]=displayName",
+            "populate[service_owner][fields][1]=firstName",
+            "populate[service_owner][fields][2]=lastName",
+            "populate[service_owner][fields][3]=emailAddress",
+            "populate[product_manager][fields][0]=displayName",
+            "populate[product_manager][fields][1]=firstName",
+            "populate[product_manager][fields][2]=lastName",
+            "populate[product_manager][fields][3]=emailAddress",
+            "populate[senior_responsible_officer][fields][0]=displayName",
+            "populate[senior_responsible_officer][fields][1]=firstName",
+            "populate[senior_responsible_officer][fields][2]=lastName",
+            "populate[senior_responsible_officer][fields][3]=emailAddress"
         };
 
         // Handle state filter and search query together
@@ -113,6 +126,21 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
             queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
             queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Search in service_owner fields
+            queryParams.Add($"filters[$and][1][$or][8][service_owner][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][9][service_owner][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][10][service_owner][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][11][service_owner][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Search in product_manager fields
+            queryParams.Add($"filters[$and][1][$or][12][product_manager][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][13][product_manager][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][14][product_manager][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][15][product_manager][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Search in senior_responsible_officer fields
+            queryParams.Add($"filters[$and][1][$or][16][senior_responsible_officer][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][17][senior_responsible_officer][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][18][senior_responsible_officer][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][19][senior_responsible_officer][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
         else if (hasStateFilter)
         {
@@ -141,6 +169,21 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={Uri.EscapeDataString(searchQuery)}");
             queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
             queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Search in service_owner fields
+            queryParams.Add($"filters[$and][1][$or][8][service_owner][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][9][service_owner][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][10][service_owner][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][11][service_owner][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Search in product_manager fields
+            queryParams.Add($"filters[$and][1][$or][12][product_manager][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][13][product_manager][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][14][product_manager][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][15][product_manager][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            // Search in senior_responsible_officer fields
+            queryParams.Add($"filters[$and][1][$or][16][senior_responsible_officer][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][17][senior_responsible_officer][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][18][senior_responsible_officer][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+            queryParams.Add($"filters[$and][1][$or][19][senior_responsible_officer][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
         }
         else if (filters == null)
         {
@@ -302,7 +345,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             for (int termIndex = 0; termIndex < searchTermList.Count; termIndex++)
             {
                 var term = Uri.EscapeDataString(searchTermList[termIndex]);
-                var baseIndex = termIndex * 8;
+                var baseIndex = termIndex * 20; // Updated from 8 to 20 to include user fields
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 0}][search_text][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 1}][title][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 2}][short_description][$containsi]={term}");
@@ -311,6 +354,21 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 5}][documentId][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 6}][category_values][name][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 7}][category_values][search_text][$containsi]={term}");
+                // Search in service_owner fields
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 8}][service_owner][displayName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 9}][service_owner][firstName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 10}][service_owner][lastName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 11}][service_owner][emailAddress][$containsi]={term}");
+                // Search in product_manager fields
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 12}][product_manager][displayName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 13}][product_manager][firstName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 14}][product_manager][lastName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 15}][product_manager][emailAddress][$containsi]={term}");
+                // Search in senior_responsible_officer fields
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 16}][senior_responsible_officer][displayName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 17}][senior_responsible_officer][firstName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 18}][senior_responsible_officer][lastName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 19}][senior_responsible_officer][emailAddress][$containsi]={term}");
             }
         }
         else if (hasStateFilter)
@@ -335,7 +393,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             for (int termIndex = 0; termIndex < searchTermList.Count; termIndex++)
             {
                 var term = Uri.EscapeDataString(searchTermList[termIndex]);
-                var baseIndex = termIndex * 8;
+                var baseIndex = termIndex * 20; // Updated from 8 to 20 to include user fields
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 0}][search_text][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 1}][title][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 2}][short_description][$containsi]={term}");
@@ -344,6 +402,21 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 5}][documentId][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 6}][category_values][name][$containsi]={term}");
                 queryParams.Add($"filters[$and][1][$or][{baseIndex + 7}][category_values][search_text][$containsi]={term}");
+                // Search in service_owner fields
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 8}][service_owner][displayName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 9}][service_owner][firstName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 10}][service_owner][lastName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 11}][service_owner][emailAddress][$containsi]={term}");
+                // Search in product_manager fields
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 12}][product_manager][displayName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 13}][product_manager][firstName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 14}][product_manager][lastName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 15}][product_manager][emailAddress][$containsi]={term}");
+                // Search in senior_responsible_officer fields
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 16}][senior_responsible_officer][displayName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 17}][senior_responsible_officer][firstName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 18}][senior_responsible_officer][lastName][$containsi]={term}");
+                queryParams.Add($"filters[$and][1][$or][{baseIndex + 19}][senior_responsible_officer][emailAddress][$containsi]={term}");
             }
         }
         else if (filters == null)
@@ -476,6 +549,21 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         // Search in category value names and search_text (includes synonyms)
         queryParams.Add($"filters[$or][4][category_values][name][$containsi]={Uri.EscapeDataString(searchQuery)}");
         queryParams.Add($"filters[$or][5][category_values][search_text][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        // Search in service_owner fields
+        queryParams.Add($"filters[$or][6][service_owner][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][7][service_owner][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][8][service_owner][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][9][service_owner][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        // Search in product_manager fields
+        queryParams.Add($"filters[$or][10][product_manager][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][11][product_manager][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][12][product_manager][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][13][product_manager][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        // Search in senior_responsible_officer fields
+        queryParams.Add($"filters[$or][14][senior_responsible_officer][displayName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][15][senior_responsible_officer][firstName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][16][senior_responsible_officer][lastName][$containsi]={Uri.EscapeDataString(searchQuery)}");
+        queryParams.Add($"filters[$or][17][senior_responsible_officer][emailAddress][$containsi]={Uri.EscapeDataString(searchQuery)}");
 
         // Add filters if provided
         if (filters != null)
