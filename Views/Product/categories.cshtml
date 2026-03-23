@@ -304,6 +304,8 @@
             "channel" => $"channel={slug}",
             "type" => $"type={slug}",
             "group" => $"group={slug}",
+            // CMS category type name for business area (matches Products Index `group` param)
+            "business area" => $"group={slug}",
             "user group" => $"userGroup={slug}",
             _ => $"category={slug}"
         };
