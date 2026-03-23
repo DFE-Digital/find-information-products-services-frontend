@@ -154,7 +154,7 @@ namespace FipsFrontend.Models
         public UpdatesViewModel()
         {
             HideNavigation = false; // Show navigation on updates page
-            PageTitle = "Keeping information updated";
+            PageTitle = "Keep information updated";
             PageDescription = "How to update information about products listed in this service";
         }
     }
