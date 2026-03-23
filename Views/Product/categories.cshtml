@@ -45,9 +45,19 @@
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
-                                    @if (Model.Product.ProductContacts?.Any() == true)
+                                    @{
+                                        var roleContactsCount =
+                                            (Model.Product.ServiceOwner?.Count(so => so != null) ?? 0)
+                                            + (Model.Product.ProductManager?.Count(pm => pm != null) ?? 0)
+                                            + (Model.Product.DeliveryManager?.Count(dm => dm != null) ?? 0)
+                                            + (Model.Product.InformationAssetOwner?.Count(iao => iao != null) ?? 0)
+                                            + (Model.Product.SeniorResponsibleOfficer?.Count(sro => sro != null) ?? 0);
+                                        var productContactsCount = Model.Product.ProductContacts?.Count ?? 0;
+                                        var totalContacts = roleContactsCount > 0 ? roleContactsCount : productContactsCount;
+                                    }
+                                    @if (totalContacts > 0)
                                     {
-                                        <a href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                        <a href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)#contacts" class="govuk-link" rel="noopener noreferrer">@totalContacts contacts</a>
                                     }
                                     else
                                     {

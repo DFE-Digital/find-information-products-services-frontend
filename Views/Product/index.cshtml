@@ -48,11 +48,15 @@
                                 </td>
                                 <td class="govuk-table__cell">
                                     @{
-                                        var totalContacts = (Model.Product.ServiceOwner?.Count ?? 0) +
-                                                             (Model.Product.ProductManager?.Count ?? 0) +
-                                                             (Model.Product.DeliveryManager?.Count ?? 0) +
-                                                             (Model.Product.InformationAssetOwner?.Count ?? 0) +
-                                                             (Model.Product.SeniorResponsibleOfficer?.Count ?? 0);
+                                        // Keep header count aligned with the contacts rendered below on this page.
+                                        var roleContactsCount =
+                                            (Model.Product.ServiceOwner?.Count(so => so != null) ?? 0)
+                                            + (Model.Product.ProductManager?.Count(pm => pm != null) ?? 0)
+                                            + (Model.Product.DeliveryManager?.Count(dm => dm != null) ?? 0)
+                                            + (Model.Product.InformationAssetOwner?.Count(iao => iao != null) ?? 0)
+                                            + (Model.Product.SeniorResponsibleOfficer?.Count(sro => sro != null) ?? 0);
+                                        var productContactsCount = Model.Product.ProductContacts?.Count ?? 0;
+                                        var totalContacts = roleContactsCount > 0 ? roleContactsCount : productContactsCount;
                                     }
                                     @if (totalContacts > 0)
                                     {
