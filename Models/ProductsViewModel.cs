@@ -44,11 +44,13 @@ namespace FipsFrontend.Models
         // Pagination properties
         public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 25;
-        public int TotalPages => (int)Math.Ceiling((double)FilteredCount / PageSize);
+        public int TotalPages => FilteredCount <= 0 ? 0 : (int)Math.Ceiling((double)FilteredCount / PageSize);
         public bool HasPreviousPage => CurrentPage > 1;
-        public bool HasNextPage => CurrentPage < TotalPages;
-        public int StartIndex => (CurrentPage - 1) * PageSize + 1;
-        public int EndIndex => Math.Min(CurrentPage * PageSize, FilteredCount);
+        public bool HasNextPage => TotalPages > 0 && CurrentPage < TotalPages;
+        /// <summary>First item number on this page (1-based). Zero when there are no results.</summary>
+        public int StartIndex => FilteredCount <= 0 ? 0 : (CurrentPage - 1) * PageSize + 1;
+        /// <summary>Last item number on this page (1-based). Zero when there are no results.</summary>
+        public int EndIndex => FilteredCount <= 0 ? 0 : Math.Min(CurrentPage * PageSize, FilteredCount);
     }
 
     public class FilterOption

@@ -309,30 +309,118 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             }
         }
 
+        if (hasSearchQuery)
+        {
+            // Load all matches for this single term, rank by relevance (title/description before categories), then paginate in memory.
+            const int batchSize = 500;
+            const int maxPages = 50;
+            var all = new List<Product>();
+            for (var pn = 1; pn <= maxPages; pn++)
+            {
+                var (batch, strapiTotal) = await GetListingPageFromStrapiAsync(pn, batchSize, searchTermList, filters);
+                if (batch.Count == 0)
+                {
+                    break;
+                }
+
+                all.AddRange(batch);
+                if (batch.Count < batchSize || all.Count >= strapiTotal)
+                {
+                    break;
+                }
+            }
+
+            if (all.Count < 5)
+            {
+                var broaderResults = await GetBroaderSearchResults(searchQuery!, 1, Math.Max(pageSize, batchSize), filters);
+                if (broaderResults.Any())
+                {
+                    all = broaderResults;
+                }
+            }
+
+            SortProductsBySearchRelevance(all, searchTermList);
+            var totalCount = all.Count;
+            var pageItems = all
+                .Skip(Math.Max(0, (page - 1) * pageSize))
+                .Take(pageSize)
+                .ToList();
+
+            if (cacheDuration.HasValue && pageItems.Any())
+            {
+                var cacheData = (Products: pageItems, TotalCount: totalCount);
+                await _cacheService.SetAsync(cacheKey, cacheData, cacheDuration.Value);
+                _logger.LogInformation("CACHED: Products listing2 (relevance) for page {Page} for {Duration}", page, cacheDuration.Value);
+            }
+
+            return (pageItems, totalCount);
+        }
+
+        try
+        {
+            var (products, totalCount) = await GetListingPageFromStrapiAsync(page, pageSize, searchTermList, filters);
+
+            if (cacheDuration.HasValue && products.Any())
+            {
+                var cacheData = (Products: products, TotalCount: totalCount);
+                await _cacheService.SetAsync(cacheKey, cacheData, cacheDuration.Value);
+                _logger.LogInformation("CACHED: Products listing2 for page {Page} for {Duration}", page, cacheDuration.Value);
+            }
+
+            return (products, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Products listing2 (no-search path)");
+            return (new List<Product>(), 0);
+        }
+    }
+
+    /// <summary>
+    /// One page from Strapi for the products listing (0 or 1 search term). Used for aggregation, multi-term fetch, and non-search listing.
+    /// </summary>
+    private async Task<(List<Product> Products, int TotalCount)> GetListingPageFromStrapiAsync(
+        int page,
+        int pageSize,
+        IReadOnlyList<string> searchTermList,
+        Dictionary<string, string[]>? filters)
+    {
+        var hasSearchQuery = searchTermList.Count == 1;
+        var searchQuery = hasSearchQuery ? string.Join(", ", searchTermList) : null;
+
         var queryParams = new List<string>
         {
             $"pagination[page]={page}",
             $"pagination[pageSize]={pageSize}",
-            // Sort products alphabetically by title
             "sort=title:asc",
-            // Only essential fields for listing
             "fields[0]=title",
-            "fields[1]=long_description", 
-            "fields[2]=fips_id",
-            "fields[3]=documentId",
-            "fields[4]=state",
-            // Minimal populate for categories (just names)
+            "fields[1]=short_description",
+            "fields[2]=long_description",
+            "fields[3]=fips_id",
+            "fields[4]=documentId",
+            "fields[5]=state",
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
-            "populate[category_values][populate][category_type][fields][0]=name"
+            "populate[category_values][fields][2]=search_text",
+            "populate[category_values][populate][category_type][fields][0]=name",
+            "populate[service_owner][fields][0]=displayName",
+            "populate[service_owner][fields][1]=firstName",
+            "populate[service_owner][fields][2]=lastName",
+            "populate[service_owner][fields][3]=emailAddress",
+            "populate[product_manager][fields][0]=displayName",
+            "populate[product_manager][fields][1]=firstName",
+            "populate[product_manager][fields][2]=lastName",
+            "populate[product_manager][fields][3]=emailAddress",
+            "populate[senior_responsible_officer][fields][0]=displayName",
+            "populate[senior_responsible_officer][fields][1]=firstName",
+            "populate[senior_responsible_officer][fields][2]=lastName",
+            "populate[senior_responsible_officer][fields][3]=emailAddress"
         };
 
-        // When both exist, we need to use $and to combine state filter with $or search
         bool hasStateFilter = filters != null && filters.ContainsKey("state");
-        
+
         if (hasStateFilter && hasSearchQuery)
         {
-            // Combine state filter with search using $and
             var stateValue = filters!["state"].Length == 1 ? filters["state"][0] : null;
             if (stateValue != null)
             {
@@ -340,14 +428,12 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             }
             else
             {
-                // Multiple state values
                 for (int i = 0; i < filters["state"].Length; i++)
                 {
                     queryParams.Add($"filters[$and][0][state][$in][{i}]={Uri.EscapeDataString(filters["state"][i])}");
                 }
             }
-            
-            // Add search queries as second $and condition (single-term path only; multi-term uses merge).
+
             var term = Uri.EscapeDataString(searchTermList[0]);
             queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={term}");
             queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={term}");
@@ -372,7 +458,6 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
         else if (hasStateFilter)
         {
-            // Only state filter, no search
             if (filters!["state"].Length == 1)
             {
                 queryParams.Add($"filters[state][$eq]={Uri.EscapeDataString(filters["state"][0])}");
@@ -387,7 +472,6 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
         else if (hasSearchQuery)
         {
-            // Only search query, no explicit state filter (default to Active)
             queryParams.Add($"filters[$and][0][state][$eq]=Active");
             var termOnly = Uri.EscapeDataString(searchTermList[0]);
             queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={termOnly}");
@@ -413,23 +497,19 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         }
         else if (filters == null)
         {
-            // No filters and no search - default to Active
             queryParams.Add("filters[state][$eq]=Active");
         }
 
-        // Add filters if provided
         if (filters != null)
         {
             foreach (var filter in filters)
             {
                 if (filter.Key == "state")
                 {
-                    // State filter already handled above, skip to avoid duplication
                     continue;
                 }
                 else if (filter.Key == "category_values.slug")
                 {
-                    // Handle category value filters
                     for (int i = 0; i < filter.Value.Length; i++)
                     {
                         queryParams.Add($"filters[category_values][slug][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
@@ -437,7 +517,6 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 }
                 else
                 {
-                    // Handle other filters generically
                     for (int i = 0; i < filter.Value.Length; i++)
                     {
                         queryParams.Add($"filters[{filter.Key}][$in][{i}]={Uri.EscapeDataString(filter.Value[i])}");
@@ -449,7 +528,6 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         var queryString = string.Join("&", queryParams);
         var url = $"products?{queryString}";
 
-        // Log the query for debugging
         if (!string.IsNullOrEmpty(searchQuery))
         {
             _logger.LogInformation("Search query for '{SearchQuery}': {Url}", searchQuery, url);
@@ -459,7 +537,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
-            
+
             var jsonContent = await response.Content.ReadAsStringAsync();
 
             var options = new JsonSerializerOptions
@@ -471,27 +549,6 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             var result = JsonSerializer.Deserialize<ApiCollectionResponse<Product>>(jsonContent, options);
             var products = result?.Data ?? new List<Product>();
             var totalCount = result?.Meta?.Pagination?.Total ?? 0;
-            
-            // If we have a search query and got fewer than 5 results, try a broader search
-            if (!string.IsNullOrEmpty(searchQuery) && products.Count < 5 && searchTermList.Count <= 1)
-            {
-                var broaderResults = await GetBroaderSearchResults(searchQuery, page, pageSize, filters);
-                if (broaderResults.Any())
-                {
-                    products = broaderResults;
-                    // For broader search, we don't have the total count, so we'll use the current page count
-                    totalCount = products.Count;
-                }
-            }
-            
-            // Cache the result if cache duration is specified
-            if (cacheDuration.HasValue && products.Any())
-            {
-                var cacheData = (Products: products, TotalCount: totalCount);
-                await _cacheService.SetAsync(cacheKey, cacheData, cacheDuration.Value);
-                _logger.LogInformation("CACHED: Products listing2 for page {Page} for {Duration}", page, cacheDuration.Value);
-            }
-            
             return (products, totalCount);
         }
         catch (Exception ex)
@@ -499,6 +556,144 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             _logger.LogError(ex, "API Error: {Url}", url);
             return (new List<Product>(), 0);
         }
+    }
+
+    /// <summary>
+    /// Higher score = stronger match. Title and long description rank above category-only matches; people fields sit between.
+    /// </summary>
+    private static void SortProductsBySearchRelevance(List<Product> products, IReadOnlyList<string> searchTerms)
+    {
+        if (products.Count == 0 || searchTerms.Count == 0)
+        {
+            return;
+        }
+
+        var terms = searchTerms
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Select(t => t.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (terms.Count == 0)
+        {
+            return;
+        }
+
+        products.Sort((a, b) =>
+        {
+            var sa = ComputeProductSearchRelevanceScore(a, terms);
+            var sb = ComputeProductSearchRelevanceScore(b, terms);
+            var cmp = sb.CompareTo(sa);
+            if (cmp != 0)
+            {
+                return cmp;
+            }
+
+            return string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase);
+        });
+    }
+
+    private static int ComputeProductSearchRelevanceScore(Product p, List<string> terms)
+    {
+        var best = 0;
+        foreach (var term in terms)
+        {
+            var s = ScoreProductForSingleSearchTerm(p, term);
+            if (s > best)
+            {
+                best = s;
+            }
+        }
+
+        return best;
+    }
+
+    private static int ScoreProductForSingleSearchTerm(Product p, string term)
+    {
+        if (string.IsNullOrEmpty(term))
+        {
+            return 0;
+        }
+
+        var c = StringComparison.OrdinalIgnoreCase;
+        var score = 0;
+        var title = p.Title ?? "";
+        var shortD = p.ShortDescription ?? "";
+        var longD = p.LongDescription ?? "";
+
+        if (title.Contains(term, c))
+        {
+            score += 1_000_000;
+        }
+
+        if (longD.Contains(term, c))
+        {
+            score += 500_000;
+        }
+
+        if (shortD.Contains(term, c))
+        {
+            score += 400_000;
+        }
+
+        if ((p.FipsId ?? "").Contains(term, c) || (p.DocumentId ?? "").Contains(term, c))
+        {
+            score += 100_000;
+        }
+
+        if (EntraUsersContainTerm(p.ServiceOwner, term) ||
+            EntraUsersContainTerm(p.ProductManager, term) ||
+            EntraUsersContainTerm(p.SeniorResponsibleOfficer, term))
+        {
+            score += 50_000;
+        }
+
+        if (CategoryValuesContainTerm(p.CategoryValues, term))
+        {
+            score += 10_000;
+        }
+
+        return score;
+    }
+
+    private static bool EntraUsersContainTerm(List<EntraUser>? users, string term)
+    {
+        if (users == null || users.Count == 0)
+        {
+            return false;
+        }
+
+        var c = StringComparison.OrdinalIgnoreCase;
+        foreach (var u in users)
+        {
+            if ((u.DisplayName ?? "").Contains(term, c) ||
+                (u.FirstName ?? "").Contains(term, c) ||
+                (u.LastName ?? "").Contains(term, c) ||
+                (u.EmailAddress ?? "").Contains(term, c))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool CategoryValuesContainTerm(List<CategoryValue>? values, string term)
+    {
+        if (values == null || values.Count == 0)
+        {
+            return false;
+        }
+
+        var c = StringComparison.OrdinalIgnoreCase;
+        foreach (var v in values)
+        {
+            if ((v.Name ?? "").Contains(term, c) || (v.SearchText ?? "").Contains(term, c))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -558,7 +753,8 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             }
         }
 
-        var sorted = merged.Values.OrderBy(p => p.Title, StringComparer.OrdinalIgnoreCase).ToList();
+        var sorted = merged.Values.ToList();
+        SortProductsBySearchRelevance(sorted, terms);
         var totalCount = sorted.Count;
         var pageItems = sorted
             .Skip(Math.Max(0, (page - 1) * pageSize))
@@ -587,7 +783,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
 
         while (pageNum <= maxPages)
         {
-            var (prods, total) = await GetProductsForListingAsync2(pageNum, batchSize, new[] { term }, filters, null);
+            var (prods, total) = await GetListingPageFromStrapiAsync(pageNum, batchSize, new List<string> { term }, filters);
             if (prods.Count == 0)
             {
                 break;
@@ -614,12 +810,26 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             // Sort products alphabetically by title
             "sort=title:asc",
             "fields[0]=title",
-            "fields[1]=short_description", 
-            "fields[2]=fips_id",
-            "fields[3]=documentId",
+            "fields[1]=short_description",
+            "fields[2]=long_description",
+            "fields[3]=fips_id",
+            "fields[4]=documentId",
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
-            "populate[category_values][populate][category_type][fields][0]=name"
+            "populate[category_values][fields][2]=search_text",
+            "populate[category_values][populate][category_type][fields][0]=name",
+            "populate[service_owner][fields][0]=displayName",
+            "populate[service_owner][fields][1]=firstName",
+            "populate[service_owner][fields][2]=lastName",
+            "populate[service_owner][fields][3]=emailAddress",
+            "populate[product_manager][fields][0]=displayName",
+            "populate[product_manager][fields][1]=firstName",
+            "populate[product_manager][fields][2]=lastName",
+            "populate[product_manager][fields][3]=emailAddress",
+            "populate[senior_responsible_officer][fields][0]=displayName",
+            "populate[senior_responsible_officer][fields][1]=firstName",
+            "populate[senior_responsible_officer][fields][2]=lastName",
+            "populate[senior_responsible_officer][fields][3]=emailAddress"
         };
 
         // Add state filter - default to Active only if no filters are provided at all
