@@ -120,7 +120,10 @@
                     Product title
                 </label>
                 <div id="Title-hint" class="govuk-hint">
-                    The official name of the product or service.
+                    The official name of the product or service. Maximum 255 characters.
+                </div>
+                <div id="Title-character-count" class="govuk-hint" role="status" aria-live="polite">
+                    255 characters remaining
                 </div>
                 @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
                 {
@@ -129,7 +132,7 @@
                         @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
                     </span>
                 }
-                <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="Title" name="Title" type="text" value="@Model.Title" maxlength="255" aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint" : "Title-hint")">
+                <input class="govuk-input @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="Title" name="Title" type="text" value="@Model.Title" maxlength="255" data-maxlength="255" data-character-count-target="Title-character-count" aria-describedby="@(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "Title-error Title-hint Title-character-count" : "Title-hint Title-character-count")">
             </div>
 
             <div class="govuk-form-group @(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -137,7 +140,10 @@
                     Description
                 </label>
                 <div id="Description-hint" class="govuk-hint">
-                    Provide a clear description of what the product does and who it serves.
+                    Provide a clear description of what the product does and who it serves. Maximum 2000 characters.
+                </div>
+                <div id="Description-character-count" class="govuk-hint" role="status" aria-live="polite">
+                    2000 characters remaining
                 </div>
                 @if (ViewData.ModelState["Description"]?.Errors.Count > 0)
                 {
@@ -146,7 +152,7 @@
                         @ViewData.ModelState["Description"]?.Errors.First().ErrorMessage
                     </span>
                 }
-                <textarea class="govuk-textarea @(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" id="Description" name="Description" rows="5" maxlength="2000" aria-describedby="@(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "Description-error Description-hint" : "Description-hint")">@Model.Description</textarea>
+                <textarea class="govuk-textarea @(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "govuk-textarea--error" : "")" id="Description" name="Description" rows="5" maxlength="2000" data-maxlength="2000" data-character-count-target="Description-character-count" aria-describedby="@(ViewData.ModelState["Description"]?.Errors.Count > 0 ? "Description-error Description-hint Description-character-count" : "Description-hint Description-character-count")">@Model.Description</textarea>
             </div>
 
             <div class="govuk-form-group @(ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -400,4 +406,37 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function updateCharacterCount(element) {
+                var targetId = element.getAttribute("data-character-count-target");
+                var maxLength = parseInt(element.getAttribute("data-maxlength"), 10);
+
+                if (!targetId || Number.isNaN(maxLength)) {
+                    return;
+                }
+
+                var counter = document.getElementById(targetId);
+                if (!counter) {
+                    return;
+                }
+
+                var currentLength = (element.value || "").length;
+                var remaining = Math.max(maxLength - currentLength, 0);
+                var word = remaining === 1 ? "character" : "characters";
+                counter.textContent = remaining + " " + word + " remaining";
+            }
+
+            var inputs = document.querySelectorAll("[data-character-count-target][data-maxlength]");
+            inputs.forEach(function (input) {
+                updateCharacterCount(input);
+                input.addEventListener("input", function () {
+                    updateCharacterCount(input);
+                });
+            });
+        });
+    </script>
+}
 
