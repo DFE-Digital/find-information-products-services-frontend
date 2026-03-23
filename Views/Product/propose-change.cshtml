@@ -145,6 +145,7 @@
 
     <form asp-action="ProposeChange" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
         @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@(ViewData["ReturnUrl"]?.ToString() ?? "")" />
 
         <h2 class="govuk-heading-l">Propose a change to product details</h2>
 
