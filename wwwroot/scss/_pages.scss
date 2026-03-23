@@ -10,3 +10,9 @@
       padding-top: 20px;
   }
 }
+
+// Products index: visible focus when focus moves to results region after filter/search (a11y)
+.products-search-results-region:focus {
+  outline: $govuk-focus-width solid $govuk-focus-colour;
+  outline-offset: 0;
+}

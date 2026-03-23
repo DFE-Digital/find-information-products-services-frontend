@@ -401,11 +401,17 @@
 
     <div class="govuk-grid-column-two-thirds">
 
+        <div id="products-search-results"
+             class="products-search-results-region"
+             role="region"
+             aria-labelledby="products-results-summary-title"
+             tabindex="-1">
+
         <!-- Applied Filters Display -->
         @if (Model.SelectedFilters.Any())
         {
             <div class="applied-filters-panel">
-                <h2 class="govuk-heading-m govuk-!-margin-bottom-4">
+                <h2 id="products-results-summary-title" class="govuk-heading-m govuk-!-margin-bottom-4">
                     @Model.FilteredCount @(Model.FilteredCount == 1 ? "result" : "results") for your selected filters
                 </h2>
                 
@@ -440,7 +446,7 @@
         <div class="govuk-!-margin-bottom-4">
             @if (!Model.SelectedFilters.Any())
             {
-                <h2 class="govuk-heading-m">All products and services</h2>
+                <h2 id="products-results-summary-title" class="govuk-heading-m">All products and services</h2>
 
                         <details class="govuk-details">
   <summary class="govuk-details__summary">
@@ -484,6 +490,8 @@
 
                
             }
+        </div>
+
         </div>
 
 
@@ -1170,6 +1178,20 @@
                     }
                 });
             }, 2000);
+
+            // After applying filters/search/pagination (GET with query string), move focus to the results
+            // region so screen reader users hear the results heading and summary instead of the page top.
+            (function () {
+                try {
+                    var region = document.getElementById('products-search-results');
+                    if (!region || !window.location.search || window.location.search.length <= 1) {
+                        return;
+                    }
+                    window.setTimeout(function () {
+                        region.focus({ preventScroll: false });
+                    }, 0);
+                } catch (e) { /* no-op */ }
+            })();
     
         });
     </script>
