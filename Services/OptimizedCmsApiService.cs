@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using FipsFrontend.Models;
 
@@ -287,6 +288,13 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         var searchQuery = hasSearchQuery ? string.Join(", ", searchTermList) : null;
         var searchKeyForCache = hasSearchQuery ? string.Join("|", searchTermList) : "null";
 
+        // Comma-separated terms = OR semantics. One giant nested Strapi $or (20+ fields × N terms) is so
+        // expensive it often exceeds HttpClient timeout. Run one fast single-term query per term and merge.
+        if (searchTermList.Count > 1)
+        {
+            return await GetProductsForListingMultiTermOrMergeAsync(page, pageSize, searchTermList, filters, cacheDuration);
+        }
+
         // Create cache key based on parameters
         var cacheKey = $"products_listing3_{page}_{pageSize}_{searchKeyForCache}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? Array.Empty<string>())}";
         
@@ -339,37 +347,28 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 }
             }
             
-            // Add search queries as second $and condition
-            // Search in product search_text (includes product synonyms) and category_value search_text (includes category synonyms)
-            // Each term is OR-ed within itself, and multiple terms are OR-ed together
-            for (int termIndex = 0; termIndex < searchTermList.Count; termIndex++)
-            {
-                var term = Uri.EscapeDataString(searchTermList[termIndex]);
-                var baseIndex = termIndex * 20; // Updated from 8 to 20 to include user fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 0}][search_text][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 1}][title][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 2}][short_description][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 3}][long_description][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 4}][fips_id][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 5}][documentId][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 6}][category_values][name][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 7}][category_values][search_text][$containsi]={term}");
-                // Search in service_owner fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 8}][service_owner][displayName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 9}][service_owner][firstName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 10}][service_owner][lastName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 11}][service_owner][emailAddress][$containsi]={term}");
-                // Search in product_manager fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 12}][product_manager][displayName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 13}][product_manager][firstName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 14}][product_manager][lastName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 15}][product_manager][emailAddress][$containsi]={term}");
-                // Search in senior_responsible_officer fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 16}][senior_responsible_officer][displayName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 17}][senior_responsible_officer][firstName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 18}][senior_responsible_officer][lastName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 19}][senior_responsible_officer][emailAddress][$containsi]={term}");
-            }
+            // Add search queries as second $and condition (single-term path only; multi-term uses merge).
+            var term = Uri.EscapeDataString(searchTermList[0]);
+            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][8][service_owner][displayName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][9][service_owner][firstName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][10][service_owner][lastName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][11][service_owner][emailAddress][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][12][product_manager][displayName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][13][product_manager][firstName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][14][product_manager][lastName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][15][product_manager][emailAddress][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][16][senior_responsible_officer][displayName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][17][senior_responsible_officer][firstName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][18][senior_responsible_officer][lastName][$containsi]={term}");
+            queryParams.Add($"filters[$and][1][$or][19][senior_responsible_officer][emailAddress][$containsi]={term}");
         }
         else if (hasStateFilter)
         {
@@ -390,34 +389,27 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         {
             // Only search query, no explicit state filter (default to Active)
             queryParams.Add($"filters[$and][0][state][$eq]=Active");
-            for (int termIndex = 0; termIndex < searchTermList.Count; termIndex++)
-            {
-                var term = Uri.EscapeDataString(searchTermList[termIndex]);
-                var baseIndex = termIndex * 20; // Updated from 8 to 20 to include user fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 0}][search_text][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 1}][title][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 2}][short_description][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 3}][long_description][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 4}][fips_id][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 5}][documentId][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 6}][category_values][name][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 7}][category_values][search_text][$containsi]={term}");
-                // Search in service_owner fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 8}][service_owner][displayName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 9}][service_owner][firstName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 10}][service_owner][lastName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 11}][service_owner][emailAddress][$containsi]={term}");
-                // Search in product_manager fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 12}][product_manager][displayName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 13}][product_manager][firstName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 14}][product_manager][lastName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 15}][product_manager][emailAddress][$containsi]={term}");
-                // Search in senior_responsible_officer fields
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 16}][senior_responsible_officer][displayName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 17}][senior_responsible_officer][firstName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 18}][senior_responsible_officer][lastName][$containsi]={term}");
-                queryParams.Add($"filters[$and][1][$or][{baseIndex + 19}][senior_responsible_officer][emailAddress][$containsi]={term}");
-            }
+            var termOnly = Uri.EscapeDataString(searchTermList[0]);
+            queryParams.Add($"filters[$and][1][$or][0][search_text][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][1][title][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][2][short_description][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][3][long_description][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][4][fips_id][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][5][documentId][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][6][category_values][name][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][7][category_values][search_text][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][8][service_owner][displayName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][9][service_owner][firstName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][10][service_owner][lastName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][11][service_owner][emailAddress][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][12][product_manager][displayName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][13][product_manager][firstName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][14][product_manager][lastName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][15][product_manager][emailAddress][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][16][senior_responsible_officer][displayName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][17][senior_responsible_officer][firstName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][18][senior_responsible_officer][lastName][$containsi]={termOnly}");
+            queryParams.Add($"filters[$and][1][$or][19][senior_responsible_officer][emailAddress][$containsi]={termOnly}");
         }
         else if (filters == null)
         {
@@ -481,7 +473,7 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             var totalCount = result?.Meta?.Pagination?.Total ?? 0;
             
             // If we have a search query and got fewer than 5 results, try a broader search
-            if (!string.IsNullOrEmpty(searchQuery) && products.Count < 5)
+            if (!string.IsNullOrEmpty(searchQuery) && products.Count < 5 && searchTermList.Count <= 1)
             {
                 var broaderResults = await GetBroaderSearchResults(searchQuery, page, pageSize, filters);
                 if (broaderResults.Any())
@@ -507,6 +499,110 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             _logger.LogError(ex, "API Error: {Url}", url);
             return (new List<Product>(), 0);
         }
+    }
+
+    /// <summary>
+    /// Comma-separated keywords are OR'd: run one fast single-term CMS query per term (same as searching one word),
+    /// then merge and dedupe. Building one giant Strapi $or (20 fields × N terms) often exceeds the HTTP timeout.
+    /// </summary>
+    private async Task<(List<Product> Products, int TotalCount)> GetProductsForListingMultiTermOrMergeAsync(
+        int page,
+        int pageSize,
+        List<string> searchTermList,
+        Dictionary<string, string[]>? filters,
+        TimeSpan? cacheDuration)
+    {
+        const int maxTerms = 15;
+        var terms = searchTermList
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Select(t => t.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(maxTerms)
+            .ToList();
+
+        if (terms.Count == 0)
+        {
+            return (new List<Product>(), 0);
+        }
+
+        var searchKeyForCache = string.Join("|", terms);
+        var cacheKey = $"products_listing3_{page}_{pageSize}_{searchKeyForCache}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? Array.Empty<string>())}";
+
+        if (cacheDuration.HasValue)
+        {
+            var cachedResult = await _cacheService.GetAsync<(List<Product> Products, int TotalCount)>(cacheKey);
+            if (cachedResult.Products != null)
+            {
+                _logger.LogInformation("CACHE HIT: Products listing multi-term OR for page {Page}", page);
+                return cachedResult;
+            }
+        }
+
+        _logger.LogInformation("Multi-term OR search: {TermCount} single-term queries in parallel for terms: {Terms}",
+            terms.Count, string.Join(", ", terms));
+
+        var lists = await Task.WhenAll(terms.Select(t => FetchAllProductsForSingleSearchTermAsync(t, filters)));
+
+        var merged = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase);
+        foreach (var list in lists)
+        {
+            foreach (var p in list)
+            {
+                var key = !string.IsNullOrEmpty(p.DocumentId)
+                    ? p.DocumentId
+                    : p.Id.ToString(CultureInfo.InvariantCulture);
+                if (!merged.ContainsKey(key))
+                {
+                    merged[key] = p;
+                }
+            }
+        }
+
+        var sorted = merged.Values.OrderBy(p => p.Title, StringComparer.OrdinalIgnoreCase).ToList();
+        var totalCount = sorted.Count;
+        var pageItems = sorted
+            .Skip(Math.Max(0, (page - 1) * pageSize))
+            .Take(pageSize)
+            .ToList();
+
+        if (cacheDuration.HasValue && pageItems.Any())
+        {
+            await _cacheService.SetAsync(cacheKey, (Products: pageItems, TotalCount: totalCount), cacheDuration.Value);
+            _logger.LogInformation("CACHED: Products listing multi-term OR page {Page} ({Count} results, total distinct {Total})",
+                page, pageItems.Count, totalCount);
+        }
+
+        return (pageItems, totalCount);
+    }
+
+    /// <summary>
+    /// Paginates through all results for one search term using the standard single-term query (fast).
+    /// </summary>
+    private async Task<List<Product>> FetchAllProductsForSingleSearchTermAsync(string term, Dictionary<string, string[]>? filters)
+    {
+        var all = new List<Product>();
+        var pageNum = 1;
+        const int batchSize = 500;
+        const int maxPages = 50;
+
+        while (pageNum <= maxPages)
+        {
+            var (prods, total) = await GetProductsForListingAsync2(pageNum, batchSize, new[] { term }, filters, null);
+            if (prods.Count == 0)
+            {
+                break;
+            }
+
+            all.AddRange(prods);
+            if (prods.Count < batchSize || all.Count >= total)
+            {
+                break;
+            }
+
+            pageNum++;
+        }
+
+        return all;
     }
 
     private async Task<List<Product>> GetBroaderSearchResults(string searchQuery, int page, int pageSize, Dictionary<string, string[]>? filters)
