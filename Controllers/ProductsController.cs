@@ -1649,6 +1649,9 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
+            // Required so ProposeChangeViewModel Current* team role properties resolve from ProductContacts
+            model.Product = product;
+
             // Log all available claims for debugging
             _logger.LogInformation("Available claims for user:");
             foreach (var claim in User.Claims)
@@ -1821,6 +1824,16 @@ public class ProductsController : Controller
                 _logger.LogInformation("  Proposed Categories ({Count}): {Categories}", proposedCategoryNames.Count, string.Join(", ", proposedCategoryNames));
                 _logger.LogInformation("  Current Contacts ({Count}): {Contacts}", currentContactNames?.Count ?? 0, string.Join(", ", currentContactNames ?? new List<string>()));
                 _logger.LogInformation("  Proposed Contacts ({Count}): {Contacts}", proposedContactNames?.Count ?? 0, string.Join(", ", proposedContactNames ?? new List<string>()));
+                _logger.LogInformation(
+                    "  Team roles (current -> proposed): SRO '{SroCur}' -> '{SroProp}', IAO '{IaoCur}' -> '{IaoProp}', DM '{DmCur}' -> '{DmProp}', PM '{PmCur}' -> '{PmProp}'",
+                    model.CurrentServiceOwner ?? "(null)",
+                    model.ProposedServiceOwner ?? "(null)",
+                    model.CurrentInformationAssetOwner ?? "(null)",
+                    model.ProposedInformationAssetOwner ?? "(null)",
+                    model.CurrentDeliveryManager ?? "(null)",
+                    model.ProposedDeliveryManager ?? "(null)",
+                    model.CurrentProductManager ?? "(null)",
+                    model.ProposedProductManager ?? "(null)");
 
                 var changeTableMarkdown = NotifyService.BuildChangeTableHtml(
                     product.Title, 
@@ -1833,17 +1846,16 @@ public class ProductsController : Controller
                     model.ProposedProductUrl,
                     currentCategoryNames, 
                     proposedCategoryNames,
-                    currentContactNames, 
                     proposedContactNames,
-                    null, // currentUserDescription - not available in Product model yet
+                    null, // currentUserDescription - not on Product model; ProposedUserDescription is still shown when it differs from null
                     model.ProposedUserDescription,
-                    null, // currentServiceOwner - not available in Product model yet
+                    model.CurrentServiceOwner,
                     model.ProposedServiceOwner,
-                    null, // currentInformationAssetOwner - not available in Product model yet
+                    model.CurrentInformationAssetOwner,
                     model.ProposedInformationAssetOwner,
-                    null, // currentDeliveryManager - not available in Product model yet
+                    model.CurrentDeliveryManager,
                     model.ProposedDeliveryManager,
-                    null, // currentProductManager - not available in Product model yet
+                    model.CurrentProductManager,
                     model.ProposedProductManager);
                 
                 _logger.LogInformation("Generated change table markdown: {Markdown}", changeTableMarkdown);

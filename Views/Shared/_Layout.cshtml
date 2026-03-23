@@ -110,20 +110,7 @@ height="0" width="0" class="gtm-inline-hidden"></iframe></noscript>
 </section>
 }
 
-@if ((ViewData.Model as BaseViewModel)?.IsHomepage != true) {
-<div class="govuk-phase-banner">
-<div class="govuk-width-container">
-        <p class="govuk-phase-banner__content">
-            <strong class="govuk-tag govuk-phase-banner__content__tag">
-      Beta
-    </strong>
-            <span class="govuk-phase-banner__text">
-      This is a new service. Find out how to <a class="govuk-link" href="/updates">improve missing or inaccurate information</a>.
-    </span>
-        </p>
-    </div>
-</div>
-}
+
 
 @RenderSection("BeforeContent", required: false)
 

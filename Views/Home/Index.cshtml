@@ -51,45 +51,53 @@
 }
 
 <div class="govuk-grid-row">
-  <div class="govuk-grid-column-full">
-    <div class="dfe-card-group">
-      <a href="/products" class="dfe-card home-card-link" data-action="view_all_products" data-card-type="products">
-        <h2 class="dfe-card-title">All products and services</h2>
-        <p class="dfe-card-content">
-          Search and filter the products and services.
-        </p>
-        <p class="dfe-card-meta">@Model.PublishedProductsCount products</p>
-      </a>
-      <a href="/categories" class="dfe-card home-card-link" data-action="browse_categories" data-card-type="categories">
-        <h2 class="dfe-card-title">Browse categories</h2>
-        <p class="dfe-card-content">
-          Find products and services by how they are categorised
-        </p>
-        <p class="dfe-card-meta">@Model.CategoryTypesCount categories</p>
-      </a>
-    </div>
+  <div class="govuk-grid-column-two-thirds">
 
-    <hr
-      class="govuk-section-break govuk-section-break--xl govuk-section-break--visible"
-    />
-
-    <h2 class="govuk-heading-m">Using this service</h2>
-
-    <div class="dfe-card-group">
+  <h2 class="govuk-heading-l">What you can use this service for</h2>
     
-      <a href="/updates" class="dfe-card home-card-link" data-action="keep_updated" data-card-type="updates">
-        <h2 class="dfe-card-title">Keep information updated</h2>
-        <p class="dfe-card-content">
-          How to update information about products listed in this service.
-        </p>
-      </a>
-       <a href="/about" class="dfe-card home-card-link" data-action="use_data" data-card-type="data">
-        <h2 class="dfe-card-title">About this service</h2>
-        <p class="dfe-card-content">
-          Find out what this service is and how it works.
-        </p>
-      </a>
-    </div>
+<p class="govuk-body">Use this service to help you understand:</p>
+<ul class="govuk-list govuk-list--bullet">
+<li>what products and services exist in DfE, from beta to decommissioned phase</li>
+<li>who to contact to find out about a product or service</li>
+<li>the types of products or services, for example, transactional or information</li>
+<li>the channels used to deliver products or services</li>
+<li>an overview of products and services in each business area or portfolio</li>
+<li>user groups supported for each product or service</li>
+</ul>
+
+
+<h2 class="govuk-heading-l">Use the service</h2>
+
+<p class="govuk-body">Search the list of products and services by product name, contacts, categories, or user groups.</p>
+
+<a href="/products" role="button" draggable="false" class="govuk-button govuk-button--start" data-module="govuk-button">
+  Search products and services
+  <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
+  </svg>
+</a>
+
+<h2 class="govuk-heading-l govuk-!-margin-top-6">Keep information updated</h2>
+
+<p class="govuk-body">If you believe that information about a product or service is incorrect, or missing, follow these steps.</p>
+
+<h3 class="govuk-heading-m">Update a product or service</h3>
+
+<ol class="govuk-list govuk-list--number">
+<li><a href="/products" class="govuk-link">Search</a> for the product or service you want to update.</li>
+<li>Select the service or product.</li>
+<li>Select Propose a change in the left-hand navigation.</li>
+<li>Edit the relevant data fields.</li>
+<li>Check your edits and submit.</li>
+</ol>
+
+<h3 class="govuk-heading-m" id="add-a-missing-product-or-service">Add a missing product or service</h3>
+<p class="govuk-body">If you cannot find a product or service, and you know it exists, you can <a href="/products/requestnewentry" class="govuk-link">request a new product entry</a>.</p>
+<p class="govuk-body">You must be a permanent member of DfE staff to add a product or service to FIPS.</p>
+<p class="govuk-body">This is a temporary process that will be iterated soon.</p>
+
+
+
   </div>
 </div>
 

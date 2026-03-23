@@ -87,8 +87,8 @@
                             <label class="govuk-label govuk-label--s" for="keywords">
                                 Search
                             </label>
-                            <div id="keywords-hint" class="govuk-hint govuk-!-margin-bottom-2">
-                                Product names, people, categories, or user groups
+                            <div id="keywords-hint" class="govuk-hint govuk-!-margin-bottom-2 govuk-body-s">
+                                Product names, contacts, categories, or user groups
                             </div>
                             <div class="products-filter__search-input-wrap">
                                 <input class="govuk-input products-filter__search-input" id="keywords" name="keywords" type="search" value="@Model.Keywords" data-search-type="product_name" autocomplete="off" aria-describedby="keywords-hint">
@@ -507,7 +507,7 @@
                    
                     <li class="dfe-chevron-card">
                         <div class="dfe-chevron-card__wrapper">
-                            <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
+                            <p class="govuk-heading-s govuk-!-margin-bottom-2">
                                 <a class="govuk-link govuk-link--no-visited-state product-link" 
                                    href="/product/@(string.IsNullOrWhiteSpace(product.FipsId) ? product.DocumentId : product.FipsId)"
                                    data-product-title="@product.Title"
@@ -515,7 +515,7 @@
                                    data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
                                     @Html.Raw(HighlightSearchMatches(product.Title, Model.KeywordTerms))
                                 </a>
-                            </h3>
+                            </p>
                             <p class="dfe-chevron-card__description govuk-body govuk-body-s">
                                 @{
                                     var descriptionText = GetTruncatedDescription(product.LongDescription, product.ShortDescription);
