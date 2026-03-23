@@ -280,6 +280,61 @@ $govuk-font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
     margin-bottom: 5px;
 }
 
+/* Products listing: search field + icon submit (first submit in form = Enter key runs search) */
+.products-filter__search-input-wrap {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+.products-filter__search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+}
+
+.products-filter__search-submit {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    margin: 0;
+    padding: 0 10px;
+    color: #fff;
+    background-color: #1d70b8;
+    border: 2px solid #1d70b8;
+    border-left: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    cursor: pointer;
+}
+
+.products-filter__search-submit:hover {
+    background-color: #003078;
+    border-color: #003078;
+}
+
+.products-filter__search-submit:focus {
+    outline: 3px solid #ffdd00;
+    outline-offset: 0;
+    z-index: 1;
+}
+
+.products-filter__search-submit svg {
+    display: block;
+}
+
+.search-match {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
 
 .app-sub-navigation {
     margin-bottom: 0

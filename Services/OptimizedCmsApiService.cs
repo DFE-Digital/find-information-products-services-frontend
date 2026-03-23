@@ -339,6 +339,10 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
                 }
             }
 
+            all = all
+                .Where(p => ProductMatchesAnySearchTerm(p, searchTermList))
+                .ToList();
+
             SortProductsBySearchRelevance(all, searchTermList);
             var totalCount = all.Count;
             var pageItems = all
@@ -396,9 +400,10 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             "fields[0]=title",
             "fields[1]=short_description",
             "fields[2]=long_description",
-            "fields[3]=fips_id",
-            "fields[4]=documentId",
-            "fields[5]=state",
+            "fields[3]=search_text",
+            "fields[4]=fips_id",
+            "fields[5]=documentId",
+            "fields[6]=state",
             "populate[category_values][fields][0]=name",
             "populate[category_values][fields][1]=slug",
             "populate[category_values][fields][2]=search_text",
@@ -619,10 +624,32 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         var title = p.Title ?? "";
         var shortD = p.ShortDescription ?? "";
         var longD = p.LongDescription ?? "";
+        var searchText = p.SearchText ?? "";
+
+        // Strongest title boosts first: exact title and exact word beats partial contains.
+        if (title.Equals(term, StringComparison.OrdinalIgnoreCase))
+        {
+            score += 2_000_000;
+        }
+        else if (ContainsWholeWord(title, term))
+        {
+            score += 1_500_000;
+        }
+        else if (title.StartsWith(term, c))
+        {
+            score += 1_200_000;
+        }
 
         if (title.Contains(term, c))
         {
             score += 1_000_000;
+        }
+
+        if (searchText.Contains(term, c))
+        {
+            // Product search_text is curated for discoverability (synonyms/keywords),
+            // so keep this high but below direct title matches.
+            score += 700_000;
         }
 
         if (longD.Contains(term, c))
@@ -655,6 +682,77 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         return score;
     }
 
+    private static bool ProductMatchesAnySearchTerm(Product product, IReadOnlyList<string> searchTerms)
+    {
+        if (searchTerms.Count == 0)
+        {
+            return true;
+        }
+
+        foreach (var term in searchTerms)
+        {
+            if (ProductMatchesSearchTerm(product, term))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ProductMatchesSearchTerm(Product product, string term)
+    {
+        if (string.IsNullOrWhiteSpace(term))
+        {
+            return false;
+        }
+
+        if (RequiresIsolatedWordMatch(term))
+        {
+            return ContainsWholeWord(product.Title ?? string.Empty, term)
+                || ContainsWholeWord(product.SearchText ?? string.Empty, term)
+                || ContainsWholeWord(product.ShortDescription ?? string.Empty, term)
+                || ContainsWholeWord(product.LongDescription ?? string.Empty, term)
+                || ContainsWholeWord(product.FipsId ?? string.Empty, term)
+                || ContainsWholeWord(product.DocumentId ?? string.Empty, term)
+                || CategoryValuesContainWholeWord(product.CategoryValues, term)
+                || EntraUsersContainWholeWord(product.ServiceOwner, term)
+                || EntraUsersContainWholeWord(product.ProductManager, term)
+                || EntraUsersContainWholeWord(product.SeniorResponsibleOfficer, term);
+        }
+
+        var c = StringComparison.OrdinalIgnoreCase;
+        return (product.Title ?? string.Empty).Contains(term, c)
+            || (product.SearchText ?? string.Empty).Contains(term, c)
+            || (product.ShortDescription ?? string.Empty).Contains(term, c)
+            || (product.LongDescription ?? string.Empty).Contains(term, c)
+            || (product.FipsId ?? string.Empty).Contains(term, c)
+            || (product.DocumentId ?? string.Empty).Contains(term, c)
+            || CategoryValuesContainTerm(product.CategoryValues, term)
+            || EntraUsersContainTerm(product.ServiceOwner, term)
+            || EntraUsersContainTerm(product.ProductManager, term)
+            || EntraUsersContainTerm(product.SeniorResponsibleOfficer, term);
+    }
+
+    private static bool RequiresIsolatedWordMatch(string term)
+    {
+        // Short acronym-style terms like "AI" should not match inside larger words such as "claim".
+        return term.Length <= 3;
+    }
+
+    private static bool ContainsWholeWord(string source, string term)
+    {
+        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(term))
+        {
+            return false;
+        }
+
+        var words = source
+            .Split(new[] { ' ', '-', '_', '/', '\\', '(', ')', ',', '.', ';', ':' }, StringSplitOptions.RemoveEmptyEntries);
+
+        return words.Any(w => w.Equals(term, StringComparison.OrdinalIgnoreCase));
+    }
+
     private static bool EntraUsersContainTerm(List<EntraUser>? users, string term)
     {
         if (users == null || users.Count == 0)
@@ -677,6 +775,27 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         return false;
     }
 
+    private static bool EntraUsersContainWholeWord(List<EntraUser>? users, string term)
+    {
+        if (users == null || users.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var u in users)
+        {
+            if (ContainsWholeWord(u.DisplayName ?? string.Empty, term) ||
+                ContainsWholeWord(u.FirstName ?? string.Empty, term) ||
+                ContainsWholeWord(u.LastName ?? string.Empty, term) ||
+                ContainsWholeWord(u.EmailAddress ?? string.Empty, term))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool CategoryValuesContainTerm(List<CategoryValue>? values, string term)
     {
         if (values == null || values.Count == 0)
@@ -688,6 +807,24 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
         foreach (var v in values)
         {
             if ((v.Name ?? "").Contains(term, c) || (v.SearchText ?? "").Contains(term, c))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool CategoryValuesContainWholeWord(List<CategoryValue>? values, string term)
+    {
+        if (values == null || values.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var v in values)
+        {
+            if (ContainsWholeWord(v.Name ?? string.Empty, term) || ContainsWholeWord(v.SearchText ?? string.Empty, term))
             {
                 return true;
             }
@@ -753,7 +890,9 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
             }
         }
 
-        var sorted = merged.Values.ToList();
+        var sorted = merged.Values
+            .Where(p => ProductMatchesAnySearchTerm(p, terms))
+            .ToList();
         SortProductsBySearchRelevance(sorted, terms);
         var totalCount = sorted.Count;
         var pageItems = sorted

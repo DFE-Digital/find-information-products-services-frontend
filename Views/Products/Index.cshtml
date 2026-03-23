@@ -7,7 +7,10 @@
 
 @section pretag {
      <script nonce="@Html.GetNonce()">
-document.querySelector('form').addEventListener('submit', function() {
+(function () {
+  var form = document.querySelector('#products-filter-form');
+  if (!form) return;
+  form.addEventListener('submit', function() {
   var form = this;
 
   // Capture text inputs
@@ -39,6 +42,7 @@ document.querySelector('form').addEventListener('submit', function() {
     groupFilters: groupFilters
   });
 });
+})();
 </script>
 }
 
@@ -63,7 +67,7 @@ document.querySelector('form').addEventListener('submit', function() {
     <div class="govuk-grid-column-one-third">
         
         <!-- MOJ Filter Component -->
-        <form method="get" action="/products">
+        <form id="products-filter-form" method="get" action="/products">
             
             <div class="moj-filter" data-module="moj-filter">
                 <div class="moj-filter__header">
@@ -83,7 +87,18 @@ document.querySelector('form').addEventListener('submit', function() {
                             <label class="govuk-label govuk-label--s" for="keywords">
                                 Search
                             </label>
-                            <input class="govuk-input" id="keywords" name="keywords" type="text" value="@Model.Keywords" data-search-type="product_name">
+                            <div id="keywords-hint" class="govuk-hint govuk-!-margin-bottom-2">
+                                Product names, people, categories, or user groups
+                            </div>
+                            <div class="products-filter__search-input-wrap">
+                                <input class="govuk-input products-filter__search-input" id="keywords" name="keywords" type="search" value="@Model.Keywords" data-search-type="product_name" autocomplete="off" aria-describedby="keywords-hint">
+                                <button type="submit" class="products-filter__search-submit" aria-label="Run search" title="Search">
+                                    <svg width="22" height="22" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                        <circle cx="12.0161" cy="11.0161" r="8.51613" stroke="currentColor" stroke-width="2.5"></circle>
+                                        <line x1="17.8668" y1="16.8667" x2="24.447" y2="23.447" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
@@ -438,10 +453,17 @@ document.querySelector('form').addEventListener('submit', function() {
    </div>
 </details>
                 <p class="govuk-body">
-                    Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount results
-                    @if (Model.FilteredCount != Model.TotalCount)
+                    @if (Model.FilteredCount == 0)
                     {
-                        <text>(filtered from @Model.TotalCount total)</text>
+                        <text>No products and services match your search or filters.</text>
+                    }
+                    else
+                    {
+                        <text>Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount products and services</text>
+                        @if (Model.FilteredCount != Model.TotalCount)
+                        {
+                            <text> (filtered from @Model.TotalCount total)</text>
+                        }
                     }
                 </p>
             }
@@ -461,7 +483,14 @@ document.querySelector('form').addEventListener('submit', function() {
 
 
                 <p class="govuk-body">
-                    Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount results
+                    @if (Model.FilteredCount == 0)
+                    {
+                        <text>No products and services match your search or filters.</text>
+                    }
+                    else
+                    {
+                        <text>Showing @Model.StartIndex to @Model.EndIndex of @Model.FilteredCount products and services</text>
+                    }
                 </p>
             }
         </div>
@@ -485,17 +514,16 @@ document.querySelector('form').addEventListener('submit', function() {
                                    data-product-title="@product.Title"
                                    data-document-id="@product.DocumentId"
                                    data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
-                                    @product.Title
+                                    @Html.Raw(HighlightSearchMatches(product.Title, Model.KeywordTerms))
                                 </a>
                             </h3>
                             <p class="dfe-chevron-card__description govuk-body govuk-body-s">
-                                @if (!string.IsNullOrEmpty(product.LongDescription))
-                                {
-                                    @(product.LongDescription.Length > 100 ? product.LongDescription.Substring(0, 100) + "..." : product.LongDescription)
+                                @{
+                                    var descriptionText = GetTruncatedDescription(product.LongDescription, product.ShortDescription);
                                 }
-                                else if (!string.IsNullOrEmpty(product.ShortDescription))
+                                @if (!string.IsNullOrEmpty(descriptionText))
                                 {
-                                    @(product.ShortDescription.Length > 100 ? product.ShortDescription.Substring(0, 100) + "..." : product.ShortDescription)
+                                    @Html.Raw(HighlightSearchMatches(descriptionText, Model.KeywordTerms))
                                 }
                                 else
                                 {
@@ -1078,7 +1106,7 @@ document.querySelector('form').addEventListener('submit', function() {
             });
 
             // Search input tracking (on form submit)
-            const searchForm = document.querySelector('form[method="get"]');
+            const searchForm = document.getElementById('products-filter-form');
             if (searchForm) {
                 searchForm.addEventListener('submit', function(e) {
                     const searchInput = document.getElementById('keywords');
@@ -1156,4 +1184,95 @@ document.querySelector('form').addEventListener('submit', function() {
     </script>
 
 
+}
+
+@functions {
+    private static string GetTruncatedDescription(string? longDescription, string? shortDescription)
+    {
+        const int maxLength = 200;
+        var source = !string.IsNullOrWhiteSpace(longDescription) ? longDescription.Trim() : shortDescription?.Trim();
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return string.Empty;
+        }
+
+        // Prefer ending at the first sentence if it lands within the target length.
+        var fullStopIndex = source.IndexOf('.');
+        if (fullStopIndex >= 0 && fullStopIndex < maxLength)
+        {
+            return source[..(fullStopIndex + 1)];
+        }
+
+        if (source.Length <= maxLength)
+        {
+            return source;
+        }
+
+        return source[..maxLength].TrimEnd() + "...";
+    }
+
+    private static string HighlightSearchMatches(string? text, IEnumerable<string>? terms)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return string.Empty;
+        }
+
+        var distinctTerms = (terms ?? Enumerable.Empty<string>())
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .Select(t => t.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(t => t.Length)
+            .ToList();
+
+        if (!distinctTerms.Any())
+        {
+            return System.Text.Encodings.Web.HtmlEncoder.Default.Encode(text);
+        }
+
+        var patternParts = distinctTerms.Select(term =>
+            term.Length <= 3
+                ? $@"\b{System.Text.RegularExpressions.Regex.Escape(term)}\b"
+                : System.Text.RegularExpressions.Regex.Escape(term));
+
+        var pattern = string.Join("|", patternParts);
+        var matches = System.Text.RegularExpressions.Regex.Matches(
+            text,
+            pattern,
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+        if (matches.Count == 0)
+        {
+            return System.Text.Encodings.Web.HtmlEncoder.Default.Encode(text);
+        }
+
+        var sb = new System.Text.StringBuilder();
+        var lastIndex = 0;
+        foreach (System.Text.RegularExpressions.Match match in matches)
+        {
+            if (!match.Success || match.Index < lastIndex)
+            {
+                continue;
+            }
+
+            if (match.Index > lastIndex)
+            {
+                var before = text[lastIndex..match.Index];
+                sb.Append(System.Text.Encodings.Web.HtmlEncoder.Default.Encode(before));
+            }
+
+            var matchedText = text.Substring(match.Index, match.Length);
+            var encodedTerm = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(matchedText);
+            var encodedTitle = System.Text.Encodings.Web.HtmlEncoder.Default.Encode($"Matches {matchedText}");
+            sb.Append($"<span class=\"search-match\" title=\"{encodedTitle}\">{encodedTerm}</span>");
+            lastIndex = match.Index + match.Length;
+        }
+
+        if (lastIndex < text.Length)
+        {
+            sb.Append(System.Text.Encodings.Web.HtmlEncoder.Default.Encode(text[lastIndex..]));
+        }
+
+        return sb.ToString();
+    }
 }
