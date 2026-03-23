@@ -127,7 +127,7 @@
                 </div>
                 @if (ViewData.ModelState["Title"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="Title-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["Title"]?.Errors.First().ErrorMessage
                     </span>
@@ -147,7 +147,7 @@
                 </div>
                 @if (ViewData.ModelState["Description"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="Description-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["Description"]?.Errors.First().ErrorMessage
                     </span>
@@ -164,7 +164,7 @@
                 </div>
                 @if (ViewData.ModelState["ServiceUrl"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="ServiceUrl-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["ServiceUrl"]?.Errors.First().ErrorMessage
                     </span>
@@ -186,7 +186,7 @@
                         </div>
                         @if (ViewData.ModelState["PhaseId"]?.Errors.Count > 0)
                         {
-                            <span class="govuk-error-message">
+                            <span id="PhaseId-error" class="govuk-error-message">
                                 <span class="govuk-visually-hidden">Error:</span>
                                 @ViewData.ModelState["PhaseId"]?.Errors.First().ErrorMessage
                             </span>
@@ -224,7 +224,7 @@
                         </div>
                         @if (ViewData.ModelState["BusinessAreaId"]?.Errors.Count > 0)
                         {
-                            <span class="govuk-error-message">
+                            <span id="BusinessAreaId-error" class="govuk-error-message">
                                 <span class="govuk-visually-hidden">Error:</span>
                                 @ViewData.ModelState["BusinessAreaId"]?.Errors.First().ErrorMessage
                             </span>
@@ -262,7 +262,7 @@
                         </div>
                         @if (ViewData.ModelState["ChannelIds"]?.Errors.Count > 0)
                         {
-                            <span class="govuk-error-message">
+                            <span id="ChannelIds-error" class="govuk-error-message">
                                 <span class="govuk-visually-hidden">Error:</span>
                                 @ViewData.ModelState["ChannelIds"]?.Errors.First().ErrorMessage
                             </span>
@@ -294,7 +294,7 @@
                         </div>
                         @if (ViewData.ModelState["TypeIds"]?.Errors.Count > 0)
                         {
-                            <span class="govuk-error-message">
+                            <span id="TypeIds-error" class="govuk-error-message">
                                 <span class="govuk-visually-hidden">Error:</span>
                                 @ViewData.ModelState["TypeIds"]?.Errors.First().ErrorMessage
                             </span>
@@ -325,7 +325,7 @@
                 </div>
                 @if (ViewData.ModelState["Users"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="Users-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["Users"]?.Errors.First().ErrorMessage
                     </span>
@@ -342,12 +342,12 @@
                 </label>
                 @if (ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="DeliveryManager-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["DeliveryManager"]?.Errors.First().ErrorMessage
                     </span>
                 }
-                <input class="govuk-input @(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="DeliveryManager" name="DeliveryManager" type="text" value="@Model.DeliveryManager" maxlength="255" aria-describedby="@(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "DeliveryManager-error" : "")">
+                <input class="govuk-input @(ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="DeliveryManager" name="DeliveryManager" type="text" value="@Model.DeliveryManager" maxlength="255" @if (ViewData.ModelState["DeliveryManager"]?.Errors.Count > 0) { <text>aria-describedby="DeliveryManager-error"</text> }>
             </div>
 
             <div class="govuk-form-group @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -356,12 +356,12 @@
                 </label>
                 @if (ViewData.ModelState["ProductManager"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="ProductManager-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["ProductManager"]?.Errors.First().ErrorMessage
                     </span>
                 }
-                <input class="govuk-input @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ProductManager" name="ProductManager" type="text" value="@Model.ProductManager" maxlength="255" aria-describedby="@(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "ProductManager-error" : "")">
+                <input class="govuk-input @(ViewData.ModelState["ProductManager"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="ProductManager" name="ProductManager" type="text" value="@Model.ProductManager" maxlength="255" @if (ViewData.ModelState["ProductManager"]?.Errors.Count > 0) { <text>aria-describedby="ProductManager-error"</text> }>
             </div>
 
             <div class="govuk-form-group @(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -370,12 +370,12 @@
                 </label>
                 @if (ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="SeniorResponsibleOfficer-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.First().ErrorMessage
                     </span>
                 }
-                <input class="govuk-input @(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="SeniorResponsibleOfficer" name="SeniorResponsibleOfficer" type="text" value="@Model.SeniorResponsibleOfficer" maxlength="255" aria-describedby="@(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "SeniorResponsibleOfficer-error" : "")">
+                <input class="govuk-input @(ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0 ? "govuk-input--error" : "")" id="SeniorResponsibleOfficer" name="SeniorResponsibleOfficer" type="text" value="@Model.SeniorResponsibleOfficer" maxlength="255" @if (ViewData.ModelState["SeniorResponsibleOfficer"]?.Errors.Count > 0) { <text>aria-describedby="SeniorResponsibleOfficer-error"</text> }>
             </div>
 
             <div class="govuk-form-group @(ViewData.ModelState["Notes"]?.Errors.Count > 0 ? "govuk-form-group--error" : "")">
@@ -387,7 +387,7 @@
                 </div>
                 @if (ViewData.ModelState["Notes"]?.Errors.Count > 0)
                 {
-                    <span class="govuk-error-message">
+                    <span id="Notes-error" class="govuk-error-message">
                         <span class="govuk-visually-hidden">Error:</span>
                         @ViewData.ModelState["Notes"]?.Errors.First().ErrorMessage
                     </span>
