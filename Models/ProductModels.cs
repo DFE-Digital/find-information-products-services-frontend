@@ -43,6 +43,8 @@ public class Product
     public string ShortDescription { get; set; } = string.Empty;
     [JsonPropertyName("long_description")]
     public string? LongDescription { get; set; }
+    [JsonPropertyName("search_text")]
+    public string? SearchText { get; set; }
     [JsonPropertyName("product_url")]
     public string? ProductUrl { get; set; }
     [JsonPropertyName("category_values")]

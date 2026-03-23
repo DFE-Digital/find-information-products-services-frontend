@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using FipsFrontend.Services;
 using FipsFrontend.Models;
@@ -426,17 +427,8 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
-            // Capture return URL - either from query parameter or from referrer
-            if (string.IsNullOrEmpty(returnUrl))
-            {
-                var referrer = Request.Headers["Referer"].FirstOrDefault();
-                if (!string.IsNullOrEmpty(referrer) && 
-                    referrer.Contains("/products") && 
-                    (referrer.Contains("?") || referrer.Contains("&")))
-                {
-                    returnUrl = referrer;
-                }
-            }
+            // Capture return URL - query param, filtered products referrer, or chained from product sub-page
+            returnUrl = ResolveProductListingReturnUrl(returnUrl);
 
             var viewModel = new ProductViewModel
             {
@@ -469,6 +461,8 @@ public class ProductsController : Controller
             {
                 return NotFound();
             }
+
+            returnUrl = ResolveProductListingReturnUrl(returnUrl);
 
             // Build category information
             var categoryInfo = new List<ProductCategoryInfo>();
@@ -578,6 +572,8 @@ public class ProductsController : Controller
             {
                 return NotFound();
             }
+
+            returnUrl = ResolveProductListingReturnUrl(returnUrl);
 
             // Start with any product assurances already stored in CMS
             var combinedAssurances = product.ProductAssurances != null
@@ -1293,6 +1289,8 @@ public class ProductsController : Controller
             var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
             var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
 
+            returnUrl = ResolveProductListingReturnUrl(returnUrl);
+
             var viewModel = new ProductEditViewModel
             {
                 Product = product,
@@ -1535,6 +1533,8 @@ public class ProductsController : Controller
                 return NotFound();
             }
 
+            returnUrl = ResolveProductListingReturnUrl(returnUrl);
+
             // Get category values for all types
             var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
             var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
@@ -1648,6 +1648,9 @@ public class ProductsController : Controller
             {
                 return NotFound();
             }
+
+            // Required so ProposeChangeViewModel Current* team role properties resolve from ProductContacts
+            model.Product = product;
 
             // Log all available claims for debugging
             _logger.LogInformation("Available claims for user:");
@@ -1821,6 +1824,16 @@ public class ProductsController : Controller
                 _logger.LogInformation("  Proposed Categories ({Count}): {Categories}", proposedCategoryNames.Count, string.Join(", ", proposedCategoryNames));
                 _logger.LogInformation("  Current Contacts ({Count}): {Contacts}", currentContactNames?.Count ?? 0, string.Join(", ", currentContactNames ?? new List<string>()));
                 _logger.LogInformation("  Proposed Contacts ({Count}): {Contacts}", proposedContactNames?.Count ?? 0, string.Join(", ", proposedContactNames ?? new List<string>()));
+                _logger.LogInformation(
+                    "  Team roles (current -> proposed): SRO '{SroCur}' -> '{SroProp}', IAO '{IaoCur}' -> '{IaoProp}', DM '{DmCur}' -> '{DmProp}', PM '{PmCur}' -> '{PmProp}'",
+                    model.CurrentServiceOwner ?? "(null)",
+                    model.ProposedServiceOwner ?? "(null)",
+                    model.CurrentInformationAssetOwner ?? "(null)",
+                    model.ProposedInformationAssetOwner ?? "(null)",
+                    model.CurrentDeliveryManager ?? "(null)",
+                    model.ProposedDeliveryManager ?? "(null)",
+                    model.CurrentProductManager ?? "(null)",
+                    model.ProposedProductManager ?? "(null)");
 
                 var changeTableMarkdown = NotifyService.BuildChangeTableHtml(
                     product.Title, 
@@ -1833,17 +1846,16 @@ public class ProductsController : Controller
                     model.ProposedProductUrl,
                     currentCategoryNames, 
                     proposedCategoryNames,
-                    currentContactNames, 
                     proposedContactNames,
-                    null, // currentUserDescription - not available in Product model yet
+                    null, // currentUserDescription - not on Product model; ProposedUserDescription is still shown when it differs from null
                     model.ProposedUserDescription,
-                    null, // currentServiceOwner - not available in Product model yet
+                    model.CurrentServiceOwner,
                     model.ProposedServiceOwner,
-                    null, // currentInformationAssetOwner - not available in Product model yet
+                    model.CurrentInformationAssetOwner,
                     model.ProposedInformationAssetOwner,
-                    null, // currentDeliveryManager - not available in Product model yet
+                    model.CurrentDeliveryManager,
                     model.ProposedDeliveryManager,
-                    null, // currentProductManager - not available in Product model yet
+                    model.CurrentProductManager,
                     model.ProposedProductManager);
                 
                 _logger.LogInformation("Generated change table markdown: {Markdown}", changeTableMarkdown);
@@ -1946,6 +1958,12 @@ public class ProductsController : Controller
 
             ViewData["ActiveNav"] = "products";
             ViewData["EditProductEnabled"] = _enabledFeatures.EditProduct;
+            var returnUrlFromFormOrQuery = Request.Form["returnUrl"].ToString();
+            if (string.IsNullOrWhiteSpace(returnUrlFromFormOrQuery))
+            {
+                returnUrlFromFormOrQuery = Request.Query["returnUrl"].ToString();
+            }
+            ViewData["ReturnUrl"] = ResolveProductListingReturnUrl(returnUrlFromFormOrQuery);
             return View("~/Views/Product/propose-change.cshtml", model);
         }
         catch (Exception ex)
@@ -2120,6 +2138,56 @@ public class ProductsController : Controller
             _logger.LogError(ex, "Error reloading request new entry form");
             return NotFound();
         }
+    }
+
+    /// <summary>
+    /// Resolves the URL to return to the filtered products listing: explicit query param,
+    /// Referer from /products?…, or chained <c>returnUrl</c> when navigating from another product sub-page.
+    /// </summary>
+    private string? ResolveProductListingReturnUrl(string? returnUrlFromQuery)
+    {
+        if (!string.IsNullOrWhiteSpace(returnUrlFromQuery))
+        {
+            return returnUrlFromQuery.Trim();
+        }
+
+        var referrer = Request.Headers["Referer"].FirstOrDefault();
+        if (string.IsNullOrEmpty(referrer))
+        {
+            return null;
+        }
+
+        if (IsFilteredProductsListingUrl(referrer))
+        {
+            return referrer;
+        }
+
+        if (!Uri.TryCreate(referrer, UriKind.Absolute, out var refUri))
+        {
+            return null;
+        }
+
+        // User came from another product page that had ?returnUrl=… (e.g. Overview → Categories without long query on client URL)
+        if (refUri.AbsolutePath.Contains("/product/", StringComparison.OrdinalIgnoreCase))
+        {
+            var q = QueryHelpers.ParseQuery(refUri.Query);
+            if (q.TryGetValue("returnUrl", out var chained) && !string.IsNullOrEmpty(chained))
+            {
+                var value = chained.ToString();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsFilteredProductsListingUrl(string url)
+    {
+        return url.Contains("/products", StringComparison.OrdinalIgnoreCase) &&
+               (url.Contains('?', StringComparison.Ordinal) || url.Contains('&', StringComparison.Ordinal));
     }
 
     /// <summary>

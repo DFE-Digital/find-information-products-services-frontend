@@ -44,9 +44,19 @@
                                     }
                                 </td>
                                 <td class="govuk-table__cell">
-                                    @if (Model.Product.ProductContacts?.Any() == true)
+                                    @{
+                                        var roleContactsCount =
+                                            (Model.Product.ServiceOwner?.Count(so => so != null) ?? 0)
+                                            + (Model.Product.ProductManager?.Count(pm => pm != null) ?? 0)
+                                            + (Model.Product.DeliveryManager?.Count(dm => dm != null) ?? 0)
+                                            + (Model.Product.InformationAssetOwner?.Count(iao => iao != null) ?? 0)
+                                            + (Model.Product.SeniorResponsibleOfficer?.Count(sro => sro != null) ?? 0);
+                                        var productContactsCount = Model.Product.ProductContacts?.Count ?? 0;
+                                        var totalContacts = roleContactsCount > 0 ? roleContactsCount : productContactsCount;
+                                    }
+                                    @if (totalContacts > 0)
                                     {
-                                        <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)#contacts" class="govuk-link" rel="noopener noreferrer">@Model.Product.ProductContacts.Count contacts</a>
+                                        <a href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)#contacts" class="govuk-link" rel="noopener noreferrer">@totalContacts contacts</a>
                                     }
                                     else
                                     {
@@ -57,7 +67,7 @@
                                     <span class="govuk-visually-hidden">View product: </span>
                                     @if (!string.IsNullOrWhiteSpace(Model.Product.ProductUrl))
                                     {
-                                        <a href="@Model.Product.ProductUrl" class="govuk-link" target="_blank" rel="noopener noreferrer">View product</a>
+                                        <a href="@Model.Product.ProductUrl" class="govuk-link"  rel="noopener noreferrer">View product</a>
                                     }
                                     else
                                     {
@@ -123,7 +133,7 @@
         </div>
     }
     
-    @if (ViewData.ModelState.ErrorCount > 0 && ViewData.ModelState[""]?.Errors.Count > 0)
+    @if (ViewData.ModelState.ErrorCount > 0)
     {
         <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-title" tabindex="-1" data-module="govuk-error-summary">
             <h2 class="govuk-error-summary__title" id="error-summary-title">
@@ -131,9 +141,25 @@
             </h2>
             <div class="govuk-error-summary__body">
                 <ul class="govuk-list govuk-error-summary__list">
-                    @foreach (var error in ViewData.ModelState[""]?.Errors ?? new Microsoft.AspNetCore.Mvc.ModelBinding.ModelErrorCollection())
+                    @foreach (var modelError in ViewData.ModelState
+                        .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                        .SelectMany(kvp => kvp.Value!.Errors.Select(e => new { Key = kvp.Key, Error = e })))
                     {
-                        <li>@error.ErrorMessage</li>
+                        var fieldId = modelError.Key;
+                        if (fieldId == "model")
+                        {
+                            fieldId = string.Empty;
+                        }
+                        <li>
+                            @if (!string.IsNullOrWhiteSpace(fieldId))
+                            {
+                                <a href="#@fieldId">@modelError.Error.ErrorMessage</a>
+                            }
+                            else
+                            {
+                                @modelError.Error.ErrorMessage
+                            }
+                        </li>
                     }
                 </ul>
             </div>
@@ -145,6 +171,7 @@
 
     <form asp-action="ProposeChange" asp-route-fipsid="@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)" method="post" novalidate>
         @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@(ViewData["ReturnUrl"]?.ToString() ?? "")" />
 
         <h2 class="govuk-heading-l">Propose a change to product details</h2>
 

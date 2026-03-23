@@ -123,7 +123,7 @@ public class NotifyService : INotifyService
         string? currentLongDesc, string? proposedLongDesc,
         string? currentProductUrl, string? proposedProductUrl,
         List<string>? currentCategories, List<string>? proposedCategories,
-        List<string>? currentContacts, List<string>? proposedContacts,
+        List<string>? proposedContacts,
         string? currentUserDescription = null, string? proposedUserDescription = null,
         string? currentServiceOwner = null, string? proposedServiceOwner = null,
         string? currentInformationAssetOwner = null, string? proposedInformationAssetOwner = null,
@@ -176,16 +176,11 @@ public class NotifyService : INotifyService
             changes.Add($"Categories\n\nCurrent:\n{currentCatsStr}\n\nProposed:\n{proposedCatsStr}");
         }
 
-        // Contacts - show if different
-        var currentContactsStr = currentContacts != null && currentContacts.Any() 
-            ? string.Join("\n", currentContacts.Select(contact => $"• {contact}")) 
-            : "(none)";
-        var proposedContactsStr = proposedContacts != null && proposedContacts.Any() 
-            ? string.Join("\n", proposedContacts.Select(contact => $"• {contact}")) 
-            : "(none)";
-        if (!string.Equals(currentContactsStr, proposedContactsStr, StringComparison.Ordinal))
+        // Contacts - only include when the form suggests contact-list changes (do not list all existing contacts)
+        if (proposedContacts != null && proposedContacts.Any())
         {
-            changes.Add($"Contacts\n\nCurrent:\n{currentContactsStr}\n\nProposed:\n{proposedContactsStr}");
+            var proposedContactsStr = string.Join("\n", proposedContacts.Select(contact => $"• {contact}"));
+            changes.Add($"Contacts\n\nProposed:\n{proposedContactsStr}");
         }
 
         // User Description - show if different

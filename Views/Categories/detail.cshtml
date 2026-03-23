@@ -39,7 +39,7 @@
             <ul class="dfe-chevron-card__list">
                 <li class="dfe-chevron-card">
                     <div class="dfe-chevron-card__wrapper">
-                        <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
+                        <p class="govuk-heading-s govuk-!-margin-bottom-2">
                             <a class="govuk-link govuk-link--no-visited-state category-filter-link" 
                                href="/products?@GetFilterParameter(Model.CategoryType.Name, Model.ParentCategory.Slug, Model.ParentCategory.Name)"
                                data-category-name="@Model.ParentCategory.Name"
@@ -49,7 +49,7 @@
                                data-action="view_products">
                                 @Model.ParentCategory.Name
                             </a>
-                        </h2>
+                        </p>
                         <p class="dfe-chevron-card__description govuk-body govuk-body-s">@Model.ParentCategory.ShortDescription</p>
                         
                         <a class="dfe-chevron-card__link category-filter-link" 
@@ -83,7 +83,7 @@
                             @if (Model.CategoryType.MultiLevel && categoryValue.Children?.Any() == true)
                             {
                                 <!-- Multi-level category with children - use chevron card -->
-                                <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
+                                <p class="govuk-heading-s govuk-!-margin-bottom-2">
                                     <a class="govuk-link govuk-link--no-visited-state category-link" 
                                        href="/categories/@Model.CurrentSlug/@categoryValue.Slug"
                                        data-category-name="@categoryValue.Name"
@@ -92,7 +92,7 @@
                                        data-action="view_subcategory">
                                         @categoryValue.Name
                                     </a>
-                                </h2>
+                                </p>
                                 <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryValue.Children.Count sub-categories</p>
                                 
                                 <a class="dfe-chevron-card__link category-link" 
@@ -109,7 +109,7 @@
                             else
                             {
                                 <!-- Leaf category - link to products with filter -->
-                                <h2 class="govuk-heading-s govuk-!-margin-bottom-2">
+                                <p class="govuk-heading-s govuk-!-margin-bottom-2">
                                     <a class="govuk-link govuk-link--no-visited-state category-filter-link" 
                                        href="/products?@GetFilterParameter(Model.CategoryType.Name, categoryValue.Slug, categoryValue.Name)"
                                        data-category-name="@categoryValue.Name"
@@ -119,7 +119,7 @@
                                        data-action="view_products">
                                         @categoryValue.Name
                                     </a>
-                                </h2>
+                                </p>
                                 <p class="dfe-chevron-card__description govuk-body govuk-body-s">@categoryValue.ShortDescription</p>
                                 
                                 <a class="dfe-chevron-card__link category-filter-link" 
