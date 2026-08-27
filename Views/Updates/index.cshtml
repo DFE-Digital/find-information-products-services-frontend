@@ -5,20 +5,32 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">@Model.PageTitle</h1>
-    <p class="govuk-body-l">@Model.PageDescription</p>
 
-    @* TODO: populate with the page content *@
-    <p class="govuk-body">[TODO: page content]</p>
+    <p class="govuk-body">This is a new service and is currently being tested and iterated.</p>
+    <p class="govuk-body">Information about products and services is also being added and updated.</p>
+    <p class="govuk-body">If you believe that information about a product or service is incorrect, or missing, follow these steps.</p>
+
+    <h2 class="govuk-heading-l">Update a product or service</h2>
+    <ol class="govuk-list govuk-list--number">
+      <li><a asp-controller="Products" asp-action="Index" class="govuk-link">Search</a> for the product or service you want to update.</li>
+      <li>Select the service or product.</li>
+      <li>Select Propose a change in the left-hand navigation.</li>
+      <li>Edit the relevant data fields.</li>
+      <li>Check your edits and submit.</li>
+    </ol>
+
+    <h2 class="govuk-heading-l">Add a missing product or service</h2>
+    <p class="govuk-body">If you cannot find a product or service, and you know it exists, you can <a asp-controller="Products" asp-action="RequestNewEntry" class="govuk-link">request a new product entry</a>.</p>
+    <p class="govuk-body">You must be a permanent member of DfE staff to add a product or service to FIPS.</p>
+    <p class="govuk-body">This is a temporary process that will be iterated soon.</p>
   </div>
 
   <div class="govuk-grid-column-one-third">
     <aside class="govuk-aside" role="complementary">
-      <h2 class="govuk-heading-m">Get help</h2>
-      <p class="govuk-body">If you need help using this service, you can:</p>
+      <h2 class="govuk-heading-m">Related content</h2>
       <ul class="govuk-list">
-        <li><a href="/contact" class="govuk-link">Contact us</a></li>
-        <li><a href="/help" class="govuk-link">View help and support</a></li>
-        <li><a href="/feedback" class="govuk-link">Give feedback</a></li>
+        <li><a asp-controller="About" asp-action="Index" class="govuk-link">About this service</a></li>
+        <li><a asp-controller="Contact" asp-action="Index" class="govuk-link">Contact us</a></li>
       </ul>
     </aside>
   </div>

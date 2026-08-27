@@ -5,20 +5,35 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">@Model.PageTitle</h1>
-    <p class="govuk-body-l">@Model.PageDescription</p>
 
-    @* TODO: populate with the page content *@
-    <p class="govuk-body">[TODO: page content]</p>
+    <p class="govuk-body">Find information about products and services (FIPS) is an internal-facing service that enables you to access details for DfE products and services in digital, data and technology.</p>
+
+    <h2 class="govuk-heading-l">How to use the service</h2>
+    <p class="govuk-body">You can use this service to understand:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>what products and services exist in DfE, from discovery to decommissioned phase</li>
+      <li>products and services that were explored, but did not progress past alpha</li>
+      <li>who to contact to find out about a product or service</li>
+      <li>the types of products or services, for example, transactional or information</li>
+      <li>the channels used to deliver products or services</li>
+      <li>an overview of products and services in each business area or portfolio</li>
+      <li>user groups supported for each product or service</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">To get started</h2>
+    <p class="govuk-body">You can:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><a asp-controller="Products" asp-action="Index" class="govuk-link">search all products and services</a></li>
+      <li><a asp-controller="Categories" asp-action="Index" class="govuk-link">browse categories</a> to find products and services</li>
+    </ul>
   </div>
 
   <div class="govuk-grid-column-one-third">
     <aside class="govuk-aside" role="complementary">
-      <h2 class="govuk-heading-m">Get help</h2>
-      <p class="govuk-body">If you need help using this service, you can:</p>
+      <h2 class="govuk-heading-m">Related content</h2>
       <ul class="govuk-list">
-        <li><a href="/contact" class="govuk-link">Contact us</a></li>
-        <li><a href="/help" class="govuk-link">View help and support</a></li>
-        <li><a href="/feedback" class="govuk-link">Give feedback</a></li>
+        <li><a asp-controller="Updates" asp-action="Index" class="govuk-link">Keep information updated</a></li>
+        <li><a asp-controller="Contact" asp-action="Index" class="govuk-link">Contact us</a></li>
       </ul>
     </aside>
   </div>

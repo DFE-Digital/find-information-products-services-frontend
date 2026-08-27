@@ -6,7 +6,7 @@
     <div class="govuk-width-container">
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-full">
-                <a href="/" class="govuk-back-link">Back to home</a>
+                <a asp-controller="Home" asp-action="Index" class="govuk-back-link">Back to home</a>
             </div>
         </div>
     </div>
@@ -15,33 +15,26 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">@Model.PageTitle</h1>
-    <p class="govuk-body-l">@Model.PageDescription</p>
 
-    @* The page body sits in its own element with the e-mail paragraph first, as the published
-       page's body did: the Playwright suite locates that paragraph as the first child of its
-       container (HomePage.ServiceEmailDesc) and pins the "Give feedback" heading and sentence. *@
+    @* The e-mail paragraph is the first child of its own element:
+       the Playwright suite locates it as such (HomePage.ServiceEmailDesc). *@
     <div>
       <p class="govuk-body">
-        Email the FIPS team at
-        <a href="mailto:fips.service@education.gov.uk" class="govuk-link">fips.service@education.gov.uk</a>.
+        Email <a href="mailto:fips.service@education.gov.uk" class="govuk-link">fips.service@education.gov.uk</a>
+        if you have a question about this service.
       </p>
 
-      @* TODO: populate with the rest of the page content *@
-      <p class="govuk-body">[TODO: page content]</p>
-
-      <h2 class="govuk-heading-m">Give feedback</h2>
+      <h2 class="govuk-heading-l">Give feedback</h2>
       <p class="govuk-body">If you have any feedback for the service, use the feedback link at the end of each page.</p>
     </div>
   </div>
 
   <div class="govuk-grid-column-one-third">
     <aside class="govuk-aside" role="complementary">
-      <h2 class="govuk-heading-m">Get help</h2>
-      <p class="govuk-body">If you need help using this service, you can:</p>
+      <h2 class="govuk-heading-m">Related content</h2>
       <ul class="govuk-list">
-        <li><a href="/contact" class="govuk-link">Contact us</a></li>
-        <li><a href="/help" class="govuk-link">View help and support</a></li>
-        <li><a href="/feedback" class="govuk-link">Give feedback</a></li>
+        <li><a asp-controller="About" asp-action="Index" class="govuk-link">About this service</a></li>
+        <li><a asp-controller="Updates" asp-action="Index" class="govuk-link">Keep information updated</a></li>
       </ul>
     </aside>
   </div>
