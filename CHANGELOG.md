@@ -86,25 +86,17 @@ The application runs, and is tested, on a developer's machine without anything h
 
 ### Maintenance
 
-- **Build:** a fresh clone builds with only the .NET SDK and Node.js installed.
-  The project file now installs the npm packages the stylesheet step needs, on the first build and whenever the package manifests change,
-  and leaves the job to the workflow's `npm ci` under CI.
-  Previously `npm install` was a remembered step the README did not mention, and a fresh clone's build failed inside the Sass compiler with an error that read as a stylesheet problem.
-- **Build:** a build no longer rewrites the tracked stylesheet `accessible-autocomplete.min.css`, which left the working tree dirty after every build on every machine.
-  The Sass input directory held a copy of that vendored file so `main.scss` could import it, and the compiler re-emitted it as output;
-  the import also produced a plain `@import` in `main.css`, so the browser fetched a stylesheet the layout already links.
-  The copy and the import go; the layout's link is unchanged, so the page loads it once.
-- **Repository:** the README names the addresses the launch profiles actually use (5505 and 7601), not 5000 and 5001.
-- **Configuration:** the settings template's placeholders now say what shape a value takes:
-  an all-zero GUID where a GUID is expected, an empty string where a secret or address is, and the code's own default where it has one.
-  Previously every placeholder was a `YOUR_…` string, which a copied template carried straight into a running instance,
-  and which said nothing about whether a value was a GUID, a URL, or a key.
-  The `Entra` section is gone, as nothing reads it (the application reads `AzureAd`);
-  the service assessments address is left blank, because the code disagrees with itself about which address it is.
-- **Configuration:** the address of the service assessments service is now the setting `SAS:BaseUrl` (`SAS__BaseUrl`).
-  It was `SAS:TenantId`, a name that said tenant while the value was always an address, and the settings template offered a tenant ID placeholder for it.
-  The old name is still read so an instance configured with it keeps working, and start-up logs a warning naming the new setting whenever the old one is relied on;
-  the old name stops being read once every hosted app has the new one.
+- **Build:** a fresh clone builds with only the .NET SDK and Node.js installed:
+  the project file installs the npm packages itself (skipped under CI, where the workflow's `npm ci` does it).
+  Previously `npm install` was an unwritten step, and a fresh build failed inside the Sass compiler.
+- **Build:** a build no longer rewrites `wwwroot/css/accessible-autocomplete.min.css`, so the working tree stays clean.
+  The page also stops fetching that stylesheet twice.
+- **Repository:** the README gives the addresses the launch profiles actually use (5505 and 7601).
+- **Configuration:** the settings template's placeholders show the shape of each value
+  (an all-zero GUID, an empty string, or the code's own default) instead of `YOUR_…` text.
+  The unread `Entra` section is removed.
+- **Configuration:** `SAS:TenantId` is renamed `SAS:BaseUrl`, which is what the value has always been.
+  The old name still works, with a start-up warning, until every hosted app uses the new one.
 
 ## [v2026.08.27-0002]
 
