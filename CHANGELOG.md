@@ -99,10 +99,11 @@ The service's own pages (about, contact, data, updates, and help) come from this
   so a link to a page that no longer exists fails when the page is rendered, not when somebody clicks it,
   and the IDE can check them.
 - **Configuration:** the address of the feedback survey ("Give us feedback about this service" in the footer,
-  "Give feedback" on the data page) is read from configuration as `Feedback:SurveyUrl` instead of being written into the page markup.
-  A blank value hides the link (the application logs a warning at start-up); a value that is not a URL stops the application starting.
-  Until the hosted apps have the application setting `Feedback__SurveyUrl`, the application uses a built-in default, the current survey address,
-  so nothing changes for users; the default is to be removed once the setting is in place.
+  "Give feedback" on the data page) and the mailbox on the contact page are read from configuration,
+  as `Feedback:SurveyUrl` and `Contact:Email`, instead of being written into the page markup.
+  A blank value hides that link (the application logs a warning at start-up); a value that is not a URL, or not an e-mail address, stops the application starting.
+  Until the hosted apps have the application settings `Feedback__SurveyUrl` and `Contact__Email`, the application uses built-in defaults, the current addresses,
+  so nothing changes for users; the defaults are to be removed once the settings are in place.
 
 ## [v2026.08.27-0001]
 

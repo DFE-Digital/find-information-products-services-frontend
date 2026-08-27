@@ -1,3 +1,4 @@
+@inject IOptions<ContactOptions> ContactOptions
 @{
     ViewData["Title"] = "Contact us";
 }
@@ -16,13 +17,14 @@
   <div class="govuk-grid-column-two-thirds">
     <h1 class="govuk-heading-xl">Contact us</h1>
 
-    @* The e-mail paragraph is the first child of its own element:
-       the Playwright suite locates it as such (HomePage.ServiceEmailDesc). *@
     <div>
-      <p class="govuk-body">
-        Email <a href="mailto:fips.service@education.gov.uk" class="govuk-link">fips.service@education.gov.uk</a>
-        if you have a question about this service.
-      </p>
+      @if (ContactOptions.Value.HasEmail)
+      {
+        <p class="govuk-body">
+          Email <a href="mailto:@ContactOptions.Value.Email" class="govuk-link">@ContactOptions.Value.Email</a>
+          if you have a question about this service.
+        </p>
+      }
 
       <h2 class="govuk-heading-l">Give feedback</h2>
       <p class="govuk-body">If you have any feedback for the service, use the feedback link at the end of each page.</p>

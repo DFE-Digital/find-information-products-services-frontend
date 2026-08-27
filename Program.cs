@@ -105,6 +105,11 @@ builder.Services.AddOptions<FeedbackOptions>()
     .Validate(options => options.IsValid(), "Feedback:SurveyUrl must be an absolute http or https URL, or left empty.")
     .ValidateOnStart();
 
+builder.Services.AddOptions<ContactOptions>()
+    .Bind(builder.Configuration.GetSection(ContactOptions.SectionName))
+    .Validate(options => options.IsValid(), "Contact:Email must be an e-mail address, or left empty.")
+    .ValidateOnStart();
+
 // Generated links keep the paths the site has always used ("/about", not "/About").
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
@@ -195,6 +200,11 @@ var app = builder.Build();
 if (!app.Services.GetRequiredService<IOptions<FeedbackOptions>>().Value.HasSurvey)
 {
     app.Logger.LogWarning("Feedback:SurveyUrl is blank, so the feedback survey link is not shown.");
+}
+
+if (!app.Services.GetRequiredService<IOptions<ContactOptions>>().Value.HasEmail)
+{
+    app.Logger.LogWarning("Contact:Email is blank, so the contact page does not offer an e-mail address.");
 }
 
 // Configure the HTTP request pipeline.

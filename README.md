@@ -45,11 +45,14 @@ Update `appsettings.json` with your configuration:
   },
   "Feedback": {
     "SurveyUrl": "https://example.com/your-feedback-survey"
+  },
+  "Contact": {
+    "Email": "your-service-mailbox@example.com"
   }
 }
 ```
 
-`Feedback:SurveyUrl` is the external survey linked from every page's footer and from the data page. Omit it and the application's built-in default is used; set it blank and the link is not shown. On a hosted app set it as the application setting `Feedback__SurveyUrl`.
+`Feedback:SurveyUrl` is the external survey linked from every page's footer and from the data page; `Contact:Email` is the mailbox offered on the contact page. Omit either and the application's built-in default is used; set it blank and that link is not shown. On a hosted app set them as the application settings `Feedback__SurveyUrl` and `Contact__Email`.
 
 ### 2. CMS API Keys
 
