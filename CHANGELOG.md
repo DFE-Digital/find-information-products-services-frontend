@@ -95,6 +95,12 @@ The application runs, and is tested, on a developer's machine without anything h
   the import also produced a plain `@import` in `main.css`, so the browser fetched a stylesheet the layout already links.
   The copy and the import go; the layout's link is unchanged, so the page loads it once.
 - **Repository:** the README names the addresses the launch profiles actually use (5505 and 7601), not 5000 and 5001.
+- **Configuration:** the settings template's placeholders now say what shape a value takes:
+  an all-zero GUID where a GUID is expected, an empty string where a secret or address is, and the code's own default where it has one.
+  Previously every placeholder was a `YOUR_…` string, which a copied template carried straight into a running instance,
+  and which said nothing about whether a value was a GUID, a URL, or a key.
+  The `Entra` section is gone, as nothing reads it (the application reads `AzureAd`);
+  `SAS:TenantId` is left blank: the code reads it as an address, not a tenant ID, and disagrees with itself about which address.
 
 ## [v2026.08.27-0002]
 
