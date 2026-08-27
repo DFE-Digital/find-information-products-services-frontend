@@ -98,7 +98,7 @@ The application runs, and is tested, on a developer's machine without anything h
 - **Configuration:** `SAS:TenantId` is renamed `SAS:BaseUrl`, which is what the value has always been.
   The old name still works, with a start-up warning, until every hosted app uses the new one.
 - **Dependencies:** the application runs on .NET 10 (support for .NET 8 ends in November 2026) with every package at its current release,
-  and the vulnerability audit is clean (it reported four advisories before).
+  and both vulnerability audits, NuGet and npm, are clean (each reported four advisories before).
   The GOV.UK and MoJ frontend packages are deliberately left as they are, since their updates change what users see.
 - **Build:** the stylesheets compile on Node 24 (Node 20 is out of support) with the current Sass; the compiled output is unchanged.
 
