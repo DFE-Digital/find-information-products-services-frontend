@@ -15,12 +15,14 @@ so a version showing Maintenance alone changed nothing for users.
 Versions are calendar-based tags on `main`, `vYYYY.MM.DD-NNNN` - the date and the zero-padded
 count of versions cut that day (it resets daily, and is padded so tags sort) - made by renaming
 the Unreleased heading to that version in the commit that is tagged and starting a fresh
-Unreleased above it; the date is in the version, so headings carry no separate date. Before the
-first entry below there were no version numbers, tags or releases; the running application
-reported `1.0.0` for every build.
+Unreleased above it; the date is in the version, so headings carry no separate date. Directly
+under each version heading, one sentence says what the version is for. If that takes more than
+a sentence or two, the version is carrying unrelated changes and should have been cut sooner.
+Before the first entry below there were no version numbers, tags, or releases; the running
+application reported `1.0.0` for every build.
 
-To cut a version: rename `## [Unreleased]` to `## [vYYYY.MM.DD-NNNN]`, delete its "None" groups,
-and paste this above it:
+To cut a version: rename `## [Unreleased]` to `## [vYYYY.MM.DD-NNNN]`, write its one-sentence
+summary under the heading, delete its "None" groups, and paste this above it:
 
 ```markdown
 ## [Unreleased]
@@ -56,6 +58,8 @@ and paste this above it:
 
 ## [Unreleased]
 
+The service's own pages (about, contact, data, updates, and help) come from this repository rather than the CMS.
+
 ### Added
 
 - None.
@@ -82,11 +86,26 @@ and paste this above it:
 
 ### Maintenance
 
-- **Pages:** the About, Contact, Data, Updates and Help pages no longer fetch their content from the CMS on every request.
+- **Pages:** the About, Contact, Data, Updates, and Help pages no longer fetch their content from the CMS on every request.
   The copy now lives in this repository as plain page markup, edited and released like any other change.
   Before this change each page requested a CMS record per visit; when the CMS answered nothing,
   four of the five rendered an empty page with no error, and when it was unreachable the empty page arrived after the retry policy gave up.
   The markdown rendering helper and its package go with the CMS records, as nothing else used them.
+  Links between these pages are generated from controller and action names rather than typed as paths,
+  so a link to a page that no longer exists fails when the page is rendered, not when somebody clicks it,
+  and the IDE can check them.
+- **Configuration:** the address of the feedback survey ("Give us feedback about this service" in the footer,
+  "Give feedback" on the data page) is read from configuration as `Feedback:SurveyUrl` instead of being written into the page markup.
+  A blank value hides the link (the application logs a warning at start-up); a value that is not a URL stops the application starting.
+  Until the hosted apps have the application setting `Feedback__SurveyUrl`, the application uses a built-in default, the current survey address,
+  so nothing changes for users; the default is to be removed once the setting is in place.
+
+## [v2026.08.27-0001]
+
+Merging to `main` no longer deploys to the public site: one workflow builds once, deploys to `development` on merge, and deploys to `production` only when a person asks, with the build made reproducible along the way.
+
+### Maintenance
+
 - **Build:** tool versions (Node, .NET SDK) are now stated explicitly in the repository,
   allowing them to be shared between developer machines and GitHub Actions/workflows.
   See `.nvmrc` and `global.json` for details (note the versions themselves are unchanged for now but do need updating soon;

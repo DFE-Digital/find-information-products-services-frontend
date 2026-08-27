@@ -42,9 +42,14 @@ Update `appsettings.json` with your configuration:
     "BaseUrl": "http://localhost:1337/api",
     "ReadApiKey": "YOUR_READ_API_KEY",
     "WriteApiKey": "YOUR_WRITE_API_KEY"
+  },
+  "Feedback": {
+    "SurveyUrl": "https://example.com/your-feedback-survey"
   }
 }
 ```
+
+`Feedback:SurveyUrl` is the external survey linked from every page's footer and from the data page. Omit it and the application's built-in default is used; set it blank and the link is not shown. On a hosted app set it as the application setting `Feedback__SurveyUrl`.
 
 ### 2. CMS API Keys
 

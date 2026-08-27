@@ -100,6 +100,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IAirtableService, AirtableService>();
 builder.Services.Configure<AirtableConfiguration>(builder.Configuration.GetSection("Airtable"));
 
+builder.Services.AddOptions<FeedbackOptions>()
+    .Bind(builder.Configuration.GetSection(FeedbackOptions.SectionName))
+    .Validate(options => options.IsValid(), "Feedback:SurveyUrl must be an absolute http or https URL, or left empty.")
+    .ValidateOnStart();
+
+// Generated links keep the paths the site has always used ("/about", not "/About").
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+
 // Register Service Assessments service
 builder.Services.AddHttpClient<IServiceAssessmentsService, ServiceAssessmentsService>(client =>
 {
@@ -183,6 +191,11 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+
+if (!app.Services.GetRequiredService<IOptions<FeedbackOptions>>().Value.HasSurvey)
+{
+    app.Logger.LogWarning("Feedback:SurveyUrl is blank, so the feedback survey link is not shown.");
+}
 
 // Configure the HTTP request pipeline.
 // Show detailed errors in both development and production for debugging

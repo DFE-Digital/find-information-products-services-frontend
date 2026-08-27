@@ -1,4 +1,5 @@
 @model DataViewModel
+@inject IOptions<FeedbackOptions> FeedbackOptions
 @{ ViewData["Title"] = Model.PageTitle; }
 @{ ViewData["Description"] = Model.PageDescription; }
 
@@ -134,7 +135,10 @@
       <ul class="govuk-list">
         <li><a asp-controller="Contact" asp-action="Index" class="govuk-link">Contact us</a></li>
         <li><a asp-controller="Help" asp-action="Index" class="govuk-link">View help and support</a></li>
-        <li><a href="https://dferesearch.fra1.qualtrics.com/jfe/form/SV_bHoLXsj3BfAh3ZI" class="govuk-link" rel="noopener noreferrer">Give feedback</a></li>
+        @if (FeedbackOptions.Value.HasSurvey)
+        {
+          <li><a href="@FeedbackOptions.Value.SurveyUrl" class="govuk-link" rel="noopener noreferrer">Give feedback</a></li>
+        }
       </ul>
     </aside>
   </div>
