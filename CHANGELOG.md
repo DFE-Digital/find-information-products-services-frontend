@@ -58,6 +58,8 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ## [Unreleased]
 
+The application runs, and is tested, on a developer's machine without anything hosted.
+
 ### Added
 
 - None.
@@ -84,7 +86,15 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ### Maintenance
 
-- None.
+- **Build:** a fresh clone builds with only the .NET SDK and Node.js installed.
+  The project file now installs the npm packages the stylesheet step needs, on the first build and whenever the package manifests change,
+  and leaves the job to the workflow's `npm ci` under CI.
+  Previously `npm install` was a remembered step the README did not mention, and a fresh clone's build failed inside the Sass compiler with an error that read as a stylesheet problem.
+- **Build:** a build no longer rewrites the tracked stylesheet `accessible-autocomplete.min.css`, which left the working tree dirty after every build on every machine.
+  The Sass input directory held a copy of that vendored file so `main.scss` could import it, and the compiler re-emitted it as output;
+  the import also produced a plain `@import` in `main.css`, so the browser fetched a stylesheet the layout already links.
+  The copy and the import go; the layout's link is unchanged, so the page loads it once.
+- **Repository:** the README names the addresses the launch profiles actually use (5505 and 7601), not 5000 and 5001.
 
 ## [v2026.08.27-0002]
 

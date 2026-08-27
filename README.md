@@ -78,9 +78,13 @@ You'll need to obtain API keys from your Strapi CMS instance:
 dotnet run
 ```
 
-The application will be available at:
-- HTTP: `http://localhost:5000`
-- HTTPS: `https://localhost:5001`
+The build installs the npm packages it needs (the Sass compiler for the stylesheets) on the first
+run and whenever `package.json` changes, so a fresh clone needs only the .NET SDK named in
+`global.json` and Node.js (see `.nvmrc` for the version the build is tested with).
+
+The application will be available at the addresses in `Properties/launchSettings.json`:
+- HTTP: `http://localhost:5505`
+- HTTPS: `https://localhost:7601`
 
 ### Production
 
