@@ -26,22 +26,17 @@ Update `appsettings.json` with your configuration:
 {
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",
-    "Domain": "YOUR_DOMAIN.onmicrosoft.com",
-    "TenantId": "YOUR_TENANT_ID",
-    "ClientId": "YOUR_CLIENT_ID",
-    "ClientSecret": "YOUR_CLIENT_SECRET",
-    "SecretId": "YOUR_SECRET_ID",
+    "Domain": "",
+    "TenantId": "00000000-0000-0000-0000-000000000000",
+    "ClientId": "00000000-0000-0000-0000-000000000000",
+    "ClientSecret": "",
+    "SecretId": "00000000-0000-0000-0000-000000000000",
     "CallbackPath": "/signin-oidc"
-  },
-  "Entra": {
-    "TenantId": "YOUR_TENANT_ID",
-    "ClientId": "YOUR_CLIENT_ID",
-    "ClientSecret": "YOUR_CLIENT_SECRET"
   },
   "CmsApi": {
     "BaseUrl": "http://localhost:1337/api",
-    "ReadApiKey": "YOUR_READ_API_KEY",
-    "WriteApiKey": "YOUR_WRITE_API_KEY"
+    "ReadApiKey": "",
+    "WriteApiKey": ""
   },
   "Feedback": {
     "SurveyUrl": "https://example.com/your-feedback-survey"
