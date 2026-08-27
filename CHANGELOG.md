@@ -104,6 +104,7 @@ The service's own pages (about, contact, data, updates, and help) come from this
   A blank value hides that link (the application logs a warning at start-up); a value that is not a URL, or not an e-mail address, stops the application starting.
   Until the hosted apps have the application settings `Feedback__SurveyUrl` and `Contact__Email`, the application uses built-in defaults, the current addresses,
   so nothing changes for users; the defaults are to be removed once the settings are in place.
+  The settings template now also lists the `Notify` section (API key, mailbox, template IDs) that the notification service has always required but the template never mentioned.
 
 ## [v2026.08.27-0001]
 
