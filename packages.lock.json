@@ -15,12 +15,6 @@
           "System.Runtime.Extensions": "4.3.0"
         }
       },
-      "Markdig": {
-        "type": "Direct",
-        "requested": "[0.41.3, )",
-        "resolved": "0.41.3",
-        "contentHash": "i3vSTyGpBGWbJB04aJ3cPJs0T3BV2e1nduW3EUHK/i+xUupYbym75iZPss/XjqhS5JlBErwQYnx7ofK3Zcsozg=="
-      },
       "Microsoft.ApplicationInsights.AspNetCore": {
         "type": "Direct",
         "requested": "[2.22.0, )",

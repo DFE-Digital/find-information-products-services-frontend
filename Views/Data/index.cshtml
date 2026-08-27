@@ -1,52 +1,145 @@
-@model DataViewModel
-@{ ViewData["Title"] = Model.PageTitle; } 
-@{ ViewData["Description"] = Model.PageDescription; }
+@inject IOptions<FeedbackOptions> FeedbackOptions
+@{
+    ViewData["Title"] = "Use the data";
+}
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    @if (Model.PageContent != null)
-    {
-        <h1 class="govuk-heading-xl">@Model.PageContent.Title</h1>
-        
-        @if (!string.IsNullOrEmpty(Model.PageContent.MetaDescription))
-        {
-            <p class="govuk-body-l">@Model.PageContent.MetaDescription</p>
-        }
-        
-      
-        @if (!string.IsNullOrEmpty(Model.ProcessedBody))
-        {
-            <div>
-                @Html.Raw(Model.ProcessedBody)
-            </div>
-        }
-        else if (!string.IsNullOrEmpty(Model.PageContent?.Body))
-        {
-            <div>
-                <p class="govuk-body"><strong>Fallback - showing raw markdown:</strong></p>
-                <pre>@Model.PageContent.Body</pre>
-            </div>
-        }
-    }
-   
+    <h1 class="govuk-heading-xl">Using the data</h1>
+    <p class="govuk-body-l">Guidance for using the data</p>
+
+    <p class="govuk-body">The FIPS system provides comprehensive data about digital products and services across government departments. This data is automatically synchronised from ServiceNow CMDB and enriched with additional information from service assessments and accessibility compliance systems.</p>
+
+    <h2 class="govuk-heading-l">Data sources</h2>
+
+    <h3 class="govuk-heading-m">Primary data source</h3>
+    <p class="govuk-body"><strong>ServiceNow CMDB</strong> - Configuration Management Database</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Core product information (names, descriptions, metadata)</li>
+      <li>Service ownership and contact details</li>
+      <li>Technical specifications and dependencies</li>
+      <li>Service status and lifecycle information</li>
+      <li>Synchronised daily at 5am</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Secondary data sources</h3>
+    <p class="govuk-body"><strong>Service Assessment Service (SAS)</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Assessment results and compliance data</li>
+      <li>Service evaluation metrics</li>
+      <li>Standards compliance information</li>
+      <li>Synchronised daily at 5am</li>
+    </ul>
+    <p class="govuk-body"><strong>Accessibility Issues Service (AISS)</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Accessibility compliance data</li>
+      <li>WCAG standards tracking</li>
+      <li>Issue identification and resolution</li>
+      <li>Synchronised daily at 5am</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Data structure</h2>
+
+    <h3 class="govuk-heading-m">Product information includes:</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Basic details</strong>: Name, description, category, status</li>
+      <li><strong>Ownership</strong>: Department, service owner, contact information</li>
+      <li><strong>Technical details</strong>: Platform, dependencies, integrations</li>
+      <li><strong>Compliance</strong>: Assessment results, accessibility status</li>
+      <li><strong>Lifecycle</strong>: Creation date, last updated, retirement plans</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Data quality</h3>
+    <p class="govuk-body">All data undergoes validation and transformation to ensure:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Consistency</strong>: Standardised field names and formats</li>
+      <li><strong>Accuracy</strong>: Required fields are present and valid</li>
+      <li><strong>Completeness</strong>: All available information is captured</li>
+      <li><strong>Integrity</strong>: Data relationships are maintained</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">API access</h2>
+    <p class="govuk-body">FIPS provides a REST API for programmatic access to product data:</p>
+
+    <h3 class="govuk-heading-m">Available endpoints</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Products</strong>: /api/products - Complete product listings</li>
+      <li><strong>Categories</strong>: /api/categories - Product categories and classifications</li>
+      <li><strong>Assessments</strong>: /api/assessments - Service assessment data</li>
+      <li><strong>Search</strong>: /api/search - Advanced search and filtering</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Authentication</h3>
+    <p class="govuk-body">API access requires authentication using:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Microsoft Entra ID integration</li>
+      <li>Bearer token authentication</li>
+      <li>Role-based access control</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Rate limiting</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>1000 requests per hour per user</li>
+      <li>Bulk data exports available on request</li>
+      <li>Contact us for higher rate limits</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Data formats</h2>
+
+    <h3 class="govuk-heading-m">Available formats</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>JSON</strong>: Primary API format with full metadata</li>
+      <li><strong>CSV</strong>: Bulk export for analysis and reporting</li>
+      <li><strong>XML</strong>: Legacy system integration support</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Export options</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Real-time</strong>: Live data via API</li>
+      <li><strong>Scheduled</strong>: Daily exports via email</li>
+      <li><strong>On-demand</strong>: Custom exports on request</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Data governance</h2>
+
+    <h3 class="govuk-heading-m">Privacy and security</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>All data access is logged and audited</li>
+      <li>Personal information is protected according to GDPR requirements</li>
+      <li>Access is restricted to authorised government users</li>
+      <li>Data retention follows government guidelines</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Data accuracy</h3>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>ServiceNow CMDB remains the authoritative source</li>
+      <li>Changes should be made in ServiceNow, not FIPS</li>
+      <li>Data is validated during synchronisation</li>
+      <li>Discrepancies are flagged for review</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Getting help with data</h2>
+    <p class="govuk-body">If you need help accessing or using FIPS data:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Technical support</strong>: Contact us for API access and integration help</li>
+      <li><strong>Data questions</strong>: Reach out if you need clarification on specific data fields</li>
+      <li><strong>Custom exports</strong>: Request tailored data exports for your needs</li>
+      <li><strong>Training</strong>: Arrange training sessions for your team</li>
+    </ul>
   </div>
-  
+
   <div class="govuk-grid-column-one-third">
     <aside class="govuk-aside" role="complementary">
-      @if (!string.IsNullOrEmpty(Model.ProcessedRelatedContent))
-      {
-        @Html.Raw(Model.ProcessedRelatedContent)
-      }
-      else
-      {
-        <h2 class="govuk-heading-m">Get help</h2>
-        <p class="govuk-body">If you need help using this service, you can:</p>
-        <ul class="govuk-list">
-          <li><a href="/contact" class="govuk-link">Contact us</a></li>
-          <li><a href="/help" class="govuk-link">View help and support</a></li>
-          <li><a href="/feedback" class="govuk-link">Give feedback</a></li>
-        </ul>
-      }
+      <h2 class="govuk-heading-m">Get help</h2>
+      <p class="govuk-body">If you need help using this service, you can:</p>
+      <ul class="govuk-list">
+        <li><a asp-controller="Contact" asp-action="Index" class="govuk-link">Contact us</a></li>
+        <li><a asp-controller="Help" asp-action="Index" class="govuk-link">View help and support</a></li>
+        @if (FeedbackOptions.Value.HasSurvey)
+        {
+          <li><a href="@FeedbackOptions.Value.SurveyUrl" class="govuk-link" rel="noopener noreferrer">Give feedback</a></li>
+        }
+      </ul>
     </aside>
   </div>
 </div>

@@ -1,75 +1,169 @@
-@model HelpViewModel
-@{ ViewData["Title"] = Model.PageTitle; } 
-@{ ViewData["Description"] = Model.PageDescription; }
+@{
+    ViewData["Title"] = "Help and support";
+}
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    @if (Model.PageContent != null)
-    {
-        <h1 class="govuk-heading-xl">@Model.PageContent.Title</h1>
-        
-        @if (!string.IsNullOrEmpty(Model.PageContent.MetaDescription))
-        {
-            <p class="govuk-body-l">@Model.PageContent.MetaDescription</p>
-        }
-        
-      
-        @if (!string.IsNullOrEmpty(Model.ProcessedBody))
-        {
-            <div>
-                @Html.Raw(Model.ProcessedBody)
-            </div>
-        }
-        else if (!string.IsNullOrEmpty(Model.PageContent?.Body))
-        {
-            <div>
-                <p class="govuk-body"><strong>Fallback - showing raw markdown:</strong></p>
-                <pre>@Model.PageContent.Body</pre>
-            </div>
-        }
-    }
-    else
-    {
-        <h1 class="govuk-heading-xl">Help and support</h1>
-        <p class="govuk-body-l">Get help using the FIPS system</p>
-        
-        <div class="govuk-body">
-            <h2 class="govuk-heading-m">Getting started</h2>
-            <p>If you're new to FIPS, here are some ways to get help:</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li><a href="/about" class="govuk-link">Learn about this service</a></li>
-                <li><a href="/contact" class="govuk-link">Contact us directly</a></li>
-                <li>Browse the product listings to understand what's available</li>
-            </ul>
-            
-            <h2 class="govuk-heading-m">Common questions</h2>
-            <p>Here are answers to some frequently asked questions:</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li><strong>How do I find products?</strong> Use the search function or browse by category</li>
-                <li><strong>How do I update product information?</strong> <a href="/updates" class="govuk-link">See our updates page</a></li>
-                <li><strong>How do I get access?</strong> <a href="/contact" class="govuk-link">Contact us</a> to request access</li>
-            </ul>
-        </div>
-    }
-   
+    <h1 class="govuk-heading-xl">Help using this service</h1>
+    <p class="govuk-body-l">Get help using this service.</p>
+
+    <p class="govuk-body">This page provides comprehensive guidance for using the FIPS system effectively. Whether you're new to the service or need help with specific features, you'll find the information you need here.</p>
+
+    <h2 class="govuk-heading-l">Getting started</h2>
+
+    <h3 class="govuk-heading-m">First time users</h3>
+    <p class="govuk-body">If you're new to FIPS, follow these steps to get started:</p>
+    <ol class="govuk-list govuk-list--number">
+      <li><strong>Learn about the service</strong>: Read our <a asp-controller="About" asp-action="Index" class="govuk-link">about page</a> to understand what FIPS does</li>
+      <li><strong>Browse products</strong>: Use the search function to explore available digital services</li>
+      <li><strong>Get access</strong>: <a asp-controller="Contact" asp-action="Index" class="govuk-link">Contact us</a> if you need access to additional features</li>
+      <li><strong>Stay updated</strong>: Check our <a asp-controller="Updates" asp-action="Index" class="govuk-link">updates page</a> to learn how to keep information current</li>
+    </ol>
+
+    <h3 class="govuk-heading-m">Understanding the interface</h3>
+    <p class="govuk-body">The FIPS interface is designed following GOV.UK design standards:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Search bar</strong>: Use the main search to find products by name or description</li>
+      <li><strong>Category filters</strong>: Browse products by category (e.g., Communication, Development, Security)</li>
+      <li><strong>Department filters</strong>: View products by owning department</li>
+      <li><strong>Status filters</strong>: Filter by service status (Active, Inactive, New, Retired)</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Finding products and services</h2>
+
+    <h3 class="govuk-heading-m">Search techniques</h3>
+
+    <h4 class="govuk-heading-s">Basic search</h4>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Enter keywords in the search bar</li>
+      <li>Use product names, descriptions, or technical terms</li>
+      <li>Search is case-insensitive</li>
+    </ul>
+
+    <h4 class="govuk-heading-s">Advanced filtering</h4>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Combine multiple filters for precise results</li>
+      <li>Use category and department filters together</li>
+      <li>Filter by service status to find active services</li>
+    </ul>
+
+    <h4 class="govuk-heading-s">Browse by category</h4>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Explore products organised by function</li>
+      <li>Categories include: Communication, Development, Security, User Experience, and more</li>
+      <li>Each category shows related services</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Understanding product information</h3>
+    <p class="govuk-body">Each product listing includes:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Basic information</strong>: Name, description, category, status</li>
+      <li><strong>Ownership details</strong>: Department, service owner, contact information</li>
+      <li><strong>Technical specifications</strong>: Platform, dependencies, integrations</li>
+      <li><strong>Compliance information</strong>: Assessment results, accessibility status</li>
+      <li><strong>Lifecycle details</strong>: Creation date, last updated, retirement plans</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Managing product information</h2>
+
+    <h3 class="govuk-heading-m">Updating product details</h3>
+    <p class="govuk-body">Product information is automatically synchronised from ServiceNow CMDB. To update information:</p>
+    <ol class="govuk-list govuk-list--number">
+      <li><strong>Make changes in ServiceNow</strong>: Update the Configuration Management Database</li>
+      <li><strong>Wait for synchronisation</strong>: Changes appear in FIPS within 24 hours</li>
+      <li><strong>Verify updates</strong>: Check that changes appear correctly</li>
+      <li><strong>Contact support</strong>: Reach out if updates don't appear as expected</li>
+    </ol>
+
+    <h3 class="govuk-heading-m">Adding new products</h3>
+    <p class="govuk-body">New products should be added to ServiceNow CMDB first:</p>
+    <ol class="govuk-list govuk-list--number">
+      <li><strong>Create in ServiceNow</strong>: Add the product to the Configuration Management Database</li>
+      <li><strong>Include required fields</strong>: Ensure all mandatory information is provided</li>
+      <li><strong>Set appropriate status</strong>: Mark as Active when ready for use</li>
+      <li><strong>Wait for sync</strong>: Product will appear in FIPS after next synchronisation</li>
+    </ol>
+
+    <h2 class="govuk-heading-l">Common questions</h2>
+
+    <h3 class="govuk-heading-m">Access and permissions</h3>
+    <p class="govuk-body"><strong>Q: How do I get access to FIPS?</strong> A: Contact us to request access. We'll set up your account and provide login instructions.</p>
+    <p class="govuk-body"><strong>Q: Can I access FIPS from outside the office?</strong> A: Yes, FIPS is accessible from anywhere with internet access using your Microsoft Entra ID credentials.</p>
+    <p class="govuk-body"><strong>Q: What if I can't log in?</strong> A: Check your Microsoft Entra ID credentials first. If problems persist, contact us for support.</p>
+
+    <h3 class="govuk-heading-m">Data and information</h3>
+    <p class="govuk-body"><strong>Q: How often is product information updated?</strong> A: Data is synchronised daily at 5am from ServiceNow CMDB. Changes made in ServiceNow appear in FIPS within 24 hours.</p>
+    <p class="govuk-body"><strong>Q: Can I download product data?</strong> A: Yes, see our <a asp-controller="Data" asp-action="Index" class="govuk-link">data page</a> for information about API access and data exports.</p>
+    <p class="govuk-body"><strong>Q: What if I find incorrect information?</strong> A: Report incorrect information to the service owner listed on the product page, or contact us for help.</p>
+
+    <h3 class="govuk-heading-m">Technical issues</h3>
+    <p class="govuk-body"><strong>Q: The search isn't working properly</strong> A: Try refreshing the page or clearing your browser cache. If problems persist, contact us.</p>
+    <p class="govuk-body"><strong>Q: Some products aren't showing up</strong> A: Check your filter settings and ensure you're not excluding products by status or category.</p>
+    <p class="govuk-body"><strong>Q: The page is loading slowly</strong> A: This might be due to network issues. Try refreshing the page or contact us if the problem continues.</p>
+
+    <h2 class="govuk-heading-l">Getting additional help</h2>
+
+    <h3 class="govuk-heading-m">Contact options</h3>
+
+    <h4 class="govuk-heading-s">Email support</h4>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Send detailed questions to our support team</li>
+      <li>Include screenshots for technical issues</li>
+      <li>Response within 2 working days</li>
+    </ul>
+
+    <h4 class="govuk-heading-s">Phone support</h4>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Available for urgent issues</li>
+      <li>Business hours: Monday to Friday, 9am to 5pm</li>
+      <li>Contact details available on our contact page</li>
+    </ul>
+
+    <h4 class="govuk-heading-s">Training sessions</h4>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Group training for departments</li>
+      <li>One-to-one sessions for specific needs</li>
+      <li>Online training materials available</li>
+    </ul>
+
+    <h3 class="govuk-heading-m">Feedback and suggestions</h3>
+    <p class="govuk-body">We welcome feedback to help improve FIPS:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li><strong>Feature requests</strong>: Suggest new functionality</li>
+      <li><strong>Bug reports</strong>: Report issues you encounter</li>
+      <li><strong>User experience feedback</strong>: Help us improve the interface</li>
+      <li><strong>Content suggestions</strong>: Recommend additional help topics</li>
+    </ul>
+
+    <h2 class="govuk-heading-l">Troubleshooting</h2>
+
+    <h3 class="govuk-heading-m">Common issues and solutions</h3>
+    <p class="govuk-body"><strong>Problem</strong>: Can't find a specific product <strong>Solution</strong>: Check spelling, try different keywords, or browse by category</p>
+    <p class="govuk-body"><strong>Problem</strong>: Search results seem incomplete <strong>Solution</strong>: Clear filters or check if you're excluding products by status</p>
+    <p class="govuk-body"><strong>Problem</strong>: Product information seems outdated <strong>Solution</strong>: Check when the product was last updated and contact the service owner</p>
+    <p class="govuk-body"><strong>Problem</strong>: Can't access certain features <strong>Solution</strong>: Contact us to verify your permissions and access level</p>
+
+    <h3 class="govuk-heading-m">Browser compatibility</h3>
+    <p class="govuk-body">FIPS works with all modern browsers:</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Chrome (recommended)</li>
+      <li>Firefox</li>
+      <li>Safari</li>
+      <li>Edge</li>
+      <li>Internet Explorer 11 (limited support)</li>
+    </ul>
+    <p class="govuk-body">For the best experience, ensure your browser is up to date.</p>
   </div>
-  
+
   <div class="govuk-grid-column-one-third">
     <aside class="govuk-aside" role="complementary">
-      @if (!string.IsNullOrEmpty(Model.ProcessedRelatedContent))
-      {
-        @Html.Raw(Model.ProcessedRelatedContent)
-      }
-      else
-      {
-        <h2 class="govuk-heading-m">Get help</h2>
-        <p class="govuk-body">If you need help using this service, you can:</p>
-        <ul class="govuk-list">
-          <li><a href="/contact" class="govuk-link">Contact us</a></li>
-          <li><a href="/about" class="govuk-link">Learn about this service</a></li>
-          <li><a href="/updates" class="govuk-link">How to update information</a></li>
-        </ul>
-      }
+      <h2 class="govuk-heading-m">Get help</h2>
+      <p class="govuk-body">If you need help using this service, you can:</p>
+      <ul class="govuk-list">
+        <li><a asp-controller="Contact" asp-action="Index" class="govuk-link">Contact us</a></li>
+        <li><a asp-controller="About" asp-action="Index" class="govuk-link">Learn about this service</a></li>
+        <li><a asp-controller="Updates" asp-action="Index" class="govuk-link">How to update information</a></li>
+      </ul>
     </aside>
   </div>
 </div>

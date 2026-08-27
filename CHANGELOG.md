@@ -15,12 +15,14 @@ so a version showing Maintenance alone changed nothing for users.
 Versions are calendar-based tags on `main`, `vYYYY.MM.DD-NNNN` - the date and the zero-padded
 count of versions cut that day (it resets daily, and is padded so tags sort) - made by renaming
 the Unreleased heading to that version in the commit that is tagged and starting a fresh
-Unreleased above it; the date is in the version, so headings carry no separate date. Before the
-first entry below there were no version numbers, tags or releases; the running application
-reported `1.0.0` for every build.
+Unreleased above it; the date is in the version, so headings carry no separate date. Directly
+under each version heading, one sentence says what the version is for. If that takes more than
+a sentence or two, the version is carrying unrelated changes and should have been cut sooner.
+Before the first entry below there were no version numbers, tags, or releases; the running
+application reported `1.0.0` for every build.
 
-To cut a version: rename `## [Unreleased]` to `## [vYYYY.MM.DD-NNNN]`, delete its "None" groups,
-and paste this above it:
+To cut a version: rename `## [Unreleased]` to `## [vYYYY.MM.DD-NNNN]`, write its one-sentence
+summary under the heading, delete its "None" groups, and paste this above it:
 
 ```markdown
 ## [Unreleased]
@@ -79,6 +81,44 @@ and paste this above it:
 ### Security
 
 - None.
+
+### Maintenance
+
+- None.
+
+## [v2026.08.27-0002]
+
+The service's own pages (about, contact, data, updates, and help) come from this repository rather than the CMS.
+
+### Fixed
+
+- Pages with no view model behind them (privacy policy, page not found, error, cookie preferences, maintenance)
+  showed no service navigation, because the layout's check hid the navigation when there was no model to ask.
+  The navigation is now shown unless a page's model asks for it to be hidden.
+
+### Maintenance
+
+- **Pages:** the About, Contact, Data, Updates, and Help pages no longer fetch their content from the CMS on every request.
+  The copy now lives in this repository as plain page markup, edited and released like any other change.
+  Before this change each page requested a CMS record per visit; when the CMS answered nothing,
+  four of the five rendered an empty page with no error, and when it was unreachable the empty page arrived after the retry policy gave up.
+  The markdown rendering helper and its package go with the CMS records, as nothing else used them,
+  and so do the five view models: each page now has the shape of the repository's other content-only pages,
+  with its title set in the view and no model.
+  Links between these pages are generated from controller and action names rather than typed as paths,
+  so a link to a page that no longer exists fails when the page is rendered, not when somebody clicks it,
+  and the IDE can check them.
+- **Configuration:** the address of the feedback survey ("Give us feedback about this service" in the footer,
+  "Give feedback" on the data page) and the mailbox on the contact page are read from configuration,
+  as `Feedback:SurveyUrl` and `Contact:Email`, instead of being written into the page markup.
+  A blank value hides that link (the application logs a warning at start-up); a value that is not a URL, or not an e-mail address, stops the application starting.
+  Until the hosted apps have the application settings `Feedback__SurveyUrl` and `Contact__Email`, the application uses built-in defaults, the current addresses,
+  so nothing changes for users; the defaults are to be removed once the settings are in place.
+  The settings template now also lists the `Notify` section (API key, mailbox, template IDs) that the notification service has always required but the template never mentioned.
+
+## [v2026.08.27-0001]
+
+Merging to `main` no longer deploys to the public site: one workflow builds once, deploys to `development` on merge, and deploys to `production` only when a person asks, with the build made reproducible along the way.
 
 ### Maintenance
 

@@ -42,9 +42,17 @@ Update `appsettings.json` with your configuration:
     "BaseUrl": "http://localhost:1337/api",
     "ReadApiKey": "YOUR_READ_API_KEY",
     "WriteApiKey": "YOUR_WRITE_API_KEY"
+  },
+  "Feedback": {
+    "SurveyUrl": "https://example.com/your-feedback-survey"
+  },
+  "Contact": {
+    "Email": "your-service-mailbox@example.com"
   }
 }
 ```
+
+`Feedback:SurveyUrl` is the external survey linked from every page's footer and from the data page; `Contact:Email` is the mailbox offered on the contact page. Omit either and the application's built-in default is used; set it blank and that link is not shown. On a hosted app set them as the application settings `Feedback__SurveyUrl` and `Contact__Email`.
 
 ### 2. CMS API Keys
 

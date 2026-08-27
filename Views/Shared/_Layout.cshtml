@@ -1,4 +1,5 @@
 @using FipsFrontend.Helpers
+@inject IOptions<FeedbackOptions> FeedbackOptions
 <!DOCTYPE html>
 <html lang="en" class="govuk-template--rebranded">
 <head>
@@ -77,7 +78,7 @@ height="0" width="0" class="gtm-inline-hidden"></iframe></noscript>
   </div>
 </header>
 
-@if (!(ViewData.Model as BaseViewModel)?.HideNavigation == true || Context.Request.Path.StartsWithSegments("/Admin")) {
+@if ((ViewData.Model as BaseViewModel)?.HideNavigation != true || Context.Request.Path.StartsWithSegments("/Admin")) {
 <section aria-label="Service information" class="govuk-service-navigation @((ViewData.Model as BaseViewModel)?.IsHomepage == true ? "govuk-service-navigation--inverse" : "")"
   data-module="govuk-service-navigation">
   <div class="govuk-width-container">
@@ -135,12 +136,20 @@ height="0" width="0" class="gtm-inline-hidden"></iframe></noscript>
           <div class="dfe-feedback-banner--content">
             <h2 class="govuk-visually-hidden" id="feedback-heading">Page feedback</h2>
             <div class="dfe-feedback-banner--flex">
+              @{
+                var problemLinkText = FeedbackOptions.Value.HasSurvey
+                  ? "tell us about a problem with this page"
+                  : "Tell us about a problem with this page";
+              }
               <p class="govuk-body" id="feedback-link-text">
-                <a href="https://dferesearch.fra1.qualtrics.com/jfe/form/SV_bHoLXsj3BfAh3ZI" class="govuk-link"  rel="noopener noreferrer">
-                  Give us feedback about this service
-                </a>
-                <span class="govuk-body"> or </span>
-                <a href="/" class="govuk-link" id="feedback-link" aria-describedby="feedback-link-desc">tell us about a problem with this page</a>.
+                @if (FeedbackOptions.Value.HasSurvey)
+                {
+                  <a href="@FeedbackOptions.Value.SurveyUrl" class="govuk-link" rel="noopener noreferrer">
+                    Give us feedback about this service
+                  </a>
+                  <span class="govuk-body"> or </span>
+                }
+                <a href="/" class="govuk-link" id="feedback-link" aria-describedby="feedback-link-desc">@problemLinkText</a>.
               </p>
               <span class="govuk-visually-hidden" id="feedback-link-desc">Opens feedback form</span>
             </div>
