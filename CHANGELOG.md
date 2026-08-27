@@ -84,7 +84,8 @@ and paste this above it:
 
 - **Build:** tool versions (Node, .NET SDK) are now stated explicitly in the repository,
   allowing them to be shared between developer machines and GitHub Actions/workflows.
-  See `.nvmrc` and `global.json` for details (note they are unchanged for now but do need updating soon).
+  See `.nvmrc` and `global.json` for details (note the versions themselves are unchanged for now but do need updating soon;
+  `global.json` now names a real SDK version, `8.0.100`, because the setup action rejects the placeholder `8.0.0`).
 - **Build:** builds in CI are now reproducible and deterministic, using both 
   the npm lockfile (`package-lock.json`) and the nuget lockfile (`packages.lock.json`).
   These are used in CI via `npm ci` and `dotnet restore --locked-mode`, respectively.
