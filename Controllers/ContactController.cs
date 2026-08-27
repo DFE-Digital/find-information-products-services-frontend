@@ -18,7 +18,7 @@ public class ContactController : Controller
     }
 
     [AllowAnonymous]
-    public IActionResult Index() => View(new ContactViewModel());
+    public IActionResult Index() => View();
 
     [HttpPost]
     [AllowAnonymous]

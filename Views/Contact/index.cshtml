@@ -1,6 +1,6 @@
-@model ContactViewModel
-@{ ViewData["Title"] = Model.PageTitle; }
-@{ ViewData["Description"] = Model.PageDescription; }
+@{
+    ViewData["Title"] = "Contact us";
+}
 
 @section BeforeContent {
     <div class="govuk-width-container">
@@ -14,7 +14,7 @@
 
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-xl">@Model.PageTitle</h1>
+    <h1 class="govuk-heading-xl">Contact us</h1>
 
     @* The e-mail paragraph is the first child of its own element:
        the Playwright suite locates it as such (HomePage.ServiceEmailDesc). *@

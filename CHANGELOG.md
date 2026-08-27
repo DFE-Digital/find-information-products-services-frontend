@@ -78,7 +78,9 @@ The service's own pages (about, contact, data, updates, and help) come from this
 
 ### Fixed
 
-- None.
+- Pages with no view model behind them (privacy policy, page not found, error, cookie preferences, maintenance)
+  showed no service navigation, because the layout's check hid the navigation when there was no model to ask.
+  The navigation is now shown unless a page's model asks for it to be hidden.
 
 ### Security
 
@@ -90,7 +92,9 @@ The service's own pages (about, contact, data, updates, and help) come from this
   The copy now lives in this repository as plain page markup, edited and released like any other change.
   Before this change each page requested a CMS record per visit; when the CMS answered nothing,
   four of the five rendered an empty page with no error, and when it was unreachable the empty page arrived after the retry policy gave up.
-  The markdown rendering helper and its package go with the CMS records, as nothing else used them.
+  The markdown rendering helper and its package go with the CMS records, as nothing else used them,
+  and so do the five view models: each page now has the shape of the repository's other content-only pages,
+  with its title set in the view and no model.
   Links between these pages are generated from controller and action names rather than typed as paths,
   so a link to a page that no longer exists fails when the page is rendered, not when somebody clicks it,
   and the IDE can check them.
