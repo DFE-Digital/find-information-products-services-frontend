@@ -26,7 +26,30 @@
     <Content Include="wwwroot\govuk-frontend\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="BuildCSS" BeforeTargets="Build">
+  <!--
+    The stylesheet step runs the Sass compiler from node_modules, so the build installs the npm packages itself.
+    Incremental: a stamp file keyed on the manifests, so an ordinary build does not pay for an install.
+    Skipped under CI, where the workflow's "npm ci" is the right tool and a lockfile mismatch must fail.
+    ContinueOnError on the install only: an offline machine that already has node_modules must still build,
+    and a genuinely missing package still stops the build at BuildCSS, where the error names the missing import.
+  -->
+  <ItemGroup>
+    <NpmManifests Include="package.json" />
+    <NpmManifests Include="package-lock.json" Condition="Exists('package-lock.json')" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- BaseIntermediateOutputPath (obj/) is defined before the project body is evaluated; IntermediateOutputPath is not. -->
+    <NpmInstallStampFile>$(BaseIntermediateOutputPath)npm-install.stamp</NpmInstallStampFile>
+  </PropertyGroup>
+
+  <Target Name="NpmInstall" BeforeTargets="BuildCSS" Condition="'$(CI)' != 'true'" Inputs="@(NpmManifests)" Outputs="$(NpmInstallStampFile)">
+    <Message Importance="high" Text="Installing npm packages (first build, or a manifest changed)..." />
+    <Exec Command="npm install --no-audit --no-fund" ContinueOnError="true" />
+    <Touch Files="$(NpmInstallStampFile)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="BuildCSS" BeforeTargets="Build" DependsOnTargets="NpmInstall">
     <Exec Command="npm run build-css" ContinueOnError="false" />
   </Target>
 
