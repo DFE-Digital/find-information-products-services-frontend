@@ -58,8 +58,6 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ## [Unreleased]
 
-The service's own pages (about, contact, data, updates, and help) come from this repository rather than the CMS.
-
 ### Added
 
 - None.
@@ -78,13 +76,25 @@ The service's own pages (about, contact, data, updates, and help) come from this
 
 ### Fixed
 
-- Pages with no view model behind them (privacy policy, page not found, error, cookie preferences, maintenance)
-  showed no service navigation, because the layout's check hid the navigation when there was no model to ask.
-  The navigation is now shown unless a page's model asks for it to be hidden.
+- None.
 
 ### Security
 
 - None.
+
+### Maintenance
+
+- None.
+
+## [v2026.08.27-0002]
+
+The service's own pages (about, contact, data, updates, and help) come from this repository rather than the CMS.
+
+### Fixed
+
+- Pages with no view model behind them (privacy policy, page not found, error, cookie preferences, maintenance)
+  showed no service navigation, because the layout's check hid the navigation when there was no model to ask.
+  The navigation is now shown unless a page's model asks for it to be hidden.
 
 ### Maintenance
 
