@@ -11,7 +11,8 @@ A .NET Core MVC application for managing Federal Information Processing Standard
 
 ## Prerequisites
 
-- .NET 8.0 SDK
+- .NET SDK, the version in `global.json`
+- Node.js, the version in `.nvmrc` (the build runs the Sass compiler with it)
 - Visual Studio 2022 or VS Code
 - Access to Microsoft Entra ID tenant
 - Strapi CMS instance running
