@@ -82,6 +82,11 @@ and paste this above it:
 
 ### Maintenance
 
+- **Pages:** the About, Contact, Data, Updates and Help pages no longer fetch their content from the CMS on every request.
+  The copy now lives in this repository as plain page markup, edited and released like any other change.
+  Before this change each page requested a CMS record per visit; when the CMS answered nothing,
+  four of the five rendered an empty page with no error, and when it was unreachable the empty page arrived after the retry policy gave up.
+  The markdown rendering helper and its package go with the CMS records, as nothing else used them.
 - **Build:** tool versions (Node, .NET SDK) are now stated explicitly in the repository,
   allowing them to be shared between developer machines and GitHub Actions/workflows.
   See `.nvmrc` and `global.json` for details (note the versions themselves are unchanged for now but do need updating soon;
