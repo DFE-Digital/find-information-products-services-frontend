@@ -2,6 +2,7 @@
   "name": "fips-frontend",
   "version": "1.0.0",
   "description": "FIPS Frontend SCSS Build",
+  "packageManager": "npm@10.8.2",
   "scripts": {
     "build-css": "sass wwwroot/scss:wwwroot/css --style=compressed --source-map",
     "watch-css": "sass wwwroot/scss:wwwroot/css --watch --style=expanded --source-map",

@@ -1,0 +1,160 @@
+name: CI/CD
+
+#
+# The single route to production.
+# - CI: every pull request is built.
+# - CD: a merge to main deploys to development, automatically.
+#       Production is deployed only when a person runs this workflow from main and chooses it.
+#
+# Which Azure web app each job deploys to is not in this file:
+# each deploy job runs under a GitHub environment of the same name, and reads the app name from that environment's AZURE_WEBAPP_NAME variable.
+# The production environment's deployment-branch rule (main only) is what enforces "production only from main";
+# the `if` on the job is the readable version of the same rule.
+#
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deploy the chosen ref to development, or main to production
+        type: choice
+        required: true
+        default: development
+        options:
+          - development
+          - production
+
+env:
+  ARTEFACT_NAME: fips-frontend-web-app
+
+# No workflow-wide permissions: each job states the minimum it needs.
+permissions: {}
+
+jobs:
+  build:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # NuGet packages are cached by the action itself, keyed on packages.lock.json; npm packages likewise by setup-node,
+      # keyed on package-lock.json (switched on by the packageManager field in package.json).
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+
+      # --locked-mode refuses a restore that would change packages.lock.json, so the build uses exactly the committed package versions.
+      - name: Restore NuGet packages
+        run: dotnet restore FipsFrontend.csproj --locked-mode
+
+      - name: Publish
+        run: dotnet publish FipsFrontend.csproj --configuration Release --no-restore -o ${{ runner.temp }}/publish
+
+      - name: Upload the published app for the deploy jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ARTEFACT_NAME }}
+          path: ${{ runner.temp }}/publish
+          if-no-files-found: error
+
+  deploy_development:
+    name: Deploy to development
+    needs: build
+    # Every merge to main, or a manual run that chose development (from any ref) -
+    # and a manual run that chose production, because production is only reached through a successful development deploy.
+    if: github.event_name == 'push' || inputs.target == 'development' || inputs.target == 'production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    # One deploy at a time; a later run waits rather than racing.
+    concurrency:
+      group: deploy-development
+      cancel-in-progress: false
+    environment:
+      name: development
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    steps:
+      - name: Download the published app
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTEFACT_NAME }}
+
+      - name: Deploy to Azure Web App
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
+
+      # SMOKE_TEST_URL, if the environment sets it, is the full URL to request (for when only a friendly hostname answers);
+      # otherwise the URL of the app the deploy reports.
+      # Accepted: 2xx, 3xx, and 401 - the app sits behind authentication, which answers 401 before the app is reached,
+      # so 401 proves the platform is serving. Anything else (no answer, another 4xx, a 5xx) fails.
+      # The production job's smoke test is identical; this comment is the one place the rule is stated.
+      - name: Smoke test
+        env:
+          URL: ${{ vars.SMOKE_TEST_URL || steps.deploy.outputs.webapp-url }}
+        run: |
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 10 "$URL")
+          echo "HTTP $status"
+          case "$status" in 2*|3*|401) ;; *) exit 1 ;; esac
+
+  deploy_production:
+    name: Deploy to production
+    # Only after development has deployed and passed its smoke test in this run: a build known to be broken there is never published.
+    needs: [ build, deploy_development ]
+    # Only a manual run that chose production, and only from main. Any other run simply skips this job.
+    if: inputs.target == 'production' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    steps:
+      - name: Download the published app
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTEFACT_NAME }}
+
+      - name: Deploy to Azure Web App
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          # Note: not a typo, a legacy name we need to update in the future.
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_TEST }}
+          package: .
+
+      # Same rule as the development smoke test above, where it is explained.
+      - name: Smoke test
+        env:
+          URL: ${{ vars.SMOKE_TEST_URL || steps.deploy.outputs.webapp-url }}
+        run: |
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 10 "$URL")
+          echo "HTTP $status"
+          case "$status" in 2*|3*|401) ;; *) exit 1 ;; esac

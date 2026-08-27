@@ -12,10 +12,36 @@ public class HealthController : Controller
     private readonly ILogger<HealthController> _logger;
     private readonly ICmsHealthService _cmsHealthService;
 
+    /// <summary>
+    /// What is running, read once from the assembly. The SDK writes the commit it built from into
+    /// the informational version as <c>1.0.0+&lt;sha&gt;</c> (<c>SourceRevisionId</c>, from the repository
+    /// at build time), so the deployed code identifies itself without any build-time plumbing.
+    /// </summary>
+    private static readonly object ApplicationInfo = DescribeApplication();
+
     public HealthController(ILogger<HealthController> logger, ICmsHealthService cmsHealthService)
     {
         _logger = logger;
         _cmsHealthService = cmsHealthService;
+    }
+
+    private static object DescribeApplication()
+    {
+        var assembly = typeof(HealthController).Assembly;
+        var informationalVersion = assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault()?.InformationalVersion;
+        var separator = informationalVersion?.IndexOf('+') ?? -1;
+
+        return new
+        {
+            name = "FIPS Frontend",
+            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
+            version = assembly.GetName().Version?.ToString() ?? "Unknown",
+            informationalVersion = informationalVersion ?? "Unknown",
+            commit = separator > 0 ? informationalVersion?[(separator + 1)..] : "Unknown"
+        };
     }
 
     /// <summary>
@@ -141,7 +167,7 @@ public class HealthController : Controller
             var isCmsAvailable = await _cmsHealthService.IsCmsAvailableAsync();
             var isMaintenanceMode = _cmsHealthService.IsMaintenanceModeEnabled();
             var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-            
+
             var cmsHealthCheckResult = await _cmsHealthService.CheckCmsHealthAsync();
 
             var healthStatus = new
@@ -162,12 +188,7 @@ public class HealthController : Controller
                         configValue = configuration.GetValue<bool>("MaintenanceMode:Enabled", false)
                     }
                 },
-                application = new
-                {
-                    name = "FIPS Frontend",
-                    environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
-                    version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown"
-                }
+                application = ApplicationInfo
             };
 
             if (isCmsAvailable && !isMaintenanceMode)
@@ -187,11 +208,7 @@ public class HealthController : Controller
                 status = "Unhealthy",
                 timestamp = DateTime.UtcNow,
                 error = ex.Message,
-                application = new
-                {
-                    name = "FIPS Frontend",
-                    environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
-                }
+                application = ApplicationInfo
             });
         }
     }
