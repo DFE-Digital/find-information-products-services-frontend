@@ -1,0 +1,44 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      # Group the minor and patch updates into one PR. This makes it simpler to review and merge, rather than having them arrive separately.
+      # Needing to split these out to debug which update is causing failures is expected to be the exception rather than a rule.
+      # Major updates are not grouped and will arrive as individual PRs.
+      nuget-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      # Group the minor and patch updates into one PR. This makes it simpler to review and merge, rather than having them arrive separately.
+      # Needing to split these out to debug which update is causing failures is expected to be the exception rather than a rule.
+      # Major updates are not grouped and will arrive as individual PRs.
+      npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns:
+          - "*"
