@@ -100,7 +100,11 @@ The application runs, and is tested, on a developer's machine without anything h
   Previously every placeholder was a `YOUR_…` string, which a copied template carried straight into a running instance,
   and which said nothing about whether a value was a GUID, a URL, or a key.
   The `Entra` section is gone, as nothing reads it (the application reads `AzureAd`);
-  `SAS:TenantId` is left blank: the code reads it as an address, not a tenant ID, and disagrees with itself about which address.
+  the service assessments address is left blank, because the code disagrees with itself about which address it is.
+- **Configuration:** the address of the service assessments service is now the setting `SAS:BaseUrl` (`SAS__BaseUrl`).
+  It was `SAS:TenantId`, a name that said tenant while the value was always an address, and the settings template offered a tenant ID placeholder for it.
+  The old name is still read so an instance configured with it keeps working, and start-up logs a warning naming the new setting whenever the old one is relied on;
+  the old name stops being read once every hosted app has the new one.
 
 ## [v2026.08.27-0002]
 

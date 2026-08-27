@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FipsFrontend.Models;
+using Microsoft.Extensions.Options;
 
 namespace FipsFrontend.Services;
 
@@ -16,20 +17,20 @@ public interface IServiceAssessmentsService
 public class ServiceAssessmentsService : IServiceAssessmentsService
 {
     private readonly HttpClient _httpClient;
-    private readonly IConfiguration _configuration;
+    private readonly SasOptions _options;
     private readonly ILogger<ServiceAssessmentsService> _logger;
     private readonly IEnhancedCacheService _cacheService;
     private readonly string _baseUrl;
     private readonly string _secretId;
 
-    public ServiceAssessmentsService(HttpClient httpClient, IConfiguration configuration, ILogger<ServiceAssessmentsService> logger, IEnhancedCacheService cacheService)
+    public ServiceAssessmentsService(HttpClient httpClient, IOptions<SasOptions> options, ILogger<ServiceAssessmentsService> logger, IEnhancedCacheService cacheService)
     {
         _httpClient = httpClient;
-        _configuration = configuration;
+        _options = options.Value;
         _logger = logger;
         _cacheService = cacheService;
-        _baseUrl = _configuration["SAS:TenantId"] ?? throw new InvalidOperationException("SAS:TenantId not configured");
-        _secretId = _configuration["SAS:SecretId"] ?? throw new InvalidOperationException("SAS:SecretId not configured");
+        _baseUrl = _options.EffectiveBaseUrl ?? throw new InvalidOperationException("SAS:BaseUrl not configured");
+        _secretId = _options.SecretId ?? throw new InvalidOperationException("SAS:SecretId not configured");
         
         // Set up authentication headers
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretId}");
@@ -203,8 +204,9 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
 
         try
         {
-            // The _baseUrl from config is "https://service-assessments.education.gov.uk/api/product/"
-            // So we just need to append the documentId
+            // TODO: this call treats SAS:BaseUrl as ".../api/product/" and appends the document id;
+            // every other call in this class treats it as the site root and appends "api/assessments/...".
+            // No single value satisfies both. Decide which the setting means and fix the other side.
             var encodedDocumentId = Uri.EscapeDataString(documentId);
             var baseUrl = _baseUrl.TrimEnd('/');
             var url = $"{baseUrl}/{encodedDocumentId}";

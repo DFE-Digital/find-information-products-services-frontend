@@ -114,9 +114,12 @@ builder.Services.AddOptions<ContactOptions>()
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
 // Register Service Assessments service
-builder.Services.AddHttpClient<IServiceAssessmentsService, ServiceAssessmentsService>(client =>
+builder.Services.AddOptions<SasOptions>()
+    .Bind(builder.Configuration.GetSection(SasOptions.SectionName));
+
+builder.Services.AddHttpClient<IServiceAssessmentsService, ServiceAssessmentsService>((services, client) =>
 {
-    var baseUrl = builder.Configuration["SAS:TenantId"] ?? "https://service-assessments.education.gov.uk/";
+    var baseUrl = services.GetRequiredService<IOptions<SasOptions>>().Value.EffectiveBaseUrl ?? "https://service-assessments.education.gov.uk/";
     // Ensure BaseAddress ends with '/' for proper relative URL resolution
     if (!baseUrl.EndsWith("/"))
     {
@@ -205,6 +208,11 @@ if (!app.Services.GetRequiredService<IOptions<FeedbackOptions>>().Value.HasSurve
 if (!app.Services.GetRequiredService<IOptions<ContactOptions>>().Value.HasEmail)
 {
     app.Logger.LogWarning("Contact:Email is blank, so the contact page does not offer an e-mail address.");
+}
+
+if (app.Services.GetRequiredService<IOptions<SasOptions>>().Value.UsesDeprecatedBaseUrlKey)
+{
+    app.Logger.LogWarning("SAS:TenantId is a deprecated name and is being read as the service assessments base URL. Set SAS:BaseUrl (SAS__BaseUrl) instead; the old name will stop being read.");
 }
 
 // Configure the HTTP request pipeline.
