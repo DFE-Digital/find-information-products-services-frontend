@@ -8,7 +8,6 @@ namespace FiPSAutomation.Pages
 
         private ILocator SearchButton => page.Locator("[class='govuk-button govuk-button--start govuk-button--inverse home-cta-link']");
         private ILocator SearchProductsAndServicesButton => page.Locator("a[class=\"govuk-button govuk-button--start\"]");
-        private ILocator SearchLinkDescLocator => page.Locator("ol[class = 'govuk-list govuk-list--number'] li:nth-child(1)");
         public string ServiceEmailDesc => "main[id='main-content'] p:nth-child(1)";
         public string EmailLink => "a[href='mailto:fips.service@education.gov.uk']";
 
@@ -63,21 +62,6 @@ namespace FiPSAutomation.Pages
         public async Task ClickSearchProductsAndServicesButtonAsync()
         {
             await SearchProductsAndServicesButton.ClickAsync();
-        }
-
-        public async Task VerifySearchLinkDescription()
-        {
-            await Assertions.Expect(SearchLinkDescLocator).ToBeVisibleAsync();
-        }
-
-        public async Task ClickSearchLinkAsync()
-        {
-            await page.GetByRole(AriaRole.Link, new() { NameString = "Search" }).ClickAsync();
-        }
-
-        public async Task ClickRequestNewProductEntryLinkAsync()
-        {
-            await page.GetByRole(AriaRole.Link, new() { NameString = "request a new product entry" }).ClickAsync();
         }
 
         public async Task ClickContactLinkAsync()

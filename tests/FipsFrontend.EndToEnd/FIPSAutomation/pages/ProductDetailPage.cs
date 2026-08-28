@@ -19,7 +19,6 @@ namespace FiPSAutomation.Pages
         // Side navigation
         private ILocator OverviewLink => page.Locator("//*[@id=\"side-navigation\"]/li[1]/a");
         private ILocator CategoriesLink => page.Locator("//*[@id=\"side-navigation\"]/li[2]/a");
-        private ILocator ProposeChangeLink => page.Locator("//*[@id=\"side-navigation\"]/li[3]/a");
 
         // Contacts
         private ILocator ResponsibilitiesAndContactsHeader => page.Locator("#contacts");
@@ -77,11 +76,6 @@ namespace FiPSAutomation.Pages
         public async Task ClickCategoriesLinkAsync()
         {
             await CategoriesLink.ClickAsync();
-        }
-
-        public async Task ClickProposeChangeLinkAsync()
-        {
-            await ProposeChangeLink.ClickAsync();
         }
 
         public async Task VerifyResponsibilitiesHeaderAsync()

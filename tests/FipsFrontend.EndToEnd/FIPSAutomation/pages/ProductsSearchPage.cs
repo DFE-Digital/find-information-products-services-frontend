@@ -92,9 +92,16 @@ namespace FiPSAutomation.Pages
             await Assertions.Expect(RequestNewProductDesc).ToContainTextAsync(expectedText);
         }
 
-        public async Task ClickRequestNewProductEntryLinkAsync()
+        /// <summary>
+        /// Follows the first link in the "missing a product or service" details and returns the page it
+        /// led to, so a test can hold that the details lead somewhere without pinning their wording.
+        /// </summary>
+        public async Task<IResponse> FollowMissingProductLinkAsync()
         {
-            await page.GetByRole(AriaRole.Link, new() { NameString = "request for a new product entry" }).ClickAsync();
+            var link = RequestNewProductDesc.GetByRole(AriaRole.Link).First;
+            return await page.RunAndWaitForResponseAsync(
+                () => link.ClickAsync(),
+                response => response.Request.IsNavigationRequest && response.Request.Frame == page.MainFrame);
         }
 
         public async Task VerifyCheckboxCheckedAsync(string checkboxLocator)
