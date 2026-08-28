@@ -173,77 +173,6 @@ public class CmsApiService
         }
     }
 
-    public async Task<T?> PutAsync<T>(string endpoint, object data)
-    {
-        try
-        {
-            var fullUrl = $"{_baseUrl.TrimEnd('/')}/{endpoint.TrimStart('/')}";
-            var json = JsonSerializer.Serialize(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
-            _logger.LogInformation("PUT Request to: {Url}", fullUrl);
-            _logger.LogInformation("PUT Request body: {Json}", json);
-            
-            // Use write API key for PUT requests
-            var writeApiKey = _configuration["CmsApi:WriteApiKey"];
-            if (string.IsNullOrEmpty(writeApiKey))
-            {
-                throw new InvalidOperationException("CmsApi:WriteApiKey is not configured");
-            }
-            
-            // Clear any existing authorization header and set the write API key
-            _httpClient.DefaultRequestHeaders.Authorization = null;
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", writeApiKey);
-            
-            _logger.LogInformation("Using WriteApiKey: {Key}", writeApiKey?.Substring(0, Math.Min(10, writeApiKey?.Length ?? 0)) + "...");
-            
-            var response = await _httpClient.PutAsync(fullUrl, content);
-            
-            var responseContent = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation("PUT Response status: {StatusCode}", response.StatusCode);
-            _logger.LogInformation("PUT Response body: {Content}", responseContent);
-            
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError("PUT request failed with status {StatusCode}. Response: {Response}", 
-                    response.StatusCode, responseContent);
-                throw new HttpRequestException($"PUT request failed with status {response.StatusCode}: {responseContent}");
-            }
-            
-            return JsonSerializer.Deserialize<T>(responseContent, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error calling CMS API PUT endpoint: {Endpoint}. Message: {Message}", endpoint, ex.Message);
-            throw; // Re-throw instead of swallowing the exception
-        }
-    }
-
-    public async Task<bool> DeleteAsync(string endpoint)
-    {
-        try
-        {
-            var fullUrl = $"{_baseUrl.TrimEnd('/')}/{endpoint.TrimStart('/')}";
-            
-            // Use write API key for DELETE requests
-            var writeApiKey = _configuration["CmsApi:WriteApiKey"];
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", writeApiKey);
-            
-            var response = await _httpClient.DeleteAsync(fullUrl);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error calling CMS API endpoint: {Endpoint}", endpoint);
-            return false;
-        }
-    }
-
     private string CreateCacheKey(string endpoint)
     {
         // Create a hash of the endpoint for consistent cache keys
@@ -553,41 +482,6 @@ public class CmsApiService
         {
             _logger.LogError(ex, "Error fetching unmapped CMDB entries");
             return new List<object>();
-        }
-    }
-
-    /// <summary>
-    /// Assign a CMDB sys_id to a CMS product
-    /// </summary>
-    public async Task<bool> AssignCmdbSysIdAsync(int productId, string cmdbSysId)
-    {
-        try
-        {
-            var requestData = new { cmdb_sys_id = cmdbSysId };
-            var response = await PostAsync<object>($"admin/products/{productId}/assign-cmdb-sys-id", requestData);
-            return response != null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error assigning CMDB sys_id {CmdbSysId} to product {ProductId}", cmdbSysId, productId);
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Remove cmdb_sys_id from a product (unlink from CMDB)
-    /// </summary>
-    public async Task<bool> UnlinkCmdbSysIdAsync(int productId)
-    {
-        try
-        {
-            var response = await PostAsync<object>($"admin/products/{productId}/unlink-cmdb-sys-id", new { });
-            return response != null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error unlinking CMDB sys_id from product {ProductId}", productId);
-            return false;
         }
     }
 
