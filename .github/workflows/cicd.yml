@@ -69,9 +69,10 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore FipsFrontend.slnx --locked-mode
 
+      # In-process scenarios only; the browser-driven suite has its own job below.
       - name: Test
         run: >
-          dotnet test FipsFrontend.slnx --configuration Release --no-restore
+          dotnet test tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj --configuration Release --no-restore
           --logger trx --collect:"XPlat Code Coverage" --settings tests/coverage.runsettings
           --results-directory ${{ runner.temp }}/test-results
 
@@ -107,6 +108,119 @@ jobs:
           name: ${{ env.ARTEFACT_NAME }}
           path: ${{ runner.temp }}/publish
           if-no-files-found: error
+
+  end_to_end:
+    name: Browser tests (informational)
+    needs: build
+    # Reports only: the suite does not yet pass in full (tests/FipsFrontend.EndToEnd/README.md).
+    # No deploy job depends on this one yet, and it continues on error for now.
+    # What it holds the line on is the list of tests known to pass; that check's verdict goes on the summary page.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: tests/FipsFrontend.EndToEnd/packages.lock.json
+
+      - name: Download the published app
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTEFACT_NAME }}
+          path: ${{ runner.temp }}/publish
+
+      - name: Build the suite and the content-source stub
+        run: |
+          dotnet restore FipsFrontend.slnx --locked-mode
+          dotnet build tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-restore
+          dotnet build tests/FipsFrontend.Tests.StubCmsApi/FipsFrontend.Tests.StubCmsApi.csproj --configuration Release --no-restore
+
+      - name: Install the browser
+        run: pwsh tests/FipsFrontend.EndToEnd/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      # The application runs as it does on a developer's machine: placeholder identity settings and no sign-in,
+      # and an empty content source, so every failure the suite reports is about the pages rather than about data.
+      - name: Start the application
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          Caching__Performance__EnableWarming: "false"
+          Caching__Redis__Enabled: "false"
+          AzureAd__Instance: https://login.microsoftonline.com/
+          AzureAd__TenantId: 00000000-0000-0000-0000-000000000000
+          AzureAd__ClientId: 00000000-0000-0000-0000-000000000000
+          AzureAd__ClientSecret: placeholder
+          CmsApi__BaseUrl: http://127.0.0.1:1338/api
+          CmsApi__ReadApiKey: placeholder
+          CmsApi__WriteApiKey: placeholder
+          SAS__BaseUrl: http://127.0.0.1:1338/
+          SAS__SecretId: placeholder
+          Notify__ApiKey: placeholder-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000
+          Notify__FIPSMailbox: mailbox@example.com
+          Notify__Templates__changeEntry: placeholder
+          Notify__Templates__newEntry: placeholder
+        run: |
+          dotnet tests/FipsFrontend.Tests.StubCmsApi/bin/Release/net10.0/FipsFrontend.Tests.StubCmsApi.dll --urls http://127.0.0.1:1338 > "${{ runner.temp }}/stub-cms-api.log" 2>&1 &
+          (cd "${{ runner.temp }}/publish" && dotnet FipsFrontend.dll --urls http://localhost:5505 > "${{ runner.temp }}/app.log" 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://localhost:5505/ && echo "The application answered after $((i * 2)) s" && exit 0
+            sleep 2
+          done
+          echo "The application did not answer within 60 s"; tail -50 "${{ runner.temp }}/app.log"; exit 1
+
+      - name: Point the suite at it
+        run: |
+          cat > tests/FipsFrontend.EndToEnd/env.local.json <<'EOF'
+          {
+            "activeEnv": "ci",
+            "loginRequired": false,
+            "envs": [ { "env": "ci", "applicationURL": "http://localhost:5505/" } ],
+            "timeouts": { "expectMs": 2000, "actionMs": 5000, "navigationMs": 10000 }
+          }
+          EOF
+
+      - name: Run the suite
+        continue-on-error: true
+        run: >
+          dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
+          --logger trx --results-directory ${{ runner.temp }}/end-to-end
+
+      - name: Check that the tests known to pass still pass
+        continue-on-error: true
+        run: |
+          pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
+          exit "${PIPESTATUS[0]}"
+
+      - name: Report the results
+        if: always()
+        run: |
+          {
+            echo "## Browser tests (informational)"
+            for trx in "${{ runner.temp }}"/end-to-end/*.trx; do
+              grep -oE '<Counters [^/]*/>' "$trx" | sed -E 's/.*total="([0-9]+)".*passed="([0-9]+)".*failed="([0-9]+)".*/- \2 passed, \3 failed, \1 in total/'
+            done
+            echo
+            echo '```'
+            cat "${{ runner.temp }}/end-to-end/known-green-check.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the results and the report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: end-to-end-results
+          path: |
+            ${{ runner.temp }}/end-to-end
+            ${{ runner.temp }}/app.log
+            tests/FipsFrontend.EndToEnd/playwright-report
 
   deploy_development:
     name: Deploy to development

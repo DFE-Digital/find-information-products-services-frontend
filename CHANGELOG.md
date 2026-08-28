@@ -110,6 +110,12 @@ The application runs, and is tested, on a developer's machine without anything h
   and both vulnerability audits, NuGet and npm, are clean (each reported four advisories before).
   The GOV.UK and MoJ frontend packages are deliberately left as they are, since their updates change what users see.
 - **Build:** the stylesheets compile on Node 24 (Node 20 is out of support) with the current Sass; the compiled output is unchanged.
+- **Tests:** the browser-driven suite moves in from its own repository as `tests/FipsFrontend.EndToEnd`,
+  so the application and its end-to-end tests change in the same commits.
+  It does not yet pass in full, so the pipeline runs it against the published application without gating on it,
+  reporting the counts and whether every test known to pass still does; `tests/FipsFrontend.Tests.StubCmsApi` stands in for the content source.
+  Playwright is brought up to the current release (the old driver crashed part-way through every run),
+  and the suite's waits become configuration, sized for an application on the same machine.
 
 ## [v2026.08.27-0002]
 
