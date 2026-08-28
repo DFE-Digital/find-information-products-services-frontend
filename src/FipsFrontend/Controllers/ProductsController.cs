@@ -50,7 +50,7 @@ public class ProductsController : Controller
 
             // Debug: Get all category types to see what's available
             var allCategoryTypes = await _optimizedCmsApiService.GetAllCategoryTypes(categoryTypesDuration);
-            _logger.LogInformation("Available category types: {Types}", 
+            _logger.LogInformation("Available category types: {Types}",
                 string.Join(", ", allCategoryTypes?.Select(ct => ct.Name) ?? new List<string>()));
 
             // Load category values for filters using individual API calls for each category type
@@ -59,13 +59,13 @@ public class ProductsController : Controller
             var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
 
             // Debug logging for category values
-            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, BusinessArea={BusinessAreaCount}", 
+            _logger.LogInformation("Category values loaded: Phase={PhaseCount}, Channel={ChannelCount}, BusinessArea={BusinessAreaCount}",
                 phaseValues.Count, channelValues.Count, groupValues.Count);
-            
+
             // Additional debug logging for Business area values
             if (groupValues.Any())
             {
-                _logger.LogInformation("Business area values: {Values}", 
+                _logger.LogInformation("Business area values: {Values}",
                     string.Join(", ", groupValues.Take(10).Select(v => $"{v.Name} ({v.Slug})")));
             }
             else
@@ -85,22 +85,22 @@ public class ProductsController : Controller
 
             // Build server-side filters for CMS API
             var serverFilters = new Dictionary<string, string[]>();
-            
+
             // Add state filter (default to Active for public products page)
             serverFilters["state"] = new[] { "Active" };
-            
+
             // Track which filters have "not categorised" selected for client-side filtering
             var hasNotCategorisedPhase = phase?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
             var hasNotCategorisedChannel = channel?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
             var hasNotCategorisedType = type?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
             var hasNotCategorisedGroup = group?.Contains("__not_categorised__", StringComparer.OrdinalIgnoreCase) == true;
-            
+
             // Convert category filters to server-side format, excluding "__not_categorised__" values
             var phaseFilters = phase?.Where(p => !p.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
             var channelFilters = channel?.Where(c => !c.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
             var typeFilters = type?.Where(t => !t.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
             var groupFilters = group?.Where(g => !g.Equals("__not_categorised__", StringComparison.OrdinalIgnoreCase)).ToArray();
-            
+
             // Count how many filter categories are active
             int activeCategoryCount = 0;
             if (phaseFilters?.Length > 0) activeCategoryCount++;
@@ -112,9 +112,9 @@ public class ProductsController : Controller
             // Use optimized service for search with caching and server-side filtering
             var searchDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Search", 2));
             var productsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Products", 15));
-            
+
             var cacheDuration = parsedKeywords.Any() ? searchDuration : productsDuration;
-            
+
             // Use client-side filtering if:
             // 1. "not categorised" filters are active (need to check for absence of values)
             // 2. Multiple filter categories are active (need AND logic between categories, OR within)
@@ -123,10 +123,10 @@ public class ProductsController : Controller
                 // Build filters excluding category types we're checking for "not categorised"
                 var filtersForNotCategorised = new Dictionary<string, string[]>();
                 filtersForNotCategorised["state"] = new[] { "Active" };
-                
+
                 // Only include category filters for types we're NOT checking "not categorised" for
                 var categorySlugFiltersForQuery = new List<string>();
-                
+
                 if (!hasNotCategorisedPhase && phaseFilters?.Length > 0)
                 {
                     categorySlugFiltersForQuery.AddRange(phaseFilters);
@@ -151,18 +151,18 @@ public class ProductsController : Controller
                 {
                     categorySlugFiltersForQuery.AddRange(parent);
                 }
-                
+
                 if (categorySlugFiltersForQuery.Count > 0)
                 {
                     filtersForNotCategorised["category_values.slug"] = categorySlugFiltersForQuery.ToArray();
                 }
-                
+
                 // Get ALL products matching other filters (not paginated yet) with full details
                 // Use a large page size to get all products in one or few requests
                 var largePageSize = 1000;
                 var allProductsResult = await _optimizedCmsApiService.GetProductsForListingAsync2(1, largePageSize, parsedKeywords, filtersForNotCategorised, cacheDuration);
                 var allProducts = allProductsResult.Products;
-                
+
                 // If there are more pages, fetch them
                 var totalPagesNeeded = (int)Math.Ceiling((double)allProductsResult.TotalCount / largePageSize);
                 if (totalPagesNeeded > 1)
@@ -175,10 +175,10 @@ public class ProductsController : Controller
                     }
                     allProducts = allProducts.Concat(additionalProducts).ToList();
                 }
-                
+
                 // Note: Keyword and category filters are already applied by GetProductsForListingAsync2
                 // We only need to apply the "not categorised" filters client-side now
-                
+
                 // Now apply "not categorised" filters with OR logic
                 filteredProducts = allProducts.Where(p =>
                 {
@@ -186,92 +186,92 @@ public class ProductsController : Controller
                     if (hasNotCategorisedPhase || (phaseFilters?.Length > 0))
                     {
                         // Check if product has ANY Phase category value
-                        var hasPhase = p.CategoryValues?.Any(cv => 
-                            cv.CategoryType != null && 
+                        var hasPhase = p.CategoryValues?.Any(cv =>
+                            cv.CategoryType != null &&
                             cv.CategoryType.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase)) == true;
-                        
+
                         // Check if product matches regular Phase filters
                         var matchesPhaseFilter = false;
                         if (phaseFilters?.Length > 0)
                         {
-                            matchesPhaseFilter = p.CategoryValues?.Any(cv => 
+                            matchesPhaseFilter = p.CategoryValues?.Any(cv =>
                                 cv.CategoryType != null &&
                                 cv.CategoryType.Name.Equals("Phase", StringComparison.OrdinalIgnoreCase) &&
                                 phaseFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
                         }
-                        
+
                         // OR logic: match regular filter OR (not categorised selected AND no phase)
                         var phaseMatch = matchesPhaseFilter || (hasNotCategorisedPhase && !hasPhase);
                         if (!phaseMatch) return false;
                     }
-                    
+
                     // Check Channel filter with OR logic
                     if (hasNotCategorisedChannel || (channelFilters?.Length > 0))
                     {
-                        var hasChannel = p.CategoryValues?.Any(cv => 
-                            cv.CategoryType != null && 
+                        var hasChannel = p.CategoryValues?.Any(cv =>
+                            cv.CategoryType != null &&
                             cv.CategoryType.Name.Equals("Channel", StringComparison.OrdinalIgnoreCase)) == true;
-                        
+
                         var matchesChannelFilter = false;
                         if (channelFilters?.Length > 0)
                         {
-                            matchesChannelFilter = p.CategoryValues?.Any(cv => 
+                            matchesChannelFilter = p.CategoryValues?.Any(cv =>
                                 cv.CategoryType != null &&
                                 cv.CategoryType.Name.Equals("Channel", StringComparison.OrdinalIgnoreCase) &&
                                 channelFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
                         }
-                        
+
                         var channelMatch = matchesChannelFilter || (hasNotCategorisedChannel && !hasChannel);
                         if (!channelMatch) return false;
                     }
-                    
+
                     // Check Type filter with OR logic
                     if (hasNotCategorisedType || (typeFilters?.Length > 0))
                     {
-                        var hasType = p.CategoryValues?.Any(cv => 
-                            cv.CategoryType != null && 
+                        var hasType = p.CategoryValues?.Any(cv =>
+                            cv.CategoryType != null &&
                             cv.CategoryType.Name.Equals("Type", StringComparison.OrdinalIgnoreCase)) == true;
-                        
+
                         var matchesTypeFilter = false;
                         if (typeFilters?.Length > 0)
                         {
-                            matchesTypeFilter = p.CategoryValues?.Any(cv => 
+                            matchesTypeFilter = p.CategoryValues?.Any(cv =>
                                 cv.CategoryType != null &&
                                 cv.CategoryType.Name.Equals("Type", StringComparison.OrdinalIgnoreCase) &&
                                 typeFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
                         }
-                        
+
                         var typeMatch = matchesTypeFilter || (hasNotCategorisedType && !hasType);
                         if (!typeMatch) return false;
                     }
-                    
+
                     // Check Business area filter with OR logic
                     if (hasNotCategorisedGroup || (groupFilters?.Length > 0))
                     {
-                        var hasBusinessArea = p.CategoryValues?.Any(cv => 
-                            cv.CategoryType != null && 
+                        var hasBusinessArea = p.CategoryValues?.Any(cv =>
+                            cv.CategoryType != null &&
                             cv.CategoryType.Name.Equals("Business area", StringComparison.OrdinalIgnoreCase)) == true;
-                        
+
                         var matchesGroupFilter = false;
                         if (groupFilters?.Length > 0)
                         {
-                            matchesGroupFilter = p.CategoryValues?.Any(cv => 
+                            matchesGroupFilter = p.CategoryValues?.Any(cv =>
                                 cv.CategoryType != null &&
                                 cv.CategoryType.Name.Equals("Business area", StringComparison.OrdinalIgnoreCase) &&
                                 groupFilters.Contains(cv.Slug, StringComparer.OrdinalIgnoreCase)) == true;
                         }
-                        
+
                         var groupMatch = matchesGroupFilter || (hasNotCategorisedGroup && !hasBusinessArea);
                         if (!groupMatch) return false;
                     }
-                    
+
                     return true;
                 }).ToList();
-                
+
                 // Calculate total count before pagination
                 filteredTotalCount = filteredProducts.Count;
                 totalCount = filteredProducts.Count;
-                
+
                 // Apply pagination after filtering
                 filteredProducts = filteredProducts
                     .Skip((cmsPage - 1) * pageSize)
@@ -305,7 +305,7 @@ public class ProductsController : Controller
                 {
                     serverFilters["category_values.slug"] = parent;
                 }
-                
+
                 var result = await _optimizedCmsApiService.GetProductsForListingAsync2(cmsPage, pageSize, parsedKeywords, serverFilters, cacheDuration);
                 filteredProducts = result.Products;
                 filteredTotalCount = result.TotalCount;
@@ -467,14 +467,14 @@ public class ProductsController : Controller
             if (product.CategoryValues?.Any() == true)
             {
                 _logger.LogInformation("Product has {Count} category values assigned", product.CategoryValues.Count);
-                
+
                 // Log all category values for debugging
                 foreach (var cv in product.CategoryValues)
                 {
-                    _logger.LogInformation("Category Value: Name={Name}, Slug={Slug}, CategoryType={Type}", 
+                    _logger.LogInformation("Category Value: Name={Name}, Slug={Slug}, CategoryType={Type}",
                         cv.Name, cv.Slug, cv.CategoryType?.Name ?? "NULL");
                 }
-                
+
                 var groupedCategories = product.CategoryValues
                     .GroupBy(cv => cv.CategoryType?.Name ?? "Unknown")
                     .OrderBy(g => g.Key);
@@ -482,9 +482,9 @@ public class ProductsController : Controller
                 foreach (var group in groupedCategories)
                 {
                     var categoryType = group.First().CategoryType;
-                    _logger.LogInformation("Processing group: {GroupKey}, CategoryType is null: {IsNull}, Count: {Count}", 
+                    _logger.LogInformation("Processing group: {GroupKey}, CategoryType is null: {IsNull}, Count: {Count}",
                         group.Key, categoryType == null, group.Count());
-                    
+
                     if (categoryType != null)
                     {
                         var info = new ProductCategoryInfo
@@ -500,28 +500,28 @@ public class ProductsController : Controller
                         };
                         categoryInfo.Add(info);
                         _logger.LogInformation("Added category group: {Name} with {Count} values", categoryType.Name, info.CategoryValueNames.Count);
-                        
+
                         // Log search_text values for debugging - check both the model and the mapped list
                         foreach (var cv in group)
                         {
-                            _logger.LogInformation("  Category value '{Name}' (DocumentId: {DocId}): cv.SearchText = '{SearchText}' (null: {IsNull})", 
+                            _logger.LogInformation("  Category value '{Name}' (DocumentId: {DocId}): cv.SearchText = '{SearchText}' (null: {IsNull})",
                                 cv.Name, cv.DocumentId ?? "null", cv.SearchText ?? "(null)", cv.SearchText == null);
                         }
-                        
+
                         for (int i = 0; i < info.CategoryValueNames.Count; i++)
                         {
                             var searchText = i < info.CategoryValueSearchTexts.Count ? info.CategoryValueSearchTexts[i] : "(not found)";
-                            _logger.LogInformation("  Mapped Category value '{Name}': search_text = '{SearchText}'", 
+                            _logger.LogInformation("  Mapped Category value '{Name}': search_text = '{SearchText}'",
                                 info.CategoryValueNames[i], searchText ?? "(null)");
                         }
                     }
                     else
                     {
-                        _logger.LogWarning("Skipping category group '{GroupKey}' because CategoryType is null. Values in group: {Values}", 
+                        _logger.LogWarning("Skipping category group '{GroupKey}' because CategoryType is null. Values in group: {Values}",
                             group.Key, string.Join(", ", group.Select(cv => cv.Name)));
                     }
                 }
-                
+
                 _logger.LogInformation("Final category info count: {Count}", categoryInfo.Count);
             }
 
@@ -560,7 +560,7 @@ public class ProductsController : Controller
         {
             var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
             var assessmentsDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:Assessments", 15));
-            
+
             // Find product by fips_id with product assurances populated - optimized for assurance view
             var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
 
@@ -848,7 +848,7 @@ public class ProductsController : Controller
 
         // Build type options from category type "Type" using individual API call
         var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15))) ?? new List<CategoryValue>();
-        
+
         if (typeValues.Any())
         {
             _logger.LogInformation("Found {Count} type values to process", typeValues.Count);
@@ -886,7 +886,7 @@ public class ProductsController : Controller
         if (groupValues.Any())
         {
             _logger.LogInformation("Found {Count} group values to process", groupValues.Count);
-            
+
             // Filter to only root-level groups (those without parents)
             var rootGroups = groupValues.Where(gv => gv.Parent == null && gv.Enabled).ToList();
             _logger.LogInformation("Found {Count} root-level groups to process", rootGroups.Count);
@@ -905,7 +905,7 @@ public class ProductsController : Controller
                 if (gv.Children?.Any() == true)
                 {
                     var enabledChildren = gv.Children.Where(c => c.Enabled).ToList();
-                    
+
                     if (enabledChildren.Any())
                     {
                         option.SubOptions = enabledChildren
@@ -918,7 +918,7 @@ public class ProductsController : Controller
                                 Count = CountProductsWithCategoryValue(allProductsForCounting, child.Slug),
                                 IsSelected = viewModel.SelectedSubgroups.Contains(child.Slug, StringComparer.OrdinalIgnoreCase)
                             }).ToList();
-                            
+
                         _logger.LogInformation("Added {Count} sub-options for group '{GroupName}'", option.SubOptions.Count, gv.Name);
                     }
                 }
@@ -1196,7 +1196,7 @@ public class ProductsController : Controller
         }
 
         // Add phase filters (exclude only if this is the filter being removed)
-        var phasesToInclude = filterType.Equals("phase", StringComparison.OrdinalIgnoreCase) 
+        var phasesToInclude = filterType.Equals("phase", StringComparison.OrdinalIgnoreCase)
             ? viewModel.SelectedPhases.Where(p => !p.Equals(value, StringComparison.OrdinalIgnoreCase)).ToArray()
             : viewModel.SelectedPhases.ToArray();
         if (phasesToInclude.Length > 0)
@@ -1246,262 +1246,6 @@ public class ProductsController : Controller
 
         var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
         return $"/products{queryString}";
-    }
-
-    // GET: Products/Edit/{fipsid}
-    [HttpGet]
-    public async Task<IActionResult> ProductEdit(string fipsid, [FromQuery] string? returnUrl)
-    {
-        try
-        {
-            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
-            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-            
-            // Get the product
-            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
-            if (product == null)
-            {
-                _logger.LogWarning("Product not found for FIPS ID: {FipsId}", fipsid);
-                return NotFound();
-            }
-
-            _logger.LogInformation("Loaded product for FIPS ID: {FipsId}, Product ID: {ProductId}, DocumentId: {DocumentId}, Title: {Title}, CategoryValues Count: {CategoryCount}", 
-                fipsid, product.Id, product.DocumentId, product.Title, product.CategoryValues?.Count ?? 0);
-
-            // Get category values for all types
-            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
-            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
-            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
-
-            // Note: Users API call removed since contacts section was removed
-
-            // Note: Product contacts removed since contacts section was removed
-
-            // Find current category values
-            var currentPhase = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Phase", StringComparison.OrdinalIgnoreCase) == true);
-            var currentGroup = product.CategoryValues?.FirstOrDefault(cv => cv.CategoryType?.Name?.Equals("Business area", StringComparison.OrdinalIgnoreCase) == true);
-            var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
-            var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
-
-            returnUrl = ResolveProductListingReturnUrl(returnUrl);
-
-            var viewModel = new ProductEditViewModel
-            {
-                Product = product,
-                Title = product.Title,
-                ShortDescription = product.ShortDescription,
-                LongDescription = product.LongDescription,
-                SelectedPhaseId = currentPhase?.Id,
-                SelectedGroupId = currentGroup?.Id,
-                SelectedChannelIds = currentChannels.Select(c => c.Id).ToList(),
-                SelectedTypeIds = currentTypes.Select(c => c.Id).ToList(),
-                AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList(),
-                AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList(),
-                AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList(),
-                AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList(),
-                PageTitle = $"Edit {product.Title}",
-                PageDescription = $"Edit details, categories and contacts for {product.Title}"
-            };
-
-            ViewData["ActiveNav"] = "products";
-            ViewData["ReturnUrl"] = returnUrl; // Pass returnUrl to the view
-            return View("~/Views/Product/edit.cshtml", viewModel);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading product edit form for FIPS ID: {FipsId}", fipsid);
-            return NotFound();
-        }
-    }
-
-    // POST: Products/Edit/{fipsid}
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ProductEdit(string fipsid, ProductEditViewModel model)
-    {
-        _logger.LogInformation("ProductEdit POST method called with FIPS ID: {FipsId}", fipsid);
-        _logger.LogInformation("Model data - Title: {Title}, ShortDescription: {ShortDesc}, LongDescription: {LongDesc}, SelectedPhaseId: {PhaseId}, SelectedGroupId: {GroupId}", 
-            model.Title, model.ShortDescription, model.LongDescription, model.SelectedPhaseId, model.SelectedGroupId);
-        _logger.LogInformation("ModelState.IsValid: {IsValid}, ModelState Error Count: {ErrorCount}", 
-            ModelState.IsValid, ModelState.ErrorCount);
-        
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                // Reload the form data
-                var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
-                var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
-                var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
-                // Note: Users API call removed since contacts section was removed
-
-                model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
-                model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
-                model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
-                model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
-
-                ViewData["ActiveNav"] = "products";
-                return View("~/Views/Product/edit.cshtml", model);
-            }
-
-            // Get the current product to ensure we have the right ID
-            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
-            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Prepare category values list
-            var categoryValuesList = new List<int>();
-            
-            if (model.SelectedPhaseId.HasValue && model.SelectedPhaseId.Value > 0)
-            {
-                categoryValuesList.Add(model.SelectedPhaseId.Value);
-            }
-            if (model.SelectedGroupId.HasValue && model.SelectedGroupId.Value > 0)
-            {
-                categoryValuesList.Add(model.SelectedGroupId.Value);
-            }
-            // Add multiple channels
-            categoryValuesList.AddRange(model.SelectedChannelIds.Where(id => id > 0));
-            
-            // Add multiple types
-            categoryValuesList.AddRange(model.SelectedTypeIds.Where(id => id > 0));
-
-            // Prepare the product data for CMS API
-            var productData = new
-            {
-                data = new
-                {
-                    title = model.Title,
-                    short_description = model.ShortDescription,
-                    long_description = model.LongDescription,
-                    category_values = categoryValuesList,
-                    publishedAt = (DateTime?)null // Keep as draft [[memory:8564229]]
-                }
-            };
-
-            // Update the product via CMS API
-            _logger.LogInformation("Attempting to update product with ID: {ProductId}, DocumentId: {DocumentId}, FipsId: {FipsId}", 
-                product.Id, product.DocumentId, product.FipsId);
-            
-            // Use documentId for the update (this is what Strapi expects for PUT requests)
-            string documentId = product.DocumentId ?? throw new InvalidOperationException("Product has no documentId");
-            _logger.LogInformation("Using documentId: {DocumentId} for update", documentId);
-            
-            ApiResponse<Product>? updatedProduct = null;
-            try
-            {
-                updatedProduct = await _cmsApiService.PutAsync<ApiResponse<Product>>($"products/{documentId}", productData);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update product with documentId: {DocumentId}. Error: {ErrorMessage}", 
-                    documentId, ex.Message);
-                ModelState.AddModelError("", $"Failed to update the product: {ex.Message}");
-                
-                // Reload form data and return to view
-                return await ReloadEditFormWithData(fipsid, model);
-            }
-
-            if (updatedProduct?.Data != null)
-            {
-                // Note: Product contacts updates removed since contacts section was removed
-
-                TempData["SuccessMessage"] = $"Product '{model.Title}' has been updated successfully.";
-                return RedirectToAction("ViewProduct", new { fipsid = fipsid });
-            }
-            else
-            {
-                ModelState.AddModelError("", "Failed to update the product. Please try again.");
-                
-                // Reload form data
-                var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-                var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-                var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
-                var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
-                var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
-                // Note: Users API call removed since contacts section was removed
-
-                model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
-                model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
-                model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
-                model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
-
-                ViewData["ActiveNav"] = "products";
-                return View("~/Views/Product/edit.cshtml", model);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating product: {Title}", model.Title);
-            ModelState.AddModelError("", "An error occurred while updating the product. Please try again.");
-            
-            // Reload form data
-            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
-            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
-            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
-            // Note: Users API call removed since contacts section was removed
-
-            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
-            model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
-            model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
-            model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
-
-            ViewData["ActiveNav"] = "products";
-            return View("~/Views/Product/edit.cshtml", model);
-        }
-    }
-
-    // Note: UpdateProductContacts method removed since contacts section was removed
-
-    private async Task<IActionResult> ReloadEditFormWithData(string fipsid, ProductEditViewModel model)
-    {
-        try
-        {
-            // Get the product again to ensure we have current data
-            var productDetailDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:ProductDetail", 10));
-            var product = await _optimizedCmsApiService.GetProductByFipsIdAsync(fipsid, productDetailDuration);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            // Reload category values
-            var categoryValuesDuration = TimeSpan.FromMinutes(_configuration.GetValue<double>("Caching:Durations:CategoryValues", 15));
-            var phaseValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Phase", categoryValuesDuration) ?? new List<CategoryValue>();
-            var groupValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Business area", categoryValuesDuration) ?? new List<CategoryValue>();
-            var channelValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Channel", categoryValuesDuration) ?? new List<CategoryValue>();
-            var typeValues = await _optimizedCmsApiService.GetCategoryValuesForFilter("Type", categoryValuesDuration) ?? new List<CategoryValue>();
-
-            // Update the model with fresh data
-            model.Product = product;
-            model.AvailablePhases = phaseValues.Where(cv => cv.Enabled).ToList();
-            model.AvailableGroups = groupValues.Where(cv => cv.Enabled).ToList();
-            model.AvailableChannels = channelValues.Where(cv => cv.Enabled).ToList();
-            model.AvailableTypes = typeValues.Where(cv => cv.Enabled).ToList();
-
-            // Get current category values for the product
-            var currentChannels = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Channel", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
-            var currentTypes = product.CategoryValues?.Where(cv => cv.CategoryType?.Name?.Equals("Type", StringComparison.OrdinalIgnoreCase) == true).ToList() ?? new List<CategoryValue>();
-
-            model.SelectedChannelIds = currentChannels.Select(c => c.Id).ToList();
-            model.SelectedTypeIds = currentTypes.Select(c => c.Id).ToList();
-
-            ViewData["ActiveNav"] = "products";
-            return View("~/Views/Product/edit.cshtml", model);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error reloading edit form for FIPS ID: {FipsId}", fipsid);
-            return NotFound();
-        }
     }
 
     /// <summary>

@@ -77,6 +77,9 @@ The application runs, and is tested, on a developer's machine without anything h
 - The "Propose a change" form on product pages, the "request a new product entry" form, and the admin "create new FIPS entry" form are removed (#315),
   along with the e-mails they sent: the service no longer uses GOV.UK Notify.
   Product information comes from the data source only. The home, updates, and product listing pages say to contact the team for now; #314 will direct people to COMPASS instead.
+- The admin area (dashboard, product management, title and description editing, categories, state changes, deletion, and CMDB matching)
+  and the product edit page are removed, with the CMS update and delete calls behind them: COMPASS does the matching and holds the record now.
+  Nothing in this service edits product information any more; search-term logging is the one remaining write to the CMS.
 
 ### Fixed
 
