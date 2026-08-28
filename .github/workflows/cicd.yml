@@ -164,15 +164,6 @@ jobs:
       - name: Check the suite's configuration rules
         run: dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build --filter "TestCategory=Configuration"
 
-      # The browser download (~100 MB) is cached between runs, keyed on the suite's lock file so a Playwright
-      # update fetches the browser build that goes with it. The install step still runs: on a hit it finds the
-      # browser present and only puts the OS packages in place.
-      - name: Cache the browser
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('tests/FipsFrontend.EndToEnd/packages.lock.json') }}
-
       - name: Install the browser
         run: pwsh tests/FipsFrontend.EndToEnd/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 

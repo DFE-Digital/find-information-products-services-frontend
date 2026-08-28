@@ -60,10 +60,6 @@ public sealed class FipsApplication : IDisposable
         ["CmsApi:WriteApiKey"] = "test-only",
         ["SAS:BaseUrl"] = "http://assessments.example.com/",
         ["SAS:SecretId"] = "test-only",
-        ["Notify:ApiKey"] = "test-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000",
-        ["Notify:FIPSMailbox"] = "mailbox@example.com",
-        ["Notify:Templates:changeEntry"] = "test-only",
-        ["Notify:Templates:newEntry"] = "test-only",
     };
 
     public RecordingStandIn Outbound { get; } = new();

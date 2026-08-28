@@ -10,14 +10,12 @@ namespace FiPSAutomation;
 public class HomePageTests : BaseTest
 {
     private HomePage homePage = null!;
-    private RequestNewProductPage requestNewProductPage = null!;
     private HeaderComponent header = null!;
 
-    [OneTimeSetUp] 
+    [OneTimeSetUp]
     public void InitPages()
     {
         homePage = new HomePage(Page);
-        requestNewProductPage = new RequestNewProductPage(Page);
         header = new HeaderComponent(Page);
     }
 
@@ -59,25 +57,8 @@ public class HomePageTests : BaseTest
         ExtentTest?.Log(Status.Pass, "VerifyHomePageUpdatesUS305AC1 passed");
     }
 
-    [Test, Order(5)]
-    public async Task VerifySearchLinkFunctionalityUS305AC2()
-    {
-        await homePage.VerifySearchLinkDescription();
-        await homePage.ClickSearchLinkAsync();
-        await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Search and filter products and services" })).ToBeVisibleAsync();
-        await Page.GoBackAsync();
-        ExtentTest?.Log(Status.Pass, "VerifySearchLinkFunctionalityUS305AC2 passed");
-    }
-
-    [Test, Order(6)]
-    public async Task VerifyRequestANewProductEntryLinkUS305AC3()
-    {
-        await homePage.ClickRequestNewProductEntryLinkAsync();
-        await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Request a new product entry" })).ToBeVisibleAsync();
-        await requestNewProductPage.VerifyFormVisibleAsync();
-        await header.ClickServiceNameLinkAsync();
-        ExtentTest?.Log(Status.Pass, "VerifyRequestANewProductEntryLinkUS305AC3 passed");
-    }
+    // #305 AC2 and AC3 (the "Search" and "request a new product entry" links in the "Update a product or
+    // service" section) no longer apply since #315 (part of #308): the section says to contact the team.
 
     [Test, Order(7)]
     public async Task VerifyContactLinkInFooterUS305AC4()

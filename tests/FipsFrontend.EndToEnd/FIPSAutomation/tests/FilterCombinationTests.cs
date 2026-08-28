@@ -158,15 +158,16 @@ public class FilterCombinationTests : BaseTest
         ExtentTest?.Log(Status.Pass, "ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC6 passed");
     }
 
+    // Changed by #315 (part of #308): the details no longer offer the request form. Their wording is interim
+    // (#314 replaces it), so this holds only that the details are there and lead somewhere.
     [Test, Order(7)]
     public async Task VerifyMissingProductOrServiceLink_ProductsPageUS219AC()
     {
         await NavigateToAsync("products");
         await productsSearchPage.ClickMissingProductLinkAsync();
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
-        await productsSearchPage.VerifyRequestNewProductDescAsync("If you cannot find a product or service, make a ");
-        await productsSearchPage.ClickRequestNewProductEntryLinkAsync();
-        await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Request a new product entry" })).ToBeVisibleAsync();
+        var destination = await productsSearchPage.FollowMissingProductLinkAsync();
+        Assert.That(destination.Ok, Is.True, $"the link in the 'missing a product or service' details led to {destination.Url} ({destination.Status})");
         await Page.GoBackAsync();
         ExtentTest?.Log(Status.Pass, "VerifyMissingProductOrServiceLink_ProductsPageUS219AC");
     }

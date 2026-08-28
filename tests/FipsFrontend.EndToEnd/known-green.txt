@@ -1,6 +1,7 @@
 # Tests known to pass; a run that fails one of these is refused by Check-KnownGreen.ps1.
 # This is how we can ratchet the tests from red to green while not missing a test go from green to red in the noise.
 AccessibilityTest
+CheckBrowseCategoriesPageDescriptionUS05AC2
 ClickMainSearchButtonUS12AC2
 ClickSubcategoryLinksForAdultLearner_US277AC1
 ClickSubcategoryLinksForAlternatProvSettingWorkforce_EPEY_US277AC5
@@ -21,4 +22,4 @@ HomePageVerificationUS12AC1
 LoginWithUsernameAndPasswordUS231AC2
 VerifyFooterCookiesLinkUS13AC
 VerifyHomePageChangesUS305AC1
-VerifySearchLinkFunctionalityUS305AC2
+VerifyMissingProductOrServiceLink_ProductsPageUS219AC
