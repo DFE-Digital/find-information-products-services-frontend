@@ -37,7 +37,8 @@ TestResults/
 playwright-report/
 env.local.json
 
-# Configuration files with sensitive data
+# Configuration files with sensitive data. The template and the "ci" settings are the exceptions: nothing in them is real.
 appsettings.json
 appsettings.*.json
 !appsettings.template.json
+!appsettings.ci.json

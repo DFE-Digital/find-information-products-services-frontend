@@ -35,7 +35,17 @@ template carries Playwright's defaults (5, 30, and 30 seconds), which suit a hos
 application on the same machine answers in milliseconds, and every failing test waits the whole
 timeout, so set them low there or a run is mostly waiting.
 
-Start the application (see the repository README), then:
+Start the application (see the repository README). To run it exactly as the pipeline does - the
+`ci` environment, whose settings are the committed `src/FipsFrontend/appsettings.ci.json` and whose
+content source is the stub below - run the published output, since static files are served from a
+build folder only under `Development`:
+
+```
+dotnet publish src/FipsFrontend/FipsFrontend.csproj -c Release -o out
+ASPNETCORE_ENVIRONMENT=ci dotnet out/FipsFrontend.dll --urls http://localhost:5505
+```
+
+Then:
 
 ```
 dotnet test tests/FipsFrontend.EndToEnd
@@ -69,5 +79,9 @@ artefact; it does not gate on either.
 
 Set `activeEnv` to `dev`, `test`, or `prod` in `env.local.json` with that environment's `applicationURL`
 and `oAuthURL`, and with `loginRequired` true give `userName` and `password` base64-encoded.
+
+The report embeds a full-page screenshot of every failing test, so against a hosted environment it
+holds real content: it stays on your machine (`playwright-report/` is gitignored), and the pipeline
+uploads a report only when the target is the copy of the application it started itself.
 
 Reference: https://playwright.dev/dotnet/

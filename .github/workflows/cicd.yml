@@ -146,26 +146,13 @@ jobs:
       - name: Install the browser
         run: pwsh tests/FipsFrontend.EndToEnd/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
-      # The application runs as it does on a developer's machine: placeholder identity settings and no sign-in,
-      # and an empty content source, so every failure the suite reports is about the pages rather than about data.
+      # The application runs as the "ci" environment: its settings are src/FipsFrontend/appsettings.ci.json (committed;
+      # placeholder identity values that sign nobody in, and the stub as its content source), so every failure the
+      # suite reports is about the pages rather than about data. Neither "Development" (hosted environments run under
+      # it too) nor a developer's local-only name, whose conveniences a pipeline copy should not inherit.
       - name: Start the application
         env:
-          ASPNETCORE_ENVIRONMENT: Development
-          Caching__Performance__EnableWarming: "false"
-          Caching__Redis__Enabled: "false"
-          AzureAd__Instance: https://login.microsoftonline.com/
-          AzureAd__TenantId: 00000000-0000-0000-0000-000000000000
-          AzureAd__ClientId: 00000000-0000-0000-0000-000000000000
-          AzureAd__ClientSecret: placeholder
-          CmsApi__BaseUrl: http://127.0.0.1:1338/api
-          CmsApi__ReadApiKey: placeholder
-          CmsApi__WriteApiKey: placeholder
-          SAS__BaseUrl: http://127.0.0.1:1338/
-          SAS__SecretId: placeholder
-          Notify__ApiKey: placeholder-00000000-0000-0000-0000-000000000000-00000000-0000-0000-0000-000000000000
-          Notify__FIPSMailbox: mailbox@example.com
-          Notify__Templates__changeEntry: placeholder
-          Notify__Templates__newEntry: placeholder
+          ASPNETCORE_ENVIRONMENT: ci
         run: |
           dotnet tests/FipsFrontend.Tests.StubCmsApi/bin/Release/net10.0/FipsFrontend.Tests.StubCmsApi.dll --urls http://127.0.0.1:1338 > "${{ runner.temp }}/stub-cms-api.log" 2>&1 &
           (cd "${{ runner.temp }}/publish" && dotnet FipsFrontend.dll --urls http://localhost:5505 > "${{ runner.temp }}/app.log" 2>&1 &)
@@ -185,6 +172,19 @@ jobs:
             "timeouts": { "expectMs": 2000, "actionMs": 5000, "navigationMs": 10000 }
           }
           EOF
+
+      # The suite's report embeds a full-page screenshot of every failing test, and the application log goes up beside it.
+      # Against the copy on this runner that is empty pages; against a hosted environment it would be real content in a
+      # 90-day artefact. So the target is read back from the file just written, and anything but a loopback address stops
+      # the job here - the constant above is not trusted to stay a constant.
+      - name: Refuse a target that is not on this machine
+        id: target
+        run: |
+          host=$(jq -r '.envs[] | select(.env == $e) | .applicationURL' --arg e "$(jq -r .activeEnv tests/FipsFrontend.EndToEnd/env.local.json)" tests/FipsFrontend.EndToEnd/env.local.json | sed -E 's#^[a-z]+://([^/:]+).*#\1#')
+          case "$host" in
+            localhost|127.0.0.1|'[::1]') echo "Target host $host is this machine"; echo "local=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Target host '$host' is not this machine; this job runs the suite only against the copy it started"; exit 1 ;;
+          esac
 
       - name: Run the suite
         continue-on-error: true
@@ -212,8 +212,9 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Only for a loopback target (see above); the step is skipped, not failed, if the check did not pass.
       - name: Upload the results and the report
-        if: always()
+        if: always() && steps.target.outputs.local == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: end-to-end-results
