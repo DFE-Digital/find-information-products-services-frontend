@@ -49,9 +49,11 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
+          cache-dependency-path: src/FipsFrontend/package-lock.json
 
       - name: Install npm dependencies
         run: npm ci
+        working-directory: src/FipsFrontend
 
       # NuGet packages are cached by the action itself, keyed on packages.lock.json; npm packages likewise by setup-node,
       # keyed on package-lock.json (switched on by the packageManager field in package.json).
@@ -63,10 +65,10 @@ jobs:
 
       # --locked-mode refuses a restore that would change packages.lock.json, so the build uses exactly the committed package versions.
       - name: Restore NuGet packages
-        run: dotnet restore FipsFrontend.csproj --locked-mode
+        run: dotnet restore src/FipsFrontend/FipsFrontend.csproj --locked-mode
 
       - name: Publish
-        run: dotnet publish FipsFrontend.csproj --configuration Release --no-restore -o ${{ runner.temp }}/publish
+        run: dotnet publish src/FipsFrontend/FipsFrontend.csproj --configuration Release --no-restore -o ${{ runner.temp }}/publish
 
       - name: Upload the published app for the deploy jobs
         uses: actions/upload-artifact@v7

@@ -86,6 +86,8 @@ The application runs, and is tested, on a developer's machine without anything h
 
 ### Maintenance
 
+- **Repository:** the web project lives in `src/FipsFrontend` and the loose documents in `docs/`, with a solution file at the root.
+  Previously the project was the repository root, which left no room for a test project beside it.
 - **Build:** a fresh clone builds with only the .NET SDK and Node.js installed:
   the project file installs the npm packages itself (skipped under CI, where the workflow's `npm ci` does it).
   Previously `npm install` was an unwritten step, and a fresh build failed inside the Sass compiler.

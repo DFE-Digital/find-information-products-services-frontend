@@ -71,21 +71,21 @@ You'll need to obtain API keys from your Strapi CMS instance:
 ### Development
 
 ```bash
-dotnet run
+dotnet run --project src/FipsFrontend
 ```
 
 The build installs the npm packages it needs (the Sass compiler for the stylesheets) on the first
 run and whenever `package.json` changes, so a fresh clone needs only the .NET SDK named in
 `global.json` and Node.js (see `.nvmrc` for the version the build is tested with).
 
-The application will be available at the addresses in `Properties/launchSettings.json`:
+The application will be available at the addresses in `src/FipsFrontend/Properties/launchSettings.json`:
 - HTTP: `http://localhost:5505`
 - HTTPS: `https://localhost:7601`
 
 ### Production
 
 ```bash
-dotnet publish -c Release -o ./publish
+dotnet publish src/FipsFrontend -c Release -o ./publish
 cd publish
 dotnet FipsFrontend.dll
 ```
@@ -93,24 +93,22 @@ dotnet FipsFrontend.dll
 ## Project Structure
 
 ```
-FipsFrontend/
-├── Controllers/           # MVC Controllers
-│   ├── HomeController.cs
-│   └── ProductsController.cs
-├── Models/               # Data Models
-│   └── ProductModels.cs
-├── Services/             # Business Logic Services
-│   └── CmsApiService.cs
-├── Views/                # Razor Views
-│   ├── Home/
-│   ├── Products/
-│   └── Shared/
-├── wwwroot/              # Static Files
-│   ├── css/
-│   └── js/
-├── Program.cs            # Application Entry Point
-├── appsettings.json      # Configuration
-└── FipsFrontend.csproj   # Project File
+.
+├── .github/                  # Workflows and Dependabot configuration
+├── docs/                     # Design notes and plans
+├── src/
+│   └── FipsFrontend/         # The web application
+│       ├── Controllers/
+│       ├── Models/
+│       ├── Services/
+│       ├── Views/
+│       ├── wwwroot/
+│       ├── Program.cs
+│       ├── appsettings.template.json
+│       └── FipsFrontend.csproj
+├── FipsFrontend.slnx         # Solution: build or test everything from the root
+├── global.json               # .NET SDK version
+└── .nvmrc                    # Node.js version
 ```
 
 ## API Integration

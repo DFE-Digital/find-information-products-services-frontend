@@ -5,8 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Compiled CSS
-wwwroot/css/main.css
-wwwroot/css/main.css.map
+src/FipsFrontend/wwwroot/css/main.css
+src/FipsFrontend/wwwroot/css/main.css.map
 
 # Build outputs
 dist/
