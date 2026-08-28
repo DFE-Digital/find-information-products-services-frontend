@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Teachers",
+      "description": "School teaching staff",
+      "displayOrder": 1,
+      "active": true,
+      "children": [
+        "Classroom teachers",
+        "Headteachers"
+      ],
+      "synonyms": [
+        "Teaching staff"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Parents and carers",
+      "description": "Adults responsible for a child",
+      "displayOrder": 2,
+      "active": true,
+      "children": [],
+      "synonyms": []
+    },
+    {
+      "id": 3,
+      "name": "Employers",
+      "description": "Retired group, kept for history",
+      "displayOrder": 3,
+      "active": false,
+      "children": [],
+      "synonyms": []
+    }
+  ]
+}

@@ -1,0 +1,400 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Discovery",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 1
+    },
+    {
+      "id": 2,
+      "name": "Alpha",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 2
+    },
+    {
+      "id": 3,
+      "name": "Private beta",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 3
+    },
+    {
+      "id": 4,
+      "name": "Public beta",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 4
+    },
+    {
+      "id": 5,
+      "name": "Live",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 5
+    },
+    {
+      "id": 6,
+      "name": "Decommissioning",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 6
+    },
+    {
+      "id": 7,
+      "name": "Decommissioned",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 7
+    },
+    {
+      "id": 8,
+      "name": "Did not progress",
+      "description": "",
+      "groupId": 1,
+      "groupName": "Phase",
+      "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 8
+    },
+    {
+      "id": 9,
+      "name": "Web",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 1
+    },
+    {
+      "id": 10,
+      "name": "Native app",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 2
+    },
+    {
+      "id": 11,
+      "name": "Email",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 3
+    },
+    {
+      "id": 12,
+      "name": "SMS",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 4
+    },
+    {
+      "id": 13,
+      "name": "Phone",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 5
+    },
+    {
+      "id": 14,
+      "name": "Chat",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 6
+    },
+    {
+      "id": 15,
+      "name": "Face-to-face",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 7
+    },
+    {
+      "id": 16,
+      "name": "Print media",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 8
+    },
+    {
+      "id": 17,
+      "name": "Other digital media",
+      "description": "",
+      "groupId": 2,
+      "groupName": "Channel",
+      "groupDescription": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 9
+    },
+    {
+      "id": 18,
+      "name": "Transactional",
+      "description": "",
+      "groupId": 3,
+      "groupName": "Type",
+      "groupDescription": "The type of service delivery and functionality provided.",
+      "displayOrder": 1
+    },
+    {
+      "id": 19,
+      "name": "Information",
+      "description": "",
+      "groupId": 3,
+      "groupName": "Type",
+      "groupDescription": "The type of service delivery and functionality provided.",
+      "displayOrder": 2
+    },
+    {
+      "id": 20,
+      "name": "Data",
+      "description": "",
+      "groupId": 3,
+      "groupName": "Type",
+      "groupDescription": "The type of service delivery and functionality provided.",
+      "displayOrder": 3
+    },
+    {
+      "id": 21,
+      "name": "API",
+      "description": "",
+      "groupId": 3,
+      "groupName": "Type",
+      "groupDescription": "The type of service delivery and functionality provided.",
+      "displayOrder": 4
+    },
+    {
+      "id": 22,
+      "name": "Campaign",
+      "description": "",
+      "groupId": 3,
+      "groupName": "Type",
+      "groupDescription": "The type of service delivery and functionality provided.",
+      "displayOrder": 5
+    },
+    {
+      "id": 23,
+      "name": "Children and Families",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 1
+    },
+    {
+      "id": 24,
+      "name": "Commercial",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 2
+    },
+    {
+      "id": 25,
+      "name": "Customer Experience and Design",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 3
+    },
+    {
+      "id": 26,
+      "name": "Enterprise Data",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 4
+    },
+    {
+      "id": 27,
+      "name": "Funding and Financial Oversight",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 5
+    },
+    {
+      "id": 28,
+      "name": "Operations and Infrastructure",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 6
+    },
+    {
+      "id": 29,
+      "name": "Regional Digital Services",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 7
+    },
+    {
+      "id": 30,
+      "name": "Schools Digital",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 8
+    },
+    {
+      "id": 31,
+      "name": "Sector Facing Services",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 9
+    },
+    {
+      "id": 32,
+      "name": "Skills and Growth",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 10
+    },
+    {
+      "id": 33,
+      "name": "Strategy",
+      "description": "",
+      "groupId": 4,
+      "groupName": "Business area",
+      "groupDescription": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 11
+    },
+    {
+      "id": 34,
+      "name": "Adult learner (18+)",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 1
+    },
+    {
+      "id": 35,
+      "name": "Careers adviser or work coach",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 2
+    },
+    {
+      "id": 36,
+      "name": "Child or young person",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 3
+    },
+    {
+      "id": 37,
+      "name": "Department for Education workforce",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 4
+    },
+    {
+      "id": 38,
+      "name": "Education provider and early years workforce",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 5
+    },
+    {
+      "id": 39,
+      "name": "Employer",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 6
+    },
+    {
+      "id": 40,
+      "name": "Local authority workforce",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 7
+    },
+    {
+      "id": 41,
+      "name": "NEET or career seeker",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 8
+    },
+    {
+      "id": 42,
+      "name": "Parent or carer",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 9
+    },
+    {
+      "id": 43,
+      "name": "Professional external user of DfE data",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 10
+    },
+    {
+      "id": 44,
+      "name": "Social care workforce",
+      "description": "",
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 11
+    }
+  ]
+}

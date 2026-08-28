@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Transactional",
+      "description": "The user completes a task",
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Information",
+      "description": "The user reads or looks up",
+      "displayOrder": 2,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Data",
+      "description": "Retired type, kept for history",
+      "displayOrder": 3,
+      "active": false
+    }
+  ]
+}
