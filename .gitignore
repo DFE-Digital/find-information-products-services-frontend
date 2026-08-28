@@ -32,6 +32,11 @@ bin/
 obj/
 TestResults/
 
+# Browser-driven suite (tests/FipsFrontend.EndToEnd): its report, and the per-machine copy of
+# env.json that points it at a running application
+playwright-report/
+env.local.json
+
 # Configuration files with sensitive data
 appsettings.json
 appsettings.*.json
