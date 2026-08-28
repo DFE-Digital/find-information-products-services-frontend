@@ -364,3 +364,6 @@ static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
                 Console.WriteLine($"Retry {retryCount} after {timespan} seconds");
             });
 }
+
+// Lets the test project host the application through WebApplicationFactory<Program>.
+public partial class Program { }
