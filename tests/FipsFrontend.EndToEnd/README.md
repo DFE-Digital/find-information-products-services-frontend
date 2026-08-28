@@ -49,12 +49,21 @@ ASPNETCORE_ENVIRONMENT=ci dotnet out/FipsFrontend.dll --urls http://localhost:55
 Then:
 
 ```
-dotnet test tests/FipsFrontend.EndToEnd
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Configuration"
 dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=functional"
 ```
 
 A report is written to `tests/FipsFrontend.EndToEnd/playwright-report/`, with a screenshot of each
-failing test.
+failing test. The `Configuration` category is the suite's own tests of its settings rules; they need
+no browser, run in seconds, and the pipeline gates on them - hence the filter that leaves them out of
+a browser run, where the known-green check would otherwise list them.
+
+The pipeline also measures which of the application's code the browser suite reaches: it starts the
+published application under `dotnet-coverage`, stops it gracefully after the run so the collector can
+write its file, and puts that figure on the summary page beside the combined figure with the
+in-process scenarios. Locally the same is `dotnet-coverage collect --session-id suite --output-format
+cobertura --output app.cobertura.xml -- dotnet out/FipsFrontend.dll --urls …`, then
+`dotnet-coverage shutdown suite` once the tests have run.
 
 For a run with no content, `tests/FipsFrontend.Tests.StubCmsApi` stands in for the content source
 and answers every request with an empty collection:

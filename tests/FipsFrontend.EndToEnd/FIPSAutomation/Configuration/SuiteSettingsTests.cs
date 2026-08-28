@@ -5,8 +5,12 @@ using Microsoft.Extensions.Configuration;
 // start a browser and open the application for these, which need neither.
 namespace FipsFrontend.EndToEnd.ConfigurationTests;
 
-/// <summary>What a person configuring the suite meets: the rules in ConfigurationSections, applied.</summary>
-[TestFixture]
+/// <summary>
+/// What a person configuring the suite meets: the rules in ConfigurationSections, applied. These
+/// need no browser and no running application, so the pipeline runs them as a gate of their own
+/// (the category below) and leaves them out of the browser run and its known-green check.
+/// </summary>
+[TestFixture, Category("Configuration")]
 public class SuiteSettingsTests
 {
     private static IConfiguration Configuration(params (string Key, string? Value)[] values) =>

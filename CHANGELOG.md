@@ -120,6 +120,8 @@ The application runs, and is tested, on a developer's machine without anything h
   and the suite's waits become configuration, sized for an application on the same machine.
   The suite is configured the way the application is - a tracked `testsettings.json`, a gitignored local copy, then environment variables -
   bound to validated options, replacing its own `env.json` and the base64-encoded credentials.
+  The pipeline measures which of the application's code the browser suite reaches, and shows it beside the combined figure
+  with the in-process scenarios, so the two can be watched as the suite turns green; the suite's own tests of its settings rules gate.
 
 ## [v2026.08.27-0002]
 

@@ -30,6 +30,7 @@ on:
 env:
   ARTEFACT_NAME: fips-frontend-web-app
   REPORT_GENERATOR_VERSION: 5.5.11
+  DOTNET_COVERAGE_VERSION: 18.10.0
 
 # No workflow-wide permissions: each job states the minimum it needs.
 permissions: {}
@@ -150,6 +151,16 @@ jobs:
           dotnet build tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-restore
           dotnet build tests/FipsFrontend.Tests.StubCmsApi/FipsFrontend.Tests.StubCmsApi.csproj --configuration Release --no-restore
 
+      - name: Install the coverage and report tools
+        run: |
+          dotnet tool install dotnet-coverage --version ${{ env.DOTNET_COVERAGE_VERSION }} --tool-path ${{ runner.temp }}/tools
+          dotnet tool install dotnet-reportgenerator-globaltool --version ${{ env.REPORT_GENERATOR_VERSION }} --tool-path ${{ runner.temp }}/tools
+
+      # The suite's own tests of its configuration rules need no browser and no application, and a failure there is a
+      # defect in the suite, so unlike the browser run below this step gates.
+      - name: Check the suite's configuration rules
+        run: dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build --filter "TestCategory=Configuration"
+
       # The browser download (~100 MB) is cached between runs, keyed on the suite's lock file so a Playwright
       # update fetches the browser build that goes with it. The install step still runs: on a hit it finds the
       # browser present and only puts the OS packages in place.
@@ -166,12 +177,18 @@ jobs:
       # placeholder identity values that sign nobody in, and the stub as its content source), so every failure the
       # suite reports is about the pages rather than about data. Neither "Development" (hosted environments run under
       # it too) nor a developer's local-only name, whose conveniences a pipeline copy should not inherit.
+      # The application runs under the coverage collector, so the report can say which of its code the browser suite
+      # reaches (the in-process scenarios' coverage is measured separately in the build job). The collector needs a
+      # graceful stop to write its file: the "shutdown" step below, never a kill.
       - name: Start the application
         env:
           ASPNETCORE_ENVIRONMENT: ci
+          DOTNET_COVERAGE_NOLOGO: "1"
+          DOTNET_COVERAGE_TELEMETRY_OPTOUT: "1"
         run: |
+          mkdir -p "${{ runner.temp }}/end-to-end"
           dotnet tests/FipsFrontend.Tests.StubCmsApi/bin/Release/net10.0/FipsFrontend.Tests.StubCmsApi.dll --urls http://127.0.0.1:1338 > "${{ runner.temp }}/stub-cms-api.log" 2>&1 &
-          (cd "${{ runner.temp }}/publish" && dotnet FipsFrontend.dll --urls http://localhost:5505 > "${{ runner.temp }}/app.log" 2>&1 &)
+          (cd "${{ runner.temp }}/publish" && "${{ runner.temp }}/tools/dotnet-coverage" collect --session-id browser-suite --output-format cobertura --output "${{ runner.temp }}/end-to-end/app.cobertura.xml" -- dotnet FipsFrontend.dll --urls http://localhost:5505 > "${{ runner.temp }}/app.log" 2>&1 &)
           for i in $(seq 1 30); do
             curl -sf -o /dev/null http://localhost:5505/ && echo "The application answered after $((i * 2)) s" && exit 0
             sleep 2
@@ -199,6 +216,7 @@ jobs:
         continue-on-error: true
         run: >
           dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
+          --filter "TestCategory!=Configuration"
           --logger trx --results-directory ${{ runner.temp }}/end-to-end
 
       - name: Check that the tests known to pass still pass
@@ -207,18 +225,40 @@ jobs:
           pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
           exit "${PIPESTATUS[0]}"
 
+      - name: Stop the application and write its coverage
+        if: always()
+        run: ${{ runner.temp }}/tools/dotnet-coverage shutdown browser-suite
+
+      # The in-process scenarios' coverage, from the build job, so the two can be read side by side and combined.
+      - name: Download the in-process test results
+        if: always()
+        uses: actions/download-artifact@v8
+        with:
+          name: test-results
+          path: ${{ runner.temp }}/unit-results
+
+      # Two coverage figures on the summary page, kept apart on purpose: what the browser suite reaches, and what the
+      # two kinds of test reach together. Each report's per-file table is left to the artefact; the summary shows totals.
       - name: Report the results
         if: always()
         run: |
+          tools="${{ runner.temp }}/tools"
+          e2e="${{ runner.temp }}/end-to-end"
+          "$tools/reportgenerator" -reports:"$e2e/app.cobertura.xml" -targetdir:"$e2e/coverage-browser" -reporttypes:"MarkdownSummaryGithub;Cobertura"
+          "$tools/reportgenerator" -reports:"$e2e/app.cobertura.xml;${{ runner.temp }}/unit-results/coverage/Cobertura.xml" -targetdir:"$e2e/coverage-combined" -reporttypes:"MarkdownSummaryGithub;Cobertura"
           {
             echo "## Browser tests (informational)"
-            for trx in "${{ runner.temp }}"/end-to-end/*.trx; do
+            for trx in "$e2e"/*.trx; do
               grep -oE '<Counters [^/]*/>' "$trx" | sed -E 's/.*total="([0-9]+)".*passed="([0-9]+)".*failed="([0-9]+)".*/- \2 passed, \3 failed, \1 in total/'
             done
             echo
             echo '```'
-            cat "${{ runner.temp }}/end-to-end/known-green-check.txt"
+            cat "$e2e/known-green-check.txt"
             echo '```'
+            echo "### Coverage of the application by the browser suite"
+            sed '/^## Coverage/q' "$e2e/coverage-browser/SummaryGithub.md" | grep -v 'only available for sponsors\|^## Coverage'
+            echo "### Coverage by the browser suite and the in-process scenarios together"
+            sed '/^## Coverage/q' "$e2e/coverage-combined/SummaryGithub.md" | grep -v 'only available for sponsors\|^## Coverage'
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Only for a loopback target (see above); the step is skipped, not failed, if the check did not pass.
