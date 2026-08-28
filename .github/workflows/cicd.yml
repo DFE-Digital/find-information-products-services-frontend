@@ -127,6 +127,9 @@ jobs:
       Timeouts__ExpectMs: "2000"
       Timeouts__ActionMs: "5000"
       Timeouts__NavigationMs: "10000"
+      # For every invocation of the coverage tool in this job, not only the one that starts the application.
+      DOTNET_COVERAGE_NOLOGO: "1"
+      DOTNET_COVERAGE_TELEMETRY_OPTOUT: "1"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -184,8 +187,6 @@ jobs:
         id: start
         env:
           ASPNETCORE_ENVIRONMENT: ci
-          DOTNET_COVERAGE_NOLOGO: "1"
-          DOTNET_COVERAGE_TELEMETRY_OPTOUT: "1"
         run: |
           mkdir -p "${{ runner.temp }}/end-to-end"
           dotnet tests/FipsFrontend.Tests.StubCmsApi/bin/Release/net10.0/FipsFrontend.Tests.StubCmsApi.dll --urls http://127.0.0.1:1338 > "${{ runner.temp }}/stub-cms-api.log" 2>&1 &
