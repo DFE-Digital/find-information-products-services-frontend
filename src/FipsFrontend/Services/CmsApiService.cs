@@ -15,18 +15,16 @@ public class CmsApiService
     private readonly Dictionary<string, CacheItemInfo> _cacheTracking;
     private readonly object _cacheTrackingLock = new();
 
-    public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger, IEnhancedCacheService cache)
+    public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger, IEnhancedCacheService cache, FipsFrontend.Configuration.CmsApiOptions contentSource)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
         _cache = cache;
         _cacheTracking = new Dictionary<string, CacheItemInfo>();
-        _baseUrl = _configuration["CmsApi:BaseUrl"] ?? "http://localhost:1337/api";
-        
-        // Log CMS endpoint on startup
-        Console.WriteLine($"[CmsApiService] Connecting to CMS endpoint: {_baseUrl}");
-        _logger.LogInformation("CmsApiService initialized - CMS Base URL: {BaseUrl}", _baseUrl);
+        // Absolute and validated at start-up; without a content source it is a placeholder the
+        // in-process handler never reaches.
+        _baseUrl = contentSource.BaseAddress.AbsoluteUri.TrimEnd('/');
     }
 
     public async Task<T?> GetAsync<T>(string endpoint, TimeSpan? cacheDuration = null)

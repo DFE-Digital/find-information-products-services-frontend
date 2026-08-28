@@ -127,6 +127,14 @@ The application runs, and is tested, on a developer's machine without anything h
   bound to validated options, replacing its own `env.json` and the base64-encoded credentials.
   The pipeline measures which of the application's code the browser suite reaches, and shows it beside the combined figure
   with the in-process scenarios, so the two can be watched as the suite turns green; the suite's own tests of its settings rules gate.
+- **Configuration:** a fresh clone runs with nothing configured. `appsettings.json` is committed (every value empty or a default; the template it replaces is gone),
+  and each optional section is off when left empty - sign-in, the content source (pages render empty), the assessments service, Redis, search-term logging -
+  while a section partly supplied, an address that is not absolute, or a feature switched on without the service it needs, stops the application at start-up naming the keys.
+  Previously every page, the error page included, failed with "IDW10106: The 'ClientId' option must be provided", and the listing hung on a content source nobody runs.
+- **Configuration:** a developer's machine runs as its own environment, `local-dev` (the launch profiles set it), and an unnamed environment is Production, as the framework intends.
+  The developer exception page, the error page's exception details, and the short HSTS header are shown under `local-dev` and `Development` only;
+  the exception page and the error details previously showed in every environment, production included. Under `local-dev`, stylesheets and scripts are served from the source tree as they are under `Development`.
+  Every environment but the live one carries a phase banner naming it on every page.
 
 ## [v2026.08.27-0002]
 

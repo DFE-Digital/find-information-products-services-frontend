@@ -33,7 +33,7 @@ public class ConfigurationTemplateTests
 
         var missing = keysRead.Where(k => !TemplateKeys().Contains(k)).ToList();
 
-        Assert.That(missing, Is.Empty, "appsettings.template.json does not name these keys the code reads:\n  " + string.Join("\n  ", missing));
+        Assert.That(missing, Is.Empty, "appsettings.json does not name these keys the code reads:\n  " + string.Join("\n  ", missing));
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class ConfigurationTemplateTests
 
         var missing = expected.Where(k => !TemplateKeys().Contains(k)).ToList();
 
-        Assert.That(missing, Is.Empty, "appsettings.template.json does not name these settings an options class binds:\n  " + string.Join("\n  ", missing));
+        Assert.That(missing, Is.Empty, "appsettings.json does not name these settings an options class binds:\n  " + string.Join("\n  ", missing));
     }
 
     private static IEnumerable<string> ApplicationSourceFiles() =>
@@ -61,7 +61,10 @@ public class ConfigurationTemplateTests
 
     private static HashSet<string> TemplateKeys()
     {
-        using var template = JsonDocument.Parse(File.ReadAllText(Path.Combine(ApplicationDirectory(), "appsettings.template.json")));
+        // The committed settings file is what a new instance runs from; the configuration provider allows comments in it, so this parse does too.
+        using var template = JsonDocument.Parse(
+            File.ReadAllText(Path.Combine(ApplicationDirectory(), "appsettings.json")),
+            new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
         return new HashSet<string>(Flatten(template.RootElement, ""));
     }
 

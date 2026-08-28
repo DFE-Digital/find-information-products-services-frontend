@@ -47,15 +47,24 @@ public class SearchTermLoggingService : ISearchTermLoggingService
     private readonly int _deduplicationWindowSeconds;
     private readonly int _maxSearchTermLength;
 
+    // False without a content-source write key (CmsApi:WriteApiKey): nothing is logged, and nothing is attempted.
+    private readonly bool _canWrite;
+
     public SearchTermLoggingService(
         CmsApiService cmsApiService,
         ILogger<SearchTermLoggingService> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        FipsFrontend.Configuration.CmsApiOptions contentSource)
     {
         _cmsApiService = cmsApiService;
         _logger = logger;
         _configuration = configuration;
-        
+        _canWrite = contentSource.CanWrite;
+        if (!_canWrite)
+        {
+            _logger.LogInformation("Search-term logging is off: no CmsApi:WriteApiKey");
+        }
+
         // Load configuration with sensible defaults
         _minSearchTermLength = _configuration.GetValue<int>("SearchLogging:MinSearchTermLength", 2);
         _rateLimitSeconds = _configuration.GetValue<int>("SearchLogging:RateLimitSeconds", 5);
@@ -65,6 +74,7 @@ public class SearchTermLoggingService : ISearchTermLoggingService
 
     public void LogSearchTerm(string? searchTerm, int resultCount, List<SearchResult>? results, string? ipAddress, string? userAgent)
     {
+        if (!_canWrite) return;
         // Fire and forget - don't block the main request
         _ = Task.Run(async () =>
         {

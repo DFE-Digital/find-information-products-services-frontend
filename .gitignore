@@ -37,8 +37,8 @@ TestResults/
 playwright-report/
 testsettings.local.json
 
-# Configuration files with sensitive data. The template and the "ci" settings are the exceptions: nothing in them is real.
-appsettings.json
+# Per-environment settings files may hold real values and stay on the machine that made them
+# (appsettings.Development.json for local overrides). appsettings.json is committed: every value in
+# it is empty or a default, and the application runs from it as it is. The "ci" file is placeholders.
 appsettings.*.json
-!appsettings.template.json
 !appsettings.ci.json

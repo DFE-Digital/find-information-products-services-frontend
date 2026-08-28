@@ -1,0 +1,10 @@
+// The environment banner is a full-width strip at the very top of the page (see _Layout.cshtml):
+// its own band, so it never breaks the header's bands, in the phase banner's usual light grey.
+// main.scss gives phase banners elsewhere the masthead tint; this one takes the strip's colour.
+.app-environment-banner {
+  background-color: govuk-colour("light-grey");
+
+  .govuk-phase-banner {
+    background-color: transparent !important;
+  }
+}

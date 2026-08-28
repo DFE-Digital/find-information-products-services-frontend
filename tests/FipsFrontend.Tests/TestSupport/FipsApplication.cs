@@ -19,14 +19,23 @@ public sealed class FipsApplication : IDisposable
     /// <summary>Records every request an outbound client tried to make, as "METHOD url".</summary>
     public sealed class RecordingStandIn : HttpMessageHandler
     {
+        private const string EmptyCollection = """{"data":[],"meta":{"pagination":{"page":1,"pageSize":25,"pageCount":0,"total":0}}}""";
         private readonly List<string> _requests = [];
+
+        /// <summary>
+        /// What to answer a request with, when a scenario needs something other than the empty
+        /// collection: return a body, or null to fall back to it. Always 200; the scenarios that
+        /// matter here are about what the application makes of an answer, not of a refusal.
+        /// </summary>
+        public Func<HttpRequestMessage, string?>? Answer { get; set; }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             lock (_requests) _requests.Add($"{request.Method} {request.RequestUri}");
+            var body = Answer?.Invoke(request) ?? EmptyCollection;
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent("""{"data":[],"meta":{"pagination":{"page":1,"pageSize":25,"pageCount":0,"total":0}}}""", System.Text.Encoding.UTF8, "application/json"),
+                Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
             });
         }
 
@@ -68,7 +77,12 @@ public sealed class FipsApplication : IDisposable
 
     /// <param name="environment">The environment name the application believes it runs under.</param>
     /// <param name="settings">Configuration for the scenario, layered over the baseline.</param>
-    public FipsApplication(string environment = "Development", IDictionary<string, string?>? settings = null)
+    /// <param name="replaceOutboundClients">
+    /// True (the default) swaps every outbound client's handler for the recording stand-in. False leaves the
+    /// application's own handlers in place, for scenarios about what the application does when nothing is
+    /// configured - its in-process no-content handler is then the thing under test, not hidden by the stand-in.
+    /// </param>
+    public FipsApplication(string environment = "Development", IDictionary<string, string?>? settings = null, bool replaceOutboundClients = true)
     {
         Factory = new WebApplicationFactory<Program>().WithWebHostBuilder(host =>
         {
@@ -83,6 +97,7 @@ public sealed class FipsApplication : IDisposable
             }
             host.ConfigureTestServices(services =>
             {
+                if (!replaceOutboundClients) return;
                 // Registered after the application's own, so this primary handler is the one each named client gets.
                 foreach (var name in OutboundClients)
                 {

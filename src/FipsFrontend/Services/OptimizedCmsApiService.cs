@@ -32,20 +32,23 @@ public class OptimizedCmsApiService : IOptimizedCmsApiService
     private readonly string _apiKey;
     private static readonly string[] DefaultStates = { "New", "Active", "Rejected", "Deleted" };
 
-    public OptimizedCmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<OptimizedCmsApiService> logger, IEnhancedCacheService cacheService)
+    public OptimizedCmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<OptimizedCmsApiService> logger, IEnhancedCacheService cacheService, FipsFrontend.Configuration.CmsApiOptions contentSource)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
         _cacheService = cacheService;
-        _apiKey = _configuration["CmsApi:ReadApiKey"] ?? throw new InvalidOperationException("CmsApi:ReadApiKey not configured");
-        
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
-        
-        // Log CMS endpoint on startup
-        var baseUrl = _httpClient.BaseAddress?.ToString() ?? "Not set";
-        Console.WriteLine($"[OptimizedCmsApiService] Connecting to CMS endpoint: {baseUrl}");
-        _logger.LogInformation("OptimizedCmsApiService initialized - CMS Base URL: {BaseUrl}", baseUrl);
+        _apiKey = contentSource.ReadApiKey;
+
+        if (contentSource.IsConfigured)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+            _logger.LogInformation("Content source: {BaseUrl}", contentSource.BaseAddress);
+        }
+        else
+        {
+            _logger.LogInformation("No content source configured (CmsApi:BaseUrl); every page renders with no content");
+        }
     }
 
     public async Task<(List<Product> Products, int TotalCount)> GetProductsForListingAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
