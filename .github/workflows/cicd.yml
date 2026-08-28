@@ -65,8 +65,12 @@ jobs:
           cache-dependency-path: src/FipsFrontend/packages.lock.json
 
       # --locked-mode refuses a restore that would change packages.lock.json, so the build uses exactly the committed package versions.
+      # The test project references the application, so restoring it restores both.
       - name: Restore NuGet packages
-        run: dotnet restore src/FipsFrontend/FipsFrontend.csproj --locked-mode
+        run: dotnet restore tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj --locked-mode
+
+      - name: Test
+        run: dotnet test tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj --configuration Release --no-restore
 
       - name: Publish
         run: dotnet publish src/FipsFrontend/FipsFrontend.csproj --configuration Release --no-restore -o ${{ runner.temp }}/publish

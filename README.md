@@ -82,6 +82,12 @@ The application will be available at the addresses in `src/FipsFrontend/Properti
 - HTTP: `http://localhost:5505`
 - HTTPS: `https://localhost:7601`
 
+### Tests
+
+```bash
+dotnet test
+```
+
 ### Production
 
 ```bash
@@ -106,6 +112,9 @@ dotnet FipsFrontend.dll
 │       ├── Program.cs
 │       ├── appsettings.template.json
 │       └── FipsFrontend.csproj
+├── tests/
+│   └── FipsFrontend.Tests/   # Scenarios run against the application
+├── Directory.Packages.props  # Every package version, in one place
 ├── FipsFrontend.slnx         # Solution: build or test everything from the root
 ├── global.json               # .NET SDK version
 └── .nvmrc                    # Node.js version

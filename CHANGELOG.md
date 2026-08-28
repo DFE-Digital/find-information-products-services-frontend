@@ -86,6 +86,10 @@ The application runs, and is tested, on a developer's machine without anything h
 
 ### Maintenance
 
+- **Tests:** the repository has a test project, `tests/FipsFrontend.Tests`, and the workflow runs it before anything is published.
+  Its first scenario keeps the settings template complete: every key the code reads must be named in it.
+- **Build:** package versions for every project live in one file, `Directory.Packages.props`.
+- **Configuration:** the settings template names the eight caching and search-logging keys the code reads with defaults, which the new test found missing.
 - **Repository:** the web project lives in `src/FipsFrontend` and the loose documents in `docs/`, with a solution file at the root.
   Previously the project was the repository root, which left no room for a test project beside it.
 - **Build:** a fresh clone builds with only the .NET SDK and Node.js installed:
