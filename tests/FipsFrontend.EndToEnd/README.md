@@ -71,7 +71,9 @@ about the pages.
 `known-green.txt` lists the tests that pass, and `Check-KnownGreen.ps1 -Trx <file>` refuses a run in
 which one of them did not: a test that stays red is allowed, a test that is removed is allowed, and
 a test brought to green is added to the list by whoever brings it there (`-Record` rewrites the list
-from a run). The pipeline runs the suite against the published application with the empty content source,
+from a run). `known-flaky.txt` lists tests seen both green and red against the same build: the check
+reports their outcome and never fails on them, and each is a signpost to a test to fix (usually a
+wait) and then move to the green list. The pipeline runs the suite against the published application with the empty content source,
 puts the counts and this check's verdict on the run's summary page, and keeps the results as an
 artefact; it does not gate on either.
 
