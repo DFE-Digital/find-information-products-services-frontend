@@ -29,6 +29,7 @@ on:
 
 env:
   ARTEFACT_NAME: fips-frontend-web-app
+  REPORT_GENERATOR_VERSION: 5.5.11
 
 # No workflow-wide permissions: each job states the minimum it needs.
 permissions: {}
@@ -65,12 +66,37 @@ jobs:
           cache-dependency-path: src/FipsFrontend/packages.lock.json
 
       # --locked-mode refuses a restore that would change packages.lock.json, so the build uses exactly the committed package versions.
-      # The test project references the application, so restoring it restores both.
       - name: Restore NuGet packages
-        run: dotnet restore tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj --locked-mode
+        run: dotnet restore FipsFrontend.slnx --locked-mode
 
       - name: Test
-        run: dotnet test tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj --configuration Release --no-restore
+        run: >
+          dotnet test FipsFrontend.slnx --configuration Release --no-restore
+          --logger trx --collect:"XPlat Code Coverage" --settings tests/coverage.runsettings
+          --results-directory ${{ runner.temp }}/test-results
+
+      # The results and the coverage go on the run's summary page; the raw files go up as an artefact.
+      - name: Report the results and coverage
+        if: always()
+        run: |
+          dotnet tool install dotnet-reportgenerator-globaltool --version ${{ env.REPORT_GENERATOR_VERSION }} --tool-path ${{ runner.temp }}/tools
+          ${{ runner.temp }}/tools/reportgenerator -reports:"${{ runner.temp }}/test-results/**/coverage.cobertura.xml" -targetdir:"${{ runner.temp }}/coverage" -reporttypes:"MarkdownSummaryGithub;Cobertura"
+          {
+            echo "## Tests"
+            for trx in "${{ runner.temp }}"/test-results/*.trx; do
+              grep -oE '<Counters [^/]*/>' "$trx" | sed -E 's/.*total="([0-9]+)".*passed="([0-9]+)".*failed="([0-9]+)".*/- \2 passed, \3 failed, \1 in total/'
+            done
+            grep -v 'only available for sponsors' "${{ runner.temp }}/coverage/SummaryGithub.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the test results and coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: |
+            ${{ runner.temp }}/test-results
+            ${{ runner.temp }}/coverage/Cobertura.xml
 
       - name: Publish
         run: dotnet publish src/FipsFrontend/FipsFrontend.csproj --configuration Release --no-restore -o ${{ runner.temp }}/publish

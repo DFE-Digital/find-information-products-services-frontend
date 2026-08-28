@@ -30,6 +30,7 @@ logs/
 # Runtime files
 bin/
 obj/
+TestResults/
 
 # Configuration files with sensitive data
 appsettings.json
