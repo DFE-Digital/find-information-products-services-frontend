@@ -181,6 +181,7 @@ jobs:
       # reaches (the in-process scenarios' coverage is measured separately in the build job). The collector needs a
       # graceful stop to write its file: the "shutdown" step below, never a kill.
       - name: Start the application
+        id: start
         env:
           ASPNETCORE_ENVIRONMENT: ci
           DOTNET_COVERAGE_NOLOGO: "1"
@@ -225,13 +226,15 @@ jobs:
           pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
           exit "${PIPESTATUS[0]}"
 
+      # From here on, "always()" would run these after a failure earlier in the job with nothing to report;
+      # they run whenever the application was started, whatever the suite then did.
       - name: Stop the application and write its coverage
-        if: always()
+        if: always() && steps.start.outcome == 'success'
         run: ${{ runner.temp }}/tools/dotnet-coverage shutdown browser-suite
 
       # The in-process scenarios' coverage, from the build job, so the two can be read side by side and combined.
       - name: Download the in-process test results
-        if: always()
+        if: always() && steps.start.outcome == 'success'
         uses: actions/download-artifact@v8
         with:
           name: test-results
@@ -240,7 +243,7 @@ jobs:
       # Two coverage figures on the summary page, kept apart on purpose: what the browser suite reaches, and what the
       # two kinds of test reach together. Each report's per-file table is left to the artefact; the summary shows totals.
       - name: Report the results
-        if: always()
+        if: always() && steps.start.outcome == 'success'
         run: |
           tools="${{ runner.temp }}/tools"
           e2e="${{ runner.temp }}/end-to-end"
@@ -263,7 +266,7 @@ jobs:
 
       # Only for a loopback target (see above); the step is skipped, not failed, if the check did not pass.
       - name: Upload the results and the report
-        if: always() && steps.target.outputs.local == 'true'
+        if: always() && steps.start.outcome == 'success' && steps.target.outputs.local == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: end-to-end-results

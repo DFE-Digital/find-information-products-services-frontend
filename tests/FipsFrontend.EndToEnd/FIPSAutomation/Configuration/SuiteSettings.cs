@@ -36,18 +36,22 @@ public sealed class SuiteSettings
         Timeouts = timeouts;
     }
 
-    /// <summary>Loads from the files beside the test assembly and the process environment.</summary>
-    public static SuiteSettings Load(string? directory = null)
+    /// <summary>
+    /// Loads from the files beside the test assembly and, unless told otherwise, the process
+    /// environment - which wins over both files, so a pipeline can point the suite anywhere without
+    /// writing one. Tests of the files alone switch the environment off; the suite never does.
+    /// </summary>
+    public static SuiteSettings Load(string? directory = null, bool includeEnvironmentVariables = true)
     {
         directory ??= AppContext.BaseDirectory;
         var template = Path.Combine(directory, TemplateFileName);
         var local = Path.Combine(directory, LocalFileName);
-        var configuration = new ConfigurationBuilder()
+        var builder = new ConfigurationBuilder()
             .AddJsonFile(template, optional: true)
-            .AddJsonFile(local, optional: true)
-            .AddEnvironmentVariables()
-            .Build();
-        return From(configuration, $"{template}; {local} (optional); environment variables");
+            .AddJsonFile(local, optional: true);
+        if (includeEnvironmentVariables) builder.AddEnvironmentVariables();
+        var sources = $"{template}; {local} (optional)" + (includeEnvironmentVariables ? "; environment variables" : "");
+        return From(builder.Build(), sources);
     }
 
     /// <summary>

@@ -112,7 +112,7 @@ public class SuiteSettingsTests
             File.WriteAllText(Path.Combine(directory, SuiteSettings.TemplateFileName), """{ "Target": { "ApplicationUrl": "" }, "Timeouts": { "ExpectMs": 4000 } }""");
             File.WriteAllText(Path.Combine(directory, SuiteSettings.LocalFileName), """{ "Target": { "ApplicationUrl": "http://localhost:5505" } }""");
 
-            var settings = SuiteSettings.Load(directory);
+            var settings = SuiteSettings.Load(directory, includeEnvironmentVariables: false);
 
             Assert.That(settings.ApplicationUrl, Is.EqualTo("http://localhost:5505/"));
             Assert.That(settings.Timeouts.ExpectMs, Is.EqualTo(4000), "the template's value survives when the local file does not set it");
@@ -131,12 +131,38 @@ public class SuiteSettingsTests
         {
             File.WriteAllText(Path.Combine(directory, SuiteSettings.TemplateFileName), """{ "Target": { "ApplicationUrl": "" } }""");
 
-            var refusal = Assert.Throws<InvalidOperationException>(() => SuiteSettings.Load(directory));
+            var refusal = Assert.Throws<InvalidOperationException>(() => SuiteSettings.Load(directory, includeEnvironmentVariables: false));
 
             Assert.That(refusal!.Message, Does.Contain(SuiteSettings.LocalFileName));
         }
         finally
         {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    /// <summary>
+    /// How a pipeline configures the suite without writing a file - and why the two tests above
+    /// switch the environment off: in the pipeline these variables are set for the whole job.
+    /// </summary>
+    [Test]
+    public void Suite_WhenEnvironmentVariableSupplied_ItOverridesBothFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("testsettings-").FullName;
+        var previous = Environment.GetEnvironmentVariable("Timeouts__ExpectMs");
+        try
+        {
+            File.WriteAllText(Path.Combine(directory, SuiteSettings.TemplateFileName), """{ "Target": { "ApplicationUrl": "http://localhost:5505/" }, "Timeouts": { "ExpectMs": 4000 } }""");
+            File.WriteAllText(Path.Combine(directory, SuiteSettings.LocalFileName), """{ "Timeouts": { "ExpectMs": 3000 } }""");
+            Environment.SetEnvironmentVariable("Timeouts__ExpectMs", "1500");
+
+            var settings = SuiteSettings.Load(directory);
+
+            Assert.That(settings.Timeouts.ExpectMs, Is.EqualTo(1500));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("Timeouts__ExpectMs", previous);
             Directory.Delete(directory, recursive: true);
         }
     }
