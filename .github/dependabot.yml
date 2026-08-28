@@ -20,7 +20,7 @@ updates:
           - patch
 
   - package-ecosystem: npm
-    directory: /
+    directory: /src/FipsFrontend
     schedule:
       interval: weekly
       day: monday
