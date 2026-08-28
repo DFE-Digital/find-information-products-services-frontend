@@ -110,6 +110,18 @@ The application runs, and is tested, on a developer's machine without anything h
   and both vulnerability audits, NuGet and npm, are clean (each reported four advisories before).
   The GOV.UK and MoJ frontend packages are deliberately left as they are, since their updates change what users see.
 - **Build:** the stylesheets compile on Node 24 (Node 20 is out of support) with the current Sass; the compiled output is unchanged.
+- **Tests:** the browser-driven suite moves in from its own repository as `tests/FipsFrontend.EndToEnd`,
+  so the application and its end-to-end tests change in the same commits.
+  It does not yet pass in full, so the pipeline runs it against the published application without gating on it,
+  reporting the counts and whether every test known to pass still does; `tests/FipsFrontend.Tests.StubCmsApi` stands in for the content source.
+  The pipeline runs that copy as its own environment, `ci`, from a committed `appsettings.ci.json` of placeholders,
+  and uploads the suite's report (which embeds a full-page screenshot per failure) only when the target is that copy.
+  Playwright is brought up to the current release (the old driver crashed part-way through every run),
+  and the suite's waits become configuration, sized for an application on the same machine.
+  The suite is configured the way the application is - a tracked `testsettings.json`, a gitignored local copy, then environment variables -
+  bound to validated options, replacing its own `env.json` and the base64-encoded credentials.
+  The pipeline measures which of the application's code the browser suite reaches, and shows it beside the combined figure
+  with the in-process scenarios, so the two can be watched as the suite turns green; the suite's own tests of its settings rules gate.
 
 ## [v2026.08.27-0002]
 

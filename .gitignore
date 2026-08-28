@@ -32,7 +32,13 @@ bin/
 obj/
 TestResults/
 
-# Configuration files with sensitive data
+# Browser-driven suite (tests/FipsFrontend.EndToEnd): its report, and the per-machine copy of
+# testsettings.json that points it at a running application
+playwright-report/
+testsettings.local.json
+
+# Configuration files with sensitive data. The template and the "ci" settings are the exceptions: nothing in them is real.
 appsettings.json
 appsettings.*.json
 !appsettings.template.json
+!appsettings.ci.json

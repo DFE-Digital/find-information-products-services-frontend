@@ -30,6 +30,7 @@ on:
 env:
   ARTEFACT_NAME: fips-frontend-web-app
   REPORT_GENERATOR_VERSION: 5.5.11
+  DOTNET_COVERAGE_VERSION: 18.10.0
 
 # No workflow-wide permissions: each job states the minimum it needs.
 permissions: {}
@@ -69,9 +70,10 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore FipsFrontend.slnx --locked-mode
 
+      # In-process scenarios only; the browser-driven suite has its own job below.
       - name: Test
         run: >
-          dotnet test FipsFrontend.slnx --configuration Release --no-restore
+          dotnet test tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj --configuration Release --no-restore
           --logger trx --collect:"XPlat Code Coverage" --settings tests/coverage.runsettings
           --results-directory ${{ runner.temp }}/test-results
 
@@ -107,6 +109,172 @@ jobs:
           name: ${{ env.ARTEFACT_NAME }}
           path: ${{ runner.temp }}/publish
           if-no-files-found: error
+
+  end_to_end:
+    name: Browser tests (informational)
+    needs: build
+    # Reports only: the suite does not yet pass in full (tests/FipsFrontend.EndToEnd/README.md).
+    # No deploy job depends on this one yet, and it continues on error for now.
+    # What it holds the line on is the list of tests known to pass; that check's verdict goes on the summary page.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    # The suite's configuration, in the environment-variable form it reads (see tests/FipsFrontend.EndToEnd/testsettings.json):
+    # the copy started below, and waits sized for a runner rather than Playwright's defaults.
+    env:
+      Target__ApplicationUrl: http://localhost:5505/
+      Timeouts__ExpectMs: "2000"
+      Timeouts__ActionMs: "5000"
+      Timeouts__NavigationMs: "10000"
+      # For every invocation of the coverage tool in this job, not only the one that starts the application.
+      DOTNET_COVERAGE_NOLOGO: "1"
+      DOTNET_COVERAGE_TELEMETRY_OPTOUT: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: tests/FipsFrontend.EndToEnd/packages.lock.json
+
+      - name: Download the published app
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.ARTEFACT_NAME }}
+          path: ${{ runner.temp }}/publish
+
+      - name: Build the suite and the content-source stub
+        run: |
+          dotnet restore FipsFrontend.slnx --locked-mode
+          dotnet build tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-restore
+          dotnet build tests/FipsFrontend.Tests.StubCmsApi/FipsFrontend.Tests.StubCmsApi.csproj --configuration Release --no-restore
+
+      - name: Install the coverage and report tools
+        run: |
+          dotnet tool install dotnet-coverage --version ${{ env.DOTNET_COVERAGE_VERSION }} --tool-path ${{ runner.temp }}/tools
+          dotnet tool install dotnet-reportgenerator-globaltool --version ${{ env.REPORT_GENERATOR_VERSION }} --tool-path ${{ runner.temp }}/tools
+
+      # The suite's own tests of its configuration rules need no browser and no application, and a failure there is a
+      # defect in the suite, so unlike the browser run below this step gates.
+      - name: Check the suite's configuration rules
+        run: dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build --filter "TestCategory=Configuration"
+
+      # The browser download (~100 MB) is cached between runs, keyed on the suite's lock file so a Playwright
+      # update fetches the browser build that goes with it. The install step still runs: on a hit it finds the
+      # browser present and only puts the OS packages in place.
+      - name: Cache the browser
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('tests/FipsFrontend.EndToEnd/packages.lock.json') }}
+
+      - name: Install the browser
+        run: pwsh tests/FipsFrontend.EndToEnd/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      # The application runs as the "ci" environment: its settings are src/FipsFrontend/appsettings.ci.json (committed;
+      # placeholder identity values that sign nobody in, and the stub as its content source), so every failure the
+      # suite reports is about the pages rather than about data. Neither "Development" (hosted environments run under
+      # it too) nor a developer's local-only name, whose conveniences a pipeline copy should not inherit.
+      # The application runs under the coverage collector, so the report can say which of its code the browser suite
+      # reaches (the in-process scenarios' coverage is measured separately in the build job). The collector needs a
+      # graceful stop to write its file: the "shutdown" step below, never a kill.
+      - name: Start the application
+        id: start
+        env:
+          ASPNETCORE_ENVIRONMENT: ci
+        run: |
+          mkdir -p "${{ runner.temp }}/end-to-end"
+          dotnet tests/FipsFrontend.Tests.StubCmsApi/bin/Release/net10.0/FipsFrontend.Tests.StubCmsApi.dll --urls http://127.0.0.1:1338 > "${{ runner.temp }}/stub-cms-api.log" 2>&1 &
+          (cd "${{ runner.temp }}/publish" && "${{ runner.temp }}/tools/dotnet-coverage" collect --session-id browser-suite --output-format cobertura --output "${{ runner.temp }}/end-to-end/app.cobertura.xml" -- dotnet FipsFrontend.dll --urls http://localhost:5505 > "${{ runner.temp }}/app.log" 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://localhost:5505/ && echo "The application answered after $((i * 2)) s" && exit 0
+            sleep 2
+          done
+          echo "The application did not answer within 60 s"; tail -50 "${{ runner.temp }}/app.log"; exit 1
+
+      # The suite's report embeds a full-page screenshot of every failing test, and the application log goes up beside it.
+      # Against the copy on this runner that is empty pages; against a hosted environment it would be real content in a
+      # 90-day artefact. So the target the suite is about to use (the SUITE_TARGET variable below, in the form the suite
+      # reads) is checked here, and anything but a loopback address stops the job - the constant is not trusted to stay one.
+      - name: Refuse a target that is not on this machine
+        id: target
+        env:
+          SUITE_TARGET: ${{ env.Target__ApplicationUrl }}
+        run: |
+          host=$(printf '%s' "$SUITE_TARGET" | sed -E 's#^[a-z]+://(\[[^]]+\]|[^/:]+).*#\1#')
+          case "$host" in
+            localhost|127.0.0.1|'[::1]') echo "Target host $host is this machine"; echo "local=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Target host '$host' is not this machine; this job runs the suite only against the copy it started"; exit 1 ;;
+          esac
+
+      # The suite is configured the way the application is: its tracked testsettings.json, then a local file (none here),
+      # then environment variables - the Target__ and Timeouts__ values set on the job.
+      - name: Run the suite
+        continue-on-error: true
+        run: >
+          dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
+          --filter "TestCategory!=Configuration"
+          --logger trx --results-directory ${{ runner.temp }}/end-to-end
+
+      - name: Check that the tests known to pass still pass
+        continue-on-error: true
+        run: |
+          pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
+          exit "${PIPESTATUS[0]}"
+
+      # From here on, "always()" would run these after a failure earlier in the job with nothing to report;
+      # they run whenever the application was started, whatever the suite then did.
+      - name: Stop the application and write its coverage
+        if: always() && steps.start.outcome == 'success'
+        run: ${{ runner.temp }}/tools/dotnet-coverage shutdown browser-suite
+
+      # The in-process scenarios' coverage, from the build job, so the two can be read side by side and combined.
+      - name: Download the in-process test results
+        if: always() && steps.start.outcome == 'success'
+        uses: actions/download-artifact@v8
+        with:
+          name: test-results
+          path: ${{ runner.temp }}/unit-results
+
+      # Two coverage figures on the summary page, kept apart on purpose: what the browser suite reaches, and what the
+      # two kinds of test reach together. Each report's per-file table is left to the artefact; the summary shows totals.
+      - name: Report the results
+        if: always() && steps.start.outcome == 'success'
+        run: |
+          tools="${{ runner.temp }}/tools"
+          e2e="${{ runner.temp }}/end-to-end"
+          "$tools/reportgenerator" -reports:"$e2e/app.cobertura.xml" -targetdir:"$e2e/coverage-browser" -reporttypes:"MarkdownSummaryGithub;Cobertura"
+          "$tools/reportgenerator" -reports:"$e2e/app.cobertura.xml;${{ runner.temp }}/unit-results/coverage/Cobertura.xml" -targetdir:"$e2e/coverage-combined" -reporttypes:"MarkdownSummaryGithub;Cobertura"
+          {
+            echo "## Browser tests (informational)"
+            for trx in "$e2e"/*.trx; do
+              grep -oE '<Counters [^/]*/>' "$trx" | sed -E 's/.*total="([0-9]+)".*passed="([0-9]+)".*failed="([0-9]+)".*/- \2 passed, \3 failed, \1 in total/'
+            done
+            echo
+            echo '```'
+            cat "$e2e/known-green-check.txt"
+            echo '```'
+            echo "### Coverage of the application by the browser suite"
+            sed '/^## Coverage/q' "$e2e/coverage-browser/SummaryGithub.md" | grep -v 'only available for sponsors\|^## Coverage'
+            echo "### Coverage by the browser suite and the in-process scenarios together"
+            sed '/^## Coverage/q' "$e2e/coverage-combined/SummaryGithub.md" | grep -v 'only available for sponsors\|^## Coverage'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Only for a loopback target (see above); the step is skipped, not failed, if the check did not pass.
+      - name: Upload the results and the report
+        if: always() && steps.start.outcome == 'success' && steps.target.outputs.local == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: end-to-end-results
+          path: |
+            ${{ runner.temp }}/end-to-end
+            ${{ runner.temp }}/app.log
+            tests/FipsFrontend.EndToEnd/playwright-report
 
   deploy_development:
     name: Deploy to development

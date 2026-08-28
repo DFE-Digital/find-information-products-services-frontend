@@ -1,0 +1,5 @@
+# Tests seen both green and red against the same build; Check-KnownGreen.ps1 reports them and never fails on them.
+# Each is a signpost to a test to fix (usually a wait) - fix it, then move it to known-green.txt.
+ValidateMaxCharsinGiveFeedbackOrReportAProblemFormUS162AC
+VerifyCookiesPageBackToHomeFunctionalityUS13AC
+VerifyCookiesPageFunctionalitiesUS13AC
