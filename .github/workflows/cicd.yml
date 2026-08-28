@@ -62,6 +62,7 @@ jobs:
         with:
           global-json-file: global.json
           cache: true
+          cache-dependency-path: src/FipsFrontend/packages.lock.json
 
       # --locked-mode refuses a restore that would change packages.lock.json, so the build uses exactly the committed package versions.
       - name: Restore NuGet packages
