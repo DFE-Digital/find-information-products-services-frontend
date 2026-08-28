@@ -206,7 +206,7 @@ jobs:
         env:
           SUITE_TARGET: ${{ env.Target__ApplicationUrl }}
         run: |
-          host=$(printf '%s' "$SUITE_TARGET" | sed -E 's#^[a-z]+://([^/:]+).*#\1#')
+          host=$(printf '%s' "$SUITE_TARGET" | sed -E 's#^[a-z]+://(\[[^]]+\]|[^/:]+).*#\1#')
           case "$host" in
             localhost|127.0.0.1|'[::1]') echo "Target host $host is this machine"; echo "local=true" >> "$GITHUB_OUTPUT" ;;
             *) echo "Target host '$host' is not this machine; this job runs the suite only against the copy it started"; exit 1 ;;
