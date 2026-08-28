@@ -17,25 +17,26 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <!-- Keeps the package versions the suite was copied with; the rest of the repository manages
-         versions centrally, and this project joins that when its packages are brought up to date. -->
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
 	<!--comment later change GenerateProgramFile to true false  -->
 	<GenerateProgramFile>true</GenerateProgramFile>
 	<StartupObject></StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="Deque.AxeCore.Playwright" Version="4.10.1" />
-    <PackageReference Include="ExtentReports" Version="5.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.62.0" />
-    <PackageReference Include="NUnit" Version="3.14.0" />
-    <PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="ClosedXML" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Deque.AxeCore.Playwright" />
+    <PackageReference Include="ExtentReports" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.Playwright.NUnit" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <!-- Referenced directly so that this version, not the 5.0.0 that ExtentReports pulls in through
+         RazorEngine.NetCore.nixFix, is the one restored: 5.0.0 carries a critical advisory
+         (GHSA-rxg9-xrhp-64gj), and ExtentReports has no release that moves off it. -->
+    <PackageReference Include="System.Drawing.Common" />
   </ItemGroup>
 
   <ItemGroup>
