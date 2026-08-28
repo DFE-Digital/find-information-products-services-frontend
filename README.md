@@ -19,9 +19,17 @@ A .NET Core MVC application for managing Federal Information Processing Standard
 
 ## Configuration
 
+The application runs from a fresh clone with nothing configured: every optional section in
+`appsettings.json` is off while its values are empty (no sign-in, no content source - pages render
+empty - no assessments service, no Redis), and a section partly filled in stops start-up naming the
+missing keys. The launch profiles run it as the `local-dev` environment, which is the only place
+developer conveniences appear; an unnamed environment is Production. Put local values in
+`appsettings.Development.json` or `appsettings.local-dev.json` (both ignored) or in environment
+variables (`CmsApi__BaseUrl` and so on).
+
 ### 1. App Settings
 
-Update `appsettings.json` with your configuration:
+The sections and their keys, as committed in `appsettings.json`:
 
 ```json
 {
@@ -110,7 +118,7 @@ dotnet FipsFrontend.dll
 │       ├── Views/
 │       ├── wwwroot/
 │       ├── Program.cs
-│       ├── appsettings.template.json
+│       ├── appsettings.json
 │       └── FipsFrontend.csproj
 ├── tests/
 │   └── FipsFrontend.Tests/   # Scenarios run against the application

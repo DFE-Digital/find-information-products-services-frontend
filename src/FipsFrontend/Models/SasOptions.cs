@@ -1,9 +1,36 @@
+using FipsFrontend.Configuration;
+
 namespace FipsFrontend.Models;
 
 // Bound from the "SAS" configuration section (SAS__BaseUrl, SAS__SecretId as environment variables).
-public class SasOptions
+// OPTIONAL, all-or-nothing: leave both empty and the assessments integration is off (every lookup
+// answers empty); supply either and both are required. Turning EnabledFeatures:Assurance on needs it.
+// Rules in ConfigurationSections.
+public class SasOptions : IOptionalSection
 {
     public const string SectionName = "SAS";
+
+    public bool IsConfigured => EffectiveBaseUrl is not null || !ConfigurationSections.IsAbsent(SecretId);
+
+    public IEnumerable<string> MissingRequired()
+    {
+        if (EffectiveBaseUrl is null) yield return nameof(BaseUrl);
+        if (ConfigurationSections.IsAbsent(SecretId)) yield return nameof(SecretId);
+    }
+
+    // The section as configured; IsConfigured is false when the integration is off.
+    // Refuses a partly supplied section or a relative address.
+    public static SasOptions Read(IConfiguration configuration)
+    {
+        var options = new SasOptions();
+        configuration.GetSection(SectionName).Bind(options);
+        ConfigurationSections.RefuseIfPartlySupplied(options, SectionName, "the assessments integration is then off.");
+        if (options.IsConfigured && ConfigurationSections.TryNormaliseBaseUrl(options.EffectiveBaseUrl) is null)
+        {
+            throw new InvalidOperationException($"{SectionName}:{nameof(BaseUrl)} must be an absolute http(s) URL; found '{options.EffectiveBaseUrl}'.");
+        }
+        return options;
+    }
 
     // Address of the service assessments service.
     public string? BaseUrl { get; set; }

@@ -21,7 +21,8 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
     private readonly ILogger<ServiceAssessmentsService> _logger;
     private readonly IEnhancedCacheService _cacheService;
     private readonly string _baseUrl;
-    private readonly string _secretId;
+    // False when the SAS section is empty (validated at start-up): every lookup then answers empty without a request.
+    private readonly bool _enabled;
 
     public ServiceAssessmentsService(HttpClient httpClient, IOptions<SasOptions> options, ILogger<ServiceAssessmentsService> logger, IEnhancedCacheService cacheService)
     {
@@ -29,16 +30,19 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
         _options = options.Value;
         _logger = logger;
         _cacheService = cacheService;
-        _baseUrl = _options.EffectiveBaseUrl ?? throw new InvalidOperationException("SAS:BaseUrl not configured");
-        _secretId = _options.SecretId ?? throw new InvalidOperationException("SAS:SecretId not configured");
-        
-        // Set up authentication headers
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_secretId}");
+        _enabled = _options.IsConfigured;
+        _baseUrl = _options.EffectiveBaseUrl ?? "";
+
+        if (_enabled)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_options.SecretId}");
+        }
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
     }
 
     public async Task<(List<AssessmentSummary> Assessments, int TotalCount)> GetAssessmentsSummaryAsync(int page = 1, int pageSize = 25, string? searchQuery = null, Dictionary<string, string[]>? filters = null, TimeSpan? cacheDuration = null)
     {
+        if (!_enabled) return (new List<AssessmentSummary>(), 0);
         // Create cache key based on parameters
         var cacheKey = $"assessments_summary_{page}_{pageSize}_{searchQuery ?? "null"}_{string.Join("_", filters?.SelectMany(f => f.Value) ?? new string[0])}";
         
@@ -140,6 +144,7 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
 
     public async Task<Assessment?> GetAssessmentByIdAsync(int id, TimeSpan? cacheDuration = null)
     {
+        if (!_enabled) return null;
         var cacheKey = $"assessment_detail_{id}";
         
         // Try to get from cache first
@@ -189,6 +194,7 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
 
     public async Task<List<AssessmentSummary>> GetAssessmentsByDocumentIdAsync(string documentId, TimeSpan? cacheDuration = null)
     {
+        if (!_enabled) return new List<AssessmentSummary>();
         var cacheKey = $"assessments_by_documentid_{documentId}";
         
         // Try to get from cache first
@@ -353,6 +359,7 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
 
     public async Task<List<string>> GetAvailableTypesAsync(TimeSpan? cacheDuration = null)
     {
+        if (!_enabled) return new List<string>();
         var cacheKey = "assessment_types";
         
         if (cacheDuration.HasValue)
@@ -414,6 +421,7 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
 
     public async Task<List<string>> GetAvailablePhasesAsync(TimeSpan? cacheDuration = null)
     {
+        if (!_enabled) return new List<string>();
         var cacheKey = "assessment_phases";
         
         if (cacheDuration.HasValue)
@@ -475,6 +483,7 @@ public class ServiceAssessmentsService : IServiceAssessmentsService
 
     public async Task<List<string>> GetAvailableStatusesAsync(TimeSpan? cacheDuration = null)
     {
+        if (!_enabled) return new List<string>();
         var cacheKey = "assessment_statuses";
         
         if (cacheDuration.HasValue)

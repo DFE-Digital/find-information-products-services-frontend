@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FipsFrontend.Configuration;
 using FipsFrontend.Services;
 using FipsFrontend.Models;
 using System.Diagnostics;
@@ -14,12 +15,15 @@ public class HomeController : Controller
     private readonly IOptimizedCmsApiService _optimizedCmsApiService;
     private readonly IConfiguration _configuration;
 
-    public HomeController(ILogger<HomeController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IConfiguration configuration)
+    private readonly IHostEnvironment _environment;
+
+    public HomeController(ILogger<HomeController> logger, CmsApiService cmsApiService, IOptimizedCmsApiService optimizedCmsApiService, IConfiguration configuration, IHostEnvironment environment)
     {
         _logger = logger;
         _cmsApiService = cmsApiService;
         _optimizedCmsApiService = optimizedCmsApiService;
         _configuration = configuration;
+        _environment = environment;
     }
 
     [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)] // Cache for 5 minutes
@@ -71,13 +75,14 @@ public class HomeController : Controller
         
         // Log the error
         _logger.LogError(exception, "Unhandled exception occurred");
-        
-        // Return detailed error information for debugging
-        return View(new ErrorViewModel 
-        { 
+
+        // The exception and its stack are for developers; everyone else gets the request id to quote.
+        var showDetails = _environment.IsDevelopmentLike();
+        return View(new ErrorViewModel
+        {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-            Exception = exception,
-            ExceptionDetails = exception?.ToString()
+            Exception = showDetails ? exception : null,
+            ExceptionDetails = showDetails ? exception?.ToString() : null
         });
     }
 

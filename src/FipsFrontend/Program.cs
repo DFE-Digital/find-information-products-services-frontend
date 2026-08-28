@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using FipsFrontend.Configuration;
 using FipsFrontend.Services;
 using FipsFrontend.Middlewares;
 using FipsFrontend.Models;
@@ -12,6 +13,14 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// The framework maps wwwroot from the source tree only under "Development"; a developer's machine
+// runs as "local-dev" (see Configuration/Environments.cs) and needs the same, or every stylesheet
+// and script is a 404 from a build folder.
+if (builder.Environment.IsLocalDev())
+{
+    builder.WebHost.UseStaticWebAssets();
+}
+
 // Add file logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -21,46 +30,47 @@ builder.Logging.AddFile("logs/app-{Date}.log");
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// Enable Azure AD authentication
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+// Optional sections are read and validated here, before anything is registered: a section left empty
+// switches its feature off, a partly supplied one stops the application now, naming the keys
+// (see Configuration/ConfigurationSections.cs).
+var signIn = AzureAdOptions.Read(builder.Configuration);
+var contentSource = CmsApiOptions.Read(builder.Configuration);
+builder.Services.AddSingleton(contentSource);
+
+// Sign-in through the identity provider, when configured. Without it the pages are served anonymously.
+if (signIn is not null)
+{
+    builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(AzureAdOptions.Section));
+}
+else
+{
+    builder.Services.AddAuthentication();
+}
 
 builder.Services.AddAuthorization();
 
-// Configure HTTP client for CMS API with optimizations
+// The content source's clients. With no content source configured they talk to an in-process handler
+// that answers every request with an empty collection, so a first run shows empty pages, not timeouts.
+HttpMessageHandler ContentSourceHandler() => contentSource.IsConfigured
+    ? new HttpClientHandler { MaxConnectionsPerServer = 10, UseProxy = false }
+    : new NoContentSourceHandler();
+
 builder.Services.AddHttpClient<CmsApiService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("User-Agent", "FIPS-Frontend/1.0");
 })
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-{
-    MaxConnectionsPerServer = 10,
-    UseProxy = false // Disable proxy for better performance in local development
-})
+.ConfigurePrimaryHttpMessageHandler(ContentSourceHandler)
 .AddPolicyHandler(GetRetryPolicy());
 
-// Note: CmsApiService is already registered above via AddHttpClient<CmsApiService>
-// No need for additional registration
-
-// Register optimized CMS API service
 builder.Services.AddHttpClient<IOptimizedCmsApiService, OptimizedCmsApiService>(client =>
 {
-    var baseUrl = builder.Configuration["CmsApi:BaseUrl"] ?? "http://localhost:1337/api";
-    // Ensure BaseAddress ends with '/' for proper relative URL resolution
-    if (!baseUrl.EndsWith("/"))
-    {
-        baseUrl += "/";
-    }
-    client.BaseAddress = new Uri(baseUrl);
+    client.BaseAddress = contentSource.BaseAddress;
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("User-Agent", "FIPS-Frontend-Optimized/1.0");
 })
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-{
-    MaxConnectionsPerServer = 10,
-    UseProxy = false // Disable proxy for better performance in local development
-})
+.ConfigurePrimaryHttpMessageHandler(ContentSourceHandler)
 .AddPolicyHandler(GetRetryPolicy());
 
 // Register CMS health service
@@ -110,27 +120,26 @@ builder.Services.AddOptions<ContactOptions>()
 // Generated links keep the paths the site has always used ("/about", not "/About").
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
-// Register Service Assessments service
+// The service assessments integration, when configured. Off, every lookup answers empty and the
+// Assurance feature cannot be on: a feature that depends on a service nobody named is refused here.
+var assessments = SasOptions.Read(builder.Configuration);
+if (builder.Configuration.GetValue<bool>("EnabledFeatures:Assurance") && !assessments.IsConfigured)
+{
+    throw new InvalidOperationException(
+        $"EnabledFeatures:Assurance is true but the assessments service is not configured: set {SasOptions.SectionName}:BaseUrl and {SasOptions.SectionName}:SecretId, or set EnabledFeatures:Assurance to false.");
+}
 builder.Services.AddOptions<SasOptions>()
     .Bind(builder.Configuration.GetSection(SasOptions.SectionName));
 
-builder.Services.AddHttpClient<IServiceAssessmentsService, ServiceAssessmentsService>((services, client) =>
+builder.Services.AddHttpClient<IServiceAssessmentsService, ServiceAssessmentsService>(client =>
 {
-    var baseUrl = services.GetRequiredService<IOptions<SasOptions>>().Value.EffectiveBaseUrl ?? "https://service-assessments.education.gov.uk/";
-    // Ensure BaseAddress ends with '/' for proper relative URL resolution
-    if (!baseUrl.EndsWith("/"))
-    {
-        baseUrl += "/";
-    }
-    client.BaseAddress = new Uri(baseUrl);
+    client.BaseAddress = ConfigurationSections.TryNormaliseBaseUrl(assessments.EffectiveBaseUrl) ?? new Uri("http://assessments.example.com/");
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("User-Agent", "FIPS-Frontend-Assessments/1.0");
 })
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-{
-    MaxConnectionsPerServer = 10,
-    UseProxy = false // Disable proxy for better performance in local development
-})
+.ConfigurePrimaryHttpMessageHandler(() => assessments.IsConfigured
+    ? new HttpClientHandler { MaxConnectionsPerServer = 10, UseProxy = false }
+    : new NoContentSourceHandler())
 .AddPolicyHandler(GetRetryPolicy());
 
 // Configure feature flags
@@ -144,27 +153,19 @@ builder.Services.AddMemoryCache(options =>
     options.CompactionPercentage = builder.Configuration.GetValue<double>("Caching:MemoryCache:CompactionPercentage", 0.25);
 });
 
-// Add distributed caching (Redis support)
-var redisEnabled = builder.Configuration.GetValue<bool>("Caching:Redis:Enabled", false);
-Console.WriteLine($"Redis enabled: {redisEnabled}");
-
-if (redisEnabled)
+// The distributed cache: Redis when switched on and given an address (refused at start-up if switched on without one), in-memory otherwise.
+var redis = RedisOptions.Read(builder.Configuration);
+if (redis.IsOn)
 {
-    var redisConnectionString = builder.Configuration.GetValue<string>("Caching:Redis:ConnectionString", "localhost:6379");
-    Console.WriteLine($"Redis connection string: {redisConnectionString}");
-    
     builder.Services.AddStackExchangeRedisCache(options =>
     {
-        options.Configuration = redisConnectionString;
-        options.InstanceName = builder.Configuration.GetValue<string>("Caching:Redis:KeyPrefix", "fips:");
+        options.Configuration = redis.ConnectionString;
+        options.InstanceName = redis.KeyPrefix;
     });
-    Console.WriteLine("Redis cache registered successfully");
 }
 else
 {
-    // Fallback to in-memory distributed cache
     builder.Services.AddDistributedMemoryCache();
-    Console.WriteLine("Using in-memory distributed cache");
 }
 
 // Add response caching
@@ -213,11 +214,15 @@ if (app.Services.GetRequiredService<IOptions<SasOptions>>().Value.UsesDeprecated
 }
 
 // Configure the HTTP request pipeline.
-// Show detailed errors in both development and production for debugging
-app.UseDeveloperExceptionPage();
+// The page with the stack trace is for developers; everyone else gets the error page. Not the other
+// way round by accident: an unnamed environment is Production (see Configuration/Environments.cs).
+if (app.Environment.IsDevelopmentLike())
+{
+    app.UseDeveloperExceptionPage();
+}
 app.UseExceptionHandler("/Home/Error");
 
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopmentLike())
 {
     app.UseHsts();
 }
@@ -238,7 +243,7 @@ app.UseMiddleware<SecurityMiddleware>();
 app.Use(async (context, next) =>
 {
     // HTTP Strict Transport Security (HSTS) - Enhanced configuration
-    if (!app.Environment.IsDevelopment())
+    if (!app.Environment.IsDevelopmentLike())
     {
         context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
     }

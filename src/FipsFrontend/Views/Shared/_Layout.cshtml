@@ -1,5 +1,6 @@
 @using FipsFrontend.Helpers
 @inject IOptions<FeedbackOptions> FeedbackOptions
+@inject IHostEnvironment HostEnvironment
 <!DOCTYPE html>
 <html lang="en" class="govuk-template--rebranded">
 <head>
@@ -52,6 +53,23 @@
 
 
     <body class="govuk-template__body">
+@if (!HostEnvironment.IsProduction())
+{
+  @* Every environment but the live one says which it is, at the top of every page, so a developer's
+     copy or a test deployment is never mistaken for the real service. A full-width strip of its own,
+     above everything, rather than a narrow break in the header's bands. No links, so the skip link
+     below stays the first thing a keyboard reaches. *@
+  <div class="app-environment-banner">
+    <div class="govuk-width-container">
+      <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+          <strong class="govuk-tag govuk-phase-banner__content__tag">@HostEnvironment.EnvironmentName</strong>
+          <span class="govuk-phase-banner__text">This is the @HostEnvironment.EnvironmentName environment, not the live service.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+}
   <script nonce="@Html.GetNonce()">
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
