@@ -88,6 +88,8 @@ The application runs, and is tested, on a developer's machine without anything h
 
 - **Tests:** the repository has a test project, `tests/FipsFrontend.Tests`, and the workflow runs it before anything is published.
   Its first scenario keeps the settings template complete: every key the code reads must be named in it.
+  The next host the whole application in-process, with every outbound HTTP client replaced by a stand-in,
+  and hold that the service's own pages render from this repository without reaching for another system.
   Each run's summary page shows the results and the line and branch coverage; the raw results are kept as an artefact.
 - **Build:** package versions for every project live in one file, `Directory.Packages.props`.
 - **Configuration:** the settings template names the eight caching and search-logging keys the code reads with defaults, which the new test found missing.
