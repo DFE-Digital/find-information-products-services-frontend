@@ -1,5 +1,5 @@
 using AventStack.ExtentReports;
-using find_information_products_services_tests.FIPSAutomation.login;
+using FiPSAutomation.Configuration;
 using FiPSAutomation.utilities;
 using Microsoft.Playwright;
 
@@ -9,7 +9,7 @@ namespace FiPSAutomation
     {
         protected IPage Page => GlobalSetup.Page!;
         protected ExtentTest? ExtentTest;
-        protected EnvironmentDetail ActiveEnvironment => GlobalSetup.ActiveEnvironment!;
+        protected SuiteSettings Settings => GlobalSetup.Settings;
 
         [SetUp]
         public void SetUp()
@@ -60,7 +60,7 @@ namespace FiPSAutomation
 
         protected async Task NavigateToAsync(string path)
         {
-            await Page.GotoAsync(ActiveEnvironment.ApplicationURL + path);
+            await Page.GotoAsync(Settings.ApplicationUrl + path);
         }
 
         protected void LogStep(string message)

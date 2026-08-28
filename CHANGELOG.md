@@ -118,6 +118,8 @@ The application runs, and is tested, on a developer's machine without anything h
   and uploads the suite's report (which embeds a full-page screenshot per failure) only when the target is that copy.
   Playwright is brought up to the current release (the old driver crashed part-way through every run),
   and the suite's waits become configuration, sized for an application on the same machine.
+  The suite is configured the way the application is - a tracked `testsettings.json`, a gitignored local copy, then environment variables -
+  bound to validated options, replacing its own `env.json` and the base64-encoded credentials.
 
 ## [v2026.08.27-0002]
 

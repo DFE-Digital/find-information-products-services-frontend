@@ -27,6 +27,7 @@
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Deque.AxeCore.Playwright" />
     <PackageReference Include="ExtentReports" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Playwright.NUnit" />
@@ -37,6 +38,11 @@
          RazorEngine.NetCore.nixFix, is the one restored: 5.0.0 carries a critical advisory
          (GHSA-rxg9-xrhp-64gj), and ExtentReports has no release that moves off it. -->
     <PackageReference Include="System.Drawing.Common" />
+  </ItemGroup>
+
+  <!-- The settings template and a machine's local copy travel with the built assembly, where SuiteSettings reads them. -->
+  <ItemGroup>
+    <None Update="testsettings.json;testsettings.local.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

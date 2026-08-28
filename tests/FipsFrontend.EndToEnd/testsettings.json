@@ -1,0 +1,20 @@
+{
+  "_hint": "Tracked template: every value is empty or a default. Copy to testsettings.local.json (gitignored) and fill it in, or supply the same keys as environment variables (Target__ApplicationUrl and so on). Keys starting with an underscore are notes and are ignored. The rules - a section is all-or-nothing, an empty or whitespace value counts as absent, the base URL must be absolute - are stated and enforced in FIPSAutomation/Configuration/ConfigurationSections.cs; each section's hint names the options class that owns its keys.",
+  "Target": {
+    "_hint": "FIPSAutomation/Configuration/TargetOptions.cs. MANDATORY: the suite refuses to start without an absolute ApplicationUrl (a trailing slash is added if missing).",
+    "ApplicationUrl": ""
+  },
+  "SignIn": {
+    "_hint": "FIPSAutomation/Configuration/SignInOptions.cs. OPTIONAL, all-or-nothing: leave every value empty and the suite opens the application directly; supply any and all four are required. Plain values, not encoded.",
+    "OAuthUrl": "",
+    "LoginUrl": "",
+    "UserName": "",
+    "Password": ""
+  },
+  "Timeouts": {
+    "_hint": "FIPSAutomation/Configuration/TimeoutOptions.cs. OPTIONAL: these are Playwright's defaults. Lower them for an application on this machine, where every failing test otherwise waits the full time.",
+    "ExpectMs": 5000,
+    "ActionMs": 30000,
+    "NavigationMs": 30000
+  }
+}

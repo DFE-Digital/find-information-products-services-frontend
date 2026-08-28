@@ -32,6 +32,7 @@
     <PackageVersion Include="ClosedXML" Version="0.105.1" />
     <PackageVersion Include="Deque.AxeCore.Playwright" Version="4.13.0" />
     <PackageVersion Include="ExtentReports" Version="5.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.11" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.11" />
     <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.62.0" />
     <PackageVersion Include="System.Drawing.Common" Version="10.0.11" />

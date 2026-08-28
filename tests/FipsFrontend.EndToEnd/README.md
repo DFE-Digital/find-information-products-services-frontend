@@ -16,17 +16,18 @@ dotnet build tests/FipsFrontend.EndToEnd
 pwsh tests/FipsFrontend.EndToEnd/bin/Debug/net10.0/playwright.ps1 install chromium
 ```
 
-Point the suite at the running application. `env.json` is a tracked template whose values are
-placeholders; copy it to `env.local.json` beside it (gitignored, and preferred when present), and set
-`applicationURL` to the address the application is listening on, with `loginRequired` false when the
-application asks for no sign-in:
+Point the suite at the running application. It is configured the way the application is:
+`testsettings.json` is the tracked template (every value empty or a default, with a hint per
+section); `testsettings.local.json` beside it (gitignored) holds this machine's values; and any key
+can be given as an environment variable instead (`Target__ApplicationUrl`), which is how the
+pipeline does it. The rules - a section is all-or-nothing, an empty value counts as absent, the
+address must be absolute - are stated and enforced in `FIPSAutomation/Configuration/`. For an
+application on this machine with no sign-in:
 
 ```json
 {
-  "activeEnv": "local",
-  "loginRequired": false,
-  "envs": [{ "env": "local", "applicationURL": "http://localhost:5505/" }],
-  "timeouts": { "expectMs": 1000, "actionMs": 3000, "navigationMs": 5000 }
+  "Target": { "ApplicationUrl": "http://localhost:5505/" },
+  "Timeouts": { "ExpectMs": 1000, "ActionMs": 3000, "NavigationMs": 5000 }
 }
 ```
 
@@ -79,8 +80,9 @@ artefact; it does not gate on either.
 
 ## Against a hosted environment
 
-Set `activeEnv` to `dev`, `test`, or `prod` in `env.local.json` with that environment's `applicationURL`
-and `oAuthURL`, and with `loginRequired` true give `userName` and `password` base64-encoded.
+Set `Target:ApplicationUrl` to that environment's address in `testsettings.local.json`, and fill the
+`SignIn` section (all four values, plain text, not encoded) so the suite signs in through the
+identity provider first; leave the section empty for an environment with no sign-in.
 
 The report embeds a full-page screenshot of every failing test, so against a hosted environment it
 holds real content: it stays on your machine (`playwright-report/` is gitignored), and the pipeline

@@ -119,6 +119,13 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+    # The suite's configuration, in the environment-variable form it reads (see tests/FipsFrontend.EndToEnd/testsettings.json):
+    # the copy started below, and waits sized for a runner rather than Playwright's defaults.
+    env:
+      Target__ApplicationUrl: http://localhost:5505/
+      Timeouts__ExpectMs: "2000"
+      Timeouts__ActionMs: "5000"
+      Timeouts__NavigationMs: "10000"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -162,30 +169,23 @@ jobs:
           done
           echo "The application did not answer within 60 s"; tail -50 "${{ runner.temp }}/app.log"; exit 1
 
-      - name: Point the suite at it
-        run: |
-          cat > tests/FipsFrontend.EndToEnd/env.local.json <<'EOF'
-          {
-            "activeEnv": "ci",
-            "loginRequired": false,
-            "envs": [ { "env": "ci", "applicationURL": "http://localhost:5505/" } ],
-            "timeouts": { "expectMs": 2000, "actionMs": 5000, "navigationMs": 10000 }
-          }
-          EOF
-
       # The suite's report embeds a full-page screenshot of every failing test, and the application log goes up beside it.
       # Against the copy on this runner that is empty pages; against a hosted environment it would be real content in a
-      # 90-day artefact. So the target is read back from the file just written, and anything but a loopback address stops
-      # the job here - the constant above is not trusted to stay a constant.
+      # 90-day artefact. So the target the suite is about to use (the SUITE_TARGET variable below, in the form the suite
+      # reads) is checked here, and anything but a loopback address stops the job - the constant is not trusted to stay one.
       - name: Refuse a target that is not on this machine
         id: target
+        env:
+          SUITE_TARGET: ${{ env.Target__ApplicationUrl }}
         run: |
-          host=$(jq -r '.envs[] | select(.env == $e) | .applicationURL' --arg e "$(jq -r .activeEnv tests/FipsFrontend.EndToEnd/env.local.json)" tests/FipsFrontend.EndToEnd/env.local.json | sed -E 's#^[a-z]+://([^/:]+).*#\1#')
+          host=$(printf '%s' "$SUITE_TARGET" | sed -E 's#^[a-z]+://([^/:]+).*#\1#')
           case "$host" in
             localhost|127.0.0.1|'[::1]') echo "Target host $host is this machine"; echo "local=true" >> "$GITHUB_OUTPUT" ;;
             *) echo "Target host '$host' is not this machine; this job runs the suite only against the copy it started"; exit 1 ;;
           esac
 
+      # The suite is configured the way the application is: its tracked testsettings.json, then a local file (none here),
+      # then environment variables - the Target__ and Timeouts__ values set on the job.
       - name: Run the suite
         continue-on-error: true
         run: >

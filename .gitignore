@@ -33,9 +33,9 @@ obj/
 TestResults/
 
 # Browser-driven suite (tests/FipsFrontend.EndToEnd): its report, and the per-machine copy of
-# env.json that points it at a running application
+# testsettings.json that points it at a running application
 playwright-report/
-env.local.json
+testsettings.local.json
 
 # Configuration files with sensitive data. The template and the "ci" settings are the exceptions: nothing in them is real.
 appsettings.json
