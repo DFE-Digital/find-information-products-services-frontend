@@ -1,0 +1,52 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Product manager",
+      "description": "The product manager responsible for this product",
+      "allowMultiple": false,
+      "displayOrder": 10,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Service Owner",
+      "description": "The service owner accountable for this product",
+      "allowMultiple": false,
+      "displayOrder": 20,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Senior Responsible Officer",
+      "description": "The SRO with overall accountability",
+      "allowMultiple": false,
+      "displayOrder": 30,
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Information Asset Owner",
+      "description": "The IAO responsible for information assets",
+      "allowMultiple": false,
+      "displayOrder": 40,
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "Delivery Manager",
+      "description": "The delivery manager for this product",
+      "allowMultiple": false,
+      "displayOrder": 50,
+      "active": true
+    },
+    {
+      "id": 6,
+      "name": "Reporting contact",
+      "description": "Contact for reporting purposes",
+      "allowMultiple": true,
+      "displayOrder": 60,
+      "active": true
+    }
+  ]
+}

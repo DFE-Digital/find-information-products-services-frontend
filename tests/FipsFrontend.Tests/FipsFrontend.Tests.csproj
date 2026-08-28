@@ -27,6 +27,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\FipsFrontend\FipsFrontend.csproj" />
+    <ProjectReference Include="..\..\src\Compass.FipsApi.Contracts\Compass.FipsApi.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Payloads recorded from a locally-running custom-seeded COMPASS; the contract tests parse them. See Fixtures/compass/README.md. -->
+    <None Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

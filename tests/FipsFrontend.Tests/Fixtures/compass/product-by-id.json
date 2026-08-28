@@ -1,0 +1,24 @@
+{
+  "data": {
+    "id": "00000000-0000-0000-0002-000000000014",
+    "uniqueId": 2016,
+    "lastUpdated": "2026-08-15T18:25:24.9718207",
+    "productName": "Admissions Appeals Manager",
+    "phase": "Public Beta",
+    "businessArea": "",
+    "productUrl": "https://example.education.gov.uk/appeals",
+    "status": "Active",
+    "isEnterpriseService": false,
+    "longDescription": "Case management for admissions appeals. Itaque earum rerum hic tenetur. (AISS URL is retired: WD-10.)",
+    "categories": [],
+    "contacts": [
+      {
+        "role": "Service Owner",
+        "roleId": 2,
+        "email": "sally.synthetic.fake@education.gov.uk",
+        "name": "Sally Synthetic",
+        "canManage": true
+      }
+    ]
+  }
+}

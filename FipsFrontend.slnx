@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="src/Compass.FipsApi.Contracts/Compass.FipsApi.Contracts.csproj" />
   <Project Path="src/FipsFrontend/FipsFrontend.csproj" />
   <Project Path="tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj" />
   <Project Path="tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj" />

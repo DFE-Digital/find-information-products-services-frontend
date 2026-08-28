@@ -1,0 +1,556 @@
+{
+  "channels": [
+    {
+      "id": 1,
+      "name": "Web",
+      "description": "Browser-based service",
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Native app",
+      "description": "Installed on a phone or tablet",
+      "displayOrder": 2,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Telephone",
+      "description": "Call centre or helpline",
+      "displayOrder": 3,
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Post",
+      "description": "Retired channel, kept for history",
+      "displayOrder": 4,
+      "active": false
+    }
+  ],
+  "types": [
+    {
+      "id": 1,
+      "name": "Transactional",
+      "description": "The user completes a task",
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Information",
+      "description": "The user reads or looks up",
+      "displayOrder": 2,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Data",
+      "description": "Retired type, kept for history",
+      "displayOrder": 3,
+      "active": false
+    }
+  ],
+  "businessAreas": [
+    {
+      "id": 5,
+      "businessAreaLookupId": 3,
+      "name": "Digital Services",
+      "description": null,
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": 6,
+      "businessAreaLookupId": 4,
+      "name": "Operations",
+      "description": null,
+      "displayOrder": 2,
+      "active": true
+    }
+  ],
+  "userGroups": [
+    {
+      "id": 1,
+      "name": "Teachers",
+      "description": "School teaching staff",
+      "displayOrder": 1,
+      "active": true,
+      "children": [
+        "Classroom teachers",
+        "Headteachers"
+      ],
+      "synonyms": [
+        "Teaching staff"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Parents and carers",
+      "description": "Adults responsible for a child",
+      "displayOrder": 2,
+      "active": true,
+      "children": [],
+      "synonyms": []
+    },
+    {
+      "id": 3,
+      "name": "Employers",
+      "description": "Retired group, kept for history",
+      "displayOrder": 3,
+      "active": false,
+      "children": [],
+      "synonyms": []
+    }
+  ],
+  "contactRoles": [
+    {
+      "id": 1,
+      "name": "Product manager",
+      "description": "The product manager responsible for this product",
+      "allowMultiple": false,
+      "displayOrder": 10,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Service Owner",
+      "description": "The service owner accountable for this product",
+      "allowMultiple": false,
+      "displayOrder": 20,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Senior Responsible Officer",
+      "description": "The SRO with overall accountability",
+      "allowMultiple": false,
+      "displayOrder": 30,
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Information Asset Owner",
+      "description": "The IAO responsible for information assets",
+      "allowMultiple": false,
+      "displayOrder": 40,
+      "active": true
+    },
+    {
+      "id": 5,
+      "name": "Delivery Manager",
+      "description": "The delivery manager for this product",
+      "allowMultiple": false,
+      "displayOrder": 50,
+      "active": true
+    },
+    {
+      "id": 6,
+      "name": "Reporting contact",
+      "description": "Contact for reporting purposes",
+      "allowMultiple": true,
+      "displayOrder": 60,
+      "active": true
+    }
+  ],
+  "categorisationGroups": [
+    {
+      "id": 1,
+      "name": "Phase",
+      "description": "The stage a product or service is at in the service delivery lifecycle.",
+      "displayOrder": 1,
+      "active": true,
+      "items": [
+        {
+          "id": 1,
+          "name": "Discovery",
+          "description": "",
+          "displayOrder": 1,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 2,
+          "name": "Alpha",
+          "description": "",
+          "displayOrder": 2,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 3,
+          "name": "Private beta",
+          "description": "",
+          "displayOrder": 3,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 4,
+          "name": "Public beta",
+          "description": "",
+          "displayOrder": 4,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 5,
+          "name": "Live",
+          "description": "",
+          "displayOrder": 5,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 6,
+          "name": "Decommissioning",
+          "description": "",
+          "displayOrder": 6,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 7,
+          "name": "Decommissioned",
+          "description": "",
+          "displayOrder": 7,
+          "active": true,
+          "categorisationGroupId": 1
+        },
+        {
+          "id": 8,
+          "name": "Did not progress",
+          "description": "",
+          "displayOrder": 8,
+          "active": true,
+          "categorisationGroupId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Channel",
+      "description": "The delivery channel through which a product or service is provided to users.",
+      "displayOrder": 2,
+      "active": true,
+      "items": [
+        {
+          "id": 9,
+          "name": "Web",
+          "description": "",
+          "displayOrder": 1,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 10,
+          "name": "Native app",
+          "description": "",
+          "displayOrder": 2,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 11,
+          "name": "Email",
+          "description": "",
+          "displayOrder": 3,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 12,
+          "name": "SMS",
+          "description": "",
+          "displayOrder": 4,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 13,
+          "name": "Phone",
+          "description": "",
+          "displayOrder": 5,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 14,
+          "name": "Chat",
+          "description": "",
+          "displayOrder": 6,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 15,
+          "name": "Face-to-face",
+          "description": "",
+          "displayOrder": 7,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 16,
+          "name": "Print media",
+          "description": "",
+          "displayOrder": 8,
+          "active": true,
+          "categorisationGroupId": 2
+        },
+        {
+          "id": 17,
+          "name": "Other digital media",
+          "description": "",
+          "displayOrder": 9,
+          "active": true,
+          "categorisationGroupId": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Type",
+      "description": "The type of service delivery and functionality provided.",
+      "displayOrder": 3,
+      "active": true,
+      "items": [
+        {
+          "id": 18,
+          "name": "Transactional",
+          "description": "",
+          "displayOrder": 1,
+          "active": true,
+          "categorisationGroupId": 3
+        },
+        {
+          "id": 19,
+          "name": "Information",
+          "description": "",
+          "displayOrder": 2,
+          "active": true,
+          "categorisationGroupId": 3
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "description": "",
+          "displayOrder": 3,
+          "active": true,
+          "categorisationGroupId": 3
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "description": "",
+          "displayOrder": 4,
+          "active": true,
+          "categorisationGroupId": 3
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "description": "",
+          "displayOrder": 5,
+          "active": true,
+          "categorisationGroupId": 3
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Business area",
+      "description": "The business area or portfolio responsible for a product or service.",
+      "displayOrder": 4,
+      "active": true,
+      "items": [
+        {
+          "id": 23,
+          "name": "Children and Families",
+          "description": "",
+          "displayOrder": 1,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 24,
+          "name": "Commercial",
+          "description": "",
+          "displayOrder": 2,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 25,
+          "name": "Customer Experience and Design",
+          "description": "",
+          "displayOrder": 3,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 26,
+          "name": "Enterprise Data",
+          "description": "",
+          "displayOrder": 4,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 27,
+          "name": "Funding and Financial Oversight",
+          "description": "",
+          "displayOrder": 5,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 28,
+          "name": "Operations and Infrastructure",
+          "description": "",
+          "displayOrder": 6,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 29,
+          "name": "Regional Digital Services",
+          "description": "",
+          "displayOrder": 7,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 30,
+          "name": "Schools Digital",
+          "description": "",
+          "displayOrder": 8,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 31,
+          "name": "Sector Facing Services",
+          "description": "",
+          "displayOrder": 9,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 32,
+          "name": "Skills and Growth",
+          "description": "",
+          "displayOrder": 10,
+          "active": true,
+          "categorisationGroupId": 4
+        },
+        {
+          "id": 33,
+          "name": "Strategy",
+          "description": "",
+          "displayOrder": 11,
+          "active": true,
+          "categorisationGroupId": 4
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "User group",
+      "description": "The users of the product or service.",
+      "displayOrder": 5,
+      "active": true,
+      "items": [
+        {
+          "id": 34,
+          "name": "Adult learner (18+)",
+          "description": "",
+          "displayOrder": 1,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 35,
+          "name": "Careers adviser or work coach",
+          "description": "",
+          "displayOrder": 2,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 36,
+          "name": "Child or young person",
+          "description": "",
+          "displayOrder": 3,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 37,
+          "name": "Department for Education workforce",
+          "description": "",
+          "displayOrder": 4,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 38,
+          "name": "Education provider and early years workforce",
+          "description": "",
+          "displayOrder": 5,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 39,
+          "name": "Employer",
+          "description": "",
+          "displayOrder": 6,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 40,
+          "name": "Local authority workforce",
+          "description": "",
+          "displayOrder": 7,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 41,
+          "name": "NEET or career seeker",
+          "description": "",
+          "displayOrder": 8,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 42,
+          "name": "Parent or carer",
+          "description": "",
+          "displayOrder": 9,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 43,
+          "name": "Professional external user of DfE data",
+          "description": "",
+          "displayOrder": 10,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 44,
+          "name": "Social care workforce",
+          "description": "",
+          "displayOrder": 11,
+          "active": true,
+          "categorisationGroupId": 5
+        }
+      ]
+    }
+  ]
+}

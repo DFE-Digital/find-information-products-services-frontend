@@ -1,0 +1,32 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Web",
+      "description": "Browser-based service",
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Native app",
+      "description": "Installed on a phone or tablet",
+      "displayOrder": 2,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "Telephone",
+      "description": "Call centre or helpline",
+      "displayOrder": 3,
+      "active": true
+    },
+    {
+      "id": 4,
+      "name": "Post",
+      "description": "Retired channel, kept for history",
+      "displayOrder": 4,
+      "active": false
+    }
+  ]
+}

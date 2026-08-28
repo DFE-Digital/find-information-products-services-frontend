@@ -84,7 +84,13 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ### Maintenance
 
-- None.
+- **Content source:** a contracts project, `src/Compass.FipsApi.Contracts`, holds the records for the
+  service-register API the service will read products from, generated from that API's own source rather
+  than written by hand or from its documentation, which describes shapes the API does not send.
+  Every member is optional; a member the records do not name is observed and logged once, never rejected.
+  Tests parse responses recorded from a local instance holding synthetic seed data (no real products) through
+  the records, and hold the seeded rows to known values, so a change on either side fails as a disagreement.
+  Nothing reads the records yet.
 
 ## [v2026.08.28-0001]
 
