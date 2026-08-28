@@ -2,16 +2,6 @@
   "version": 2,
   "dependencies": {
     "net10.0": {
-      "GovukNotify": {
-        "type": "Direct",
-        "requested": "[8.1.0, )",
-        "resolved": "8.1.0",
-        "contentHash": "lQI8TYhwzVWdyi12ZebXRNq6l5yc1L4R48FsjEml297Zx+3pRLFdxnySzYfl3aDiGUoqG8UiVEsL65zI2TpJBg==",
-        "dependencies": {
-          "JWT": "[11.0.0, 12.0.0]",
-          "Newtonsoft.Json": "[13.0.4, 14.0.0]"
-        }
-      },
       "Microsoft.ApplicationInsights.AspNetCore": {
         "type": "Direct",
         "requested": "[3.1.2, )",
@@ -151,14 +141,6 @@
         "contentHash": "vwPceoznuT6glvirZcXlaCQrh1uzTSxpZUi2hRFNumHiS3hVyqIXI5fgWiLtlBzwqPJMTr0flUoSvGKjXXQlfg==",
         "dependencies": {
           "Azure.Core": "1.37.0"
-        }
-      },
-      "JWT": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "jOT1PA95jgf78CqWsKt8hz9Uzv4J39vukzf5nYtfky9N6wl1W4vIXT1CdkQI7zG20HnApEMtmpC/pMtCKr4rvw==",
-        "dependencies": {
-          "Newtonsoft.Json": "13.0.3"
         }
       },
       "Microsoft.ApplicationInsights": {

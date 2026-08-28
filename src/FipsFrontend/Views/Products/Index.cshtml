@@ -455,13 +455,17 @@
     </span>
   </summary>
   <div class="govuk-details__text">
-  If you cannot find a product or service, make a <a class="govuk-link govuk-link--no-visited-state" href="/products/requestnewentry" rel="noopener noreferrer">request for a new product entry</a>.
+  If you cannot find a product or service, <a class="govuk-link govuk-link--no-visited-state" asp-controller="Contact" asp-action="Index">contact the team</a>.
    </div>
 </details>
                 <p class="govuk-body">
-                    @if (Model.FilteredCount == 0)
+                    @if (Model.FilteredCount == 0 && Model.SelectedFilters.Any())
                     {
                         <text>No products and services match your search or filters.</text>
+                    }
+                    else if (Model.FilteredCount == 0)
+                    {
+                        <text>There are no products and services to show.</text>
                     }
                     else
                     {
@@ -483,7 +487,7 @@
     </span>
   </summary>
   <div class="govuk-details__text">
-  If you cannot find a product or service, make a <a class="govuk-link govuk-link--no-visited-state" href="/products/requestnewentry" rel="noopener noreferrer">request for a new product entry</a>.
+  If you cannot find a product or service, <a class="govuk-link govuk-link--no-visited-state" asp-controller="Contact" asp-action="Index">contact the team</a>.
    </div>
 </details>
 
@@ -705,18 +709,10 @@
                 </nav>
             }
         }
-        else
+        else if (Model.SelectedFilters.Any())
         {
             <div class="govuk-inset-text">
-                <p class="govuk-body">No products found matching your filters.</p>
-                @if (Model.SelectedFilters.Any())
-                {
-                    <p class="govuk-body"><a href="/products" class="govuk-link">Clear all filters</a> to see all products.</p>
-                }
-                else
-                {
-                    <p class="govuk-body"><a asp-action="Create" class="govuk-link">Add the first product</a>.</p>
-                }
+                <p class="govuk-body"><a href="/products" class="govuk-link">Clear all filters</a> to see all products and services.</p>
             </div>
         }
 

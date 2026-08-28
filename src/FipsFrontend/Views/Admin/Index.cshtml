@@ -1,6 +1,5 @@
-@using FipsFrontend.Helpers
 @model AdminViewModel
-@{ ViewData["Title"] = Model.PageTitle; } 
+@{ ViewData["Title"] = Model.PageTitle; }
 @{ ViewData["Description"] = Model.PageDescription; }
 
 
@@ -13,7 +12,7 @@
                     <h1 class="govuk-heading-xl dfe-masthead--title govuk-!-margin-bottom-0">
                         Admin dashboard
                     </h1>
-                    
+
                 </div>
             </div>
         </div>
@@ -21,99 +20,33 @@
 
 }
 
-
-
-<div class="govuk-grid-row ">
+<div class="govuk-grid-row">
   <div class="govuk-grid-column-full">
     <div class="dfe-card-group">
-      <a href="/Admin/ProductCreate" class="dfe-card admin-card-link" data-action="create_product" data-card-type="create">
-        <h2 class="dfe-card-title">Create new FIPS entry</h2>
+      <a asp-controller="Admin" asp-action="ProductManage" class="dfe-card">
+        <h2 class="dfe-card-title">Manage products</h2>
         <p class="dfe-card-content">
-          Add a new product entry to the FIPS service.
+          View, edit, and change the state of products: @Model.PublishedProductsCount published, @Model.CategoryTypesCount category types.
         </p>
       </a>
-      
+      <a asp-controller="Admin" asp-action="CmdbMatching" class="dfe-card">
+        <h2 class="dfe-card-title">CMDB matching</h2>
+        <p class="dfe-card-content">
+          Match products to their CMDB entries.
+        </p>
+      </a>
+      <a asp-controller="Admin" asp-action="UnmappedProducts" class="dfe-card">
+        <h2 class="dfe-card-title">Products without a CMDB system ID</h2>
+        <p class="dfe-card-content">
+          Products not yet linked to a CMDB entry.
+        </p>
+      </a>
+      <a asp-controller="Admin" asp-action="UnmappedCmdbEntries" class="dfe-card">
+        <h2 class="dfe-card-title">Unmapped CMDB entries</h2>
+        <p class="dfe-card-content">
+          CMDB entries with no product in this service.
+        </p>
+      </a>
     </div>
   </div>
 </div>
-
-@section Scripts {
-    <script nonce="@Html.GetNonce()">
-        // Google Analytics Event Tracking Functions
-        function trackGAEvent(eventName, parameters = {}) {
-            console.log('Attempting to track GA event:', eventName, parameters);
-            
-            if (typeof gtag !== 'undefined') {
-                console.log('Using gtag for GA4');
-                gtag('event', eventName, parameters);
-            } else if (typeof ga !== 'undefined') {
-                console.log('Using ga for Universal Analytics');
-                ga('send', 'event', parameters.category || 'User Interaction', eventName, parameters.label || '', parameters.value || 0);
-            } else {
-                console.error('Google Analytics not loaded - gtag and ga are undefined');
-                console.log('Available globals:', Object.keys(window).filter(key => key.includes('google') || key.includes('gtag') || key.includes('ga')));
-            }
-            
-            // Also log to dataLayer for debugging
-            if (window.dataLayer) {
-                console.log('dataLayer exists, current length:', window.dataLayer.length);
-            } else {
-                console.error('dataLayer not found');
-            }
-        }
-
-        // Microsoft Clarity Event Tracking Functions
-        function trackClarityEvent(eventName, parameters = {}) {
-            if (typeof clarity !== 'undefined') {
-                clarity('event', eventName);
-                
-                // Set custom tags for additional context
-                if (parameters.event_category) {
-                    clarity('set', 'event_category', parameters.event_category);
-                }
-                if (parameters.action) {
-                    clarity('set', 'action', parameters.action);
-                }
-                if (parameters.card_type) {
-                    clarity('set', 'card_type', parameters.card_type);
-                }
-                
-                console.log('Clarity Event:', eventName, parameters);
-            }
-        }
-
-        // Combined tracking function
-        function trackEvent(eventName, parameters = {}) {
-            trackGAEvent(eventName, parameters);
-            trackClarityEvent(eventName, parameters);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Admin card link tracking
-            document.querySelectorAll('.admin-card-link').forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    const action = this.getAttribute('data-action');
-                    const cardType = this.getAttribute('data-card-type');
-                    
-                    trackEvent('admin_card_click', {
-                        event_category: 'Admin Dashboard',
-                        event_label: action,
-                        card_type: cardType,
-                        action: action
-                    });
-                });
-            });
-
-            // Test GA connection on page load
-            setTimeout(function() {
-                trackEvent('page_view_test', {
-                    event_category: 'Test',
-                    event_label: 'Admin Dashboard Load',
-                    page_title: '@Model.PageTitle',
-                    test_timestamp: new Date().toISOString()
-                });
-            }, 1000);
-        });
-    </script>
-}
-

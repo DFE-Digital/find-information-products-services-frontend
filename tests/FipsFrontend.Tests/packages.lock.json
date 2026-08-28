@@ -102,14 +102,6 @@
           "Azure.Core": "1.37.0"
         }
       },
-      "JWT": {
-        "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "jOT1PA95jgf78CqWsKt8hz9Uzv4J39vukzf5nYtfky9N6wl1W4vIXT1CdkQI7zG20HnApEMtmpC/pMtCKr4rvw==",
-        "dependencies": {
-          "Newtonsoft.Json": "13.0.3"
-        }
-      },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
         "resolved": "3.1.2",
@@ -878,7 +870,6 @@
       "fipsfrontend": {
         "type": "Project",
         "dependencies": {
-          "GovukNotify": "[8.1.0, )",
           "Microsoft.ApplicationInsights.AspNetCore": "[3.1.2, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[10.0.11, )",
           "Microsoft.AspNetCore.Authentication.OpenIdConnect": "[10.0.11, )",
@@ -888,16 +879,6 @@
           "Microsoft.Identity.Web.UI": "[4.14.2, )",
           "Newtonsoft.Json": "[13.0.4, )",
           "Serilog.Extensions.Logging.File": "[3.0.0, )"
-        }
-      },
-      "GovukNotify": {
-        "type": "CentralTransitive",
-        "requested": "[8.1.0, )",
-        "resolved": "8.1.0",
-        "contentHash": "lQI8TYhwzVWdyi12ZebXRNq6l5yc1L4R48FsjEml297Zx+3pRLFdxnySzYfl3aDiGUoqG8UiVEsL65zI2TpJBg==",
-        "dependencies": {
-          "JWT": "[11.0.0, 12.0.0]",
-          "Newtonsoft.Json": "[13.0.4, 14.0.0]"
         }
       },
       "Microsoft.ApplicationInsights.AspNetCore": {

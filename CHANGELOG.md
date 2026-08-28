@@ -74,7 +74,9 @@ The application runs, and is tested, on a developer's machine without anything h
 
 ### Removed
 
-- None.
+- The "Propose a change" form on product pages, the "request a new product entry" form, and the admin "create new FIPS entry" form are removed (#315),
+  along with the e-mails they sent: the service no longer uses GOV.UK Notify.
+  Product information comes from the data source only. The home, updates, and product listing pages say to contact the team for now; #314 will direct people to COMPASS instead.
 
 ### Fixed
 
