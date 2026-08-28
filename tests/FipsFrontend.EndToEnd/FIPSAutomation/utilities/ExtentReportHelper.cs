@@ -38,10 +38,11 @@ namespace FiPSAutomation.utilities
                 extent.AddSystemInfo("Framework", ".Net + Playwright + NUnit");
                 extent.AddSystemInfo(".Net Version", Environment.Version.ToString());
                 extent.AddSystemInfo("Browser", "Chromium");
-                extent.AddSystemInfo("Tester", "Shalini");
+                // Who ran it: the pipeline's actor when there is one, otherwise the signed-in user.
+                extent.AddSystemInfo("Run by", Environment.GetEnvironmentVariable("GITHUB_ACTOR") ?? Environment.UserName);
                 extent.AddSystemInfo("Project", "FiPS");
                 extent.AddSystemInfo("Org", "DfE");
-                extent.AddSystemInfo("Build-verson", "1.0.12");
+                // The target and the version of the application under test are added by GlobalSetup once it knows them.
 
                 return extent;
             }

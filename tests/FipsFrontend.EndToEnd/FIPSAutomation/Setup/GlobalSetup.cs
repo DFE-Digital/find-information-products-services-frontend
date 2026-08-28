@@ -50,6 +50,21 @@ namespace FiPSAutomation
             ExtentReportHelper.FlushReport(); //Finalizes and flushes reports
         }
 
+        private static async Task<string> DescribeApplicationAsync(string applicationUrl)
+        {
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+                using var json = JsonDocument.Parse(await http.GetStringAsync(new Uri(new Uri(applicationUrl), "health/detailed")));
+                var application = json.RootElement.GetProperty("application");
+                return $"{application.GetProperty("informationalVersion").GetString()} ({application.GetProperty("environment").GetString()})";
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException)
+            {
+                return $"unknown - health/detailed did not answer as expected ({ex.GetType().Name}: {ex.Message})";
+            }
+        }
+
         private async Task LoginAndAcceptCookiesAsync()
         {
             // env.json is a tracked template whose values are placeholders, so running against
@@ -91,6 +106,12 @@ namespace FiPSAutomation
             Assertions.SetDefaultExpectTimeout(LoginConfig!.Timeouts.ExpectMs);
             Context!.SetDefaultTimeout(LoginConfig.Timeouts.ActionMs);
             Context.SetDefaultNavigationTimeout(LoginConfig.Timeouts.NavigationMs);
+
+            // The report says what was tested: the target as configured, and the version the
+            // application itself reports (health/detailed carries "1.0.0+<commit>" and the environment
+            // name). A target that does not answer is recorded as such rather than failing the run.
+            ExtentReportHelper.extent?.AddSystemInfo("Target", $"{LoginConfig.ActiveEnv}: {url}");
+            ExtentReportHelper.extent?.AddSystemInfo("Application", await DescribeApplicationAsync(url!));
 
             if (!LoginConfig!.LoginRequired)
             {
