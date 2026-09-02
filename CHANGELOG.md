@@ -105,8 +105,10 @@ summary under the heading, delete its "None" groups, and paste this above it:
 - **Browser suite:** link locators that a longer link name could also satisfy now match exactly, so strict mode
   reports a real ambiguity rather than a substring. One test file is converted from Windows-1252 to UTF-8, which is
   what every other file and the compiler on Linux expect.
-- **Browser suite:** tests that named a particular mailbox or a person now assert the configured address or the
-  seeded contact.
+- **Browser suite:** tests that followed a link out to another site (the accessibility statement, the privacy
+  charter, the feedback survey, a product's own website) now assert the link and its destination, which is what
+  FIPS provides; the survey test waited for a new window, which issue 226 removed, and now asserts the link in the
+  same tab. Tests that named a particular mailbox or a person now assert the configured address or the seeded contact.
 - **Browser suite:** a trx summariser under `tests/FipsFrontend.EndToEnd/tools` groups a run's failures by cause and
   reads them against the known-green list. Against a seeded local copy every test passes; in the pipeline the
   known-green list still gates.

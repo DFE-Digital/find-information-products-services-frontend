@@ -49,7 +49,7 @@ public class ProductDetailTests : BaseTest
 
         // #168 AC3: a link to access the product directly. The product's address is its own data and the site behind
         // it is not FIPS, so the link's presence and an absolute destination are asserted; the site is not opened.
-        var viewProduct = targetValueRow.GetByRole(AriaRole.Link, new() { Exact = true, Name = "View product (opens in new tab)" });
+        var viewProduct = targetValueRow.GetByRole(AriaRole.Link, new() { Exact = true, Name = "View product" });
         await Assertions.Expect(viewProduct).ToBeVisibleAsync();
         await Assertions.Expect(viewProduct).ToHaveAttributeAsync("href", new Regex("^https?://"));
         await Assertions.Expect(Page).ToHaveTitleAsync("Accessibility and inclusion manual - FIPS");
