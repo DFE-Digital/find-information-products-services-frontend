@@ -91,6 +91,10 @@ summary under the heading, delete its "None" groups, and paste this above it:
   Tests parse responses recorded from a local instance holding synthetic seed data (no real products) through
   the records, and hold the seeded rows to known values, so a change on either side fails as a disagreement.
   Nothing reads the records yet.
+- **Footer:** the accessibility statement's address is the `AccessibilityStatement:Url` setting, with the departmental
+  statement as the default, so an instance can point the link at its own statement; the link itself is never absent.
+- **Feedback:** the feedback store's address is the `Airtable:BaseUrl` setting, defaulting to the Airtable service, so a
+  local or pipeline instance can send the form to a stand-in and the browser suite can see it succeed.
 - **Request limiter:** a caller refused for its pace now gets 429 Too Many Requests with a Retry-After header;
   previously the limiter answered its default 503, which read as the service being down. The limit and window are
   the `RateLimiting` settings, defaulting to what the constant was, so the pipeline's copy can admit the browser

@@ -23,7 +23,8 @@ public class AirtableService : IAirtableService
         _logger = logger;
 
         // Configure HttpClient for Airtable API
-        _httpClient.BaseAddress = new Uri($"https://api.airtable.com/v0/{_config.BaseId}/");
+        var baseUrl = string.IsNullOrWhiteSpace(_config.BaseUrl) ? AirtableConfiguration.DefaultBaseUrl : _config.BaseUrl;
+        _httpClient.BaseAddress = new Uri(new Uri(baseUrl.TrimEnd('/') + "/"), $"{_config.BaseId}/");
         _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.ApiKey}");
     }
 

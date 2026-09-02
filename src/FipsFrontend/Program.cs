@@ -107,6 +107,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IAirtableService, AirtableService>();
 builder.Services.Configure<AirtableConfiguration>(builder.Configuration.GetSection("Airtable"));
 
+builder.Services.AddOptions<AccessibilityStatementOptions>()
+    .Bind(builder.Configuration.GetSection(AccessibilityStatementOptions.SectionName));
+
 builder.Services.AddOptions<FeedbackOptions>()
     .Bind(builder.Configuration.GetSection(FeedbackOptions.SectionName))
     .Validate(options => options.IsValid(), "Feedback:SurveyUrl must be an absolute http or https URL, or left empty.")

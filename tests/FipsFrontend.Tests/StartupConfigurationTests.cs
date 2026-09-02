@@ -90,7 +90,7 @@ public class StartupConfigurationTests
         var html = await response.Content.ReadAsStringAsync();
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), Html.Excerpt(html));
-        Assert.That(Html.Headings(html), Is.Not.Empty);
+        Assert.That(Html.H1Headings(html), Is.Not.Empty);
     }
 
     [Test]
