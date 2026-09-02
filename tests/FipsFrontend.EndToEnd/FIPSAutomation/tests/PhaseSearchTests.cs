@@ -42,7 +42,7 @@ public class PhaseSearchTests : BaseTest
             if (hasPagination && nextPageUrl != null)
             {
                 await productsSearchPage.Pagination.GoToNextPageAsync();
-                await productsSearchPage.Pagination.VerifyUrlContainsAsync(nextPageUrl);
+                await productsSearchPage.Pagination.VerifyPathAndQueryAsync(nextPageUrl);
                 await productsSearchPage.VerifyProductListVisibleAsync();
             }
             await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -80,7 +80,7 @@ public class PhaseSearchTests : BaseTest
     [Test, Order(5)]
     public async Task VerifyPhaseSearchFunctionality_PublicBetaCategoryUS236AC5()
     {
-        await VerifyPhaseFilterAsync(productsSearchPage.FilterPanel.Phase_PublicBeta, productsSearchPage.FilterTags.Phase_PublicBeta, "Public beta × Remove Public beta filter", hasPagination: true, nextPageUrl: "https://find-products-services-test.azurewebsites.net/Products?phase=public-beta&page=2");
+        await VerifyPhaseFilterAsync(productsSearchPage.FilterPanel.Phase_PublicBeta, productsSearchPage.FilterTags.Phase_PublicBeta, "Public beta × Remove Public beta filter", hasPagination: true, nextPageUrl: "/Products?phase=public-beta&page=2");
         ExtentTest?.Log(Status.Pass, "VerifyPhaseSearchFunctionality_PublicBetaCategoryUS236AC5 passed");
     }
 

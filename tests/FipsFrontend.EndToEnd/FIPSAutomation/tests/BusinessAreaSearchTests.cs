@@ -35,12 +35,12 @@ public class BusinessAreaSearchTests : BaseTest
         if (hasPagination && page2.HasValue && page2Url != null)
         {
             await productsSearchPage.Pagination.GoToPageAsync(page2.Value);
-            await productsSearchPage.Pagination.VerifyUrlContainsAsync(page2Url);
+            await productsSearchPage.Pagination.VerifyPathAndQueryAsync(page2Url);
             await productsSearchPage.VerifyProductListVisibleAsync();
             if (page3.HasValue && page3Url != null)
             {
                 await productsSearchPage.Pagination.GoToPageAsync(page3.Value);
-                await productsSearchPage.Pagination.VerifyUrlContainsAsync(page3Url);
+                await productsSearchPage.Pagination.VerifyPathAndQueryAsync(page3Url);
                 await productsSearchPage.VerifyProductListVisibleAsync();
             }
             else
@@ -87,10 +87,10 @@ public class BusinessAreaSearchTests : BaseTest
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(2);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?group=enterprise-data&page=2");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?group=enterprise-data&page=2");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToNextPageAsync();
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?group=enterprise-data&page=3");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?group=enterprise-data&page=3");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
         ExtentTest?.Log(Status.Pass, "VerifyBusinessAreaSearchFunctionality_EnterpriseDataUS234AC4 passed");
@@ -160,10 +160,10 @@ public class BusinessAreaSearchTests : BaseTest
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(2);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?group=__not_categorised__&page=2");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?group=__not_categorised__&page=2");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(3);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?group=__not_categorised__&page=3");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?group=__not_categorised__&page=3");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
         ExtentTest?.Log(Status.Pass, "VerifyBusinessAreaSearchFunctionality_NotCategorisedUS234AC12 passed");

@@ -68,10 +68,10 @@ public class TypeSearchTests : BaseTest
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(2);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?type=information&page=2");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?type=information&page=2");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(3);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?type=information&page=3");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?type=information&page=3");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
         ExtentTest?.Log(Status.Pass, "VerifyTypeSearchFunctionality_InformationCategoryUS237AC4 passed");
@@ -90,10 +90,10 @@ public class TypeSearchTests : BaseTest
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(2);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?type=transactional&page=2");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?type=transactional&page=2");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(3);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?type=transactional&page=3");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?type=transactional&page=3");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
         ExtentTest?.Log(Status.Pass, "VerifyTypeSearchFunctionality_TransactionalCategoryUS237AC5 passed");
@@ -120,7 +120,7 @@ public class TypeSearchTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.Type_Information, "Information × Remove Information filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.Pagination.GoToNextPageAsync();
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?type=api&type=information&page=2");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?type=api&type=information&page=2");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
         ExtentTest?.Log(Status.Pass, "VerifyTypeCategorywiseSearchFunctionalityUS103AC passed");

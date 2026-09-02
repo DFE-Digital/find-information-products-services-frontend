@@ -9,7 +9,7 @@ namespace FiPSAutomation.Pages
         private ILocator SearchButton => page.Locator("[class='govuk-button govuk-button--start govuk-button--inverse home-cta-link']");
         private ILocator SearchProductsAndServicesButton => page.Locator("a[class=\"govuk-button govuk-button--start\"]");
         public string ServiceEmailDesc => "main[id='main-content'] p:nth-child(1)";
-        public string EmailLink => "a[href='mailto:fips.service@education.gov.uk']";
+        public string EmailLink => "a[href^='mailto:']";
 
         //A page object is passed as a dependency to the constructor,enabling flexible management of browser pages.
         public HomePage(IPage page)   
@@ -66,7 +66,8 @@ namespace FiPSAutomation.Pages
 
         public async Task ClickContactLinkAsync()
         {
-            await page.GetByRole(AriaRole.Link, new() { NameString = "Contact" }).ClickAsync();
+            // Exact: the page's "contact the team" signposts also match a substring search for Contact.
+            await page.GetByRole(AriaRole.Link, new() { Name = "Contact", Exact = true }).ClickAsync();
         }
 
         public async Task ClickBackToHomeAsync()

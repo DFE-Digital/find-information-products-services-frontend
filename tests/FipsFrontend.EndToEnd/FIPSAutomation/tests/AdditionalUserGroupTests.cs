@@ -35,7 +35,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGSocialWorkerSubcategoryListUS101AC passed");
@@ -122,7 +122,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEYAcademyAndTrustWorkforceSubcategoryListUS130AC passed");
@@ -167,7 +167,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEYAlternatProvSettingWorkforceSubcategListUS131AC passed");
@@ -211,7 +211,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEYEarlyYearsWorkforceSubcategoryListUS132AC passed");
@@ -256,7 +256,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEYFurtherEducationWorkforceSubcategoryListUS133AC passed");
@@ -300,7 +300,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEYHigherEducationWorkforceSubcategoryListUS134AC passed");
@@ -344,7 +344,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEY_SENDProfessionalSubcategoryListUS135AC passed");
@@ -388,7 +388,7 @@ public class AdditionalUserGroupTests : BaseTest
             {
                 if (dataRows[i].Col1 != "")
                 {
-                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = dataRows[i].Col1 })).ToBeVisibleAsync();
+                    await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Name = dataRows[i].Col1, Exact = true })).ToBeVisibleAsync();
                 }
             }
             ExtentTest?.Log(Status.Pass, "VerifyUGEPEYSchoolWorkforceSubcategoryListUS136AC passed");

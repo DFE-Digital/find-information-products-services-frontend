@@ -21,7 +21,8 @@ public class ProductSearchMainTests : BaseTest
     [Test, Order(1)]
     public async Task VerifyMainProductPageView_HeaderAndListUS103AC()
     {
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Products" }).ClickAsync();
+        // Exact: the service name link "Find information about products and services" also contains "Products".
+        await Page.GetByRole(AriaRole.Link, new() { Name = "Products", Exact = true }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();
         await productsSearchPage.VerifyFilterOptionsBlockAsync();
         await productsSearchPage.FilterPanel.VerifyBusinessAreaVisibleAsync();
@@ -43,7 +44,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                                 (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                                (productsSearchPage.FilterTags.GiasAcronym_FilterTag, "GIAS × Remove GIAS filter");
+                                (productsSearchPage.FilterTags.GiasAcronym_FilterTag, "GIAS Ã— Remove GIAS filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -60,7 +61,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                                 (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                                (productsSearchPage.FilterTags.FipsAcronym_FilterTag, "FIPS × Remove FIPS filter");
+                                (productsSearchPage.FilterTags.FipsAcronym_FilterTag, "FIPS Ã— Remove FIPS filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -77,7 +78,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                       (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-              (productsSearchPage.FilterTags.UGTermEYW_FilterTag, "Early years workforce × Remove Early years workforce filter");
+              (productsSearchPage.FilterTags.UGTermEYW_FilterTag, "Early years workforce Ã— Remove Early years workforce filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -94,7 +95,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                       (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-               (productsSearchPage.FilterTags.UGTermCYP_FilterTag, "Child or young person × Remove Child or young person filter");
+               (productsSearchPage.FilterTags.UGTermCYP_FilterTag, "Child or young person Ã— Remove Child or young person filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -111,7 +112,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                            (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                           (productsSearchPage.FilterTags.NonPreferTermDfEStaff_FilterTag, "DfE staff × Remove DfE staff filter");
+                           (productsSearchPage.FilterTags.NonPreferTermDfEStaff_FilterTag, "DfE staff Ã— Remove DfE staff filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -128,7 +129,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                                 (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                     (productsSearchPage.FilterTags.NonPreferTermHEWorkforce_FilterTag, "HE workforce × Remove HE workforce filter");
+                     (productsSearchPage.FilterTags.NonPreferTermHEWorkforce_FilterTag, "HE workforce Ã— Remove HE workforce filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -147,11 +148,11 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                                 (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                                (productsSearchPage.FilterTags.CrmAcronym_FilterTag, "CRM × Remove CRM filter");
+                                (productsSearchPage.FilterTags.CrmAcronym_FilterTag, "CRM Ã— Remove CRM filter");
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                                 (productsSearchPage.FilterTags.Channel_FilterHeading, "Channel");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                                (productsSearchPage.FilterTags.Channel_Web, "Web × Remove Web filter");
+                                (productsSearchPage.FilterTags.Channel_Web, "Web Ã— Remove Web filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -168,7 +169,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                       (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                      (productsSearchPage.FilterTags.NationalCareer_FilterTag, "National career × Remove National career filter");
+                      (productsSearchPage.FilterTags.NationalCareer_FilterTag, "National career Ã— Remove National career filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -185,7 +186,7 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                       (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                      (productsSearchPage.FilterTags.AI_FilterTag, "AI × Remove AI filter");
+                      (productsSearchPage.FilterTags.AI_FilterTag, "AI Ã— Remove AI filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -202,9 +203,9 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                       (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                      (productsSearchPage.FilterTags.AI_FilterTag, "AI × Remove AI filter");
+                      (productsSearchPage.FilterTags.AI_FilterTag, "AI Ã— Remove AI filter");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-                      (productsSearchPage.FilterTags.BA_Strategy, "Strategy × Remove Strategy filter");
+                      (productsSearchPage.FilterTags.BA_Strategy, "Strategy Ã— Remove Strategy filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -221,9 +222,9 @@ public class ProductSearchMainTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-              (productsSearchPage.FilterTags.PrivateBetaSearch_FilterTag, "private beta × Remove private beta filter");
+              (productsSearchPage.FilterTags.PrivateBetaSearch_FilterTag, "private beta Ã— Remove private beta filter");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-              (productsSearchPage.FilterTags.CustExpAndDesignSearch_FilterTag, "customer experience and design × Remove customer experience and design filter");
+              (productsSearchPage.FilterTags.CustExpAndDesignSearch_FilterTag, "customer experience and design Ã— Remove customer experience and design filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -234,13 +235,13 @@ public class ProductSearchMainTests : BaseTest
     [Test, Order(13)]
     public async Task VerifySearchBoxFunctionUpdate_UsingContactsUS306AC5a()
     {
-        await productsSearchPage.SearchByKeywordAsync("Andy Jones");
+        await productsSearchPage.SearchByKeywordAsync("Alpha Testcontact");
         await productsSearchPage.FilterPanel.ClickSearchBoxButtonAsync();
         await productsSearchPage.FilterTags.VerifyAppliedFiltersPanelContainsAsync("your selected filters");
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-              (productsSearchPage.FilterTags.AndyJones_FilterTag, "Andy Jones × Remove Andy Jones filter");
+              (productsSearchPage.FilterTags.AlphaTestcontact_FilterTag, "Alpha Testcontact Ã— Remove Alpha Testcontact filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();
@@ -251,13 +252,13 @@ public class ProductSearchMainTests : BaseTest
     [Test, Order(14)]
     public async Task VerifySearchBoxFunctionUpdate_UsingContactsUS306AC5b()
     {
-        await productsSearchPage.SearchByKeywordAsync("Sam Barton");
+        await productsSearchPage.SearchByKeywordAsync("Beta Testcontact");
         await productsSearchPage.FilterPanel.ClickSearchBoxButtonAsync();
         await productsSearchPage.FilterTags.VerifyAppliedFiltersPanelContainsAsync("your selected filters");
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync
                (productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync
-              (productsSearchPage.FilterTags.SamBarton_FilterTag, "Sam Barton × Remove Sam Barton filter");
+              (productsSearchPage.FilterTags.BetaTestcontact_FilterTag, "Beta Testcontact Ã— Remove Beta Testcontact filter");
         await productsSearchPage.VerifyMissingProductSectionVisibleAsync();
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();

@@ -32,7 +32,7 @@ application on this machine with no sign-in:
 ```
 
 The timeouts are how long an assertion, an action, or a navigation waits before failing; the
-template carries Playwright's defaults (5, 30, and 30 seconds), which suit a hosted environment. An
+template carries Playwright's defaults, which suit a hosted environment. An
 application on the same machine answers in milliseconds, and every failing test waits the whole
 timeout, so set them low there or a run is mostly waiting.
 
@@ -75,6 +75,15 @@ dotnet run --project tests/FipsFrontend.Tests.StubCmsApi --urls http://127.0.0.1
 and point the application at it with `CmsApi__BaseUrl=http://127.0.0.1:1338/api`. The application
 then renders every page with no data and answers quickly, so every failure the suite reports is
 about the pages.
+
+## Seed data
+
+The page objects and tests under `FIPSAutomation/` name the products, categories, user groups,
+search terms, and contacts of one seeded data set: the hosted environment's (`testdata.xlsx`), which
+the local composition's seed reproduces with visibly synthetic contact names such as "Alpha
+Testcontact". Every such literal depends on that seed, so a change to the seed and to the tests
+that name the changed value must land together. Against an instance with no content, every such test is red by design, which is what the
+known-green list below accounts for.
 
 ## The tests known to pass
 

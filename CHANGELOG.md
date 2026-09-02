@@ -91,6 +91,17 @@ summary under the heading, delete its "None" groups, and paste this above it:
   Tests parse responses recorded from a local instance holding synthetic seed data (no real products) through
   the records, and hold the seeded rows to known values, so a change on either side fails as a disagreement.
   Nothing reads the records yet.
+- **Browser suite:** pagination assertions check the route and query a click produced, not which host served it,
+  so they pass against any environment; the comparison parses the url and treats query order as irrelevant, and
+  holds those decisions in fifteen browser-free tests.
+- **Browser suite:** link locators that a longer link name could also satisfy now match exactly, so strict mode
+  reports a real ambiguity rather than a substring. One test file is converted from Windows-1252 to UTF-8, which is
+  what every other file and the compiler on Linux expect.
+- **Browser suite:** tests that named a particular mailbox or a person now assert the configured address or the
+  seeded contact.
+- **Browser suite:** a trx summariser under `tests/FipsFrontend.EndToEnd/tools` groups a run's failures by cause and
+  reads them against the known-green list. Against a seeded local copy every test passes; in the pipeline the
+  known-green list still gates.
 
 ## [v2026.08.28-0001]
 

@@ -22,7 +22,7 @@ namespace FiPSAutomation.Pages
 
         // Contacts
         private ILocator ResponsibilitiesAndContactsHeader => page.Locator("#contacts");
-        private ILocator ContactsNameLink => page.Locator("//a[text()='Andy JONES']");
+        private ILocator ContactsNameLink => page.GetByRole(AriaRole.Link, new() { Name = "Alpha Testcontact", Exact = true });
         private ILocator ServiceOwnerLocator => page.Locator("(//dt[@class = \"govuk-summary-list__key\"])[1]");
 
         // Tables

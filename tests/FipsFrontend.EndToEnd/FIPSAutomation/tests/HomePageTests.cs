@@ -66,7 +66,9 @@ public class HomePageTests : BaseTest
         await homePage.ClickContactLinkAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Contact us" })).ToBeVisibleAsync();
         await Assertions.Expect(Page.Locator(homePage.ServiceEmailDesc)).ToBeVisibleAsync();
-        await Assertions.Expect(Page.Locator(homePage.EmailLink)).ToHaveAttributeAsync("href", "mailto:fips.service@education.gov.uk");
+        // #305 AC4: the page displays how to contact the team. The address is the instance's Contact:Email setting, so a
+        // mailto link is asserted, not a particular mailbox.
+        await Assertions.Expect(Page.Locator(homePage.EmailLink)).ToBeVisibleAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Give feedback" })).ToBeVisibleAsync();
         await Assertions.Expect(Page.GetByText("If you have any feedback for the service, use the feedback link at the end of each page.")).ToBeVisibleAsync();
         await homePage.ClickBackToHomeAsync();

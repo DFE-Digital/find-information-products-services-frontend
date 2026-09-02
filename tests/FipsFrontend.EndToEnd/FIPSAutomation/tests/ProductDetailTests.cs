@@ -47,20 +47,11 @@ public class ProductDetailTests : BaseTest
         await productDetailPage.VerifyServiceOwnerAsync();
         await productDetailPage.VerifyContactsNameLinkAsync();
 
-        // clicking on 'View products', product details page opens in new tab. Failing at this step currently -
-        var newTab = await Page.RunAndWaitForPopupAsync(async () =>
-        {
-            await targetValueRow.GetByRole(AriaRole.Link, new() { NameString = "View product" }).ClickAsync();
-        });
-        await newTab.WaitForLoadStateAsync();
-
-        // Assertions in the new tab
-        await Assertions.Expect(newTab).ToHaveURLAsync(ProductDetailPage.Accessibility_URL);
-        await Assertions.Expect(newTab).ToHaveTitleAsync("Accessibility and inclusive design manual | Accessibility manual - Department for Education");
-        await Assertions.Expect(newTab.GetByRole(AriaRole.Heading, new() { NameString = "Accessibility and inclusive design manual" })).ToBeVisibleAsync();
-        await newTab.CloseAsync();
-
-        // Assertions back on the original page
+        // #168 AC3: a link to access the product directly. The product's address is its own data and the site behind
+        // it is not FIPS, so the link's presence and an absolute destination are asserted; the site is not opened.
+        var viewProduct = targetValueRow.GetByRole(AriaRole.Link, new() { Exact = true, Name = "View product (opens in new tab)" });
+        await Assertions.Expect(viewProduct).ToBeVisibleAsync();
+        await Assertions.Expect(viewProduct).ToHaveAttributeAsync("href", new Regex("^https?://"));
         await Assertions.Expect(Page).ToHaveTitleAsync("Accessibility and inclusion manual - FIPS");
 
         ExtentTest?.Log(Status.Pass, "VerifyProductOverviewPageHeadersUS168AC passed");
@@ -143,27 +134,27 @@ public class ProductDetailTests : BaseTest
     [Test, Order(4)]
     public async Task ClickSubcategoriesLinkInCategoriesTableUS168AC()
     {
-        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = "Customer Experience and Design" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Customer Experience and Design" }).ClickAsync();
+        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Customer Experience and Design" })).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Customer Experience and Design" }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();
         // bug raised for below line 177 code, once fixed this TC should pass
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.BA_CustomerExpAndDesign, "Customer Experience and Design × Remove Customer Experience and Design filter");
         await Page.GoBackAsync();
 
-        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = "Web" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Web" }).ClickAsync();
+        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Web" })).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Web" }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.Channel_Web, "Web × Remove Web filter");
         await Page.GoBackAsync();
 
-        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = "Live" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Live" }).ClickAsync();
+        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Live" })).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Live" }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.Phase_Live, "Live × Remove Live filter");
         await Page.GoBackAsync();
 
-        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = "Information" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Information" }).ClickAsync();
+        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Information" })).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Information" }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.Type_Information, "Information × Remove Information filter");
         await Page.GoBackAsync();
@@ -175,8 +166,8 @@ public class ProductDetailTests : BaseTest
     public async Task VerifyLinkInUsersProductTableUS168AC()
     {
         await NavigateToAsync("product/h7pjd1dx4hwvjm9zg6bv2gci/categories");
-        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { NameString = "Department for Education workforce" })).ToBeVisibleAsync();
-        await Page.GetByRole(AriaRole.Link, new() { NameString = "Department for Education workforce" }).ClickAsync();
+        await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Department for Education workforce" })).ToBeVisibleAsync();
+        await Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Department for Education workforce" }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.UserGroups_FilterTag, "Department for Education workforce × Remove Department for Education workforce filter");
         await Page.GoBackAsync();

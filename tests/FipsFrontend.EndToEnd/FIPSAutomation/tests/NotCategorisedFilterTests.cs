@@ -53,7 +53,8 @@ public class NotCategorisedFilterTests : BaseTest
         await filterPanel.OpenPhaseAsync();
         await filterPanel.CheckFilterAsync(filterPanel.Phase_NotCategorised);
         await filterPanel.ApplyFiltersAsync();
-        await productsSearchPage.FilterTags.VerifyAppliedFiltersPanelContainsAsync("results for your selected filters");
+        // "1 result" or "N results": how many products carry the keyword is the data's business, the panel's wording is the page's.
+        await productsSearchPage.FilterTags.VerifyAppliedFiltersPanelContainsAsync("for your selected filters");
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync(productsSearchPage.FilterTags.Search_FilterHeading, "Search term");
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.KeywordSearchTag, "Apprentice × Remove Apprentice filter");
         await productsSearchPage.FilterTags.VerifyFilterHeadingAsync(productsSearchPage.FilterTags.Phase_FilterHeading, "Phase");
