@@ -36,6 +36,12 @@ template carries Playwright's defaults, which suit a hosted environment. An
 application on the same machine answers in milliseconds, and every failing test waits the whole
 timeout, so set them low there or a run is mostly waiting.
 
+At that pace the suite exceeds the application's request limiter at its default, and every page
+after that is a 429 that a test reports as a missing heading or filter. Start the
+application with `RateLimiting__PermitLimitPerWindow=1000` (the pipeline's `appsettings.ci.json` does), and
+read a run's trx with `dotnet run tests/FipsFrontend.EndToEnd/tools/summarise-trx.cs -- <trx>
+--app-log <application log>`, which names the tests that ran while the limiter was refusing.
+
 Start the application (see the repository README). To run it exactly as the pipeline does - the
 `ci` environment, whose settings are the committed `src/FipsFrontend/appsettings.ci.json` and whose
 content source is the stub below - run the published output, since static files are served from a

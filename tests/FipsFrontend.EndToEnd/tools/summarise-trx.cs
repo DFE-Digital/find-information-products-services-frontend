@@ -61,7 +61,7 @@ if (showAt >= 0 && showAt + 1 < args.Length)
     return 0;
 }
 // --app-log <path>: the application's console log; a test whose run overlaps a refusal the application answered is
-// named, because the request limiter refuses in under a millisecond once a host exceeds RateLimiting:PermitLimit
+// named, because the request limiter refuses in under a millisecond once a host exceeds RateLimiting:PermitLimitPerWindow
 // (100 a minute by default), and the suite at its local pace does exactly that. Such a failure reads as "expected to
 // be visible" and names nothing about rate limiting, so it is worth cross-referencing rather than chasing as a
 // locator. The limiter answers 429; 503 is matched too, since a hosting layer or an older build answers that.

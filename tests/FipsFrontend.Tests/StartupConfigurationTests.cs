@@ -125,18 +125,5 @@ public class StartupConfigurationTests
     }
 
     /// <summary>Every message on the chain of the exception that stops the application starting; empty if it started.</summary>
-    private static string StartupRefusal(IDictionary<string, string?> settings)
-    {
-        try
-        {
-            using var app = new FipsApplication(settings: settings);
-            return "";
-        }
-        catch (Exception ex)
-        {
-            var messages = new List<string>();
-            for (var e = ex; e is not null; e = e.InnerException) messages.Add(e.Message);
-            return string.Join(" | ", messages);
-        }
-    }
+    private static string StartupRefusal(IDictionary<string, string?> settings) => FipsApplication.StartupRefusal(settings);
 }
