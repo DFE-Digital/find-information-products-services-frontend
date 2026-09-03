@@ -111,7 +111,7 @@ summary under the heading, delete its "None" groups, and paste this above it:
   same tab. Tests that named a particular mailbox or a person now assert the configured address or the seeded contact.
 - **Browser suite:** a trx summariser under `tests/FipsFrontend.EndToEnd/tools` groups a run's failures by cause and
   reads them against the known-green list. Against a seeded local copy every test passes; in the pipeline the
-  known-green list still gates.
+  known-green list still gates, and gains the 21 tests this branch brings to green there.
 
 ## [v2026.08.28-0001]
 
