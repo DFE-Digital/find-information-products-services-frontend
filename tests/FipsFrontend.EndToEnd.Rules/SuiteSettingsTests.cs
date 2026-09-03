@@ -1,16 +1,13 @@
 using FiPSAutomation.Configuration;
 using Microsoft.Extensions.Configuration;
 
-// Outside the FiPSAutomation namespace on purpose: the suite's [SetUpFixture] lives there and would
-// start a browser and open the application for these, which need neither.
-namespace FipsFrontend.EndToEnd.ConfigurationTests;
+namespace FipsFrontend.EndToEnd.Rules;
 
 /// <summary>
 /// What a person configuring the suite meets: the rules in ConfigurationSections, applied. These
-/// need no browser and no running application, so the pipeline runs them as a gate of their own
-/// (the category below) and leaves them out of the browser run and its known-green check.
+/// need no browser and no running application, which is why they live in this project and gate the pipeline.
 /// </summary>
-[TestFixture, Category("Configuration")]
+[TestFixture]
 public class SuiteSettingsTests
 {
     private static IConfiguration Configuration(params (string Key, string? Value)[] values) =>

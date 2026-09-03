@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The browser suite's tests that need no browser and no running application: its settings rules and the url
+    comparison behind its pagination assertions. They live apart from the browser project so that `dotnet test`
+    there runs browser tests and nothing else, and these run in seconds anywhere and gate the pipeline.
+    The classes under test are the browser project's own files, linked in below.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FipsFrontend.EndToEnd\FIPSAutomation\Configuration\ConfigurationSections.cs" Link="Configuration\ConfigurationSections.cs" />
+    <Compile Include="..\FipsFrontend.EndToEnd\FIPSAutomation\Configuration\SignInOptions.cs" Link="Configuration\SignInOptions.cs" />
+    <Compile Include="..\FipsFrontend.EndToEnd\FIPSAutomation\Configuration\SuiteSettings.cs" Link="Configuration\SuiteSettings.cs" />
+    <Compile Include="..\FipsFrontend.EndToEnd\FIPSAutomation\Configuration\TargetOptions.cs" Link="Configuration\TargetOptions.cs" />
+    <Compile Include="..\FipsFrontend.EndToEnd\FIPSAutomation\Configuration\TimeoutOptions.cs" Link="Configuration\TimeoutOptions.cs" />
+    <Compile Include="..\FipsFrontend.EndToEnd\FIPSAutomation\Components\Urls.cs" Link="Components\Urls.cs" />
+    <!-- The tracked settings template, which one rule holds complete against the options classes. -->
+    <None Include="..\FipsFrontend.EndToEnd\testsettings.json" Link="testsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" />
+    <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+</Project>

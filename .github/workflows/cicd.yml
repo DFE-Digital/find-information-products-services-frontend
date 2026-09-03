@@ -159,10 +159,10 @@ jobs:
           dotnet tool install dotnet-coverage --version ${{ env.DOTNET_COVERAGE_VERSION }} --tool-path ${{ runner.temp }}/tools
           dotnet tool install dotnet-reportgenerator-globaltool --version ${{ env.REPORT_GENERATOR_VERSION }} --tool-path ${{ runner.temp }}/tools
 
-      # The suite's own tests of its configuration rules need no browser and no application, and a failure there is a
-      # defect in the suite, so unlike the browser run below this step gates.
-      - name: Check the suite's configuration rules
-        run: dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build --filter "TestCategory=Configuration"
+      # The suite's own rules (its settings, its url comparison) need no browser and no application, and a failure
+      # there is a defect in the suite, so unlike the browser run below this step gates.
+      - name: Check the suite's rules
+        run: dotnet test tests/FipsFrontend.EndToEnd.Rules/FipsFrontend.EndToEnd.Rules.csproj --configuration Release --no-restore
 
       - name: Install the browser
         run: pwsh tests/FipsFrontend.EndToEnd/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
@@ -212,7 +212,7 @@ jobs:
         continue-on-error: true
         run: >
           dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
-          --filter "TestCategory!=Configuration&TestCategory!=Integration"
+          --filter "TestCategory!=Integration"
           --logger trx --results-directory ${{ runner.temp }}/end-to-end/expected-green
 
       - name: Run the Integration tests (expected red until the pipeline seeds content)

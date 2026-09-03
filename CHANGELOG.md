@@ -112,6 +112,9 @@ summary under the heading, delete its "None" groups, and paste this above it:
 - **Browser suite:** a trx summariser under `tests/FipsFrontend.EndToEnd/tools` groups a run's failures by cause and
   reads them against the known-green list. Against a seeded local copy every test passes; in the pipeline the
   known-green list still gates, and gains the 21 tests this branch brings to green there.
+- **Browser suite:** the tests that need no browser (the suite's settings rules and its url comparison) live in
+  `tests/FipsFrontend.EndToEnd.Rules`, so `dotnet test` on the browser project runs browser tests and nothing else,
+  and the one category that still splits a run is `Integration`: the tests that name seeded content.
 
 ## [v2026.08.28-0001]
 

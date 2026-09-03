@@ -1,4 +1,3 @@
-using System.Web;
 using Microsoft.Playwright;
 
 namespace FiPSAutomation.Components
@@ -43,53 +42,17 @@ namespace FiPSAutomation.Components
             var expected = "/" + pathAndQuery.TrimStart('/');
             try
             {
-                await page.WaitForURLAsync(url => SamePathAndQuery(url, expected));
+                await page.WaitForURLAsync(url => Urls.SamePathAndQuery(url, expected));
             }
             catch (TimeoutException)
             {
                 // Playwright's own timeout names neither url; both are stated, reduced to the compared part, query sorted.
                 throw new PlaywrightException(
-                    $"Expected path and query:\n  {Describe(Absolute(expected))}\nbut the page is at:\n  {Describe(new Uri(page.Url))}\n\n"
+                    $"Expected path and query:\n  {Urls.Describe(Urls.Absolute(expected))}\nbut the page is at:\n  {Urls.Describe(new Uri(page.Url))}\n\n"
                     + "Query parameters are compared as a set, so their order is not the difference. "
                     + "The origin is not asserted: this checks the route and parameters a click produced, so it passes against any environment.");
             }
         }
 
-        // A relative reference needs a base to be parsed at all; the base is discarded and never compared.
-        private static Uri Absolute(string pathAndQuery) => new(new Uri("https://base.invalid"), pathAndQuery);
-
-        /// <summary>
-        /// Whether a url's path and query match an expected path and query, ignoring the origin and the order of
-        /// query parameters. Public so UrlComparisonTests can hold its decisions without a browser.
-        /// </summary>
-        public static bool SamePathAndQuery(string actualUrl, string expectedPathAndQuery)
-        {
-            var actual = new Uri(actualUrl);
-            var expected = Absolute(expectedPathAndQuery);
-            // The path compares without regard to case: routing is case-insensitive and the application renders
-            // its links in lower case, so /Products and /products are one route rendered two ways. Values keep their case.
-            return string.Equals(actual.AbsolutePath, expected.AbsolutePath, StringComparison.OrdinalIgnoreCase)
-                && QueryPairs(actual).SequenceEqual(QueryPairs(expected), StringComparer.Ordinal);
-        }
-
-        // HttpUtility parses the query rather than splitting it by hand: repeated keys, percent-encoding and
-        // empty values all appear in these filter urls, and a split on '&' and '=' gets each subtly wrong.
-        private static List<string> QueryPairs(Uri uri)
-        {
-            var parsed = HttpUtility.ParseQueryString(uri.Query);
-            var pairs = new List<string>();
-            foreach (var key in parsed.AllKeys)
-            {
-                foreach (var value in parsed.GetValues(key) ?? Array.Empty<string>())
-                {
-                    pairs.Add($"{key}={value}");
-                }
-            }
-            pairs.Sort(StringComparer.Ordinal);
-            return pairs;
-        }
-
-        private static string Describe(Uri uri) =>
-            uri.AbsolutePath + (QueryPairs(uri).Count > 0 ? "?" + string.Join("&", QueryPairs(uri)) + "  (sorted)" : "");
     }
 }

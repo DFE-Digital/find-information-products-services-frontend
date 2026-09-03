@@ -3,5 +3,6 @@
   <Project Path="src/FipsFrontend/FipsFrontend.csproj" />
   <Project Path="tests/FipsFrontend.Tests/FipsFrontend.Tests.csproj" />
   <Project Path="tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj" />
+  <Project Path="tests/FipsFrontend.EndToEnd.Rules/FipsFrontend.EndToEnd.Rules.csproj" />
   <Project Path="tests/FipsFrontend.Tests.StubCmsApi/FipsFrontend.Tests.StubCmsApi.csproj" />
 </Solution>

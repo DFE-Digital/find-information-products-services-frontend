@@ -55,14 +55,17 @@ ASPNETCORE_ENVIRONMENT=ci dotnet out/FipsFrontend.dll --urls http://localhost:55
 Then:
 
 ```
-dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Configuration"
-dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=functional"
+dotnet test tests/FipsFrontend.EndToEnd
 ```
 
 A report is written to `tests/FipsFrontend.EndToEnd/playwright-report/`, with a screenshot of each
-failing test. The `Configuration` category is the suite's own tests of its settings rules; they need
-no browser, run in seconds, and the pipeline gates on them - hence the filter that leaves them out of
-a browser run, where the known-green check would otherwise list them.
+failing test. The suite's own rules - its settings rules and the url comparison behind its pagination
+assertions - are tests in `tests/FipsFrontend.EndToEnd.Rules`, a project with no browser in it: they
+run in seconds anywhere, and the pipeline gates on them before it starts a browser.
+
+```
+dotnet test tests/FipsFrontend.EndToEnd.Rules
+```
 
 The pipeline also measures which of the application's code the browser suite reaches: it starts the
 published application under `dotnet-coverage`, stops it gracefully after the run so the collector can
@@ -95,8 +98,8 @@ does and on the test otherwise. Against an instance with no content they are red
 rest must be green, so the two are run apart:
 
 ```
-dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Configuration&TestCategory!=Integration"   # expected green anywhere
-dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=Integration"                                # green only against the seed
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Integration"   # expected green anywhere
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=Integration"    # green only against the seed
 ```
 
 The pipeline runs both; the first is gated by the known-green check below (which ignores the tests
