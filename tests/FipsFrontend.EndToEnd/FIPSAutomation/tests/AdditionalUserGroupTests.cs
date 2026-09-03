@@ -19,7 +19,7 @@ public class AdditionalUserGroupTests : BaseTest
         productsSearchPage = new ProductsSearchPage(Page);
     }
 
-    [Test, Order(1)]
+    [Test, Order(1), Category("Integration")]
     public async Task VerifyUGSocialWorkerSubcategoryListUS101AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "usergroup_SocialWorker_list");
@@ -84,7 +84,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(4)]
+    [Test, Order(4), Category("Integration")]
     public async Task ClickSubcategoryLinksForEPAndEYWorkforce_US277AC5()
     {
         List<FipsSheetRowUG> dataRows = ExcelReader.getRowsFromExcelForSelectedUserType("testdata.xlsx", "UGSubcategory_EPandEYWorkforce");
@@ -106,7 +106,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(5)]
+    [Test, Order(5), Category("Integration")]
     public async Task VerifyUGEPEYAcademyAndTrustWorkforceSubcategoryListUS130AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEYAcademyTruWorkforce_list");
@@ -129,7 +129,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(6)]
+    [Test, Order(6), Category("Integration")]
     public async Task ClickSubcategoryLinksForAcademyAndTrustWorkforce_EPEY_US277AC5()
     {
         List<FipsSheetRowUG> dataRows = ExcelReader.getRowsFromExcelForSelectedUserType("testdata.xlsx", "EPEYSubcateg_AcademyTWorkforce");
@@ -151,7 +151,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(7)]
+    [Test, Order(7), Category("Integration")]
     public async Task VerifyUGEPEYAlternatProvSettingWorkforceSubcategListUS131AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEYAltProvSetWorkforce_list");
@@ -195,7 +195,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(9)]
+    [Test, Order(9), Category("Integration")]
     public async Task VerifyUGEPEYEarlyYearsWorkforceSubcategoryListUS132AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEYEarlyYearsWorkforce_list");
@@ -218,7 +218,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(10)]
+    [Test, Order(10), Category("Integration")]
     public async Task ClickSubcategoryLinksForEarlyYearsWorkforce_EPEY_US277AC5()
     {
         List<FipsSheetRowUG> dataRows = ExcelReader.getRowsFromExcelForSelectedUserType("testdata.xlsx", "EPEYSubcatg_EarlyYearsWorkforce");
@@ -240,7 +240,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(11)]
+    [Test, Order(11), Category("Integration")]
     public async Task VerifyUGEPEYFurtherEducationWorkforceSubcategoryListUS133AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEYFurtherEduWorkforce_list");
@@ -284,7 +284,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(13)]
+    [Test, Order(13), Category("Integration")]
     public async Task VerifyUGEPEYHigherEducationWorkforceSubcategoryListUS134AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEYHigherEduWorkforce_list");
@@ -328,7 +328,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(15)]
+    [Test, Order(15), Category("Integration")]
     public async Task VerifyUGEPEY_SENDProfessionalSubcategoryListUS135AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEY_SENDProfessional_list");
@@ -372,7 +372,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(17)]
+    [Test, Order(17), Category("Integration")]
     public async Task VerifyUGEPEYSchoolWorkforceSubcategoryListUS136AC()
     {
         List<SheetRow> dataRows = ExcelReader.getCategoryRowsFromExcelFileBySheetName("testdata.xlsx", "UG_EPEY_SchoolWorkforce_list");
@@ -395,7 +395,7 @@ public class AdditionalUserGroupTests : BaseTest
         }
     }
 
-    [Test, Order(18)]
+    [Test, Order(18), Category("Integration")]
     public async Task ClickSubcategoryLinksForSchoolWorkforce_EPEY_US277AC5()
     {
         List<FipsSheetRowUG> dataRows = ExcelReader.getRowsFromExcelForSelectedUserType("testdata.xlsx", "EPEYSubcateg_SchoolWorkforce");

@@ -205,17 +205,26 @@ jobs:
 
       # The suite is configured the way the application is: its tracked testsettings.json, then a local file (none here),
       # then environment variables - the Target__ and Timeouts__ values set on the job.
-      - name: Run the suite
+      # Two runs, split by the Integration category (see tests/FipsFrontend.EndToEnd/README.md, "Seed data"). The
+      # application here has no content, so a test that names seeded content cannot pass and one that does not must.
+      # The first run's gate is the known-green check below, which ignores the tests listed as flaky.
+      - name: Run the tests outside the Integration category (expected green)
         continue-on-error: true
         run: >
           dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
-          --filter "TestCategory!=Configuration"
-          --logger trx --results-directory ${{ runner.temp }}/end-to-end
+          --filter "TestCategory!=Configuration&TestCategory!=Integration"
+          --logger trx --results-directory ${{ runner.temp }}/end-to-end/expected-green
+
+      - name: Run the Integration tests (expected red until the pipeline seeds content)
+        continue-on-error: true
+        run: >
+          dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
+          --filter "TestCategory=Integration"
+          --logger trx --results-directory ${{ runner.temp }}/end-to-end/integration
 
       - name: Check that the tests known to pass still pass
-        continue-on-error: true
         run: |
-          pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
+          pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/expected-green/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
           exit "${PIPESTATUS[0]}"
 
       # From here on, "always()" would run these after a failure earlier in the job with nothing to report;
@@ -243,8 +252,10 @@ jobs:
           "$tools/reportgenerator" -reports:"$e2e/app.cobertura.xml;${{ runner.temp }}/unit-results/coverage/Cobertura.xml" -targetdir:"$e2e/coverage-combined" -reporttypes:"MarkdownSummaryGithub;Cobertura"
           {
             echo "## Browser tests (informational)"
-            for trx in "$e2e"/*.trx; do
-              grep -oE '<Counters [^/]*/>' "$trx" | sed -E 's/.*total="([0-9]+)".*passed="([0-9]+)".*failed="([0-9]+)".*/- \2 passed, \3 failed, \1 in total/'
+            for run in expected-green integration; do
+              for trx in "$e2e/$run"/*.trx; do
+                grep -oE '<Counters [^/]*/>' "$trx" | sed -E "s/.*total=\"([0-9]+)\".*passed=\"([0-9]+)\".*failed=\"([0-9]+)\".*/- $run: \2 passed, \3 failed, \1 in total/"
+              done
             done
             echo
             echo '```'

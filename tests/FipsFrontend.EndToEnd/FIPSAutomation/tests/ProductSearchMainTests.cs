@@ -7,7 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace FiPSAutomation;
 
 [TestFixture, Order(11)]
-[Category("Functional")]
+[Category("Functional"), Category("Integration")]
 public class ProductSearchMainTests : BaseTest
 {
     private ProductsSearchPage productsSearchPage = null!;

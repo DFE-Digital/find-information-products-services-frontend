@@ -88,8 +88,24 @@ The page objects and tests under `FIPSAutomation/` name the products, categories
 search terms, and contacts of one seeded data set: the hosted environment's (`testdata.xlsx`), which
 the local composition's seed reproduces with visibly synthetic contact names such as "Alpha
 Testcontact". Every such literal depends on that seed, so a change to the seed and to the tests
-that name the changed value must land together. Against an instance with no content, every such test is red by design, which is what the
-known-green list below accounts for.
+that name the changed value must land together.
+
+Tests that need that content carry the `Integration` category, on the class where every test in it
+does and on the test otherwise. Against an instance with no content they are red by design, and the
+rest must be green, so the two are run apart:
+
+```
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Configuration&TestCategory!=Integration"   # expected green anywhere
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=Integration"                                # green only against the seed
+```
+
+The pipeline runs both; the first is gated by the known-green check below (which ignores the tests
+listed as flaky, so one timing flake does not fail the job), and the second is informational until
+the pipeline seeds content, at which point it becomes a gate too. A test that starts naming a seeded
+value gets the category with it; a test that passes against the empty content stub without it is
+wrongly tagged. Each test opens the page it needs itself: a filtered run selects tests out of their
+fixture's order, so a test that relies on the one before it having navigated somewhere fails for
+that reason alone.
 
 ## The tests known to pass
 

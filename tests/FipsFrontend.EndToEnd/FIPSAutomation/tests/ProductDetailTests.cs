@@ -6,7 +6,7 @@ using Microsoft.Playwright;
 namespace FiPSAutomation;
 
 [TestFixture, Order(17)]
-[Category("Functional")]
+[Category("Functional"), Category("Integration")]
 public class ProductDetailTests : BaseTest
 {
     private ProductDetailPage productDetailPage = null!;

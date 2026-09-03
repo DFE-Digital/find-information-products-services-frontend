@@ -5,7 +5,7 @@ using FiPSAutomation.Components;
 namespace FiPSAutomation;
 
 [TestFixture, Order(15)]
-[Category("Functional")]
+[Category("Functional"), Category("Integration")]
 public class TypeSearchTests : BaseTest
 {
     private ProductsSearchPage productsSearchPage = null!;

@@ -6,7 +6,7 @@ using Microsoft.Playwright;
 namespace FiPSAutomation;
 
 [TestFixture, Order(20)]
-[Category("Functional")]
+[Category("Functional"), Category("Integration")]
 public class NotCategorisedFilterTests : BaseTest
 {
     private ProductsSearchPage productsSearchPage = null!;
