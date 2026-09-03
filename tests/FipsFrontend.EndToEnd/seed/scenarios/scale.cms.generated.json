@@ -1,0 +1,2761 @@
+{
+ "_generated": {
+  "by": "generators/regenerate-scale.mjs",
+  "count": 250,
+  "seed": 1,
+  "deterministic": true,
+  "note": "Do not hand-edit; change the generator or its parameters and run npm run generate:scale."
+ },
+ "products": [
+  {
+   "data": {
+    "title": "Statutory Pupil Directory",
+    "cmdb_sys_id": "SCALE-0001",
+    "short_description": "Statutory Pupil Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-pupil-directory.",
+    "long_description": "Statutory Pupil Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-pupil-directory.",
+    "product_url": "https://example.org/statutory-pupil-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Languages Manager",
+    "cmdb_sys_id": "SCALE-0002",
+    "short_description": "Federated Languages Manager. Synthetic service generated for the scale fixture. See https://example.org/federated-languages-manager.",
+    "long_description": "Federated Languages Manager. Synthetic service generated for the scale fixture. See https://example.org/federated-languages-manager.",
+    "product_url": "https://example.org/federated-languages-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Nursery Checker",
+    "cmdb_sys_id": "SCALE-0003",
+    "short_description": "Statutory Nursery Checker. Synthetic service generated for the scale fixture. See https://example.org/statutory-nursery-checker.",
+    "long_description": "Statutory Nursery Checker. Synthetic service generated for the scale fixture. See https://example.org/statutory-nursery-checker.",
+    "product_url": "https://example.org/statutory-nursery-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Bursary Planner",
+    "cmdb_sys_id": "SCALE-0004",
+    "short_description": "Federated Bursary Planner. Synthetic service generated for the scale fixture. See https://example.org/federated-bursary-planner.",
+    "long_description": "Federated Bursary Planner. Synthetic service generated for the scale fixture. See https://example.org/federated-bursary-planner.",
+    "product_url": "https://example.org/federated-bursary-planner",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Ofsted Finder",
+    "cmdb_sys_id": "SCALE-0005",
+    "short_description": "Regional Ofsted Finder. Synthetic service generated for the scale fixture. See https://example.org/regional-ofsted-finder.",
+    "long_description": "Regional Ofsted Finder. Synthetic service generated for the scale fixture. See https://example.org/regional-ofsted-finder.",
+    "product_url": "https://example.org/regional-ofsted-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Transport Portal",
+    "cmdb_sys_id": "SCALE-0006",
+    "short_description": "Regional Transport Portal. Synthetic service generated for the scale fixture. See https://example.org/regional-transport-portal.",
+    "long_description": "Regional Transport Portal. Synthetic service generated for the scale fixture. See https://example.org/regional-transport-portal.",
+    "product_url": "https://example.org/regional-transport-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Exclusions Manager",
+    "cmdb_sys_id": "SCALE-0007",
+    "short_description": "Unified Exclusions Manager. Synthetic service generated for the scale fixture. See https://example.org/unified-exclusions-manager.",
+    "long_description": "Unified Exclusions Manager. Synthetic service generated for the scale fixture. See https://example.org/unified-exclusions-manager.",
+    "product_url": "https://example.org/unified-exclusions-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local School Checker",
+    "cmdb_sys_id": "SCALE-0008",
+    "short_description": "Local School Checker. Synthetic service generated for the scale fixture. See https://example.org/local-school-checker.",
+    "long_description": "Local School Checker. Synthetic service generated for the scale fixture. See https://example.org/local-school-checker.",
+    "product_url": "https://example.org/local-school-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Exclusions Manager",
+    "cmdb_sys_id": "SCALE-0009",
+    "short_description": "Statutory Exclusions Manager. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-manager.",
+    "long_description": "Statutory Exclusions Manager. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-manager.",
+    "product_url": "https://example.org/statutory-exclusions-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Careers Directory",
+    "cmdb_sys_id": "SCALE-0010",
+    "short_description": "Local Careers Directory. Synthetic service generated for the scale fixture. See https://example.org/local-careers-directory.",
+    "long_description": "Local Careers Directory. Synthetic service generated for the scale fixture. See https://example.org/local-careers-directory.",
+    "product_url": "https://example.org/local-careers-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Admissions Ledger",
+    "cmdb_sys_id": "SCALE-0011",
+    "short_description": "Operational Admissions Ledger. Synthetic service generated for the scale fixture. See https://example.org/operational-admissions-ledger.",
+    "long_description": "Operational Admissions Ledger. Synthetic service generated for the scale fixture. See https://example.org/operational-admissions-ledger.",
+    "product_url": "https://example.org/operational-admissions-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Exclusions Archive",
+    "cmdb_sys_id": "SCALE-0012",
+    "short_description": "Integrated Exclusions Archive. Synthetic service generated for the scale fixture. See https://example.org/integrated-exclusions-archive.",
+    "long_description": "Integrated Exclusions Archive. Synthetic service generated for the scale fixture. See https://example.org/integrated-exclusions-archive.",
+    "product_url": "https://example.org/integrated-exclusions-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Academy Dashboard",
+    "cmdb_sys_id": "SCALE-0013",
+    "short_description": "Local Academy Dashboard. Synthetic service generated for the scale fixture. See https://example.org/local-academy-dashboard.",
+    "long_description": "Local Academy Dashboard. Synthetic service generated for the scale fixture. See https://example.org/local-academy-dashboard.",
+    "product_url": "https://example.org/local-academy-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Ofsted Finder",
+    "cmdb_sys_id": "SCALE-0014",
+    "short_description": "Central Ofsted Finder. Synthetic service generated for the scale fixture. See https://example.org/central-ofsted-finder.",
+    "long_description": "Central Ofsted Finder. Synthetic service generated for the scale fixture. See https://example.org/central-ofsted-finder.",
+    "product_url": "https://example.org/central-ofsted-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Nursery Gateway",
+    "cmdb_sys_id": "SCALE-0015",
+    "short_description": "Regional Nursery Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-nursery-gateway.",
+    "long_description": "Regional Nursery Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-nursery-gateway.",
+    "product_url": "https://example.org/regional-nursery-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Safeguarding Register",
+    "cmdb_sys_id": "SCALE-0016",
+    "short_description": "Regional Safeguarding Register. Synthetic service generated for the scale fixture. See https://example.org/regional-safeguarding-register.",
+    "long_description": "Regional Safeguarding Register. Synthetic service generated for the scale fixture. See https://example.org/regional-safeguarding-register.",
+    "product_url": "https://example.org/regional-safeguarding-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Behaviour Finder",
+    "cmdb_sys_id": "SCALE-0017",
+    "short_description": "Statutory Behaviour Finder. Synthetic service generated for the scale fixture. See https://example.org/statutory-behaviour-finder.",
+    "long_description": "Statutory Behaviour Finder. Synthetic service generated for the scale fixture. See https://example.org/statutory-behaviour-finder.",
+    "product_url": "https://example.org/statutory-behaviour-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Nursery Checker",
+    "cmdb_sys_id": "SCALE-0018",
+    "short_description": "Federated Nursery Checker. Synthetic service generated for the scale fixture. See https://example.org/federated-nursery-checker.",
+    "long_description": "Federated Nursery Checker. Synthetic service generated for the scale fixture. See https://example.org/federated-nursery-checker.",
+    "product_url": "https://example.org/federated-nursery-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Library Archive",
+    "cmdb_sys_id": "SCALE-0019",
+    "short_description": "Central Library Archive. Synthetic service generated for the scale fixture. See https://example.org/central-library-archive.",
+    "long_description": "Central Library Archive. Synthetic service generated for the scale fixture. See https://example.org/central-library-archive.",
+    "product_url": "https://example.org/central-library-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Library Notifier",
+    "cmdb_sys_id": "SCALE-0020",
+    "short_description": "Federated Library Notifier. Synthetic service generated for the scale fixture. See https://example.org/federated-library-notifier.",
+    "long_description": "Federated Library Notifier. Synthetic service generated for the scale fixture. See https://example.org/federated-library-notifier.",
+    "product_url": "https://example.org/federated-library-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Numeracy Tracker",
+    "cmdb_sys_id": "SCALE-0021",
+    "short_description": "Consolidated Numeracy Tracker. Synthetic service generated for the scale fixture. See https://example.org/consolidated-numeracy-tracker.",
+    "long_description": "Consolidated Numeracy Tracker. Synthetic service generated for the scale fixture. See https://example.org/consolidated-numeracy-tracker.",
+    "product_url": "https://example.org/consolidated-numeracy-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Wellbeing Manager",
+    "cmdb_sys_id": "SCALE-0022",
+    "short_description": "National Wellbeing Manager. Synthetic service generated for the scale fixture. See https://example.org/national-wellbeing-manager.",
+    "long_description": "National Wellbeing Manager. Synthetic service generated for the scale fixture. See https://example.org/national-wellbeing-manager.",
+    "product_url": "https://example.org/national-wellbeing-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Catering Notifier",
+    "cmdb_sys_id": "SCALE-0023",
+    "short_description": "Consolidated Catering Notifier. Synthetic service generated for the scale fixture. See https://example.org/consolidated-catering-notifier.",
+    "long_description": "Consolidated Catering Notifier. Synthetic service generated for the scale fixture. See https://example.org/consolidated-catering-notifier.",
+    "product_url": "https://example.org/consolidated-catering-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Curriculum Workbench",
+    "cmdb_sys_id": "SCALE-0024",
+    "short_description": "Strategic Curriculum Workbench. Synthetic service generated for the scale fixture. See https://example.org/strategic-curriculum-workbench.",
+    "long_description": "Strategic Curriculum Workbench. Synthetic service generated for the scale fixture. See https://example.org/strategic-curriculum-workbench.",
+    "product_url": "https://example.org/strategic-curriculum-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Governor Archive",
+    "cmdb_sys_id": "SCALE-0025",
+    "short_description": "Federated Governor Archive. Synthetic service generated for the scale fixture. See https://example.org/federated-governor-archive.",
+    "long_description": "Federated Governor Archive. Synthetic service generated for the scale fixture. See https://example.org/federated-governor-archive.",
+    "product_url": "https://example.org/federated-governor-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional SEND Tracker",
+    "cmdb_sys_id": "SCALE-0026",
+    "short_description": "Regional SEND Tracker. Synthetic service generated for the scale fixture. See https://example.org/regional-send-tracker.",
+    "long_description": "Regional SEND Tracker. Synthetic service generated for the scale fixture. See https://example.org/regional-send-tracker.",
+    "product_url": "https://example.org/regional-send-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Apprenticeship Workbench",
+    "cmdb_sys_id": "SCALE-0027",
+    "short_description": "Unified Apprenticeship Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-apprenticeship-workbench.",
+    "long_description": "Unified Apprenticeship Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-apprenticeship-workbench.",
+    "product_url": "https://example.org/unified-apprenticeship-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Catering Portal",
+    "cmdb_sys_id": "SCALE-0028",
+    "short_description": "Digital Catering Portal. Synthetic service generated for the scale fixture. See https://example.org/digital-catering-portal.",
+    "long_description": "Digital Catering Portal. Synthetic service generated for the scale fixture. See https://example.org/digital-catering-portal.",
+    "product_url": "https://example.org/digital-catering-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Behaviour Manager",
+    "cmdb_sys_id": "SCALE-0029",
+    "short_description": "Operational Behaviour Manager. Synthetic service generated for the scale fixture. See https://example.org/operational-behaviour-manager.",
+    "long_description": "Operational Behaviour Manager. Synthetic service generated for the scale fixture. See https://example.org/operational-behaviour-manager.",
+    "product_url": "https://example.org/operational-behaviour-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Apprenticeship Reconciler",
+    "cmdb_sys_id": "SCALE-0030",
+    "short_description": "Regional Apprenticeship Reconciler. Synthetic service generated for the scale fixture. See https://example.org/regional-apprenticeship-reconciler.",
+    "long_description": "Regional Apprenticeship Reconciler. Synthetic service generated for the scale fixture. See https://example.org/regional-apprenticeship-reconciler.",
+    "product_url": "https://example.org/regional-apprenticeship-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Curriculum Workbench",
+    "cmdb_sys_id": "SCALE-0031",
+    "short_description": "Central Curriculum Workbench. Synthetic service generated for the scale fixture. See https://example.org/central-curriculum-workbench.",
+    "long_description": "Central Curriculum Workbench. Synthetic service generated for the scale fixture. See https://example.org/central-curriculum-workbench.",
+    "product_url": "https://example.org/central-curriculum-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Apprenticeship Tracker",
+    "cmdb_sys_id": "SCALE-0032",
+    "short_description": "Digital Apprenticeship Tracker. Synthetic service generated for the scale fixture. See https://example.org/digital-apprenticeship-tracker.",
+    "long_description": "Digital Apprenticeship Tracker. Synthetic service generated for the scale fixture. See https://example.org/digital-apprenticeship-tracker.",
+    "product_url": "https://example.org/digital-apprenticeship-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Teacher Service",
+    "cmdb_sys_id": "SCALE-0033",
+    "short_description": "Regional Teacher Service. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-service.",
+    "long_description": "Regional Teacher Service. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-service.",
+    "product_url": "https://example.org/regional-teacher-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Careers Tracker",
+    "cmdb_sys_id": "SCALE-0034",
+    "short_description": "Strategic Careers Tracker. Synthetic service generated for the scale fixture. See https://example.org/strategic-careers-tracker.",
+    "long_description": "Strategic Careers Tracker. Synthetic service generated for the scale fixture. See https://example.org/strategic-careers-tracker.",
+    "product_url": "https://example.org/strategic-careers-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Catering Finder",
+    "cmdb_sys_id": "SCALE-0035",
+    "short_description": "Digital Catering Finder. Synthetic service generated for the scale fixture. See https://example.org/digital-catering-finder.",
+    "long_description": "Digital Catering Finder. Synthetic service generated for the scale fixture. See https://example.org/digital-catering-finder.",
+    "product_url": "https://example.org/digital-catering-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Safeguarding Archive",
+    "cmdb_sys_id": "SCALE-0036",
+    "short_description": "Operational Safeguarding Archive. Synthetic service generated for the scale fixture. See https://example.org/operational-safeguarding-archive.",
+    "long_description": "Operational Safeguarding Archive. Synthetic service generated for the scale fixture. See https://example.org/operational-safeguarding-archive.",
+    "product_url": "https://example.org/operational-safeguarding-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Wellbeing Register",
+    "cmdb_sys_id": "SCALE-0037",
+    "short_description": "Federated Wellbeing Register. Synthetic service generated for the scale fixture. See https://example.org/federated-wellbeing-register.",
+    "long_description": "Federated Wellbeing Register. Synthetic service generated for the scale fixture. See https://example.org/federated-wellbeing-register.",
+    "product_url": "https://example.org/federated-wellbeing-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Pupil Archive",
+    "cmdb_sys_id": "SCALE-0038",
+    "short_description": "Local Pupil Archive. Synthetic service generated for the scale fixture. See https://example.org/local-pupil-archive.",
+    "long_description": "Local Pupil Archive. Synthetic service generated for the scale fixture. See https://example.org/local-pupil-archive.",
+    "product_url": "https://example.org/local-pupil-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Nursery Reconciler",
+    "cmdb_sys_id": "SCALE-0039",
+    "short_description": "Central Nursery Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-nursery-reconciler.",
+    "long_description": "Central Nursery Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-nursery-reconciler.",
+    "product_url": "https://example.org/central-nursery-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Safeguarding Reconciler",
+    "cmdb_sys_id": "SCALE-0040",
+    "short_description": "Regional Safeguarding Reconciler. Synthetic service generated for the scale fixture. See https://example.org/regional-safeguarding-reconciler.",
+    "long_description": "Regional Safeguarding Reconciler. Synthetic service generated for the scale fixture. See https://example.org/regional-safeguarding-reconciler.",
+    "product_url": "https://example.org/regional-safeguarding-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Exclusions Finder",
+    "cmdb_sys_id": "SCALE-0041",
+    "short_description": "Operational Exclusions Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-exclusions-finder.",
+    "long_description": "Operational Exclusions Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-exclusions-finder.",
+    "product_url": "https://example.org/operational-exclusions-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Curriculum Checker",
+    "cmdb_sys_id": "SCALE-0042",
+    "short_description": "Regional Curriculum Checker. Synthetic service generated for the scale fixture. See https://example.org/regional-curriculum-checker.",
+    "long_description": "Regional Curriculum Checker. Synthetic service generated for the scale fixture. See https://example.org/regional-curriculum-checker.",
+    "product_url": "https://example.org/regional-curriculum-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Funding Reconciler",
+    "cmdb_sys_id": "SCALE-0043",
+    "short_description": "Digital Funding Reconciler. Synthetic service generated for the scale fixture. See https://example.org/digital-funding-reconciler.",
+    "long_description": "Digital Funding Reconciler. Synthetic service generated for the scale fixture. See https://example.org/digital-funding-reconciler.",
+    "product_url": "https://example.org/digital-funding-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Literacy Reconciler",
+    "cmdb_sys_id": "SCALE-0044",
+    "short_description": "Central Literacy Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-literacy-reconciler.",
+    "long_description": "Central Literacy Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-literacy-reconciler.",
+    "product_url": "https://example.org/central-literacy-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Library Finder",
+    "cmdb_sys_id": "SCALE-0045",
+    "short_description": "Statutory Library Finder. Synthetic service generated for the scale fixture. See https://example.org/statutory-library-finder.",
+    "long_description": "Statutory Library Finder. Synthetic service generated for the scale fixture. See https://example.org/statutory-library-finder.",
+    "product_url": "https://example.org/statutory-library-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Apprenticeship Finder",
+    "cmdb_sys_id": "SCALE-0046",
+    "short_description": "Unified Apprenticeship Finder. Synthetic service generated for the scale fixture. See https://example.org/unified-apprenticeship-finder.",
+    "long_description": "Unified Apprenticeship Finder. Synthetic service generated for the scale fixture. See https://example.org/unified-apprenticeship-finder.",
+    "product_url": "https://example.org/unified-apprenticeship-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Literacy Archive",
+    "cmdb_sys_id": "SCALE-0047",
+    "short_description": "Central Literacy Archive. Synthetic service generated for the scale fixture. See https://example.org/central-literacy-archive.",
+    "long_description": "Central Literacy Archive. Synthetic service generated for the scale fixture. See https://example.org/central-literacy-archive.",
+    "product_url": "https://example.org/central-literacy-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Apprenticeship Portal",
+    "cmdb_sys_id": "SCALE-0048",
+    "short_description": "Regional Apprenticeship Portal. Synthetic service generated for the scale fixture. See https://example.org/regional-apprenticeship-portal.",
+    "long_description": "Regional Apprenticeship Portal. Synthetic service generated for the scale fixture. See https://example.org/regional-apprenticeship-portal.",
+    "product_url": "https://example.org/regional-apprenticeship-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Exclusions Hub",
+    "cmdb_sys_id": "SCALE-0049",
+    "short_description": "National Exclusions Hub. Synthetic service generated for the scale fixture. See https://example.org/national-exclusions-hub.",
+    "long_description": "National Exclusions Hub. Synthetic service generated for the scale fixture. See https://example.org/national-exclusions-hub.",
+    "product_url": "https://example.org/national-exclusions-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Curriculum Scheduler",
+    "cmdb_sys_id": "SCALE-0050",
+    "short_description": "Local Curriculum Scheduler. Synthetic service generated for the scale fixture. See https://example.org/local-curriculum-scheduler.",
+    "long_description": "Local Curriculum Scheduler. Synthetic service generated for the scale fixture. See https://example.org/local-curriculum-scheduler.",
+    "product_url": "https://example.org/local-curriculum-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Wellbeing Directory",
+    "cmdb_sys_id": "SCALE-0051",
+    "short_description": "Central Wellbeing Directory. Synthetic service generated for the scale fixture. See https://example.org/central-wellbeing-directory.",
+    "long_description": "Central Wellbeing Directory. Synthetic service generated for the scale fixture. See https://example.org/central-wellbeing-directory.",
+    "product_url": "https://example.org/central-wellbeing-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Library Service",
+    "cmdb_sys_id": "SCALE-0052",
+    "short_description": "Integrated Library Service. Synthetic service generated for the scale fixture. See https://example.org/integrated-library-service.",
+    "long_description": "Integrated Library Service. Synthetic service generated for the scale fixture. See https://example.org/integrated-library-service.",
+    "product_url": "https://example.org/integrated-library-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Estates Index",
+    "cmdb_sys_id": "SCALE-0053",
+    "short_description": "Local Estates Index. Synthetic service generated for the scale fixture. See https://example.org/local-estates-index.",
+    "long_description": "Local Estates Index. Synthetic service generated for the scale fixture. See https://example.org/local-estates-index.",
+    "product_url": "https://example.org/local-estates-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational School Finder",
+    "cmdb_sys_id": "SCALE-0054",
+    "short_description": "Operational School Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-school-finder.",
+    "long_description": "Operational School Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-school-finder.",
+    "product_url": "https://example.org/operational-school-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Careers Register",
+    "cmdb_sys_id": "SCALE-0055",
+    "short_description": "Statutory Careers Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-careers-register.",
+    "long_description": "Statutory Careers Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-careers-register.",
+    "product_url": "https://example.org/statutory-careers-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Ofsted Reconciler",
+    "cmdb_sys_id": "SCALE-0056",
+    "short_description": "Central Ofsted Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-ofsted-reconciler.",
+    "long_description": "Central Ofsted Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-ofsted-reconciler.",
+    "product_url": "https://example.org/central-ofsted-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Childcare Hub",
+    "cmdb_sys_id": "SCALE-0057",
+    "short_description": "Statutory Childcare Hub. Synthetic service generated for the scale fixture. See https://example.org/statutory-childcare-hub.",
+    "long_description": "Statutory Childcare Hub. Synthetic service generated for the scale fixture. See https://example.org/statutory-childcare-hub.",
+    "product_url": "https://example.org/statutory-childcare-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Pupil Notifier",
+    "cmdb_sys_id": "SCALE-0058",
+    "short_description": "Statutory Pupil Notifier. Synthetic service generated for the scale fixture. See https://example.org/statutory-pupil-notifier.",
+    "long_description": "Statutory Pupil Notifier. Synthetic service generated for the scale fixture. See https://example.org/statutory-pupil-notifier.",
+    "product_url": "https://example.org/statutory-pupil-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Workforce Console",
+    "cmdb_sys_id": "SCALE-0059",
+    "short_description": "Digital Workforce Console. Synthetic service generated for the scale fixture. See https://example.org/digital-workforce-console.",
+    "long_description": "Digital Workforce Console. Synthetic service generated for the scale fixture. See https://example.org/digital-workforce-console.",
+    "product_url": "https://example.org/digital-workforce-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Teacher Scheduler",
+    "cmdb_sys_id": "SCALE-0060",
+    "short_description": "Regional Teacher Scheduler. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-scheduler.",
+    "long_description": "Regional Teacher Scheduler. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-scheduler.",
+    "product_url": "https://example.org/regional-teacher-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Nursery Manager",
+    "cmdb_sys_id": "SCALE-0061",
+    "short_description": "Regional Nursery Manager. Synthetic service generated for the scale fixture. See https://example.org/regional-nursery-manager.",
+    "long_description": "Regional Nursery Manager. Synthetic service generated for the scale fixture. See https://example.org/regional-nursery-manager.",
+    "product_url": "https://example.org/regional-nursery-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Funding Directory",
+    "cmdb_sys_id": "SCALE-0062",
+    "short_description": "Statutory Funding Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-funding-directory.",
+    "long_description": "Statutory Funding Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-funding-directory.",
+    "product_url": "https://example.org/statutory-funding-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Teacher Tracker",
+    "cmdb_sys_id": "SCALE-0063",
+    "short_description": "Federated Teacher Tracker. Synthetic service generated for the scale fixture. See https://example.org/federated-teacher-tracker.",
+    "long_description": "Federated Teacher Tracker. Synthetic service generated for the scale fixture. See https://example.org/federated-teacher-tracker.",
+    "product_url": "https://example.org/federated-teacher-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Library Register",
+    "cmdb_sys_id": "SCALE-0064",
+    "short_description": "Local Library Register. Synthetic service generated for the scale fixture. See https://example.org/local-library-register.",
+    "long_description": "Local Library Register. Synthetic service generated for the scale fixture. See https://example.org/local-library-register.",
+    "product_url": "https://example.org/local-library-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital SEND Index",
+    "cmdb_sys_id": "SCALE-0065",
+    "short_description": "Digital SEND Index. Synthetic service generated for the scale fixture. See https://example.org/digital-send-index.",
+    "long_description": "Digital SEND Index. Synthetic service generated for the scale fixture. See https://example.org/digital-send-index.",
+    "product_url": "https://example.org/digital-send-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Teacher Archive",
+    "cmdb_sys_id": "SCALE-0066",
+    "short_description": "Central Teacher Archive. Synthetic service generated for the scale fixture. See https://example.org/central-teacher-archive.",
+    "long_description": "Central Teacher Archive. Synthetic service generated for the scale fixture. See https://example.org/central-teacher-archive.",
+    "product_url": "https://example.org/central-teacher-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Pupil Reconciler",
+    "cmdb_sys_id": "SCALE-0067",
+    "short_description": "Federated Pupil Reconciler. Synthetic service generated for the scale fixture. See https://example.org/federated-pupil-reconciler.",
+    "long_description": "Federated Pupil Reconciler. Synthetic service generated for the scale fixture. See https://example.org/federated-pupil-reconciler.",
+    "product_url": "https://example.org/federated-pupil-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional SEND Console",
+    "cmdb_sys_id": "SCALE-0068",
+    "short_description": "Regional SEND Console. Synthetic service generated for the scale fixture. See https://example.org/regional-send-console.",
+    "long_description": "Regional SEND Console. Synthetic service generated for the scale fixture. See https://example.org/regional-send-console.",
+    "product_url": "https://example.org/regional-send-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital SEND Ledger",
+    "cmdb_sys_id": "SCALE-0069",
+    "short_description": "Digital SEND Ledger. Synthetic service generated for the scale fixture. See https://example.org/digital-send-ledger.",
+    "long_description": "Digital SEND Ledger. Synthetic service generated for the scale fixture. See https://example.org/digital-send-ledger.",
+    "product_url": "https://example.org/digital-send-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Funding Archive",
+    "cmdb_sys_id": "SCALE-0070",
+    "short_description": "Regional Funding Archive. Synthetic service generated for the scale fixture. See https://example.org/regional-funding-archive.",
+    "long_description": "Regional Funding Archive. Synthetic service generated for the scale fixture. See https://example.org/regional-funding-archive.",
+    "product_url": "https://example.org/regional-funding-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Estates Register",
+    "cmdb_sys_id": "SCALE-0071",
+    "short_description": "Statutory Estates Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-estates-register.",
+    "long_description": "Statutory Estates Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-estates-register.",
+    "product_url": "https://example.org/statutory-estates-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Assessment Finder",
+    "cmdb_sys_id": "SCALE-0072",
+    "short_description": "Regional Assessment Finder. Synthetic service generated for the scale fixture. See https://example.org/regional-assessment-finder.",
+    "long_description": "Regional Assessment Finder. Synthetic service generated for the scale fixture. See https://example.org/regional-assessment-finder.",
+    "product_url": "https://example.org/regional-assessment-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Careers Console",
+    "cmdb_sys_id": "SCALE-0073",
+    "short_description": "Regional Careers Console. Synthetic service generated for the scale fixture. See https://example.org/regional-careers-console.",
+    "long_description": "Regional Careers Console. Synthetic service generated for the scale fixture. See https://example.org/regional-careers-console.",
+    "product_url": "https://example.org/regional-careers-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Teacher Register",
+    "cmdb_sys_id": "SCALE-0074",
+    "short_description": "National Teacher Register. Synthetic service generated for the scale fixture. See https://example.org/national-teacher-register.",
+    "long_description": "National Teacher Register. Synthetic service generated for the scale fixture. See https://example.org/national-teacher-register.",
+    "product_url": "https://example.org/national-teacher-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Library Workbench",
+    "cmdb_sys_id": "SCALE-0075",
+    "short_description": "Unified Library Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-library-workbench.",
+    "long_description": "Unified Library Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-library-workbench.",
+    "product_url": "https://example.org/unified-library-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Careers Workbench",
+    "cmdb_sys_id": "SCALE-0076",
+    "short_description": "Operational Careers Workbench. Synthetic service generated for the scale fixture. See https://example.org/operational-careers-workbench.",
+    "long_description": "Operational Careers Workbench. Synthetic service generated for the scale fixture. See https://example.org/operational-careers-workbench.",
+    "product_url": "https://example.org/operational-careers-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Pupil Scheduler",
+    "cmdb_sys_id": "SCALE-0077",
+    "short_description": "Federated Pupil Scheduler. Synthetic service generated for the scale fixture. See https://example.org/federated-pupil-scheduler.",
+    "long_description": "Federated Pupil Scheduler. Synthetic service generated for the scale fixture. See https://example.org/federated-pupil-scheduler.",
+    "product_url": "https://example.org/federated-pupil-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Estates Hub",
+    "cmdb_sys_id": "SCALE-0078",
+    "short_description": "Digital Estates Hub. Synthetic service generated for the scale fixture. See https://example.org/digital-estates-hub.",
+    "long_description": "Digital Estates Hub. Synthetic service generated for the scale fixture. See https://example.org/digital-estates-hub.",
+    "product_url": "https://example.org/digital-estates-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Teacher Workbench",
+    "cmdb_sys_id": "SCALE-0079",
+    "short_description": "Regional Teacher Workbench. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-workbench.",
+    "long_description": "Regional Teacher Workbench. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-workbench.",
+    "product_url": "https://example.org/regional-teacher-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Pupil Directory",
+    "cmdb_sys_id": "SCALE-0080",
+    "short_description": "Unified Pupil Directory. Synthetic service generated for the scale fixture. See https://example.org/unified-pupil-directory.",
+    "long_description": "Unified Pupil Directory. Synthetic service generated for the scale fixture. See https://example.org/unified-pupil-directory.",
+    "product_url": "https://example.org/unified-pupil-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Library Reconciler",
+    "cmdb_sys_id": "SCALE-0081",
+    "short_description": "Digital Library Reconciler. Synthetic service generated for the scale fixture. See https://example.org/digital-library-reconciler.",
+    "long_description": "Digital Library Reconciler. Synthetic service generated for the scale fixture. See https://example.org/digital-library-reconciler.",
+    "product_url": "https://example.org/digital-library-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Exclusions Portal",
+    "cmdb_sys_id": "SCALE-0082",
+    "short_description": "Integrated Exclusions Portal. Synthetic service generated for the scale fixture. See https://example.org/integrated-exclusions-portal.",
+    "long_description": "Integrated Exclusions Portal. Synthetic service generated for the scale fixture. See https://example.org/integrated-exclusions-portal.",
+    "product_url": "https://example.org/integrated-exclusions-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Academy Finder",
+    "cmdb_sys_id": "SCALE-0083",
+    "short_description": "Unified Academy Finder. Synthetic service generated for the scale fixture. See https://example.org/unified-academy-finder.",
+    "long_description": "Unified Academy Finder. Synthetic service generated for the scale fixture. See https://example.org/unified-academy-finder.",
+    "product_url": "https://example.org/unified-academy-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Exclusions Portal",
+    "cmdb_sys_id": "SCALE-0084",
+    "short_description": "Consolidated Exclusions Portal. Synthetic service generated for the scale fixture. See https://example.org/consolidated-exclusions-portal.",
+    "long_description": "Consolidated Exclusions Portal. Synthetic service generated for the scale fixture. See https://example.org/consolidated-exclusions-portal.",
+    "product_url": "https://example.org/consolidated-exclusions-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Nursery Register",
+    "cmdb_sys_id": "SCALE-0085",
+    "short_description": "Local Nursery Register. Synthetic service generated for the scale fixture. See https://example.org/local-nursery-register.",
+    "long_description": "Local Nursery Register. Synthetic service generated for the scale fixture. See https://example.org/local-nursery-register.",
+    "product_url": "https://example.org/local-nursery-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Numeracy Service",
+    "cmdb_sys_id": "SCALE-0086",
+    "short_description": "Operational Numeracy Service. Synthetic service generated for the scale fixture. See https://example.org/operational-numeracy-service.",
+    "long_description": "Operational Numeracy Service. Synthetic service generated for the scale fixture. See https://example.org/operational-numeracy-service.",
+    "product_url": "https://example.org/operational-numeracy-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Behaviour Console",
+    "cmdb_sys_id": "SCALE-0087",
+    "short_description": "Consolidated Behaviour Console. Synthetic service generated for the scale fixture. See https://example.org/consolidated-behaviour-console.",
+    "long_description": "Consolidated Behaviour Console. Synthetic service generated for the scale fixture. See https://example.org/consolidated-behaviour-console.",
+    "product_url": "https://example.org/consolidated-behaviour-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Workforce Checker",
+    "cmdb_sys_id": "SCALE-0088",
+    "short_description": "Integrated Workforce Checker. Synthetic service generated for the scale fixture. See https://example.org/integrated-workforce-checker.",
+    "long_description": "Integrated Workforce Checker. Synthetic service generated for the scale fixture. See https://example.org/integrated-workforce-checker.",
+    "product_url": "https://example.org/integrated-workforce-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Curriculum Notifier",
+    "cmdb_sys_id": "SCALE-0089",
+    "short_description": "Local Curriculum Notifier. Synthetic service generated for the scale fixture. See https://example.org/local-curriculum-notifier.",
+    "long_description": "Local Curriculum Notifier. Synthetic service generated for the scale fixture. See https://example.org/local-curriculum-notifier.",
+    "product_url": "https://example.org/local-curriculum-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory School Gateway",
+    "cmdb_sys_id": "SCALE-0090",
+    "short_description": "Statutory School Gateway. Synthetic service generated for the scale fixture. See https://example.org/statutory-school-gateway.",
+    "long_description": "Statutory School Gateway. Synthetic service generated for the scale fixture. See https://example.org/statutory-school-gateway.",
+    "product_url": "https://example.org/statutory-school-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Curriculum Dashboard",
+    "cmdb_sys_id": "SCALE-0091",
+    "short_description": "Statutory Curriculum Dashboard. Synthetic service generated for the scale fixture. See https://example.org/statutory-curriculum-dashboard.",
+    "long_description": "Statutory Curriculum Dashboard. Synthetic service generated for the scale fixture. See https://example.org/statutory-curriculum-dashboard.",
+    "product_url": "https://example.org/statutory-curriculum-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Funding Register",
+    "cmdb_sys_id": "SCALE-0092",
+    "short_description": "Federated Funding Register. Synthetic service generated for the scale fixture. See https://example.org/federated-funding-register.",
+    "long_description": "Federated Funding Register. Synthetic service generated for the scale fixture. See https://example.org/federated-funding-register.",
+    "product_url": "https://example.org/federated-funding-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Apprenticeship Archive",
+    "cmdb_sys_id": "SCALE-0093",
+    "short_description": "Integrated Apprenticeship Archive. Synthetic service generated for the scale fixture. See https://example.org/integrated-apprenticeship-archive.",
+    "long_description": "Integrated Apprenticeship Archive. Synthetic service generated for the scale fixture. See https://example.org/integrated-apprenticeship-archive.",
+    "product_url": "https://example.org/integrated-apprenticeship-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Transport Register",
+    "cmdb_sys_id": "SCALE-0094",
+    "short_description": "Statutory Transport Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-transport-register.",
+    "long_description": "Statutory Transport Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-transport-register.",
+    "product_url": "https://example.org/statutory-transport-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Pupil Index",
+    "cmdb_sys_id": "SCALE-0095",
+    "short_description": "Statutory Pupil Index. Synthetic service generated for the scale fixture. See https://example.org/statutory-pupil-index.",
+    "long_description": "Statutory Pupil Index. Synthetic service generated for the scale fixture. See https://example.org/statutory-pupil-index.",
+    "product_url": "https://example.org/statutory-pupil-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Admissions Console",
+    "cmdb_sys_id": "SCALE-0096",
+    "short_description": "Federated Admissions Console. Synthetic service generated for the scale fixture. See https://example.org/federated-admissions-console.",
+    "long_description": "Federated Admissions Console. Synthetic service generated for the scale fixture. See https://example.org/federated-admissions-console.",
+    "product_url": "https://example.org/federated-admissions-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Workforce Gateway",
+    "cmdb_sys_id": "SCALE-0097",
+    "short_description": "Consolidated Workforce Gateway. Synthetic service generated for the scale fixture. See https://example.org/consolidated-workforce-gateway.",
+    "long_description": "Consolidated Workforce Gateway. Synthetic service generated for the scale fixture. See https://example.org/consolidated-workforce-gateway.",
+    "product_url": "https://example.org/consolidated-workforce-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Assessment Gateway",
+    "cmdb_sys_id": "SCALE-0098",
+    "short_description": "Unified Assessment Gateway. Synthetic service generated for the scale fixture. See https://example.org/unified-assessment-gateway.",
+    "long_description": "Unified Assessment Gateway. Synthetic service generated for the scale fixture. See https://example.org/unified-assessment-gateway.",
+    "product_url": "https://example.org/unified-assessment-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Wellbeing Hub",
+    "cmdb_sys_id": "SCALE-0099",
+    "short_description": "Operational Wellbeing Hub. Synthetic service generated for the scale fixture. See https://example.org/operational-wellbeing-hub.",
+    "long_description": "Operational Wellbeing Hub. Synthetic service generated for the scale fixture. See https://example.org/operational-wellbeing-hub.",
+    "product_url": "https://example.org/operational-wellbeing-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Nursery Finder",
+    "cmdb_sys_id": "SCALE-0100",
+    "short_description": "Operational Nursery Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-nursery-finder.",
+    "long_description": "Operational Nursery Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-nursery-finder.",
+    "product_url": "https://example.org/operational-nursery-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Wellbeing Hub",
+    "cmdb_sys_id": "SCALE-0101",
+    "short_description": "Regional Wellbeing Hub. Synthetic service generated for the scale fixture. See https://example.org/regional-wellbeing-hub.",
+    "long_description": "Regional Wellbeing Hub. Synthetic service generated for the scale fixture. See https://example.org/regional-wellbeing-hub.",
+    "product_url": "https://example.org/regional-wellbeing-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Catering Console",
+    "cmdb_sys_id": "SCALE-0102",
+    "short_description": "Federated Catering Console. Synthetic service generated for the scale fixture. See https://example.org/federated-catering-console.",
+    "long_description": "Federated Catering Console. Synthetic service generated for the scale fixture. See https://example.org/federated-catering-console.",
+    "product_url": "https://example.org/federated-catering-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Governor Index",
+    "cmdb_sys_id": "SCALE-0103",
+    "short_description": "Integrated Governor Index. Synthetic service generated for the scale fixture. See https://example.org/integrated-governor-index.",
+    "long_description": "Integrated Governor Index. Synthetic service generated for the scale fixture. See https://example.org/integrated-governor-index.",
+    "product_url": "https://example.org/integrated-governor-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Exclusions Tracker",
+    "cmdb_sys_id": "SCALE-0104",
+    "short_description": "Statutory Exclusions Tracker. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-tracker.",
+    "long_description": "Statutory Exclusions Tracker. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-tracker.",
+    "product_url": "https://example.org/statutory-exclusions-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Exclusions Index",
+    "cmdb_sys_id": "SCALE-0105",
+    "short_description": "National Exclusions Index. Synthetic service generated for the scale fixture. See https://example.org/national-exclusions-index.",
+    "long_description": "National Exclusions Index. Synthetic service generated for the scale fixture. See https://example.org/national-exclusions-index.",
+    "product_url": "https://example.org/national-exclusions-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Apprenticeship Ledger",
+    "cmdb_sys_id": "SCALE-0106",
+    "short_description": "Local Apprenticeship Ledger. Synthetic service generated for the scale fixture. See https://example.org/local-apprenticeship-ledger.",
+    "long_description": "Local Apprenticeship Ledger. Synthetic service generated for the scale fixture. See https://example.org/local-apprenticeship-ledger.",
+    "product_url": "https://example.org/local-apprenticeship-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Safeguarding Portal",
+    "cmdb_sys_id": "SCALE-0107",
+    "short_description": "National Safeguarding Portal. Synthetic service generated for the scale fixture. See https://example.org/national-safeguarding-portal.",
+    "long_description": "National Safeguarding Portal. Synthetic service generated for the scale fixture. See https://example.org/national-safeguarding-portal.",
+    "product_url": "https://example.org/national-safeguarding-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Numeracy Service",
+    "cmdb_sys_id": "SCALE-0108",
+    "short_description": "Central Numeracy Service. Synthetic service generated for the scale fixture. See https://example.org/central-numeracy-service.",
+    "long_description": "Central Numeracy Service. Synthetic service generated for the scale fixture. See https://example.org/central-numeracy-service.",
+    "product_url": "https://example.org/central-numeracy-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Library Tracker",
+    "cmdb_sys_id": "SCALE-0109",
+    "short_description": "Unified Library Tracker. Synthetic service generated for the scale fixture. See https://example.org/unified-library-tracker.",
+    "long_description": "Unified Library Tracker. Synthetic service generated for the scale fixture. See https://example.org/unified-library-tracker.",
+    "product_url": "https://example.org/unified-library-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Exclusions Workbench",
+    "cmdb_sys_id": "SCALE-0110",
+    "short_description": "Statutory Exclusions Workbench. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-workbench.",
+    "long_description": "Statutory Exclusions Workbench. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-workbench.",
+    "product_url": "https://example.org/statutory-exclusions-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Governor Checker",
+    "cmdb_sys_id": "SCALE-0111",
+    "short_description": "Integrated Governor Checker. Synthetic service generated for the scale fixture. See https://example.org/integrated-governor-checker.",
+    "long_description": "Integrated Governor Checker. Synthetic service generated for the scale fixture. See https://example.org/integrated-governor-checker.",
+    "product_url": "https://example.org/integrated-governor-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Bursary Notifier",
+    "cmdb_sys_id": "SCALE-0112",
+    "short_description": "Consolidated Bursary Notifier. Synthetic service generated for the scale fixture. See https://example.org/consolidated-bursary-notifier.",
+    "long_description": "Consolidated Bursary Notifier. Synthetic service generated for the scale fixture. See https://example.org/consolidated-bursary-notifier.",
+    "product_url": "https://example.org/consolidated-bursary-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Assessment Dashboard",
+    "cmdb_sys_id": "SCALE-0113",
+    "short_description": "Federated Assessment Dashboard. Synthetic service generated for the scale fixture. See https://example.org/federated-assessment-dashboard.",
+    "long_description": "Federated Assessment Dashboard. Synthetic service generated for the scale fixture. See https://example.org/federated-assessment-dashboard.",
+    "product_url": "https://example.org/federated-assessment-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Assessment Gateway",
+    "cmdb_sys_id": "SCALE-0114",
+    "short_description": "Statutory Assessment Gateway. Synthetic service generated for the scale fixture. See https://example.org/statutory-assessment-gateway.",
+    "long_description": "Statutory Assessment Gateway. Synthetic service generated for the scale fixture. See https://example.org/statutory-assessment-gateway.",
+    "product_url": "https://example.org/statutory-assessment-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated SEND Notifier",
+    "cmdb_sys_id": "SCALE-0115",
+    "short_description": "Consolidated SEND Notifier. Synthetic service generated for the scale fixture. See https://example.org/consolidated-send-notifier.",
+    "long_description": "Consolidated SEND Notifier. Synthetic service generated for the scale fixture. See https://example.org/consolidated-send-notifier.",
+    "product_url": "https://example.org/consolidated-send-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Bursary Finder",
+    "cmdb_sys_id": "SCALE-0116",
+    "short_description": "National Bursary Finder. Synthetic service generated for the scale fixture. See https://example.org/national-bursary-finder.",
+    "long_description": "National Bursary Finder. Synthetic service generated for the scale fixture. See https://example.org/national-bursary-finder.",
+    "product_url": "https://example.org/national-bursary-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Catering Planner",
+    "cmdb_sys_id": "SCALE-0117",
+    "short_description": "National Catering Planner. Synthetic service generated for the scale fixture. See https://example.org/national-catering-planner.",
+    "long_description": "National Catering Planner. Synthetic service generated for the scale fixture. See https://example.org/national-catering-planner.",
+    "product_url": "https://example.org/national-catering-planner",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Apprenticeship Scheduler",
+    "cmdb_sys_id": "SCALE-0118",
+    "short_description": "Operational Apprenticeship Scheduler. Synthetic service generated for the scale fixture. See https://example.org/operational-apprenticeship-scheduler.",
+    "long_description": "Operational Apprenticeship Scheduler. Synthetic service generated for the scale fixture. See https://example.org/operational-apprenticeship-scheduler.",
+    "product_url": "https://example.org/operational-apprenticeship-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Ofsted Dashboard",
+    "cmdb_sys_id": "SCALE-0119",
+    "short_description": "Consolidated Ofsted Dashboard. Synthetic service generated for the scale fixture. See https://example.org/consolidated-ofsted-dashboard.",
+    "long_description": "Consolidated Ofsted Dashboard. Synthetic service generated for the scale fixture. See https://example.org/consolidated-ofsted-dashboard.",
+    "product_url": "https://example.org/consolidated-ofsted-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Careers Directory",
+    "cmdb_sys_id": "SCALE-0120",
+    "short_description": "Federated Careers Directory. Synthetic service generated for the scale fixture. See https://example.org/federated-careers-directory.",
+    "long_description": "Federated Careers Directory. Synthetic service generated for the scale fixture. See https://example.org/federated-careers-directory.",
+    "product_url": "https://example.org/federated-careers-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated School Checker",
+    "cmdb_sys_id": "SCALE-0121",
+    "short_description": "Integrated School Checker. Synthetic service generated for the scale fixture. See https://example.org/integrated-school-checker.",
+    "long_description": "Integrated School Checker. Synthetic service generated for the scale fixture. See https://example.org/integrated-school-checker.",
+    "product_url": "https://example.org/integrated-school-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Estates Register",
+    "cmdb_sys_id": "SCALE-0122",
+    "short_description": "Local Estates Register. Synthetic service generated for the scale fixture. See https://example.org/local-estates-register.",
+    "long_description": "Local Estates Register. Synthetic service generated for the scale fixture. See https://example.org/local-estates-register.",
+    "product_url": "https://example.org/local-estates-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Childcare Gateway",
+    "cmdb_sys_id": "SCALE-0123",
+    "short_description": "Digital Childcare Gateway. Synthetic service generated for the scale fixture. See https://example.org/digital-childcare-gateway.",
+    "long_description": "Digital Childcare Gateway. Synthetic service generated for the scale fixture. See https://example.org/digital-childcare-gateway.",
+    "product_url": "https://example.org/digital-childcare-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Curriculum Manager",
+    "cmdb_sys_id": "SCALE-0124",
+    "short_description": "Local Curriculum Manager. Synthetic service generated for the scale fixture. See https://example.org/local-curriculum-manager.",
+    "long_description": "Local Curriculum Manager. Synthetic service generated for the scale fixture. See https://example.org/local-curriculum-manager.",
+    "product_url": "https://example.org/local-curriculum-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Funding Console",
+    "cmdb_sys_id": "SCALE-0125",
+    "short_description": "Central Funding Console. Synthetic service generated for the scale fixture. See https://example.org/central-funding-console.",
+    "long_description": "Central Funding Console. Synthetic service generated for the scale fixture. See https://example.org/central-funding-console.",
+    "product_url": "https://example.org/central-funding-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Teacher Hub",
+    "cmdb_sys_id": "SCALE-0126",
+    "short_description": "Statutory Teacher Hub. Synthetic service generated for the scale fixture. See https://example.org/statutory-teacher-hub.",
+    "long_description": "Statutory Teacher Hub. Synthetic service generated for the scale fixture. See https://example.org/statutory-teacher-hub.",
+    "product_url": "https://example.org/statutory-teacher-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Exclusions Directory",
+    "cmdb_sys_id": "SCALE-0127",
+    "short_description": "Local Exclusions Directory. Synthetic service generated for the scale fixture. See https://example.org/local-exclusions-directory.",
+    "long_description": "Local Exclusions Directory. Synthetic service generated for the scale fixture. See https://example.org/local-exclusions-directory.",
+    "product_url": "https://example.org/local-exclusions-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Transport Register",
+    "cmdb_sys_id": "SCALE-0128",
+    "short_description": "Local Transport Register. Synthetic service generated for the scale fixture. See https://example.org/local-transport-register.",
+    "long_description": "Local Transport Register. Synthetic service generated for the scale fixture. See https://example.org/local-transport-register.",
+    "product_url": "https://example.org/local-transport-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Childcare Gateway",
+    "cmdb_sys_id": "SCALE-0129",
+    "short_description": "Regional Childcare Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-childcare-gateway.",
+    "long_description": "Regional Childcare Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-childcare-gateway.",
+    "product_url": "https://example.org/regional-childcare-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated SEND Console",
+    "cmdb_sys_id": "SCALE-0130",
+    "short_description": "Federated SEND Console. Synthetic service generated for the scale fixture. See https://example.org/federated-send-console.",
+    "long_description": "Federated SEND Console. Synthetic service generated for the scale fixture. See https://example.org/federated-send-console.",
+    "product_url": "https://example.org/federated-send-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Ofsted Hub",
+    "cmdb_sys_id": "SCALE-0131",
+    "short_description": "Digital Ofsted Hub. Synthetic service generated for the scale fixture. See https://example.org/digital-ofsted-hub.",
+    "long_description": "Digital Ofsted Hub. Synthetic service generated for the scale fixture. See https://example.org/digital-ofsted-hub.",
+    "product_url": "https://example.org/digital-ofsted-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Assessment Workbench",
+    "cmdb_sys_id": "SCALE-0132",
+    "short_description": "National Assessment Workbench. Synthetic service generated for the scale fixture. See https://example.org/national-assessment-workbench.",
+    "long_description": "National Assessment Workbench. Synthetic service generated for the scale fixture. See https://example.org/national-assessment-workbench.",
+    "product_url": "https://example.org/national-assessment-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Pupil Service",
+    "cmdb_sys_id": "SCALE-0133",
+    "short_description": "Digital Pupil Service. Synthetic service generated for the scale fixture. See https://example.org/digital-pupil-service.",
+    "long_description": "Digital Pupil Service. Synthetic service generated for the scale fixture. See https://example.org/digital-pupil-service.",
+    "product_url": "https://example.org/digital-pupil-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Assessment Archive",
+    "cmdb_sys_id": "SCALE-0134",
+    "short_description": "Regional Assessment Archive. Synthetic service generated for the scale fixture. See https://example.org/regional-assessment-archive.",
+    "long_description": "Regional Assessment Archive. Synthetic service generated for the scale fixture. See https://example.org/regional-assessment-archive.",
+    "product_url": "https://example.org/regional-assessment-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Transport Index",
+    "cmdb_sys_id": "SCALE-0135",
+    "short_description": "Federated Transport Index. Synthetic service generated for the scale fixture. See https://example.org/federated-transport-index.",
+    "long_description": "Federated Transport Index. Synthetic service generated for the scale fixture. See https://example.org/federated-transport-index.",
+    "product_url": "https://example.org/federated-transport-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Pupil Manager",
+    "cmdb_sys_id": "SCALE-0136",
+    "short_description": "Integrated Pupil Manager. Synthetic service generated for the scale fixture. See https://example.org/integrated-pupil-manager.",
+    "long_description": "Integrated Pupil Manager. Synthetic service generated for the scale fixture. See https://example.org/integrated-pupil-manager.",
+    "product_url": "https://example.org/integrated-pupil-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated School Service",
+    "cmdb_sys_id": "SCALE-0137",
+    "short_description": "Federated School Service. Synthetic service generated for the scale fixture. See https://example.org/federated-school-service.",
+    "long_description": "Federated School Service. Synthetic service generated for the scale fixture. See https://example.org/federated-school-service.",
+    "product_url": "https://example.org/federated-school-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Behaviour Hub",
+    "cmdb_sys_id": "SCALE-0138",
+    "short_description": "Consolidated Behaviour Hub. Synthetic service generated for the scale fixture. See https://example.org/consolidated-behaviour-hub.",
+    "long_description": "Consolidated Behaviour Hub. Synthetic service generated for the scale fixture. See https://example.org/consolidated-behaviour-hub.",
+    "product_url": "https://example.org/consolidated-behaviour-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Timetable Console",
+    "cmdb_sys_id": "SCALE-0139",
+    "short_description": "Operational Timetable Console. Synthetic service generated for the scale fixture. See https://example.org/operational-timetable-console.",
+    "long_description": "Operational Timetable Console. Synthetic service generated for the scale fixture. See https://example.org/operational-timetable-console.",
+    "product_url": "https://example.org/operational-timetable-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local School Dashboard",
+    "cmdb_sys_id": "SCALE-0140",
+    "short_description": "Local School Dashboard. Synthetic service generated for the scale fixture. See https://example.org/local-school-dashboard.",
+    "long_description": "Local School Dashboard. Synthetic service generated for the scale fixture. See https://example.org/local-school-dashboard.",
+    "product_url": "https://example.org/local-school-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Transport Directory",
+    "cmdb_sys_id": "SCALE-0141",
+    "short_description": "Statutory Transport Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-transport-directory.",
+    "long_description": "Statutory Transport Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-transport-directory.",
+    "product_url": "https://example.org/statutory-transport-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Apprenticeship Console",
+    "cmdb_sys_id": "SCALE-0142",
+    "short_description": "Integrated Apprenticeship Console. Synthetic service generated for the scale fixture. See https://example.org/integrated-apprenticeship-console.",
+    "long_description": "Integrated Apprenticeship Console. Synthetic service generated for the scale fixture. See https://example.org/integrated-apprenticeship-console.",
+    "product_url": "https://example.org/integrated-apprenticeship-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Timetable Portal",
+    "cmdb_sys_id": "SCALE-0143",
+    "short_description": "Operational Timetable Portal. Synthetic service generated for the scale fixture. See https://example.org/operational-timetable-portal.",
+    "long_description": "Operational Timetable Portal. Synthetic service generated for the scale fixture. See https://example.org/operational-timetable-portal.",
+    "product_url": "https://example.org/operational-timetable-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Estates Hub",
+    "cmdb_sys_id": "SCALE-0144",
+    "short_description": "Consolidated Estates Hub. Synthetic service generated for the scale fixture. See https://example.org/consolidated-estates-hub.",
+    "long_description": "Consolidated Estates Hub. Synthetic service generated for the scale fixture. See https://example.org/consolidated-estates-hub.",
+    "product_url": "https://example.org/consolidated-estates-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Catering Hub",
+    "cmdb_sys_id": "SCALE-0145",
+    "short_description": "Consolidated Catering Hub. Synthetic service generated for the scale fixture. See https://example.org/consolidated-catering-hub.",
+    "long_description": "Consolidated Catering Hub. Synthetic service generated for the scale fixture. See https://example.org/consolidated-catering-hub.",
+    "product_url": "https://example.org/consolidated-catering-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Timetable Gateway",
+    "cmdb_sys_id": "SCALE-0146",
+    "short_description": "Unified Timetable Gateway. Synthetic service generated for the scale fixture. See https://example.org/unified-timetable-gateway.",
+    "long_description": "Unified Timetable Gateway. Synthetic service generated for the scale fixture. See https://example.org/unified-timetable-gateway.",
+    "product_url": "https://example.org/unified-timetable-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Attendance Reconciler",
+    "cmdb_sys_id": "SCALE-0147",
+    "short_description": "Consolidated Attendance Reconciler. Synthetic service generated for the scale fixture. See https://example.org/consolidated-attendance-reconciler.",
+    "long_description": "Consolidated Attendance Reconciler. Synthetic service generated for the scale fixture. See https://example.org/consolidated-attendance-reconciler.",
+    "product_url": "https://example.org/consolidated-attendance-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Academy Tracker",
+    "cmdb_sys_id": "SCALE-0148",
+    "short_description": "Unified Academy Tracker. Synthetic service generated for the scale fixture. See https://example.org/unified-academy-tracker.",
+    "long_description": "Unified Academy Tracker. Synthetic service generated for the scale fixture. See https://example.org/unified-academy-tracker.",
+    "product_url": "https://example.org/unified-academy-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Apprenticeship Workbench",
+    "cmdb_sys_id": "SCALE-0149",
+    "short_description": "Central Apprenticeship Workbench. Synthetic service generated for the scale fixture. See https://example.org/central-apprenticeship-workbench.",
+    "long_description": "Central Apprenticeship Workbench. Synthetic service generated for the scale fixture. See https://example.org/central-apprenticeship-workbench.",
+    "product_url": "https://example.org/central-apprenticeship-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Catering Planner",
+    "cmdb_sys_id": "SCALE-0150",
+    "short_description": "Unified Catering Planner. Synthetic service generated for the scale fixture. See https://example.org/unified-catering-planner.",
+    "long_description": "Unified Catering Planner. Synthetic service generated for the scale fixture. See https://example.org/unified-catering-planner.",
+    "product_url": "https://example.org/unified-catering-planner",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Nursery Workbench",
+    "cmdb_sys_id": "SCALE-0151",
+    "short_description": "Unified Nursery Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-nursery-workbench.",
+    "long_description": "Unified Nursery Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-nursery-workbench.",
+    "product_url": "https://example.org/unified-nursery-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Teacher Archive",
+    "cmdb_sys_id": "SCALE-0152",
+    "short_description": "Federated Teacher Archive. Synthetic service generated for the scale fixture. See https://example.org/federated-teacher-archive.",
+    "long_description": "Federated Teacher Archive. Synthetic service generated for the scale fixture. See https://example.org/federated-teacher-archive.",
+    "product_url": "https://example.org/federated-teacher-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Teacher Hub",
+    "cmdb_sys_id": "SCALE-0153",
+    "short_description": "Central Teacher Hub. Synthetic service generated for the scale fixture. See https://example.org/central-teacher-hub.",
+    "long_description": "Central Teacher Hub. Synthetic service generated for the scale fixture. See https://example.org/central-teacher-hub.",
+    "product_url": "https://example.org/central-teacher-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory SEND Directory",
+    "cmdb_sys_id": "SCALE-0154",
+    "short_description": "Statutory SEND Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-send-directory.",
+    "long_description": "Statutory SEND Directory. Synthetic service generated for the scale fixture. See https://example.org/statutory-send-directory.",
+    "product_url": "https://example.org/statutory-send-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Nursery Notifier",
+    "cmdb_sys_id": "SCALE-0155",
+    "short_description": "Unified Nursery Notifier. Synthetic service generated for the scale fixture. See https://example.org/unified-nursery-notifier.",
+    "long_description": "Unified Nursery Notifier. Synthetic service generated for the scale fixture. See https://example.org/unified-nursery-notifier.",
+    "product_url": "https://example.org/unified-nursery-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Teacher Service",
+    "cmdb_sys_id": "SCALE-0156",
+    "short_description": "Strategic Teacher Service. Synthetic service generated for the scale fixture. See https://example.org/strategic-teacher-service.",
+    "long_description": "Strategic Teacher Service. Synthetic service generated for the scale fixture. See https://example.org/strategic-teacher-service.",
+    "product_url": "https://example.org/strategic-teacher-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Admissions Directory",
+    "cmdb_sys_id": "SCALE-0157",
+    "short_description": "Central Admissions Directory. Synthetic service generated for the scale fixture. See https://example.org/central-admissions-directory.",
+    "long_description": "Central Admissions Directory. Synthetic service generated for the scale fixture. See https://example.org/central-admissions-directory.",
+    "product_url": "https://example.org/central-admissions-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Teacher Service",
+    "cmdb_sys_id": "SCALE-0158",
+    "short_description": "National Teacher Service. Synthetic service generated for the scale fixture. See https://example.org/national-teacher-service.",
+    "long_description": "National Teacher Service. Synthetic service generated for the scale fixture. See https://example.org/national-teacher-service.",
+    "product_url": "https://example.org/national-teacher-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Funding Workbench",
+    "cmdb_sys_id": "SCALE-0159",
+    "short_description": "Unified Funding Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-funding-workbench.",
+    "long_description": "Unified Funding Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-funding-workbench.",
+    "product_url": "https://example.org/unified-funding-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local School Workbench",
+    "cmdb_sys_id": "SCALE-0160",
+    "short_description": "Local School Workbench. Synthetic service generated for the scale fixture. See https://example.org/local-school-workbench.",
+    "long_description": "Local School Workbench. Synthetic service generated for the scale fixture. See https://example.org/local-school-workbench.",
+    "product_url": "https://example.org/local-school-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Languages Scheduler",
+    "cmdb_sys_id": "SCALE-0161",
+    "short_description": "Digital Languages Scheduler. Synthetic service generated for the scale fixture. See https://example.org/digital-languages-scheduler.",
+    "long_description": "Digital Languages Scheduler. Synthetic service generated for the scale fixture. See https://example.org/digital-languages-scheduler.",
+    "product_url": "https://example.org/digital-languages-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Transport Gateway",
+    "cmdb_sys_id": "SCALE-0162",
+    "short_description": "Unified Transport Gateway. Synthetic service generated for the scale fixture. See https://example.org/unified-transport-gateway.",
+    "long_description": "Unified Transport Gateway. Synthetic service generated for the scale fixture. See https://example.org/unified-transport-gateway.",
+    "product_url": "https://example.org/unified-transport-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Teacher Console",
+    "cmdb_sys_id": "SCALE-0163",
+    "short_description": "Statutory Teacher Console. Synthetic service generated for the scale fixture. See https://example.org/statutory-teacher-console.",
+    "long_description": "Statutory Teacher Console. Synthetic service generated for the scale fixture. See https://example.org/statutory-teacher-console.",
+    "product_url": "https://example.org/statutory-teacher-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Safeguarding Index",
+    "cmdb_sys_id": "SCALE-0164",
+    "short_description": "Unified Safeguarding Index. Synthetic service generated for the scale fixture. See https://example.org/unified-safeguarding-index.",
+    "long_description": "Unified Safeguarding Index. Synthetic service generated for the scale fixture. See https://example.org/unified-safeguarding-index.",
+    "product_url": "https://example.org/unified-safeguarding-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Childcare Index",
+    "cmdb_sys_id": "SCALE-0165",
+    "short_description": "Consolidated Childcare Index. Synthetic service generated for the scale fixture. See https://example.org/consolidated-childcare-index.",
+    "long_description": "Consolidated Childcare Index. Synthetic service generated for the scale fixture. See https://example.org/consolidated-childcare-index.",
+    "product_url": "https://example.org/consolidated-childcare-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Languages Scheduler",
+    "cmdb_sys_id": "SCALE-0166",
+    "short_description": "Consolidated Languages Scheduler. Synthetic service generated for the scale fixture. See https://example.org/consolidated-languages-scheduler.",
+    "long_description": "Consolidated Languages Scheduler. Synthetic service generated for the scale fixture. See https://example.org/consolidated-languages-scheduler.",
+    "product_url": "https://example.org/consolidated-languages-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Bursary Checker",
+    "cmdb_sys_id": "SCALE-0167",
+    "short_description": "Operational Bursary Checker. Synthetic service generated for the scale fixture. See https://example.org/operational-bursary-checker.",
+    "long_description": "Operational Bursary Checker. Synthetic service generated for the scale fixture. See https://example.org/operational-bursary-checker.",
+    "product_url": "https://example.org/operational-bursary-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Wellbeing Ledger",
+    "cmdb_sys_id": "SCALE-0168",
+    "short_description": "Local Wellbeing Ledger. Synthetic service generated for the scale fixture. See https://example.org/local-wellbeing-ledger.",
+    "long_description": "Local Wellbeing Ledger. Synthetic service generated for the scale fixture. See https://example.org/local-wellbeing-ledger.",
+    "product_url": "https://example.org/local-wellbeing-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Safeguarding Scheduler",
+    "cmdb_sys_id": "SCALE-0169",
+    "short_description": "National Safeguarding Scheduler. Synthetic service generated for the scale fixture. See https://example.org/national-safeguarding-scheduler.",
+    "long_description": "National Safeguarding Scheduler. Synthetic service generated for the scale fixture. See https://example.org/national-safeguarding-scheduler.",
+    "product_url": "https://example.org/national-safeguarding-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Exclusions Register",
+    "cmdb_sys_id": "SCALE-0170",
+    "short_description": "Statutory Exclusions Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-register.",
+    "long_description": "Statutory Exclusions Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-exclusions-register.",
+    "product_url": "https://example.org/statutory-exclusions-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Workforce Register",
+    "cmdb_sys_id": "SCALE-0171",
+    "short_description": "Statutory Workforce Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-workforce-register.",
+    "long_description": "Statutory Workforce Register. Synthetic service generated for the scale fixture. See https://example.org/statutory-workforce-register.",
+    "product_url": "https://example.org/statutory-workforce-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local School Ledger",
+    "cmdb_sys_id": "SCALE-0172",
+    "short_description": "Local School Ledger. Synthetic service generated for the scale fixture. See https://example.org/local-school-ledger.",
+    "long_description": "Local School Ledger. Synthetic service generated for the scale fixture. See https://example.org/local-school-ledger.",
+    "product_url": "https://example.org/local-school-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Wellbeing Dashboard",
+    "cmdb_sys_id": "SCALE-0173",
+    "short_description": "National Wellbeing Dashboard. Synthetic service generated for the scale fixture. See https://example.org/national-wellbeing-dashboard.",
+    "long_description": "National Wellbeing Dashboard. Synthetic service generated for the scale fixture. See https://example.org/national-wellbeing-dashboard.",
+    "product_url": "https://example.org/national-wellbeing-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified School Console",
+    "cmdb_sys_id": "SCALE-0174",
+    "short_description": "Unified School Console. Synthetic service generated for the scale fixture. See https://example.org/unified-school-console.",
+    "long_description": "Unified School Console. Synthetic service generated for the scale fixture. See https://example.org/unified-school-console.",
+    "product_url": "https://example.org/unified-school-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Behaviour Notifier",
+    "cmdb_sys_id": "SCALE-0175",
+    "short_description": "Strategic Behaviour Notifier. Synthetic service generated for the scale fixture. See https://example.org/strategic-behaviour-notifier.",
+    "long_description": "Strategic Behaviour Notifier. Synthetic service generated for the scale fixture. See https://example.org/strategic-behaviour-notifier.",
+    "product_url": "https://example.org/strategic-behaviour-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Literacy Console",
+    "cmdb_sys_id": "SCALE-0176",
+    "short_description": "National Literacy Console. Synthetic service generated for the scale fixture. See https://example.org/national-literacy-console.",
+    "long_description": "National Literacy Console. Synthetic service generated for the scale fixture. See https://example.org/national-literacy-console.",
+    "product_url": "https://example.org/national-literacy-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Apprenticeship Portal",
+    "cmdb_sys_id": "SCALE-0177",
+    "short_description": "Statutory Apprenticeship Portal. Synthetic service generated for the scale fixture. See https://example.org/statutory-apprenticeship-portal.",
+    "long_description": "Statutory Apprenticeship Portal. Synthetic service generated for the scale fixture. See https://example.org/statutory-apprenticeship-portal.",
+    "product_url": "https://example.org/statutory-apprenticeship-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Admissions Workbench",
+    "cmdb_sys_id": "SCALE-0178",
+    "short_description": "Operational Admissions Workbench. Synthetic service generated for the scale fixture. See https://example.org/operational-admissions-workbench.",
+    "long_description": "Operational Admissions Workbench. Synthetic service generated for the scale fixture. See https://example.org/operational-admissions-workbench.",
+    "product_url": "https://example.org/operational-admissions-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Funding Checker",
+    "cmdb_sys_id": "SCALE-0179",
+    "short_description": "Consolidated Funding Checker. Synthetic service generated for the scale fixture. See https://example.org/consolidated-funding-checker.",
+    "long_description": "Consolidated Funding Checker. Synthetic service generated for the scale fixture. See https://example.org/consolidated-funding-checker.",
+    "product_url": "https://example.org/consolidated-funding-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Wellbeing Tracker",
+    "cmdb_sys_id": "SCALE-0180",
+    "short_description": "Federated Wellbeing Tracker. Synthetic service generated for the scale fixture. See https://example.org/federated-wellbeing-tracker.",
+    "long_description": "Federated Wellbeing Tracker. Synthetic service generated for the scale fixture. See https://example.org/federated-wellbeing-tracker.",
+    "product_url": "https://example.org/federated-wellbeing-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Teacher Gateway",
+    "cmdb_sys_id": "SCALE-0181",
+    "short_description": "Operational Teacher Gateway. Synthetic service generated for the scale fixture. See https://example.org/operational-teacher-gateway.",
+    "long_description": "Operational Teacher Gateway. Synthetic service generated for the scale fixture. See https://example.org/operational-teacher-gateway.",
+    "product_url": "https://example.org/operational-teacher-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Curriculum Portal",
+    "cmdb_sys_id": "SCALE-0182",
+    "short_description": "Unified Curriculum Portal. Synthetic service generated for the scale fixture. See https://example.org/unified-curriculum-portal.",
+    "long_description": "Unified Curriculum Portal. Synthetic service generated for the scale fixture. See https://example.org/unified-curriculum-portal.",
+    "product_url": "https://example.org/unified-curriculum-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Ofsted Gateway",
+    "cmdb_sys_id": "SCALE-0183",
+    "short_description": "Local Ofsted Gateway. Synthetic service generated for the scale fixture. See https://example.org/local-ofsted-gateway.",
+    "long_description": "Local Ofsted Gateway. Synthetic service generated for the scale fixture. See https://example.org/local-ofsted-gateway.",
+    "product_url": "https://example.org/local-ofsted-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Numeracy Service",
+    "cmdb_sys_id": "SCALE-0184",
+    "short_description": "Regional Numeracy Service. Synthetic service generated for the scale fixture. See https://example.org/regional-numeracy-service.",
+    "long_description": "Regional Numeracy Service. Synthetic service generated for the scale fixture. See https://example.org/regional-numeracy-service.",
+    "product_url": "https://example.org/regional-numeracy-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Pupil Console",
+    "cmdb_sys_id": "SCALE-0185",
+    "short_description": "Unified Pupil Console. Synthetic service generated for the scale fixture. See https://example.org/unified-pupil-console.",
+    "long_description": "Unified Pupil Console. Synthetic service generated for the scale fixture. See https://example.org/unified-pupil-console.",
+    "product_url": "https://example.org/unified-pupil-console",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Languages Finder",
+    "cmdb_sys_id": "SCALE-0186",
+    "short_description": "Federated Languages Finder. Synthetic service generated for the scale fixture. See https://example.org/federated-languages-finder.",
+    "long_description": "Federated Languages Finder. Synthetic service generated for the scale fixture. See https://example.org/federated-languages-finder.",
+    "product_url": "https://example.org/federated-languages-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Estates Finder",
+    "cmdb_sys_id": "SCALE-0187",
+    "short_description": "Operational Estates Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-estates-finder.",
+    "long_description": "Operational Estates Finder. Synthetic service generated for the scale fixture. See https://example.org/operational-estates-finder.",
+    "product_url": "https://example.org/operational-estates-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated School Portal",
+    "cmdb_sys_id": "SCALE-0188",
+    "short_description": "Consolidated School Portal. Synthetic service generated for the scale fixture. See https://example.org/consolidated-school-portal.",
+    "long_description": "Consolidated School Portal. Synthetic service generated for the scale fixture. See https://example.org/consolidated-school-portal.",
+    "product_url": "https://example.org/consolidated-school-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National SEND Scheduler",
+    "cmdb_sys_id": "SCALE-0189",
+    "short_description": "National SEND Scheduler. Synthetic service generated for the scale fixture. See https://example.org/national-send-scheduler.",
+    "long_description": "National SEND Scheduler. Synthetic service generated for the scale fixture. See https://example.org/national-send-scheduler.",
+    "product_url": "https://example.org/national-send-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Funding Hub",
+    "cmdb_sys_id": "SCALE-0190",
+    "short_description": "Statutory Funding Hub. Synthetic service generated for the scale fixture. See https://example.org/statutory-funding-hub.",
+    "long_description": "Statutory Funding Hub. Synthetic service generated for the scale fixture. See https://example.org/statutory-funding-hub.",
+    "product_url": "https://example.org/statutory-funding-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated SEND Gateway",
+    "cmdb_sys_id": "SCALE-0191",
+    "short_description": "Integrated SEND Gateway. Synthetic service generated for the scale fixture. See https://example.org/integrated-send-gateway.",
+    "long_description": "Integrated SEND Gateway. Synthetic service generated for the scale fixture. See https://example.org/integrated-send-gateway.",
+    "product_url": "https://example.org/integrated-send-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Academy Workbench",
+    "cmdb_sys_id": "SCALE-0192",
+    "short_description": "Integrated Academy Workbench. Synthetic service generated for the scale fixture. See https://example.org/integrated-academy-workbench.",
+    "long_description": "Integrated Academy Workbench. Synthetic service generated for the scale fixture. See https://example.org/integrated-academy-workbench.",
+    "product_url": "https://example.org/integrated-academy-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic School Checker",
+    "cmdb_sys_id": "SCALE-0193",
+    "short_description": "Strategic School Checker. Synthetic service generated for the scale fixture. See https://example.org/strategic-school-checker.",
+    "long_description": "Strategic School Checker. Synthetic service generated for the scale fixture. See https://example.org/strategic-school-checker.",
+    "product_url": "https://example.org/strategic-school-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Ofsted Reconciler",
+    "cmdb_sys_id": "SCALE-0194",
+    "short_description": "Integrated Ofsted Reconciler. Synthetic service generated for the scale fixture. See https://example.org/integrated-ofsted-reconciler.",
+    "long_description": "Integrated Ofsted Reconciler. Synthetic service generated for the scale fixture. See https://example.org/integrated-ofsted-reconciler.",
+    "product_url": "https://example.org/integrated-ofsted-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Attendance Archive",
+    "cmdb_sys_id": "SCALE-0195",
+    "short_description": "Strategic Attendance Archive. Synthetic service generated for the scale fixture. See https://example.org/strategic-attendance-archive.",
+    "long_description": "Strategic Attendance Archive. Synthetic service generated for the scale fixture. See https://example.org/strategic-attendance-archive.",
+    "product_url": "https://example.org/strategic-attendance-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Literacy Dashboard",
+    "cmdb_sys_id": "SCALE-0196",
+    "short_description": "Strategic Literacy Dashboard. Synthetic service generated for the scale fixture. See https://example.org/strategic-literacy-dashboard.",
+    "long_description": "Strategic Literacy Dashboard. Synthetic service generated for the scale fixture. See https://example.org/strategic-literacy-dashboard.",
+    "product_url": "https://example.org/strategic-literacy-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Pupil Planner",
+    "cmdb_sys_id": "SCALE-0197",
+    "short_description": "Federated Pupil Planner. Synthetic service generated for the scale fixture. See https://example.org/federated-pupil-planner.",
+    "long_description": "Federated Pupil Planner. Synthetic service generated for the scale fixture. See https://example.org/federated-pupil-planner.",
+    "product_url": "https://example.org/federated-pupil-planner",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Assessment Portal",
+    "cmdb_sys_id": "SCALE-0198",
+    "short_description": "Regional Assessment Portal. Synthetic service generated for the scale fixture. See https://example.org/regional-assessment-portal.",
+    "long_description": "Regional Assessment Portal. Synthetic service generated for the scale fixture. See https://example.org/regional-assessment-portal.",
+    "product_url": "https://example.org/regional-assessment-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Governor Tracker",
+    "cmdb_sys_id": "SCALE-0199",
+    "short_description": "Statutory Governor Tracker. Synthetic service generated for the scale fixture. See https://example.org/statutory-governor-tracker.",
+    "long_description": "Statutory Governor Tracker. Synthetic service generated for the scale fixture. See https://example.org/statutory-governor-tracker.",
+    "product_url": "https://example.org/statutory-governor-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Bursary Manager",
+    "cmdb_sys_id": "SCALE-0200",
+    "short_description": "Unified Bursary Manager. Synthetic service generated for the scale fixture. See https://example.org/unified-bursary-manager.",
+    "long_description": "Unified Bursary Manager. Synthetic service generated for the scale fixture. See https://example.org/unified-bursary-manager.",
+    "product_url": "https://example.org/unified-bursary-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Teacher Tracker",
+    "cmdb_sys_id": "SCALE-0201",
+    "short_description": "Statutory Teacher Tracker. Synthetic service generated for the scale fixture. See https://example.org/statutory-teacher-tracker.",
+    "long_description": "Statutory Teacher Tracker. Synthetic service generated for the scale fixture. See https://example.org/statutory-teacher-tracker.",
+    "product_url": "https://example.org/statutory-teacher-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Library Scheduler",
+    "cmdb_sys_id": "SCALE-0202",
+    "short_description": "Central Library Scheduler. Synthetic service generated for the scale fixture. See https://example.org/central-library-scheduler.",
+    "long_description": "Central Library Scheduler. Synthetic service generated for the scale fixture. See https://example.org/central-library-scheduler.",
+    "product_url": "https://example.org/central-library-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Transport Archive",
+    "cmdb_sys_id": "SCALE-0203",
+    "short_description": "Integrated Transport Archive. Synthetic service generated for the scale fixture. See https://example.org/integrated-transport-archive.",
+    "long_description": "Integrated Transport Archive. Synthetic service generated for the scale fixture. See https://example.org/integrated-transport-archive.",
+    "product_url": "https://example.org/integrated-transport-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Teacher Archive",
+    "cmdb_sys_id": "SCALE-0204",
+    "short_description": "Operational Teacher Archive. Synthetic service generated for the scale fixture. See https://example.org/operational-teacher-archive.",
+    "long_description": "Operational Teacher Archive. Synthetic service generated for the scale fixture. See https://example.org/operational-teacher-archive.",
+    "product_url": "https://example.org/operational-teacher-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Attendance Directory",
+    "cmdb_sys_id": "SCALE-0205",
+    "short_description": "Regional Attendance Directory. Synthetic service generated for the scale fixture. See https://example.org/regional-attendance-directory.",
+    "long_description": "Regional Attendance Directory. Synthetic service generated for the scale fixture. See https://example.org/regional-attendance-directory.",
+    "product_url": "https://example.org/regional-attendance-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Workforce Tracker",
+    "cmdb_sys_id": "SCALE-0206",
+    "short_description": "Digital Workforce Tracker. Synthetic service generated for the scale fixture. See https://example.org/digital-workforce-tracker.",
+    "long_description": "Digital Workforce Tracker. Synthetic service generated for the scale fixture. See https://example.org/digital-workforce-tracker.",
+    "product_url": "https://example.org/digital-workforce-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Careers Workbench",
+    "cmdb_sys_id": "SCALE-0207",
+    "short_description": "Unified Careers Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-careers-workbench.",
+    "long_description": "Unified Careers Workbench. Synthetic service generated for the scale fixture. See https://example.org/unified-careers-workbench.",
+    "product_url": "https://example.org/unified-careers-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Catering Ledger",
+    "cmdb_sys_id": "SCALE-0208",
+    "short_description": "Unified Catering Ledger. Synthetic service generated for the scale fixture. See https://example.org/unified-catering-ledger.",
+    "long_description": "Unified Catering Ledger. Synthetic service generated for the scale fixture. See https://example.org/unified-catering-ledger.",
+    "product_url": "https://example.org/unified-catering-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Careers Notifier",
+    "cmdb_sys_id": "SCALE-0209",
+    "short_description": "Federated Careers Notifier. Synthetic service generated for the scale fixture. See https://example.org/federated-careers-notifier.",
+    "long_description": "Federated Careers Notifier. Synthetic service generated for the scale fixture. See https://example.org/federated-careers-notifier.",
+    "product_url": "https://example.org/federated-careers-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Academy Service",
+    "cmdb_sys_id": "SCALE-0210",
+    "short_description": "Operational Academy Service. Synthetic service generated for the scale fixture. See https://example.org/operational-academy-service.",
+    "long_description": "Operational Academy Service. Synthetic service generated for the scale fixture. See https://example.org/operational-academy-service.",
+    "product_url": "https://example.org/operational-academy-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Exclusions Planner",
+    "cmdb_sys_id": "SCALE-0211",
+    "short_description": "Consolidated Exclusions Planner. Synthetic service generated for the scale fixture. See https://example.org/consolidated-exclusions-planner.",
+    "long_description": "Consolidated Exclusions Planner. Synthetic service generated for the scale fixture. See https://example.org/consolidated-exclusions-planner.",
+    "product_url": "https://example.org/consolidated-exclusions-planner",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Timetable Notifier",
+    "cmdb_sys_id": "SCALE-0212",
+    "short_description": "Unified Timetable Notifier. Synthetic service generated for the scale fixture. See https://example.org/unified-timetable-notifier.",
+    "long_description": "Unified Timetable Notifier. Synthetic service generated for the scale fixture. See https://example.org/unified-timetable-notifier.",
+    "product_url": "https://example.org/unified-timetable-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated School Scheduler",
+    "cmdb_sys_id": "SCALE-0213",
+    "short_description": "Consolidated School Scheduler. Synthetic service generated for the scale fixture. See https://example.org/consolidated-school-scheduler.",
+    "long_description": "Consolidated School Scheduler. Synthetic service generated for the scale fixture. See https://example.org/consolidated-school-scheduler.",
+    "product_url": "https://example.org/consolidated-school-scheduler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated SEND Tracker",
+    "cmdb_sys_id": "SCALE-0214",
+    "short_description": "Integrated SEND Tracker. Synthetic service generated for the scale fixture. See https://example.org/integrated-send-tracker.",
+    "long_description": "Integrated SEND Tracker. Synthetic service generated for the scale fixture. See https://example.org/integrated-send-tracker.",
+    "product_url": "https://example.org/integrated-send-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Bursary Finder",
+    "cmdb_sys_id": "SCALE-0215",
+    "short_description": "Integrated Bursary Finder. Synthetic service generated for the scale fixture. See https://example.org/integrated-bursary-finder.",
+    "long_description": "Integrated Bursary Finder. Synthetic service generated for the scale fixture. See https://example.org/integrated-bursary-finder.",
+    "product_url": "https://example.org/integrated-bursary-finder",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Languages Directory",
+    "cmdb_sys_id": "SCALE-0216",
+    "short_description": "Digital Languages Directory. Synthetic service generated for the scale fixture. See https://example.org/digital-languages-directory.",
+    "long_description": "Digital Languages Directory. Synthetic service generated for the scale fixture. See https://example.org/digital-languages-directory.",
+    "product_url": "https://example.org/digital-languages-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Languages Directory",
+    "cmdb_sys_id": "SCALE-0217",
+    "short_description": "National Languages Directory. Synthetic service generated for the scale fixture. See https://example.org/national-languages-directory.",
+    "long_description": "National Languages Directory. Synthetic service generated for the scale fixture. See https://example.org/national-languages-directory.",
+    "product_url": "https://example.org/national-languages-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Pupil Index",
+    "cmdb_sys_id": "SCALE-0218",
+    "short_description": "Strategic Pupil Index. Synthetic service generated for the scale fixture. See https://example.org/strategic-pupil-index.",
+    "long_description": "Strategic Pupil Index. Synthetic service generated for the scale fixture. See https://example.org/strategic-pupil-index.",
+    "product_url": "https://example.org/strategic-pupil-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Exclusions Notifier",
+    "cmdb_sys_id": "SCALE-0219",
+    "short_description": "Operational Exclusions Notifier. Synthetic service generated for the scale fixture. See https://example.org/operational-exclusions-notifier.",
+    "long_description": "Operational Exclusions Notifier. Synthetic service generated for the scale fixture. See https://example.org/operational-exclusions-notifier.",
+    "product_url": "https://example.org/operational-exclusions-notifier",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Consolidated Careers Register",
+    "cmdb_sys_id": "SCALE-0220",
+    "short_description": "Consolidated Careers Register. Synthetic service generated for the scale fixture. See https://example.org/consolidated-careers-register.",
+    "long_description": "Consolidated Careers Register. Synthetic service generated for the scale fixture. See https://example.org/consolidated-careers-register.",
+    "product_url": "https://example.org/consolidated-careers-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Bursary Archive",
+    "cmdb_sys_id": "SCALE-0221",
+    "short_description": "Strategic Bursary Archive. Synthetic service generated for the scale fixture. See https://example.org/strategic-bursary-archive.",
+    "long_description": "Strategic Bursary Archive. Synthetic service generated for the scale fixture. See https://example.org/strategic-bursary-archive.",
+    "product_url": "https://example.org/strategic-bursary-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Assessment Dashboard",
+    "cmdb_sys_id": "SCALE-0222",
+    "short_description": "Digital Assessment Dashboard. Synthetic service generated for the scale fixture. See https://example.org/digital-assessment-dashboard.",
+    "long_description": "Digital Assessment Dashboard. Synthetic service generated for the scale fixture. See https://example.org/digital-assessment-dashboard.",
+    "product_url": "https://example.org/digital-assessment-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Admissions Directory",
+    "cmdb_sys_id": "SCALE-0223",
+    "short_description": "Strategic Admissions Directory. Synthetic service generated for the scale fixture. See https://example.org/strategic-admissions-directory.",
+    "long_description": "Strategic Admissions Directory. Synthetic service generated for the scale fixture. See https://example.org/strategic-admissions-directory.",
+    "product_url": "https://example.org/strategic-admissions-directory",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Attendance Hub",
+    "cmdb_sys_id": "SCALE-0224",
+    "short_description": "Central Attendance Hub. Synthetic service generated for the scale fixture. See https://example.org/central-attendance-hub.",
+    "long_description": "Central Attendance Hub. Synthetic service generated for the scale fixture. See https://example.org/central-attendance-hub.",
+    "product_url": "https://example.org/central-attendance-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional School Checker",
+    "cmdb_sys_id": "SCALE-0225",
+    "short_description": "Regional School Checker. Synthetic service generated for the scale fixture. See https://example.org/regional-school-checker.",
+    "long_description": "Regional School Checker. Synthetic service generated for the scale fixture. See https://example.org/regional-school-checker.",
+    "product_url": "https://example.org/regional-school-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Careers Dashboard",
+    "cmdb_sys_id": "SCALE-0226",
+    "short_description": "National Careers Dashboard. Synthetic service generated for the scale fixture. See https://example.org/national-careers-dashboard.",
+    "long_description": "National Careers Dashboard. Synthetic service generated for the scale fixture. See https://example.org/national-careers-dashboard.",
+    "product_url": "https://example.org/national-careers-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Bursary Reconciler",
+    "cmdb_sys_id": "SCALE-0227",
+    "short_description": "Central Bursary Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-bursary-reconciler.",
+    "long_description": "Central Bursary Reconciler. Synthetic service generated for the scale fixture. See https://example.org/central-bursary-reconciler.",
+    "product_url": "https://example.org/central-bursary-reconciler",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital Numeracy Hub",
+    "cmdb_sys_id": "SCALE-0228",
+    "short_description": "Digital Numeracy Hub. Synthetic service generated for the scale fixture. See https://example.org/digital-numeracy-hub.",
+    "long_description": "Digital Numeracy Hub. Synthetic service generated for the scale fixture. See https://example.org/digital-numeracy-hub.",
+    "product_url": "https://example.org/digital-numeracy-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Catering Manager",
+    "cmdb_sys_id": "SCALE-0229",
+    "short_description": "Unified Catering Manager. Synthetic service generated for the scale fixture. See https://example.org/unified-catering-manager.",
+    "long_description": "Unified Catering Manager. Synthetic service generated for the scale fixture. See https://example.org/unified-catering-manager.",
+    "product_url": "https://example.org/unified-catering-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Workforce Checker",
+    "cmdb_sys_id": "SCALE-0230",
+    "short_description": "Unified Workforce Checker. Synthetic service generated for the scale fixture. See https://example.org/unified-workforce-checker.",
+    "long_description": "Unified Workforce Checker. Synthetic service generated for the scale fixture. See https://example.org/unified-workforce-checker.",
+    "product_url": "https://example.org/unified-workforce-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Integrated Governor Manager",
+    "cmdb_sys_id": "SCALE-0231",
+    "short_description": "Integrated Governor Manager. Synthetic service generated for the scale fixture. See https://example.org/integrated-governor-manager.",
+    "long_description": "Integrated Governor Manager. Synthetic service generated for the scale fixture. See https://example.org/integrated-governor-manager.",
+    "product_url": "https://example.org/integrated-governor-manager",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Digital School Tracker",
+    "cmdb_sys_id": "SCALE-0232",
+    "short_description": "Digital School Tracker. Synthetic service generated for the scale fixture. See https://example.org/digital-school-tracker.",
+    "long_description": "Digital School Tracker. Synthetic service generated for the scale fixture. See https://example.org/digital-school-tracker.",
+    "product_url": "https://example.org/digital-school-tracker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Assessment Hub",
+    "cmdb_sys_id": "SCALE-0233",
+    "short_description": "Local Assessment Hub. Synthetic service generated for the scale fixture. See https://example.org/local-assessment-hub.",
+    "long_description": "Local Assessment Hub. Synthetic service generated for the scale fixture. See https://example.org/local-assessment-hub.",
+    "product_url": "https://example.org/local-assessment-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "National Numeracy Register",
+    "cmdb_sys_id": "SCALE-0234",
+    "short_description": "National Numeracy Register. Synthetic service generated for the scale fixture. See https://example.org/national-numeracy-register.",
+    "long_description": "National Numeracy Register. Synthetic service generated for the scale fixture. See https://example.org/national-numeracy-register.",
+    "product_url": "https://example.org/national-numeracy-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Behaviour Dashboard",
+    "cmdb_sys_id": "SCALE-0235",
+    "short_description": "Regional Behaviour Dashboard. Synthetic service generated for the scale fixture. See https://example.org/regional-behaviour-dashboard.",
+    "long_description": "Regional Behaviour Dashboard. Synthetic service generated for the scale fixture. See https://example.org/regional-behaviour-dashboard.",
+    "product_url": "https://example.org/regional-behaviour-dashboard",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Academy Gateway",
+    "cmdb_sys_id": "SCALE-0236",
+    "short_description": "Regional Academy Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-academy-gateway.",
+    "long_description": "Regional Academy Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-academy-gateway.",
+    "product_url": "https://example.org/regional-academy-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Attendance Workbench",
+    "cmdb_sys_id": "SCALE-0237",
+    "short_description": "Strategic Attendance Workbench. Synthetic service generated for the scale fixture. See https://example.org/strategic-attendance-workbench.",
+    "long_description": "Strategic Attendance Workbench. Synthetic service generated for the scale fixture. See https://example.org/strategic-attendance-workbench.",
+    "product_url": "https://example.org/strategic-attendance-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Unified Numeracy Index",
+    "cmdb_sys_id": "SCALE-0238",
+    "short_description": "Unified Numeracy Index. Synthetic service generated for the scale fixture. See https://example.org/unified-numeracy-index.",
+    "long_description": "Unified Numeracy Index. Synthetic service generated for the scale fixture. See https://example.org/unified-numeracy-index.",
+    "product_url": "https://example.org/unified-numeracy-index",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Local Safeguarding Service",
+    "cmdb_sys_id": "SCALE-0239",
+    "short_description": "Local Safeguarding Service. Synthetic service generated for the scale fixture. See https://example.org/local-safeguarding-service.",
+    "long_description": "Local Safeguarding Service. Synthetic service generated for the scale fixture. See https://example.org/local-safeguarding-service.",
+    "product_url": "https://example.org/local-safeguarding-service",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Careers Register",
+    "cmdb_sys_id": "SCALE-0240",
+    "short_description": "Central Careers Register. Synthetic service generated for the scale fixture. See https://example.org/central-careers-register.",
+    "long_description": "Central Careers Register. Synthetic service generated for the scale fixture. See https://example.org/central-careers-register.",
+    "product_url": "https://example.org/central-careers-register",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Languages Checker",
+    "cmdb_sys_id": "SCALE-0241",
+    "short_description": "Central Languages Checker. Synthetic service generated for the scale fixture. See https://example.org/central-languages-checker.",
+    "long_description": "Central Languages Checker. Synthetic service generated for the scale fixture. See https://example.org/central-languages-checker.",
+    "product_url": "https://example.org/central-languages-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Library Ledger",
+    "cmdb_sys_id": "SCALE-0242",
+    "short_description": "Central Library Ledger. Synthetic service generated for the scale fixture. See https://example.org/central-library-ledger.",
+    "long_description": "Central Library Ledger. Synthetic service generated for the scale fixture. See https://example.org/central-library-ledger.",
+    "product_url": "https://example.org/central-library-ledger",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Nursery Archive",
+    "cmdb_sys_id": "SCALE-0243",
+    "short_description": "Central Nursery Archive. Synthetic service generated for the scale fixture. See https://example.org/central-nursery-archive.",
+    "long_description": "Central Nursery Archive. Synthetic service generated for the scale fixture. See https://example.org/central-nursery-archive.",
+    "product_url": "https://example.org/central-nursery-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Strategic Teacher Workbench",
+    "cmdb_sys_id": "SCALE-0244",
+    "short_description": "Strategic Teacher Workbench. Synthetic service generated for the scale fixture. See https://example.org/strategic-teacher-workbench.",
+    "long_description": "Strategic Teacher Workbench. Synthetic service generated for the scale fixture. See https://example.org/strategic-teacher-workbench.",
+    "product_url": "https://example.org/strategic-teacher-workbench",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Central Transport Hub",
+    "cmdb_sys_id": "SCALE-0245",
+    "short_description": "Central Transport Hub. Synthetic service generated for the scale fixture. See https://example.org/central-transport-hub.",
+    "long_description": "Central Transport Hub. Synthetic service generated for the scale fixture. See https://example.org/central-transport-hub.",
+    "product_url": "https://example.org/central-transport-hub",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Catering Checker",
+    "cmdb_sys_id": "SCALE-0246",
+    "short_description": "Federated Catering Checker. Synthetic service generated for the scale fixture. See https://example.org/federated-catering-checker.",
+    "long_description": "Federated Catering Checker. Synthetic service generated for the scale fixture. See https://example.org/federated-catering-checker.",
+    "product_url": "https://example.org/federated-catering-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Federated Teacher Checker",
+    "cmdb_sys_id": "SCALE-0247",
+    "short_description": "Federated Teacher Checker. Synthetic service generated for the scale fixture. See https://example.org/federated-teacher-checker.",
+    "long_description": "Federated Teacher Checker. Synthetic service generated for the scale fixture. See https://example.org/federated-teacher-checker.",
+    "product_url": "https://example.org/federated-teacher-checker",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Operational Numeracy Portal",
+    "cmdb_sys_id": "SCALE-0248",
+    "short_description": "Operational Numeracy Portal. Synthetic service generated for the scale fixture. See https://example.org/operational-numeracy-portal.",
+    "long_description": "Operational Numeracy Portal. Synthetic service generated for the scale fixture. See https://example.org/operational-numeracy-portal.",
+    "product_url": "https://example.org/operational-numeracy-portal",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Statutory Safeguarding Archive",
+    "cmdb_sys_id": "SCALE-0249",
+    "short_description": "Statutory Safeguarding Archive. Synthetic service generated for the scale fixture. See https://example.org/statutory-safeguarding-archive.",
+    "long_description": "Statutory Safeguarding Archive. Synthetic service generated for the scale fixture. See https://example.org/statutory-safeguarding-archive.",
+    "product_url": "https://example.org/statutory-safeguarding-archive",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  },
+  {
+   "data": {
+    "title": "Regional Teacher Gateway",
+    "cmdb_sys_id": "SCALE-0250",
+    "short_description": "Regional Teacher Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-gateway.",
+    "long_description": "Regional Teacher Gateway. Synthetic service generated for the scale fixture. See https://example.org/regional-teacher-gateway.",
+    "product_url": "https://example.org/regional-teacher-gateway",
+    "parent_category": "Scale Fixture",
+    "state": "Active"
+   }
+  }
+ ]
+}

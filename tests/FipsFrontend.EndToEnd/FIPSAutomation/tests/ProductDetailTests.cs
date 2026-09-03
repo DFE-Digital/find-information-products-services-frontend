@@ -21,10 +21,27 @@ public class ProductDetailTests : BaseTest
         header = new HeaderComponent(Page);
     }
 
+    // The product these tests describe, reached by its title through the listing rather than by a hard-coded
+    // content id. The id belonged to one environment's database, and giving a seeded database the same id meant
+    // writing the database directly, since the CMS does not accept a chosen id on create.
+    private const string DetailProduct = "Accessibility and inclusion manual";
+
+    private async Task OpenTheDetailProductAsync()
+    {
+        await NavigateToAsync("products?keywords=" + Uri.EscapeDataString(DetailProduct));
+        // Followed by its address rather than clicked. The card's whole-card overlay covers the title link, and
+        // Playwright (not a browser) refuses a click on either: the title's click is intercepted by the overlay, and
+        // the overlay itself it counts as not visible. A person's click lands on the overlay and opens this address.
+        var href = await Page.Locator("a.product-link.govuk-link", new() { HasText = DetailProduct }).GetAttributeAsync("href");
+        Assert.That(href, Is.Not.Null.And.Not.Empty, $"the listing links to \"{DetailProduct}\"");
+        await NavigateToAsync(href.TrimStart('/'));
+        await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { Name = DetailProduct, Exact = true })).ToBeVisibleAsync();
+    }
+
     [Test, Order(1)]
     public async Task VerifyProductOverviewPageHeadersUS168AC()
     {
-        await NavigateToAsync("product/h7pjd1dx4hwvjm9zg6bv2gci");
+        await OpenTheDetailProductAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Accessibility and inclusion manual" })).ToBeVisibleAsync();
         await productDetailPage.VerifyOverviewHeadersAsync();
 
@@ -60,7 +77,7 @@ public class ProductDetailTests : BaseTest
     [Test, Order(2)]
     public async Task VerifyProductOverviewPageLinksUS168AC()
     {
-        await NavigateToAsync("product/h7pjd1dx4hwvjm9zg6bv2gci"); //above TC failing due to 'View products' link change, so added direct navigation
+        await OpenTheDetailProductAsync();
         // Assertion for Overview link
         await productDetailPage.ClickOverviewLinkAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Heading, new() { NameString = "Description" })).ToBeVisibleAsync();
@@ -165,7 +182,8 @@ public class ProductDetailTests : BaseTest
     [Test, Order(5)]
     public async Task VerifyLinkInUsersProductTableUS168AC()
     {
-        await NavigateToAsync("product/h7pjd1dx4hwvjm9zg6bv2gci/categories");
+        await OpenTheDetailProductAsync();
+        await productDetailPage.ClickCategoriesLinkAsync();
         await Assertions.Expect(Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Department for Education workforce" })).ToBeVisibleAsync();
         await Page.GetByRole(AriaRole.Link, new() { Exact = true, Name = "Department for Education workforce" }).ClickAsync();
         await productsSearchPage.VerifyProductsPageHeadingAsync();

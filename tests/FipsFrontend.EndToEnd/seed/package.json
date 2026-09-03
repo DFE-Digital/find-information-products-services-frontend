@@ -1,0 +1,17 @@
+{
+  "name": "fips-browser-suite-seed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A seeded Strapi content source for the browser suite: start it, seed it, stop it, and regenerate the generated inputs. No dependencies beyond Node 22, the .NET SDK for one generator, and the CMS's own API.",
+  "type": "module",
+  "scripts": {
+    "cms:start": "node cms.mjs start",
+    "cms:seed": "node cms.mjs seed",
+    "cms:stop": "node cms.mjs stop",
+    "generate:scale": "node generators/regenerate-scale.mjs",
+    "generate:taxonomy": "dotnet run generators/extract-taxonomy-from-testdata.cs -- --xlsx ../testdata.xlsx --out scenarios/taxonomy-from-testdata-xlsx.generated.json"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  }
+}

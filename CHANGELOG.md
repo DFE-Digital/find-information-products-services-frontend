@@ -115,6 +115,12 @@ summary under the heading, delete its "None" groups, and paste this above it:
 - **Browser suite:** the tests that need no browser (the suite's settings rules and its url comparison) live in
   `tests/FipsFrontend.EndToEnd.Rules`, so `dotnet test` on the browser project runs browser tests and nothing else,
   and the one category that still splits a run is `Integration`: the tests that name seeded content.
+- **Browser suite:** the pipeline seeds its content source. The data set the suite names lives as text under
+  `tests/FipsFrontend.EndToEnd/seed`, with one entry point that starts the CMS at a pinned commit, seeds it, and
+  stops it; the seeded database is cached by the hash of that folder and the commit. The inputs that are derived
+  rather than written carry `.generated.json` in their names and sit beside the generators that reproduce them,
+  so a hand edit to one has nowhere to hide. Every test can now be green in the pipeline, and the product-detail
+  tests reach their product by its title rather than by a content id that only one database ever held.
 
 ## [v2026.08.28-0001]
 
