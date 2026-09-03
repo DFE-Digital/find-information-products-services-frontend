@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Compass.FipsApi.Contracts\Compass.FipsApi.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="wwwroot\govuk-frontend\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

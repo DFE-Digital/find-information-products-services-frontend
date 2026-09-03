@@ -29,11 +29,17 @@ public sealed class FipsApplication : IDisposable
         /// </summary>
         public Func<HttpRequestMessage, string?>? Answer { get; set; }
 
+        /// <summary>
+        /// A status and body for a request, for scenarios about a refusal (a 503, a 404): return null to fall
+        /// back to <see cref="Answer"/>. Only clients without a retry policy should be refused here.
+        /// </summary>
+        public Func<HttpRequestMessage, (HttpStatusCode Status, string Body)?>? Respond { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             lock (_requests) _requests.Add($"{request.Method} {request.RequestUri}");
-            var body = Answer?.Invoke(request) ?? EmptyCollection;
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            var (status, body) = Respond?.Invoke(request) ?? (HttpStatusCode.OK, Answer?.Invoke(request) ?? EmptyCollection);
+            return Task.FromResult(new HttpResponseMessage(status)
             {
                 Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json"),
             });
@@ -71,7 +77,7 @@ public sealed class FipsApplication : IDisposable
 
     // AddHttpClient<T> names each client after T; these are the registrations in Program.cs.
     private static readonly string[] OutboundClients =
-        ["CmsApiService", "IOptimizedCmsApiService", "IAirtableService", "IServiceAssessmentsService"];
+        ["CmsApiService", "IOptimizedCmsApiService", "IAirtableService", "IServiceAssessmentsService", "ICompassClient"];
 
     // The least configuration under which every controller can be constructed.
     // Values are inert: nothing leaves the process, because every outbound client is the stand-in.

@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Compass.FipsApi.Contracts;
 using FipsFrontend.Configuration;
 using FipsFrontend.Services;
+using FipsFrontend.Services.Compass;
 using FipsFrontend.Middlewares;
 using FipsFrontend.Models;
 using Microsoft.Extensions.Options;
@@ -72,6 +74,22 @@ builder.Services.AddHttpClient<IOptimizedCmsApiService, OptimizedCmsApiService>(
 })
 .ConfigurePrimaryHttpMessageHandler(ContentSourceHandler)
 .AddPolicyHandler(GetRetryPolicy());
+
+// The COMPASS service-register API. Off unless both settings are supplied; the pages that read it check
+// CompassOptions.IsConfigured before calling. No retry policy: a failure is reported, not repeated.
+var compass = CompassOptions.Read(builder.Configuration);
+builder.Services.AddSingleton(compass);
+builder.Services.AddSingleton<IContractObservations, ContractObservations>();
+builder.Services.AddHttpClient<ICompassClient, CompassClient>(client =>
+{
+    client.BaseAddress = compass.BaseAddress;
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.Add("User-Agent", "FIPS-Frontend/1.0");
+    if (compass.IsConfigured) client.DefaultRequestHeaders.Authorization = new("Bearer", compass.ApiToken);
+})
+.ConfigurePrimaryHttpMessageHandler(() => compass.IsConfigured
+    ? new HttpClientHandler { MaxConnectionsPerServer = 10, UseProxy = false }
+    : new NoCompassHandler());
 
 // Register CMS health service
 builder.Services.AddScoped<ICmsHealthService, CmsHealthService>();
