@@ -89,6 +89,31 @@ public class SuiteSettingsTests
         Assert.That((settings.Timeouts.ExpectMs, settings.Timeouts.ActionMs, settings.Timeouts.NavigationMs), Is.EqualTo((5_000, 30_000, 30_000)));
     }
 
+    // A run's output says which timeouts applied, so a run left at the defaults against a slow target is recognised
+    // from its log rather than diagnosed after the fact.
+    [Test]
+    public void Suite_WhenTimeoutsOmitted_RunReportSaysTheyArePlaywrightsDefaults()
+    {
+        var settings = Load(("Target:ApplicationUrl", "http://localhost:5505/"));
+
+        var report = settings.Timeouts.Describe();
+
+        Assert.That(report, Does.Contain("expect 5000 ms").And.Contain("action 30000 ms").And.Contain("navigation 30000 ms"));
+        Assert.That(report, Does.Contain("Playwright's defaults"));
+    }
+
+    [Test]
+    public void Suite_WhenTimeoutsSet_RunReportNamesEachValueAndNotTheDefaults()
+    {
+        var settings = Load(("Target:ApplicationUrl", "http://localhost:5505/"),
+            ("Timeouts:ExpectMs", "2000"), ("Timeouts:ActionMs", "5000"), ("Timeouts:NavigationMs", "10000"));
+
+        var report = settings.Timeouts.Describe();
+
+        Assert.That(report, Does.Contain("expect 2000 ms").And.Contain("action 5000 ms").And.Contain("navigation 10000 ms"));
+        Assert.That(report, Does.Not.Contain("defaults"));
+    }
+
     [TestCase("0")]
     [TestCase("-1")]
     [TestCase("soon")]

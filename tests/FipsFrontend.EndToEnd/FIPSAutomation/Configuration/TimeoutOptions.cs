@@ -26,4 +26,15 @@ public sealed class TimeoutOptions
         if (ActionMs <= 0) yield return nameof(ActionMs);
         if (NavigationMs <= 0) yield return nameof(NavigationMs);
     }
+
+    /// <summary>
+    /// One line for a run's output, saying which timeouts applied and whether they are Playwright's
+    /// defaults: a run left at the defaults against a slow target is then recognisable from its log.
+    /// </summary>
+    public string Describe()
+    {
+        var defaults = new TimeoutOptions();
+        var atDefaults = ExpectMs == defaults.ExpectMs && ActionMs == defaults.ActionMs && NavigationMs == defaults.NavigationMs;
+        return $"Timeouts: expect {ExpectMs} ms, action {ActionMs} ms, navigation {NavigationMs} ms" + (atDefaults ? " (Playwright's defaults)" : "");
+    }
 }

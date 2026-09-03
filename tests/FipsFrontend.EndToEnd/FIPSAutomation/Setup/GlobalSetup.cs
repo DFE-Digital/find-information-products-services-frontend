@@ -41,10 +41,12 @@ namespace FiPSAutomation
                 ViewportSize = ViewportSize.NoViewport //Sets viewport size for consistent UI testing.
             });
 
-            // Set once, here, for every test: see TimeoutOptions for why they are configuration.
+            // Set once, here, for every test: see TimeoutOptions for why they are configuration. Reported at the
+            // start of the run's output and in the report, so a run at the defaults is recognised from its log.
             Assertions.SetDefaultExpectTimeout(_settings.Timeouts.ExpectMs);
             Context.SetDefaultTimeout(_settings.Timeouts.ActionMs);
             Context.SetDefaultNavigationTimeout(_settings.Timeouts.NavigationMs);
+            TestContext.Progress.WriteLine(_settings.Timeouts.Describe());
 
             Page = await Context.NewPageAsync();
 
@@ -55,6 +57,7 @@ namespace FiPSAutomation
             // name). A target that does not answer is recorded as such rather than failing the run.
             ExtentReportHelper.extent?.AddSystemInfo("Target", _settings.ApplicationUrl);
             ExtentReportHelper.extent?.AddSystemInfo("Application", await DescribeApplicationAsync(_settings.ApplicationUrl));
+            ExtentReportHelper.extent?.AddSystemInfo("Timeouts", _settings.Timeouts.Describe());
 
             await OpenApplicationAsync(Page, _settings);
         }

@@ -278,12 +278,13 @@ jobs:
       # then environment variables - the Target__ and Timeouts__ values set on the job.
       # The whole suite in one run: the content is seeded, so every test is expected to pass. (The Integration category
       # marks the tests that need content; it matters for a run against an instance without any, not here.)
-      # The gate is the known-green check below, which ignores the tests listed as flaky.
+      # The gate is the known-green check below, which ignores the tests listed as flaky. The console logger at
+      # normal verbosity shows the suite's own start-up line (the timeouts it runs with) and each test as it finishes.
       - name: Run the suite
         continue-on-error: true
         run: >
           dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
-          --logger trx --results-directory ${{ runner.temp }}/end-to-end
+          --logger "console;verbosity=normal" --logger trx --results-directory ${{ runner.temp }}/end-to-end
 
       - name: Check that the tests known to pass still pass
         run: |

@@ -55,10 +55,12 @@ ASPNETCORE_ENVIRONMENT=ci dotnet out/FipsFrontend.dll --urls http://localhost:55
 Then:
 
 ```
-dotnet test tests/FipsFrontend.EndToEnd
+dotnet test tests/FipsFrontend.EndToEnd --logger "console;verbosity=normal"
 ```
 
-A report is written to `tests/FipsFrontend.EndToEnd/playwright-report/`, with a screenshot of each
+The console logger at normal verbosity shows the suite's start-up line, which names the timeouts
+the run uses and says when they are Playwright's defaults, and each test as it finishes; the same
+line is in the trx and the report either way. A report is written to `tests/FipsFrontend.EndToEnd/playwright-report/`, with a screenshot of each
 failing test. The suite's own rules - its settings rules and the url comparison behind its pagination
 assertions - are tests in `tests/FipsFrontend.EndToEnd.Rules`, a project with no browser in it: they
 run in seconds anywhere, and the pipeline gates on them before it starts a browser.

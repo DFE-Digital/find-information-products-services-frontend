@@ -121,6 +121,8 @@ summary under the heading, delete its "None" groups, and paste this above it:
   rather than written carry `.generated.json` in their names and sit beside the generators that reproduce them,
   so a hand edit to one has nowhere to hide. Every test can now be green in the pipeline, and the product-detail
   tests reach their product by its title rather than by a content id that only one database ever held.
+- **Browser suite:** a run's output names the timeouts it uses and says when they are Playwright's defaults, so a run
+  left at the defaults against a slow target is recognised from its log rather than diagnosed afterwards.
 
 ## [v2026.08.28-0001]
 
