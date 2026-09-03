@@ -60,7 +60,11 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ### Added
 
-- None.
+- The products listing and product page read from COMPASS, at `/compass/products` and `/compass/product/{id}`, looking as
+  they do from the CMS: COMPASS's vocabularies are the filters, its products the results, with filtering and paging done by COMPASS,
+  and only the products COMPASS holds as Active listed, as the CMS-backed listing lists Active products.
+  What COMPASS does not supply (FIPS IDs, short descriptions, sub-group and CMDB filters) is marked as such on the page,
+  which also says plainly when COMPASS is not configured or cannot be reached.
 
 ### Changed
 
@@ -120,6 +124,8 @@ summary under the heading, delete its "None" groups, and paste this above it:
   (it publishes no API specification and returns anonymous objects), with tests over responses recorded from a locally seeded copy.
   Generated from and recorded against COMPASS `main` at `e6657ad`, which names each product's channels and types;
   the recordings say which commit they came from.
+- **Tests:** rendered pages are parsed and queried as a document rather than pattern-matched, so a test names the element
+  it means and does not break on attribute order or whitespace.
 - **Content source:** a stand-in COMPASS, `src/Compass.FipsApi.Stub`, serves those recordings and three more scenarios
   (empty, drifted, unavailable) by URL prefix, so the application and its tests read COMPASS without one running.
   The `Compass` settings section is optional: absent means off.

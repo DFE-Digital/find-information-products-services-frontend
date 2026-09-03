@@ -14,7 +14,14 @@ namespace FipsFrontend.Models
         public List<Product> Products { get; set; } = new List<Product>();
         public List<CategoryType> CategoryTypes { get; set; } = new List<CategoryType>();
         public List<CategoryValue> CategoryValues { get; set; } = new List<CategoryValue>();
-        
+
+        // Where the listing and its product pages live: the CMS-backed pages by default, the COMPASS-backed ones under /compass.
+        public string ListingPath { get; set; } = "/products";
+        public string ProductPath { get; set; } = "/product";
+
+        // Shown above the listing when set: what this rendering cannot show or does differently, said loudly.
+        public List<string> Notices { get; set; } = new List<string>();
+
         // Filter properties
         public string? Keywords { get; set; }
         public List<string> KeywordTerms { get; set; } = new List<string>();

@@ -1,0 +1,288 @@
+using System.Net;
+using Compass.FipsApi.Stub;
+using FipsFrontend.Tests.TestSupport;
+
+namespace FipsFrontend.Tests;
+
+/// <summary>
+/// What a visitor meets at /compass/products and /compass/product/{id}: the products listing and product page as they
+/// look from the CMS, read from COMPASS - its vocabularies as the filters, its products as the results - or a plain
+/// statement when COMPASS is not configured or cannot be reached.
+/// </summary>
+[TestFixture]
+public class CompassProductsPageTests
+{
+    private static readonly Dictionary<string, string?> Configured = new()
+    {
+        ["Compass:BaseUrl"] = "http://compass.example.com/seeded",
+        ["Compass:ApiToken"] = "test-only",
+    };
+
+    private static readonly Scenarios Scenarios = new(Path.Combine(AppContext.BaseDirectory, "scenarios"));
+
+    private static (HttpStatusCode, string)? Serve(HttpRequestMessage request, string scenario)
+    {
+        var answer = Scenarios.Answer(scenario, request.RequestUri!.AbsolutePath.Replace("/seeded/", "/", StringComparison.Ordinal));
+        return ((HttpStatusCode)answer.Status, answer.Body);
+    }
+
+    // The two links on each product card: its title, and the overlay that makes the whole card clickable.
+    private const string TitleLinks = "a.product-link.govuk-link";
+    private const string OverlayLinks = "a.product-link.dfe-chevron-card__link";
+
+    [Test]
+    public async Task CompassProducts_WhenCompassIsNotConfigured_PageSaysSoAndOffersNoFilters()
+    {
+        using var app = new FipsApplication();
+
+        var response = await app.Client.GetAsync("/compass/products");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(html, Does.Contain("data-compass-state=\"not-configured\""));
+        Assert.That(html, Does.Not.Contain("name=\"channel\""));
+        Assert.That(app.Outbound.Snapshot(), Has.None.Contains("ServiceRegister"), "nothing is asked of COMPASS");
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenSeeded_LooksLikeTheProductsListing_WithCompassVocabulariesAndProducts()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/products"));
+
+        // The same listing: the filter form and product cards of /products, pointed under /compass.
+        Assert.That(page.QuerySelector("form#products-filter-form")?.GetAttribute("action"), Is.EqualTo("/compass/products"));
+        var titleLinks = Html.Hrefs(page, TitleLinks);
+        Assert.That(titleLinks, Has.Count.EqualTo(28));
+        Assert.That(titleLinks, Has.All.StartWith("/compass/product/"));
+        Assert.That(titleLinks.Select(h => Guid.TryParse(h["/compass/product/".Length..], out _)), Has.All.True, "each link carries the product's COMPASS id");
+        // Channels: the seed's three active ones offered as filter values, the inactive "Post" not.
+        var channels = page.QuerySelectorAll("input[name='channel']").Select(i => i.GetAttribute("value")).ToList();
+        Assert.That(channels, Is.SupersetOf(new[] { "Web", "Native app", "Telephone" }));
+        Assert.That(channels, Does.Not.Contain("Post"));
+        // Phase comes from COMPASS's categorisation bundle; a seeded product carries its phase and business area tags.
+        Assert.That(page.QuerySelectorAll("input[name='phase']").Select(i => i.GetAttribute("value")), Does.Contain("Public beta"));
+        Assert.That(page.QuerySelectorAll(TitleLinks).Select(Html.Text), Does.Contain("Apply for Teacher Training"));
+        Assert.That(page.QuerySelectorAll(".govuk-tag").Select(Html.Text), Does.Contain("Digital Services"));
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenFiltersAreChosenByName_CompassFiltersByItsIds_AndTheChoiceStaysTicked()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/products?keywords=teacher&channel=Web&phase=Live&group=Operations&page=2"));
+
+        // The ids are the seeded recording's: Live = 5 in the Phase categorisation group, Web = channel 1, Operations = business area 6.
+        Assert.That(app.Outbound.Snapshot(), Has.One.EndsWith("/products?page=2&pageSize=25&status=Active&q=teacher&categoryIds=5&channelIds=1&businessAreaIds=6"));
+        Assert.That(page.QuerySelector("input[name='channel'][value='Web']")?.HasAttribute("checked"), Is.True, "the chosen channel stays ticked");
+        Assert.That(page.QuerySelectorAll(".filter-badge"), Is.Not.Empty, "the chosen filters are shown as removable badges");
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenSeeded_ShowsTheProductFromCompass()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        var html = await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000014");
+
+        Assert.That(html, Does.Contain("from COMPASS").And.Contain("govuk-summary-list"));
+        Assert.That(app.Outbound.Snapshot(), Has.One.EndsWith("/products/00000000-0000-0000-0002-000000000014"));
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenCompassLinksItToChannelsAndTypes_TheProductPageShowsThem()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // The seed links this product to two channels and two types; the recording is its own file in the scenario.
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0001-000000000001"));
+
+        Assert.That(Html.H1Headings(page), Is.EqualTo(new[] { "Apply for Teacher Training" }));
+        Assert.That(Html.SummaryRows(page), Is.SupersetOf(new[] { ("Channel", "Web"), ("Channel", "Native app"), ("Type", "Transactional"), ("Type", "Information") }));
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenPhaseAndBusinessAreaAreBothTaggedAndNamedOnTheRow_EachShowsOnce()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
+
+        // The drift scenario's product carries Live and Digital Services both as categorisation tags and as the row's own phase and business area.
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000001"));
+
+        var rows = Html.SummaryRows(page);
+        Assert.That(rows.Where(r => r.Key == "Phase"), Is.EqualTo(new[] { ("Phase", "Live") }));
+        Assert.That(rows.Where(r => r.Key == "Business area"), Is.EqualTo(new[] { ("Business area", "Digital Services") }));
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenCompassLinksAndTagsTheSameChannelOrType_EachShowsOnce()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // The seed both links this product to the Web channel and Transactional type and tags it "Channel: Web" and "Type: Transactional".
+        var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0001-000000000001")));
+
+        Assert.That(rows.Where(r => r.Key == "Channel"), Is.EqualTo(new[] { ("Channel", "Web"), ("Channel", "Native app") }));
+        Assert.That(rows.Where(r => r.Key == "Type"), Is.EqualTo(new[] { ("Type", "Transactional"), ("Type", "Information") }));
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenTheRowAndItsTagDisagreeOnThePhase_BothShow()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
+
+        // The drift scenario's second product is tagged "Phase: Live" while its own phase field says "Public beta".
+        var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000002")));
+
+        Assert.That(rows.Where(r => r.Key == "Phase"), Is.EqualTo(new[] { ("Phase", "Live"), ("Phase", "Public beta") }), "a conflict in COMPASS's data is shown, not resolved here");
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenOnePersonHoldsTwoRoles_EachRoleShowsThem()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
+
+        // The drift scenario's third product names the same person as product manager and as service owner. COMPASS
+        // sends one contact row per role, and the page shows each role with its person, not one person once.
+        var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000003")));
+
+        Assert.That(rows.Where(r => r.Value.Contains("One Person")), Is.EqualTo(new[] { ("Product manager", "One Person"), ("Service Owner", "One Person") }));
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenTheProductIsNotActive_StillRenders_AsTheCmsBackedProductPageDoes()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
+
+        // The drift scenario's second product is Inactive: absent from the listing, reachable by its link.
+        var response = await app.Client.GetAsync("/compass/product/00000000-0000-0000-0002-000000000002");
+        var page = Html.Parse(await response.Content.ReadAsStringAsync());
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(Html.H1Headings(page), Is.EqualTo(new[] { "Drifted product (row and tag disagree)" }));
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenAFilterNameIsUnknownToCompass_NothingIsListed_AndTheChoiceStaysRemovable()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // A stale link or a typed url can name a phase COMPASS does not hold. No product can match it.
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/products?phase=ThisPhaseDoesNotExist"));
+
+        Assert.That(page.QuerySelectorAll("a.product-link"), Is.Empty);
+        Assert.That(page.QuerySelectorAll(".filter-badge").Select(Html.Text), Has.Some.Contains("ThisPhaseDoesNotExist"), "the choice is shown so it can be removed");
+        Assert.That(app.Outbound.Snapshot(), Has.None.Contains("/ServiceRegister/products?"), "COMPASS is not asked for an unfiltered listing in its place");
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenCompassDoesNotKnowTheId_Answers404()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => (HttpStatusCode.NotFound, """{"error":"not found"}""");
+
+        var response = await app.Client.GetAsync($"/compass/product/{Guid.NewGuid()}");
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenCompassIsUnavailable_PageSaysSoWithoutTechnicalDetail()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Unavailable);
+
+        var response = await app.Client.GetAsync("/compass/products");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(html, Does.Contain("data-compass-state=\"unavailable\""));
+        // The page body, not the layout: the telemetry script in <head> legitimately mentions exceptions.
+        var main = Html.Text(Html.Parse(html).QuerySelector("main"));
+        Assert.That(main, Is.Not.Empty.And.Not.Contain("Exception").And.Not.Contain("503"));
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenCompassHasNoProducts_ListingShowsNoneAndStillOffersFilters()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Empty);
+
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/products"));
+
+        Assert.That(page.QuerySelectorAll("a.product-link"), Is.Empty);
+        Assert.That(page.QuerySelector("input[name='keywords']"), Is.Not.Null);
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenSeeded_OnlyActiveProductsAreAskedOf_Compass_AsTheCmsListingShowsActiveOnly()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        await app.Client.GetStringAsync("/compass/products");
+
+        // COMPASS holds New, Inactive and Rejected products too; the public listing shows what it lists from the CMS: Active only.
+        var products = app.Outbound.Snapshot().Single(r => r.Contains("/ServiceRegister/products?"));
+        Assert.That(products, Does.Contain("status=Active"));
+        Assert.That(products, Does.Not.Contain("status=New").And.Not.Contain("status=Inactive").And.Not.Contain("status=Rejected"));
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenSeeded_ClickingACardBodyOpensTheSameProductAsItsTitle()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/products"));
+
+        var titleLinks = Html.Hrefs(page, TitleLinks);
+        var overlayLinks = Html.Hrefs(page, OverlayLinks);
+        Assert.That(titleLinks, Has.Count.EqualTo(28));
+        Assert.That(overlayLinks, Is.EqualTo(titleLinks), "the card body opens the product the title names");
+
+        var opened = await app.Client.GetAsync(overlayLinks[0]);
+        Assert.That(opened.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    }
+
+    [Test]
+    public async Task CompassProducts_WhenThereIsAnotherPage_TheNextPageLinkOpensIt_KeepingTheFilters()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // 28 seeded products at 25 a page: a second page exists.
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/products?channel=Web"));
+
+        var href = page.QuerySelector("a.govuk-pagination__link[rel='next']")?.GetAttribute("href");
+        Assert.That(href, Is.Not.Null, "the listing offers a next page");
+        Assert.That(href, Does.StartWith("/compass/products?").And.Contain("channel=Web").And.Contain("page=2"));
+
+        var response = await app.Client.GetAsync(href);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        Assert.That(app.Outbound.Snapshot(), Has.One.Contains("/products?page=2&"), "the second page is asked of COMPASS");
+    }
+
+    [Test]
+    public async Task Products_TheCmsBackedListing_StillPointsAtItsOwnPaths()
+    {
+        using var app = new FipsApplication();
+
+        var html = await app.Client.GetStringAsync("/products");
+
+        Assert.That(html, Does.Contain("action=\"/products\""));
+        Assert.That(html, Does.Not.Contain("/compass/"));
+    }
+}

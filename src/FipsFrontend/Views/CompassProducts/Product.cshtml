@@ -1,0 +1,45 @@
+@model FipsFrontend.Controllers.CompassProductViewModel
+@{ ViewData["Title"] = Model.Product.Title; }
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <span class="govuk-caption-xl">Product or service (from COMPASS)</span>
+        <h1 class="govuk-heading-xl">@Model.Product.Title</h1>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Product.LongDescription))
+        {
+            <p class="govuk-body-l">@Model.Product.LongDescription</p>
+        }
+
+        <dl class="govuk-summary-list">
+            @* What the CMS-backed product page shows and COMPASS does not supply, said loudly so an omission is not mistaken for a gap here. *@
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">FIPS ID</dt><dd class="govuk-summary-list__value"><strong class="govuk-tag govuk-tag--red">[NOT AVAILABLE VIA COMPASS]</strong> COMPASS id @Model.Product.DocumentId</dd></div>
+            <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Short description</dt><dd class="govuk-summary-list__value"><strong class="govuk-tag govuk-tag--red">[NOT AVAILABLE VIA COMPASS]</strong> only a long description is supplied</dd></div>
+            @foreach (var value in Model.Product.CategoryValues ?? [])
+            {
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">@value.CategoryType?.Name</dt>
+                    <dd class="govuk-summary-list__value">@value.Name</dd>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Product.State))
+            {
+                <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Status</dt><dd class="govuk-summary-list__value">@Model.Product.State</dd></div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Product.ProductUrl))
+            {
+                <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Website</dt><dd class="govuk-summary-list__value"><a class="govuk-link" href="@Model.Product.ProductUrl">@Model.Product.ProductUrl</a></dd></div>
+            }
+            @foreach (var contact in Model.Contacts)
+            {
+                <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">@(contact.Role ?? "Contact")</dt><dd class="govuk-summary-list__value">@(contact.Name ?? contact.Email)</dd></div>
+            }
+            @if (Model.LastUpdated is { } updated)
+            {
+                <div class="govuk-summary-list__row"><dt class="govuk-summary-list__key">Last updated</dt><dd class="govuk-summary-list__value">@updated.ToString("d MMMM yyyy")</dd></div>
+            }
+        </dl>
+
+        <p class="govuk-body"><a class="govuk-link" href="/compass/products">Back to the listing</a></p>
+    </div>
+</div>

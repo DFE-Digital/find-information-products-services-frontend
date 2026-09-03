@@ -63,11 +63,23 @@
     </div>
 }
 
+@if (Model.Notices.Count > 0)
+{
+    <div class="govuk-notification-banner" role="region" aria-labelledby="listing-notices-title" data-module="govuk-notification-banner" data-listing-notices>
+        <div class="govuk-notification-banner__header"><h2 class="govuk-notification-banner__title" id="listing-notices-title">Where this listing differs</h2></div>
+        <div class="govuk-notification-banner__content">
+            <ul class="govuk-list govuk-list--bullet">
+                @foreach (var notice in Model.Notices) { <li>@notice</li> }
+            </ul>
+        </div>
+    </div>
+}
+
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-third">
         
         <!-- MOJ Filter Component -->
-        <form id="products-filter-form" method="get" action="/products">
+        <form id="products-filter-form" method="get" action="@Model.ListingPath">
             
             <div class="moj-filter" data-module="moj-filter">
                 <div class="moj-filter__header">
@@ -433,7 +445,7 @@
                 }
                 
                 <div class="clear-filters-section">
-                    <a href="/products" class="govuk-link govuk-link--no-visited-state" style="font-weight: 600; font-size: 16px;">
+                    <a href="@Model.ListingPath" class="govuk-link govuk-link--no-visited-state" style="font-weight: 600; font-size: 16px;">
                         Clear all filters
                     </a>
                 </div>
@@ -513,7 +525,7 @@
                         <div class="dfe-chevron-card__wrapper">
                             <p class="govuk-heading-s govuk-!-margin-bottom-2">
                                 <a class="govuk-link govuk-link--no-visited-state product-link" 
-                                   href="/product/@(string.IsNullOrWhiteSpace(product.FipsId) ? product.DocumentId : product.FipsId)"
+                                   href="@ProductUrl(product)"
                                    data-product-title="@product.Title"
                                    data-document-id="@product.DocumentId"
                                    data-position="@(Model.StartIndex + Model.Products.ToList().IndexOf(product))">
@@ -566,8 +578,8 @@
                                
                             </div>
 
-                            <a class="dfe-chevron-card__link product-link" 
-                               href="/product/@product.FipsId" 
+                            <a class="dfe-chevron-card__link product-link"
+                               href="@ProductUrl(product)"
                                aria-hidden="true" 
                                tabindex="-1"
                                data-product-title="@product.Title"
@@ -587,17 +599,7 @@
                     @if (Model.HasPreviousPage)
                     {
                         <div class="govuk-pagination__prev">
-                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
-                                keywords = Model.Keywords,
-                                phase = Model.SelectedPhases,
-                                group = Model.SelectedGroups,
-                                subgroup = Model.SelectedSubgroups,
-                                channel = Model.SelectedChannels,
-                                type = Model.SelectedTypes,
-                                cmdbStatus = Model.SelectedCmdbStatuses,
-                                parent = Model.SelectedCmdbGroups,
-                                page = Model.CurrentPage - 1
-                            })" rel="prev">
+                            <a class="govuk-link govuk-pagination__link" href="@PageUrl(Model.CurrentPage - 1)" rel="prev">
                                 <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
                                     <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
                                 </svg>
@@ -617,17 +619,7 @@
                             if (startPage > 1)
                             {
                                 <li class="govuk-pagination__item">
-                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
-                                        keywords = Model.Keywords,
-                                        phase = Model.SelectedPhases,
-                                        group = Model.SelectedGroups,
-                                        subgroup = Model.SelectedSubgroups,
-                                        channel = Model.SelectedChannels,
-                                        type = Model.SelectedTypes,
-                                        cmdbStatus = Model.SelectedCmdbStatuses,
-                                        parent = Model.SelectedCmdbGroups,
-                                        page = 1
-                                    })" aria-label="Page 1">
+                                    <a class="govuk-link govuk-pagination__link" href="@PageUrl(1)" aria-label="Page 1">
                                         1
                                     </a>
                                 </li>
@@ -641,17 +633,7 @@
                             @for (int i = startPage; i <= endPage; i++)
                             {
                                 <li class="govuk-pagination__item @(i == Model.CurrentPage ? "govuk-pagination__item--current" : "")">
-                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
-                                        keywords = Model.Keywords,
-                                        phase = Model.SelectedPhases,
-                                        group = Model.SelectedGroups,
-                                        subgroup = Model.SelectedSubgroups,
-                                        channel = Model.SelectedChannels,
-                                        type = Model.SelectedTypes,
-                                        cmdbStatus = Model.SelectedCmdbStatuses,
-                                        parent = Model.SelectedCmdbGroups,
-                                        page = i
-                                    })" aria-label="Page @i" @(i == Model.CurrentPage ? "aria-current=\"page\"" : "")>
+                                    <a class="govuk-link govuk-pagination__link" href="@PageUrl(i)" aria-label="Page @i" @(i == Model.CurrentPage ? "aria-current=\"page\"" : "")>
                                         @i
                                     </a>
                                 </li>
@@ -665,17 +647,7 @@
                                     <li class="govuk-pagination__item govuk-pagination__item--ellipsis" aria-label="Omitted pages @(endPage + 1) to @(Model.TotalPages - 1)">…</li>
                                 }
                                 <li class="govuk-pagination__item">
-                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
-                                        keywords = Model.Keywords,
-                                        phase = Model.SelectedPhases,
-                                        group = Model.SelectedGroups,
-                                        subgroup = Model.SelectedSubgroups,
-                                        channel = Model.SelectedChannels,
-                                        type = Model.SelectedTypes,
-                                        cmdbStatus = Model.SelectedCmdbStatuses,
-                                        parent = Model.SelectedCmdbGroups,
-                                        page = Model.TotalPages
-                                    })" aria-label="Page @Model.TotalPages">
+                                    <a class="govuk-link govuk-pagination__link" href="@PageUrl(Model.TotalPages)" aria-label="Page @Model.TotalPages">
                                         @Model.TotalPages
                                     </a>
                                 </li>
@@ -686,17 +658,7 @@
                     @if (Model.HasNextPage)
                     {
                         <div class="govuk-pagination__next">
-                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "Products", new { 
-                                keywords = Model.Keywords,
-                                phase = Model.SelectedPhases,
-                                group = Model.SelectedGroups,
-                                subgroup = Model.SelectedSubgroups,
-                                channel = Model.SelectedChannels,
-                                type = Model.SelectedTypes,
-                                cmdbStatus = Model.SelectedCmdbStatuses,
-                                parent = Model.SelectedCmdbGroups,
-                                page = Model.CurrentPage + 1
-                            })" rel="next">
+                            <a class="govuk-link govuk-pagination__link" href="@PageUrl(Model.CurrentPage + 1)" rel="next">
                                 <span class="govuk-pagination__link-title">
                                     Next<span class="govuk-visually-hidden"> page</span>
                                 </span>
@@ -712,7 +674,7 @@
         else if (Model.SelectedFilters.Any())
         {
             <div class="govuk-inset-text">
-                <p class="govuk-body"><a href="/products" class="govuk-link">Clear all filters</a> to see all products and services.</p>
+                <p class="govuk-body"><a href="@Model.ListingPath" class="govuk-link">Clear all filters</a> to see all products and services.</p>
             </div>
         }
 
@@ -1129,7 +1091,7 @@
             });
 
             // Clear filters tracking
-            document.querySelectorAll('a[href="/products"]').forEach(function(link) {
+            document.querySelectorAll('a[href="@Model.ListingPath"]').forEach(function(link) {
                 if (link.textContent.includes('Clear')) {
                     link.addEventListener('click', function(e) {
                         trackEvent('clear_filters', {
@@ -1196,6 +1158,34 @@
 }
 
 @functions {
+    // The product page's address: by FIPS id where there is one, else by the source's own identifier.
+    // Both links on a card use it, so the card body opens the same product as the title.
+    private string ProductUrl(FipsFrontend.Models.Product product) =>
+        $"{Model.ProductPath}/{(string.IsNullOrWhiteSpace(product.FipsId) ? product.DocumentId : product.FipsId)}";
+
+    // Paging links are built from the listing path, not generated from the controller name.
+    // Link generation rejects an attribute-routed action when a route value is named "page", the name MVC reserves for Razor Pages,
+    // and falls through to the conventional route, which answers 404.
+    private string PageUrl(int page)
+    {
+        var query = new List<KeyValuePair<string, string?>>();
+        if (Model.Keywords is not null) query.Add(new("keywords", Model.Keywords));
+        Add("phase", Model.SelectedPhases);
+        Add("group", Model.SelectedGroups);
+        Add("subgroup", Model.SelectedSubgroups);
+        Add("channel", Model.SelectedChannels);
+        Add("type", Model.SelectedTypes);
+        Add("cmdbStatus", Model.SelectedCmdbStatuses);
+        Add("parent", Model.SelectedCmdbGroups);
+        query.Add(new("page", page.ToString()));
+        return Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(Model.ListingPath, query);
+
+        void Add(string name, List<string> values)
+        {
+            foreach (var value in values) query.Add(new(name, value));
+        }
+    }
+
     private static string GetTruncatedDescription(string? longDescription, string? shortDescription)
     {
         const int maxLength = 200;

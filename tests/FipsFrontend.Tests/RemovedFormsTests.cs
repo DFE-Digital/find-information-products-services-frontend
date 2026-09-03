@@ -53,7 +53,10 @@ public class RemovedFormsTests
 
         Assert.That(html, Does.Not.Contain("Propose a change"));
         Assert.That(html, Does.Not.Contain("request a new product entry"));
-        Assert.That(html, Does.Match("""<h2[^>]*>Update a product or service</h2>\s*<p[^>]*>(?s:.*?)<a [^>]*href="/[^"]*"(?s:.*?)</p>"""),
-            "the 'Update a product or service' section should contain a link to somewhere");
+        var page = Html.Parse(html);
+        var heading = page.QuerySelectorAll("h2").SingleOrDefault(h => Html.Text(h) == "Update a product or service");
+        Assert.That(heading, Is.Not.Null, "the page keeps its 'Update a product or service' section");
+        Assert.That(heading!.NextElementSibling?.QuerySelector("a[href^='/']"), Is.Not.Null,
+            "the paragraph after the heading offers a link to somewhere on this site");
     }
 }

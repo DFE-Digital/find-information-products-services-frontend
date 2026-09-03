@@ -1,0 +1,22 @@
+@model FipsFrontend.Controllers.CompassState
+@{ ViewData["Title"] = "Products and services (from COMPASS)"; }
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl">@ViewData["Title"]</h1>
+        @if (Model == FipsFrontend.Controllers.CompassState.NotConfigured)
+        {
+            <div class="govuk-inset-text" data-compass-state="not-configured">
+                COMPASS is not configured for this copy of the service, so there is nothing to show here.
+                Supply <code>Compass:BaseUrl</code> and <code>Compass:ApiToken</code> to read from it.
+            </div>
+        }
+        else
+        {
+            <div class="govuk-inset-text" data-compass-state="unavailable">
+                COMPASS could not be reached, so there is nothing to show right now. Try again in a few minutes.
+            </div>
+        }
+        <p class="govuk-body"><a class="govuk-link" href="/products">See the products and services listing</a>.</p>
+    </div>
+</div>
