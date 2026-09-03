@@ -15,7 +15,8 @@ namespace FipsFrontend.Tests;
 [TestFixture]
 public class CompassContractTests
 {
-    private static string Fixture(string name) => Path.Combine(AppContext.BaseDirectory, "Fixtures", "compass", name);
+    // The stub's seeded scenario, linked into this project's output; names are endpoint paths under /api/v1/ServiceRegister/.
+    private static string Fixture(string name) => Path.Combine(AppContext.BaseDirectory, "scenarios", "seeded", "api", "v1", "ServiceRegister", name);
 
     private static T Parse<T>(string json) =>
         JsonSerializer.Deserialize<T>(json, CompassJson.Options) ?? throw new InvalidOperationException("payload deserialised to null");
@@ -26,16 +27,16 @@ public class CompassContractTests
 
     // Every endpoint the client reads, each recorded from a COMPASS seeded with its minimal scenario.
     [TestCase("products.json", typeof(ServiceRegisterGetProductsResponse))]
-    [TestCase("enterprise-active.json", typeof(ServiceRegisterGetProductsResponse))]
-    [TestCase("product-by-id.json", typeof(ServiceRegisterGetProductResponse))]
+    [TestCase("products/enterprise-active.json", typeof(ServiceRegisterGetProductsResponse))]
+    [TestCase("products/_by-id.json", typeof(ServiceRegisterGetProductResponse))]
     [TestCase("categorisation-items.json", typeof(ServiceRegisterGetCategorisationItemsResponse))]
-    [TestCase("fips-configuration.json", typeof(ServiceRegisterGetFipsConfigurationBundleResponse))]
-    [TestCase("fips-channels.json", typeof(ServiceRegisterGetFipsChannelsV1Response))]
-    [TestCase("fips-types.json", typeof(ServiceRegisterGetFipsChannelsV1Response))]
-    [TestCase("fips-business-areas.json", typeof(ServiceRegisterGetFipsBusinessAreasV1Response))]
-    [TestCase("fips-user-groups.json", typeof(ServiceRegisterGetFipsUserGroupsV1Response))]
-    [TestCase("fips-contact-roles.json", typeof(ServiceRegisterGetFipsContactRolesV1Response))]
-    [TestCase("fips-categorisation.json", typeof(ServiceRegisterGetFipsCategorisationNestedV1Response))]
+    [TestCase("fips/configuration.json", typeof(ServiceRegisterGetFipsConfigurationBundleResponse))]
+    [TestCase("fips/channels.json", typeof(ServiceRegisterGetFipsChannelsV1Response))]
+    [TestCase("fips/types.json", typeof(ServiceRegisterGetFipsChannelsV1Response))]
+    [TestCase("fips/business-areas.json", typeof(ServiceRegisterGetFipsBusinessAreasV1Response))]
+    [TestCase("fips/user-groups.json", typeof(ServiceRegisterGetFipsUserGroupsV1Response))]
+    [TestCase("fips/contact-roles.json", typeof(ServiceRegisterGetFipsContactRolesV1Response))]
+    [TestCase("fips/categorisation.json", typeof(ServiceRegisterGetFipsCategorisationNestedV1Response))]
     public void RecordedPayload_ParsesThroughTheGeneratedRootType_WithNoMemberUnnamed(string file, Type root)
     {
         var parsed = JsonSerializer.Deserialize(File.ReadAllText(Fixture(file)), root, CompassJson.Options);
@@ -75,9 +76,9 @@ public class CompassContractTests
     [Test]
     public void RecordedLookups_CarrySeededRows_InactiveIncluded_AndNestedUserGroups()
     {
-        var channels = ParseFixture<ServiceRegisterGetFipsChannelsV1Response>("fips-channels.json").Data!;
-        var groups = ParseFixture<ServiceRegisterGetFipsUserGroupsV1Response>("fips-user-groups.json").Data!;
-        var bundle = ParseFixture<ServiceRegisterGetFipsConfigurationBundleResponse>("fips-configuration.json");
+        var channels = ParseFixture<ServiceRegisterGetFipsChannelsV1Response>("fips/channels.json").Data!;
+        var groups = ParseFixture<ServiceRegisterGetFipsUserGroupsV1Response>("fips/user-groups.json").Data!;
+        var bundle = ParseFixture<ServiceRegisterGetFipsConfigurationBundleResponse>("fips/configuration.json");
 
         Assert.That(channels.Select(c => c.Name), Is.SupersetOf(new[] { "Web", "Native app", "Telephone", "Post" }));
         Assert.That(channels.Single(c => c.Name == "Post").Active, Is.False, "the lookups return inactive rows too: Active is a flag, not a filter");
@@ -103,7 +104,7 @@ public class CompassContractTests
     [Test]
     public void Product_WhenCompassSendsAMemberNobodyHereKnows_ParsesAndIsReportedOnce()
     {
-        var node = JsonNode.Parse(File.ReadAllText(Fixture("product-by-id.json")))!;
+        var node = JsonNode.Parse(File.ReadAllText(Fixture("products/_by-id.json")))!;
         node["data"]!["riskAppetite"] = "tolerant";                       // a member on the product
         node["data"]!["categories"] = new JsonArray(new JsonObject { ["id"] = 1, ["name"] = "Web", ["groupId"] = 2, ["groupName"] = "Channel", ["icon"] = "globe" }); // and one inside a list
 

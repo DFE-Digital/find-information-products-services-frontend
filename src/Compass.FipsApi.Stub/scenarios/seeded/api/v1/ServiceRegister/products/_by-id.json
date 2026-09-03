@@ -10,6 +10,8 @@
     "status": "Active",
     "isEnterpriseService": false,
     "longDescription": "Case management for admissions appeals. Itaque earum rerum hic tenetur. (AISS URL is retired: WD-10.)",
+    "channels": [],
+    "types": [],
     "categories": [],
     "contacts": [
       {

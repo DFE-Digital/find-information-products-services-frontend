@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- A stand-in COMPASS service-register API: serves recorded responses by scenario. See Program.cs. -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The Web SDK already lists every .json as Content; this only asks for the scenarios to be copied. -->
+    <Content Update="scenarios\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The empty scenario's answers are the contracts project's, shared with the application's stand-in for an unconfigured COMPASS. -->
+    <ProjectReference Include="..\Compass.FipsApi.Contracts\Compass.FipsApi.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

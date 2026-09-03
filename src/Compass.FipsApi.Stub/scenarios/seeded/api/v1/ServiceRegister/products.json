@@ -11,6 +11,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Case management for admissions appeals. Itaque earum rerum hic tenetur. (AISS URL is retired: WD-10.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -33,6 +35,8 @@
       "status": "New",
       "isEnterpriseService": false,
       "longDescription": "New in the register, not yet triaged.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": []
     },
@@ -47,6 +51,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Registered alternative provision settings and capacity. Nam libero tempore, cum soluta nobis.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -69,6 +75,26 @@
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "A live enterprise service used to demo the full house.",
+      "channels": [
+        {
+          "id": 1,
+          "name": "Web"
+        },
+        {
+          "id": 2,
+          "name": "Native app"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        },
+        {
+          "id": 2,
+          "name": "Information"
+        }
+      ],
       "categories": [
         {
           "id": 9,
@@ -111,6 +137,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Evidence-based behaviour interventions for schools. Omnis voluptas assumenda est.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -133,6 +161,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Gatsby benchmark tracking for secondary schools. Ut aut reiciendis voluptatibus. (owned_by dangles on purpose: WD-12.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": []
     },
@@ -147,6 +177,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Grant applications for classroom technology. Et harum quidem rerum facilis est.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -169,6 +201,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Public beta service, Priya is SRO.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -191,6 +225,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Curated teaching resources by key stage. Neque porro quisquam est qui dolorem. (Phase disagrees with SAS: WD-05.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -213,6 +249,8 @@
       "status": "New",
       "isEnterpriseService": false,
       "longDescription": "Pre-beta discovery work.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": []
     },
@@ -227,6 +265,8 @@
       "status": "New",
       "isEnterpriseService": false,
       "longDescription": "Offering first seen in the cmdb-minimal era; part of the world's steady state now.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -249,6 +289,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Registration and inspection history for early years providers. Duis aute irure dolor in reprehenderit.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -278,6 +320,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "\u26a0 WD-11: near-duplicate of School Estate Condition Survey, hand-created with NO CMDBID \u2014 permanently unmatchable by any sync.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": []
     },
@@ -292,6 +336,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": null,
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -314,6 +360,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Application workflow for free school proposals. Maiores alias consequatur aut perferendis.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -336,6 +384,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Training modules and completion tracking for governors. Sed ut perspiciatis unde omnis. (COMPASS contact carries WD-04: typo'd email.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -365,6 +415,8 @@
       "status": "Inactive",
       "isEnterpriseService": false,
       "longDescription": "Inactive/retired product for the inactive tab.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": []
     },
@@ -379,6 +431,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Daily attendance capture for schools. Lorem ipsum dolor sit amet, consectetur adipiscing elit. (COMPASS copy carries WD-02: transposed title.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -408,6 +462,8 @@
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Structured reporting route for safeguarding concerns. Quis autem vel eum iure reprehenderit.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -430,6 +486,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Pre-submission validation for census returns. Doloribus asperiores repellat.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -452,6 +510,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Condition data collection across the school estate. Temporibus autem quibusdam. (COMPASS holds a near-duplicate twin: WD-11.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -474,6 +534,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Nutrition standards guidance and compliance returns. Ut enim ad minim veniam.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -496,6 +558,18 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Live reporting service \u2014 CMDB copy updated 2026-08: now covers independent settings too.",
+      "channels": [
+        {
+          "id": 1,
+          "name": "Web"
+        }
+      ],
+      "types": [
+        {
+          "id": 2,
+          "name": "Information"
+        }
+      ],
       "categories": [
         {
           "id": 19,
@@ -525,6 +599,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Route planning and eligibility checks for home-to-school transport. Nemo enim ipsam voluptatem.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -547,6 +623,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Signposting and plans for special educational needs support. Lorem ipsum dolor sit amet. (AISS copy carries WD-09: case drift.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -569,6 +647,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Retirement estimate calculator for the teachers' scheme. At vero eos et accusamus. Service URL: https://example.education.gov.uk/pension-estimator (COMPASS copy carries WD-06: URL missing there.)",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -591,6 +671,8 @@
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Search and list teaching vacancies nationally. Sed do eiusmod tempor incididunt ut labore.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -620,6 +702,8 @@
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Tutoring provider enrolment and session logging. Lorem ipsum dolor sit amet, consectetur.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {

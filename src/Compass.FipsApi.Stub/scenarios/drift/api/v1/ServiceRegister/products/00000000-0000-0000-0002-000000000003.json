@@ -1,0 +1,34 @@
+{
+  "data": {
+    "id": "00000000-0000-0000-0002-000000000003",
+    "uniqueId": 3,
+    "lastUpdated": "2026-08-28T19:00:00Z",
+    "productName": "Drifted product (one person, two roles)",
+    "phase": "Live",
+    "businessArea": "Digital Services",
+    "productUrl": "https://www.example.com/drifted-two-roles",
+    "status": "Active",
+    "isEnterpriseService": false,
+    "longDescription": null,
+    "channels": [ { "id": 1, "name": "Web" } ],
+    "types": [],
+    "categories": [],
+    "contacts": [
+      {
+        "role": "Product manager",
+        "roleId": 1,
+        "email": "one.person@example.com",
+        "name": "One Person",
+        "canManage": false
+      },
+      {
+        "role": "Service Owner",
+        "roleId": 2,
+        "email": "one.person@example.com",
+        "name": "One Person",
+        "canManage": true
+      }
+    ],
+    "retiredAt": null
+  }
+}

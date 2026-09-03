@@ -84,13 +84,6 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ### Maintenance
 
-- **Content source:** a contracts project, `src/Compass.FipsApi.Contracts`, holds the records for the
-  service-register API the service will read products from, generated from that API's own source rather
-  than written by hand or from its documentation, which describes shapes the API does not send.
-  Every member is optional; a member the records do not name is observed and logged once, never rejected.
-  Tests parse responses recorded from a local instance holding synthetic seed data (no real products) through
-  the records, and hold the seeded rows to known values, so a change on either side fails as a disagreement.
-  Nothing reads the records yet.
 - **Footer:** the accessibility statement's address is the `AccessibilityStatement:Url` setting, with the departmental
   statement as the default, so an instance can point the link at its own statement; the link itself is never absent.
 - **Feedback:** the feedback store's address is the `Airtable:BaseUrl` setting, defaulting to the Airtable service, so a
@@ -123,6 +116,13 @@ summary under the heading, delete its "None" groups, and paste this above it:
   tests reach their product by its title rather than by a content id that only one database ever held.
 - **Browser suite:** a run's output names the timeouts it uses and says when they are Playwright's defaults, so a run
   left at the defaults against a slow target is recognised from its log rather than diagnosed afterwards.
+- **Content source:** the records for the COMPASS service-register API, generated from its controllers' source
+  (it publishes no API specification and returns anonymous objects), with tests over responses recorded from a locally seeded copy.
+  Generated from and recorded against COMPASS `main` at `e6657ad`, which names each product's channels and types;
+  the recordings say which commit they came from.
+- **Content source:** a stand-in COMPASS, `src/Compass.FipsApi.Stub`, serves those recordings and three more scenarios
+  (empty, drifted, unavailable) by URL prefix, so the application and its tests read COMPASS without one running.
+  The `Compass` settings section is optional: absent means off.
 
 ## [v2026.08.28-0001]
 

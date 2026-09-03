@@ -1,0 +1,24 @@
+{
+  "channels": [
+    { "id": 1, "name": "Web", "description": "Browser-based service", "displayOrder": 1, "active": true, "colour": "blue" },
+    { "id": 2, "name": "Native app", "description": null, "displayOrder": 2, "active": true }
+  ],
+  "types": [
+    { "id": 1, "name": "Transactional", "active": true }
+  ],
+  "businessAreas": [
+    { "id": 1, "businessAreaLookupId": 1, "name": "Digital Services", "description": null, "displayOrder": 1, "active": true }
+  ],
+  "userGroups": [
+    { "id": 1, "name": "Teachers", "description": null, "displayOrder": 1, "active": true, "children": ["Classroom teachers"], "synonyms": [], "parentId": null }
+  ],
+  "contactRoles": [
+    { "id": 1, "name": "Service Owner", "description": null, "allowMultiple": false, "displayOrder": 1, "active": true }
+  ],
+  "categorisationGroups": [
+    { "id": 1, "name": "Phase", "description": null, "displayOrder": 1, "active": true, "items": [
+      { "id": 10, "name": "Live", "description": null, "displayOrder": 1, "active": true, "categorisationGroupId": 1 }
+    ] }
+  ],
+  "generatedAt": "2026-08-28T20:00:00Z"
+}

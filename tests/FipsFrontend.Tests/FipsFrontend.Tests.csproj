@@ -33,8 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Payloads recorded from a locally-running custom-seeded COMPASS; the contract tests parse them. See Fixtures/compass/README.md. -->
-    <None Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The stub's scenario files and resolver, so the tests serve in-process exactly what the stub serves over HTTP.
+         Linked rather than referenced: two web projects with top-level statements would both be named Program. -->
+    <Compile Include="..\..\src\Compass.FipsApi.Stub\Scenarios.cs" Link="TestSupport\Scenarios.cs" />
+    <None Include="..\..\src\Compass.FipsApi.Stub\scenarios\**\*.json" Link="scenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

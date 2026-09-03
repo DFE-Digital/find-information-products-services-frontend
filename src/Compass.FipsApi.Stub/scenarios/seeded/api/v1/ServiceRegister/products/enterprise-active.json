@@ -11,6 +11,26 @@
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "A live enterprise service used to demo the full house.",
+      "channels": [
+        {
+          "id": 1,
+          "name": "Web"
+        },
+        {
+          "id": 2,
+          "name": "Native app"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        },
+        {
+          "id": 2,
+          "name": "Information"
+        }
+      ],
       "categories": [
         {
           "id": 9,
@@ -53,6 +73,8 @@
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Structured reporting route for safeguarding concerns. Quis autem vel eum iure reprehenderit.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {
@@ -75,6 +97,8 @@
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Search and list teaching vacancies nationally. Sed do eiusmod tempor incididunt ut labore.",
+      "channels": [],
+      "types": [],
       "categories": [],
       "contacts": [
         {

@@ -22,6 +22,15 @@ public static class Routes
 }
 
 /// <summary>Built by GET /api/v1/ServiceRegister/products (ServiceRegisterController.GetProducts); GET /api/v1/ServiceRegister/products/enterprise-active (ServiceRegisterController.GetEnterpriseActiveProducts); GET /api/v1/ServiceRegister/products/{id:guid} (ServiceRegisterController.GetProduct).</summary>
+public sealed class ServiceRegisterGetProductsResponseDataItemChannel : IContractRecord
+{
+    [JsonPropertyName("id")] public int? Id { get; set; }
+    [JsonPropertyName("name")] public string? Name { get; set; }
+
+    [JsonExtensionData] public IDictionary<string, JsonElement>? Unexpected { get; set; }
+}
+
+/// <summary>Built by GET /api/v1/ServiceRegister/products (ServiceRegisterController.GetProducts); GET /api/v1/ServiceRegister/products/enterprise-active (ServiceRegisterController.GetEnterpriseActiveProducts); GET /api/v1/ServiceRegister/products/{id:guid} (ServiceRegisterController.GetProduct).</summary>
 public sealed class ServiceRegisterGetProductsResponseDataItemCategory : IContractRecord
 {
     [JsonPropertyName("id")] public int? Id { get; set; }
@@ -57,6 +66,8 @@ public sealed class ServiceRegisterGetProductsResponseDataItem : IContractRecord
     [JsonPropertyName("status")] public string? Status { get; set; }
     [JsonPropertyName("isEnterpriseService")] public bool? IsEnterpriseService { get; set; }
     [JsonPropertyName("longDescription")] public string? LongDescription { get; set; }
+    [JsonPropertyName("channels")] public List<ServiceRegisterGetProductsResponseDataItemChannel>? Channels { get; set; }
+    [JsonPropertyName("types")] public List<ServiceRegisterGetProductsResponseDataItemChannel>? Types { get; set; }
     [JsonPropertyName("categories")] public List<ServiceRegisterGetProductsResponseDataItemCategory>? Categories { get; set; }
     [JsonPropertyName("contacts")] public List<ServiceRegisterGetProductsResponseDataItemContact>? Contacts { get; set; }
 

@@ -1,0 +1,22 @@
+{
+  "data": {
+    "id": "00000000-0000-0000-0002-000000000002",
+    "uniqueId": 2,
+    "lastUpdated": "2026-08-28T19:00:00Z",
+    "productName": "Drifted product (row and tag disagree)",
+    "phase": "Public beta",
+    "businessArea": "Digital Services",
+    "productUrl": "https://www.example.com/drifted-disagreeing",
+    "status": "Inactive",
+    "isEnterpriseService": false,
+    "longDescription": null,
+    "channels": [ { "id": 1, "name": "Web" } ],
+    "types": [],
+    "categories": [
+      { "id": 10, "name": "Live", "groupId": 1, "groupName": "Phase" },
+      { "id": 41, "name": "Digital Services", "groupId": 4, "groupName": "Business area" }
+    ],
+    "contacts": [],
+    "retiredAt": null
+  }
+}

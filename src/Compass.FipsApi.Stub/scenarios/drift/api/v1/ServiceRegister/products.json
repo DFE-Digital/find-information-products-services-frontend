@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "id": "00000000-0000-0000-0002-000000000001",
+      "uniqueId": 1,
+      "lastUpdated": "2026-08-28T19:00:00Z",
+      "productName": "Drifted product (extra member)",
+      "phase": "Live",
+      "businessArea": "Digital Services",
+      "productUrl": "https://www.example.com/drifted",
+      "status": "Active",
+      "isEnterpriseService": false,
+      "longDescription": null,
+      "categories": [ { "id": 10, "name": "Live", "groupId": 1, "groupName": "Phase" } ],
+      "contacts": [],
+      "retiredAt": null
+    },
+    {
+      "id": "00000000-0000-0000-0002-000000000002",
+      "uniqueId": 2,
+      "productName": "Drifted product (missing members)",
+      "status": "Active"
+    }
+  ],
+  "pagination": { "currentPage": 1, "pageSize": 100, "totalPages": 1, "totalRecords": 2 }
+}
