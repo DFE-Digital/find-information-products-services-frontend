@@ -17,7 +17,7 @@ public class FilterCombinationTests : BaseTest
         productsSearchPage = new ProductsSearchPage(Page);
     }
 
-    [Test, Order(1)]
+    [Test, Order(1), Category("Integration")]
     public async Task ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC1()
     {
         await NavigateToAsync("products");
@@ -45,7 +45,7 @@ public class FilterCombinationTests : BaseTest
         ExtentTest?.Log(Status.Pass, "ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC1 passed");
     }
 
-    [Test, Order(2)]
+    [Test, Order(2), Category("Integration")]
     public async Task ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC2()
     {
         await productsSearchPage.FilterPanel.OpenBusinessAreaAsync();
@@ -70,7 +70,7 @@ public class FilterCombinationTests : BaseTest
         ExtentTest?.Log(Status.Pass, "ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC2 passed");
     }
 
-    [Test, Order(3)]
+    [Test, Order(3), Category("Integration")]
     public async Task ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC3()
     {
         await productsSearchPage.FilterPanel.OpenBusinessAreaAsync();
@@ -91,7 +91,7 @@ public class FilterCombinationTests : BaseTest
         ExtentTest?.Log(Status.Pass, "ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC3 passed");
     }
 
-    [Test, Order(4)]
+    [Test, Order(4), Category("Integration")]
     public async Task ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC4()
     {
         await productsSearchPage.FilterPanel.OpenBusinessAreaAsync();
@@ -112,7 +112,7 @@ public class FilterCombinationTests : BaseTest
         ExtentTest?.Log(Status.Pass, "ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC4 passed");
     }
 
-    [Test, Order(5)]
+    [Test, Order(5), Category("Integration")]
     public async Task ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC5()
     {
         await productsSearchPage.FilterPanel.OpenBusinessAreaAsync();
@@ -135,7 +135,7 @@ public class FilterCombinationTests : BaseTest
         ExtentTest?.Log(Status.Pass, "ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC5 passed");
     }
 
-    [Test, Order(6)]
+    [Test, Order(6), Category("Integration")]
     public async Task ValidateFilterLogicUpdate_ANDLogic_SearchFunctionalityUS220TC6()
     {
         await productsSearchPage.FilterPanel.OpenBusinessAreaAsync();

@@ -5,7 +5,7 @@ using FiPSAutomation.Components;
 namespace FiPSAutomation;
 
 [TestFixture, Order(13)]
-[Category("Functional")]
+[Category("Functional"), Category("Integration")]
 public class ChannelSearchTests : BaseTest
 {
     private ProductsSearchPage productsSearchPage = null!;
@@ -99,13 +99,13 @@ public class ChannelSearchTests : BaseTest
         await productsSearchPage.FilterTags.VerifyFilterTagAsync(productsSearchPage.FilterTags.Channel_Web, "Web × Remove Web filter");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(2);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?channel=web&page=2");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?channel=web&page=2");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToPageAsync(3);
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?channel=web&page=3");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?channel=web&page=3");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await productsSearchPage.Pagination.GoToNextPageAsync();
-        await productsSearchPage.Pagination.VerifyUrlContainsAsync("https://find-products-services-test.azurewebsites.net/Products?channel=web&page=4");
+        await productsSearchPage.Pagination.VerifyPathAndQueryAsync("/Products?channel=web&page=4");
         await productsSearchPage.VerifyProductListVisibleAsync();
         await Task.Delay(1000);
         await productsSearchPage.FilterPanel.ClearAllFiltersAsync();

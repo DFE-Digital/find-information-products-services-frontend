@@ -17,6 +17,8 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- tools/ and seed/ hold file-based apps run with `dotnet run <file>` and Node scripts, not tests; see tools/summarise-trx.cs and seed/README.md. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);tools/**;seed/**</DefaultItemExcludes>
 	<!--comment later change GenerateProgramFile to true false  -->
 	<GenerateProgramFile>true</GenerateProgramFile>
 	<StartupObject></StartupObject>

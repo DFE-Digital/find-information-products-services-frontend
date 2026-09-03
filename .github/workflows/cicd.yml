@@ -31,6 +31,8 @@ env:
   ARTEFACT_NAME: fips-frontend-web-app
   REPORT_GENERATOR_VERSION: 5.5.11
   DOTNET_COVERAGE_VERSION: 18.10.0
+  # The CMS commit the browser suite's content source is built from; part of the seeded database's cache key.
+  CMS_REF: 5f2092bfc9f1df4c764e72f435f40f568f3500cb
 
 # No workflow-wide permissions: each job states the minimum it needs.
 permissions: {}
@@ -159,13 +161,78 @@ jobs:
           dotnet tool install dotnet-coverage --version ${{ env.DOTNET_COVERAGE_VERSION }} --tool-path ${{ runner.temp }}/tools
           dotnet tool install dotnet-reportgenerator-globaltool --version ${{ env.REPORT_GENERATOR_VERSION }} --tool-path ${{ runner.temp }}/tools
 
-      # The suite's own tests of its configuration rules need no browser and no application, and a failure there is a
-      # defect in the suite, so unlike the browser run below this step gates.
-      - name: Check the suite's configuration rules
-        run: dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build --filter "TestCategory=Configuration"
+      # The suite's own rules (its settings, its url comparison) need no browser and no application, and a failure
+      # there is a defect in the suite, so unlike the browser run below this step gates.
+      - name: Check the suite's rules
+        run: dotnet test tests/FipsFrontend.EndToEnd.Rules/FipsFrontend.EndToEnd.Rules.csproj --configuration Release --no-restore
 
       - name: Install the browser
         run: pwsh tests/FipsFrontend.EndToEnd/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      # The content source: the CMS at a pinned commit, on SQLite, holding the world the suite names. The seeded
+      # database is a build output cached by the hash of the seed folder and the CMS commit (see
+      # tests/FipsFrontend.EndToEnd/seed/README.md); a run regenerates it only when one of those changes.
+      - name: Check out the CMS
+        uses: actions/checkout@v7
+        with:
+          repository: DFE-Digital/find-information-products-services-cms
+          ref: ${{ env.CMS_REF }}
+          path: .cms
+          persist-credentials: false
+
+      - name: Set up Node for the CMS
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .cms/package-lock.json
+
+      - name: Install the CMS
+        run: npm ci --prefix .cms
+
+      - name: Restore the seeded database
+        id: seed-cache
+        uses: actions/cache@v6
+        with:
+          path: .cms/.tmp/data.db
+          key: cms-seed-${{ env.CMS_REF }}-${{ hashFiles('tests/FipsFrontend.EndToEnd/seed/**') }}
+
+      # Runs Strapi from the checkout with throwaway placeholder secrets, waits for it, and mints a token: the same
+      # command a developer runs, which keeps Strapi in the foreground, so here it runs in the background with its
+      # stderr (Strapi's output and the entry point's messages) in cms.log. The entry point writes TOKEN=... to its
+      # stdout, which goes to a file that is read here and never echoed; the token is registered as a secret so the
+      # log masks it wherever it appears. The wait ends early if the entry point exits, since that answer is final.
+      - name: Start the CMS
+        id: cms-token
+        run: |
+          npm run --silent cms:start --prefix tests/FipsFrontend.EndToEnd/seed -- --cms "$PWD/.cms" > "${{ runner.temp }}/cms-token.out" 2> "${{ runner.temp }}/cms.log" &
+          for i in $(seq 1 100); do
+            grep -q '^TOKEN=' "${{ runner.temp }}/cms-token.out" && break
+            kill -0 $! 2>/dev/null || break
+            sleep 2
+          done
+          token=$(sed -n 's/^TOKEN=//p' "${{ runner.temp }}/cms-token.out")
+          test -n "$token" || { echo "no token from cms:start"; tail -50 "${{ runner.temp }}/cms.log"; exit 1; }
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      # Only on a cache miss. The test-required loader counts through an application's listing page to size its
+      # filler products, so a throwaway copy of the application reads the CMS while the seed runs, then stops.
+      - name: Seed the CMS
+        if: steps.seed-cache.outputs.cache-hit != 'true'
+        env:
+          ASPNETCORE_ENVIRONMENT: ci
+          CmsApi__BaseUrl: http://127.0.0.1:1337/api
+          CmsApi__ReadApiKey: ${{ steps.cms-token.outputs.token }}
+          CmsApi__WriteApiKey: ${{ steps.cms-token.outputs.token }}
+        run: |
+          (cd "${{ runner.temp }}/publish" && dotnet FipsFrontend.dll --urls http://localhost:5506 > "${{ runner.temp }}/seed-app.log" 2>&1 &)
+          # Wait for that copy to answer; the seed cannot size its fillers against an application that is not up.
+          up=false
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:5506/ && up=true && break; sleep 2; done
+          if [ "$up" != true ]; then echo "The seed-time application did not answer within 60 s"; tail -50 "${{ runner.temp }}/seed-app.log"; exit 1; fi
+          npm run --silent cms:seed --prefix tests/FipsFrontend.EndToEnd/seed -- --fips http://localhost:5506
+          pkill -f 'FipsFrontend.dll --urls http://localhost:5506' || true
 
       # The application runs as the "ci" environment: its settings are src/FipsFrontend/appsettings.ci.json (committed;
       # placeholder identity values that sign nobody in, and the stub as its content source), so every failure the
@@ -178,6 +245,10 @@ jobs:
         id: start
         env:
           ASPNETCORE_ENVIRONMENT: ci
+          # The seeded CMS rather than the settings file's empty stub, which stays up for the feedback stand-in.
+          CmsApi__BaseUrl: http://127.0.0.1:1337/api
+          CmsApi__ReadApiKey: ${{ steps.cms-token.outputs.token }}
+          CmsApi__WriteApiKey: ${{ steps.cms-token.outputs.token }}
         run: |
           mkdir -p "${{ runner.temp }}/end-to-end"
           dotnet tests/FipsFrontend.Tests.StubCmsApi/bin/Release/net10.0/FipsFrontend.Tests.StubCmsApi.dll --urls http://127.0.0.1:1338 > "${{ runner.temp }}/stub-cms-api.log" 2>&1 &
@@ -205,15 +276,17 @@ jobs:
 
       # The suite is configured the way the application is: its tracked testsettings.json, then a local file (none here),
       # then environment variables - the Target__ and Timeouts__ values set on the job.
+      # The whole suite in one run: the content is seeded, so every test is expected to pass. (The Integration category
+      # marks the tests that need content; it matters for a run against an instance without any, not here.)
+      # The gate is the known-green check below, which ignores the tests listed as flaky. The console logger at
+      # normal verbosity shows the suite's own start-up line (the timeouts it runs with) and each test as it finishes.
       - name: Run the suite
         continue-on-error: true
         run: >
           dotnet test tests/FipsFrontend.EndToEnd/FipsFrontend.EndToEnd.csproj --configuration Release --no-build
-          --filter "TestCategory!=Configuration"
-          --logger trx --results-directory ${{ runner.temp }}/end-to-end
+          --logger "console;verbosity=normal" --logger trx --results-directory ${{ runner.temp }}/end-to-end
 
       - name: Check that the tests known to pass still pass
-        continue-on-error: true
         run: |
           pwsh tests/FipsFrontend.EndToEnd/Check-KnownGreen.ps1 -Trx "$(ls "${{ runner.temp }}"/end-to-end/*.trx | head -1)" 2>&1 | tee "${{ runner.temp }}/end-to-end/known-green-check.txt"
           exit "${PIPESTATUS[0]}"
@@ -265,6 +338,8 @@ jobs:
           path: |
             ${{ runner.temp }}/end-to-end
             ${{ runner.temp }}/app.log
+            ${{ runner.temp }}/cms.log
+            ${{ runner.temp }}/seed-app.log
             tests/FipsFrontend.EndToEnd/playwright-report
 
   deploy_development:

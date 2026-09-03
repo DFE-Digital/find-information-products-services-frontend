@@ -42,3 +42,6 @@ testsettings.local.json
 # it is empty or a default, and the application runs from it as it is. The "ci" file is placeholders.
 appsettings.*.json
 !appsettings.ci.json
+
+# The seed entry point's record of the Strapi it started: pid, database path, and a throwaway token.
+tests/FipsFrontend.EndToEnd/seed/.cms-*.json

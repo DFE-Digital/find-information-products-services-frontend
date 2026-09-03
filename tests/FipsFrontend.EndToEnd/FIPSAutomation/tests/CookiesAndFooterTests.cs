@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using AventStack.ExtentReports;
 using FiPSAutomation.Pages;
 using FiPSAutomation.Components;
@@ -62,33 +63,23 @@ public class CookiesAndFooterTests : BaseTest
     [Test, Order(4)]
     public async Task VerifyAccessibilityLinkUS16AC()
     {
-        await footer.ClickAccessibilityStatementAsync();
-        await accessibilityPage.VerifyAccessibilityStatementVisibleAsync();
-        await header.ClickServiceNameLinkAsync();
-        await homePage.VerifyMainHeadingAsync();
+        // #16 AC1: a link at the bottom of every page; AC2: it leads to the service's accessibility statement. Where the
+        // statement lives is the instance's AccessibilityStatement:Url setting and the statement is another service's
+        // page, so an absolute link is asserted, not a particular address and not the statement's content.
+        var link = Page.GetByRole(AriaRole.Link, new() { Name = "Accessibility statement", Exact = true});
+        await Assertions.Expect(link).ToBeVisibleAsync();
+        await Assertions.Expect(link).ToHaveAttributeAsync("href", new Regex("^https?://"));
         ExtentTest?.Log(Status.Pass, "VerifyAccessibilityLinkUS16AC passed");
     }
 
     [Test, Order(5)]
     public async Task VerifyPrivacyPolicyLinkUS15AC()
     {
-        //Fails because Privacy link is coded to open in a new tab, need to update after March 2026 release
-        var newTab = await Page.RunAndWaitForPopupAsync(async () =>
-        {
-            await Page.GetByRole(AriaRole.Link, new() { NameString = "Privacy policy" }).ClickAsync();
-        });
-
-        await newTab.WaitForLoadStateAsync();
-        await newTab.GetByRole(AriaRole.Button, new() { NameString = "Accept additional cookies" }).ClickAsync();
-        await newTab.GetByRole(AriaRole.Button, new() { NameString = "Hide cookie message" }).ClickAsync();
-
-        // Assertions in the new tab
-        await Assertions.Expect(newTab).ToHaveURLAsync(ProductDetailPage.GOV_URL);        
-        await Assertions.Expect(newTab).ToHaveTitleAsync("Personal information charter - Department for Education - GOV.UK");          
-        await Assertions.Expect(newTab.GetByRole(AriaRole.Heading, new() { NameString = "Personal information charter" })).ToBeVisibleAsync();
-        await newTab.CloseAsync();
-        // Assertions back on the original page
-        await Assertions.Expect(Page).ToHaveTitleAsync("Find information about products and services - FIPS");
+        // #15 AC1: a link at the bottom of every page; AC2: it leads to the department's personal information charter
+        // on GOV.UK. That page, its cookie banner and its heading are GOV.UK's, so they are not asserted here.
+        var link = Page.GetByRole(AriaRole.Link, new() { Name = "Privacy policy", Exact = true});
+        await Assertions.Expect(link).ToBeVisibleAsync();
+        await Assertions.Expect(link).ToHaveAttributeAsync("href", ProductDetailPage.GOV_URL);
 
         ExtentTest?.Log(Status.Pass, "VerifyPrivacyPolicyLinkUS15AC passed");
     }

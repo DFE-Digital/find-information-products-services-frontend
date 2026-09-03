@@ -1,4 +1,5 @@
-﻿using AventStack.ExtentReports;
+using System.Text.RegularExpressions;
+using AventStack.ExtentReports;
 using FiPSAutomation.Pages;
 using Microsoft.Playwright;
 
@@ -21,22 +22,25 @@ public class FeedbackAndSurveyTests : BaseTest
     {
         await NavigateToAsync("");
         await productDetailPage.VerifyFeedbackBannerAsync();
-        await Assertions.Expect(Page.Locator("//*[@id=\"feedback-link-text\"]/a[1]")).ToContainTextAsync("Give us feedback about this service");
-        var newTab = await Page.RunAndWaitForPopupAsync(async () =>
-        {
-            await productDetailPage.ClickSurveyLinkAsync();
-        });
-        await newTab.WaitForLoadStateAsync();
-
-        // Assertions in the new tab
-        await Assertions.Expect(newTab).ToHaveURLAsync("https://dferesearch.fra1.qualtrics.com/jfe/form/SV_bHoLXsj3BfAh3ZI");
-        await Assertions.Expect(newTab).ToHaveTitleAsync("Qualtrics Survey | Qualtrics Experience Management");
-        await Assertions.Expect(newTab.Locator("//div[@class='QuestionText BorderColor']")).ToContainTextAsync("Thank you for taking the time to give feedback on your experience of using ‘Find Information about Products and Services’ (FIPS) today.   This survey should take no more than 2 minutes to complete, and your contribution will help us to: - Understand your needs with regards to the FIPS service - Make future improvements to FIPS");
-        await newTab.CloseAsync();
-
-        // Assertions back on the original page
-        await Assertions.Expect(Page).ToHaveTitleAsync("Find information about products and services - FIPS");
-
+        var survey = Page.Locator("//*[@id=\"feedback-link-text\"]/a[1]");
+        await Assertions.Expect(survey).ToContainTextAsync("Give us feedback about this service");
+        // #207 AC2 names a survey address. The address is the instance's Feedback:SurveyUrl setting and the survey is
+        // the research platform's page, so an absolute link is asserted, not the platform's title or question.
+        await Assertions.Expect(survey).ToHaveAttributeAsync("href", new Regex("^https?://"));
         ExtentTest?.Log(Status.Pass, "VerifyFeedbackLinks_ContentChangeUS207AC passed");
+    }
+
+    [Test, Order(2)]
+    public async Task VerifyFeedbackSurveyLinkStaysInTheSameTabUS226()
+    {
+        // #207 AC2 asked for the survey to open in a new window. #226 (accessibility: a new tab strands keyboard and
+        // screen-reader users) removed every new-tab opening, the survey link among them, so the link stays in the
+        // same tab and the survey itself is not opened here.
+        await NavigateToAsync("");
+        var survey = Page.Locator("//*[@id=\"feedback-link-text\"]/a[1]");
+        await Assertions.Expect(survey).ToContainTextAsync("Give us feedback about this service");
+        await Assertions.Expect(survey).Not.ToHaveAttributeAsync("target", new Regex(".*"));
+        await Assertions.Expect(survey).ToHaveAttributeAsync("href", new Regex("^https?://"));
+        ExtentTest?.Log(Status.Pass, "VerifyFeedbackSurveyLinkStaysInTheSameTabUS226 passed");
     }
 }

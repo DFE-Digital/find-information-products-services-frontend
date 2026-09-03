@@ -50,6 +50,25 @@ public sealed class FipsApplication : IDisposable
         }
     }
 
+    /// <summary>
+    /// What the application says when it refuses to start under these settings: every exception message in the
+    /// chain, joined; empty when it starts. For the scenarios where a bad setting must be named at start-up.
+    /// </summary>
+    public static string StartupRefusal(IDictionary<string, string?> settings)
+    {
+        try
+        {
+            using var app = new FipsApplication(settings: settings);
+            return "";
+        }
+        catch (Exception ex)
+        {
+            var messages = new List<string>();
+            for (var e = ex; e is not null; e = e.InnerException) messages.Add(e.Message);
+            return string.Join(" | ", messages);
+        }
+    }
+
     // AddHttpClient<T> names each client after T; these are the registrations in Program.cs.
     private static readonly string[] OutboundClients =
         ["CmsApiService", "IOptimizedCmsApiService", "IAirtableService", "IServiceAssessmentsService"];

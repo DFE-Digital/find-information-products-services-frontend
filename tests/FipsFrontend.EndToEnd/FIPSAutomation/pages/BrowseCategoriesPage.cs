@@ -20,7 +20,8 @@ namespace FiPSAutomation.Pages
         public async Task VerifyCategoryLinkVisibleAsync(string categoryName)
         {
             await Assertions.Expect(
-                page.GetByRole(AriaRole.Link, new() { NameString = categoryName })).ToBeVisibleAsync();
+                // Exact: "Information" is also inside the service name link, and a value can be a sibling's prefix.
+                page.GetByRole(AriaRole.Link, new() { Name = categoryName, Exact = true })).ToBeVisibleAsync();
         }
 
         public async Task VerifyCategoryDescriptionAsync(string description)

@@ -26,20 +26,23 @@ namespace FiPSAutomation
         [Test, Order(1)]
         public async Task CheckBrowseCategoriesPageDescriptionUS05AC2()
         {
+            await NavigateToAsync("");
             await homePage.ClickCategoriesLinkAsync();
             await categoryDetailPage.VerifyHeadingAsync("Browse categories");
             await browseCategoriesPage.VerifyDescriptionAsync();
             ExtentTest?.Log(Status.Pass, "CheckBrowseCategoriesPageDescriptionUS05AC2 passed");
         }
 
-        [Test, Order(2)]
+        [Test, Order(2), Category("Integration")]
         public async Task CheckCategoriesListAndDescriptionUS05AC3()
         {
+            // Each test opens its own page: a run may select this one without the test before it.
+            await NavigateToAsync("categories");
             await browseCategoriesPage.VerifyAllCategoryLinksAsync();
             ExtentTest?.Log(Status.Pass, "CheckCategoriesListAndDescriptionUS05AC3 passed");
         }
 
-        [Test, Order(3)]
+        [Test, Order(3), Category("Integration")]
         public async Task ClickCategoriesLinksUS05AC4()
         {
             await NavigateToAsync("categories/channel");

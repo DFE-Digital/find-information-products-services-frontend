@@ -1,16 +1,13 @@
 using FiPSAutomation.Configuration;
 using Microsoft.Extensions.Configuration;
 
-// Outside the FiPSAutomation namespace on purpose: the suite's [SetUpFixture] lives there and would
-// start a browser and open the application for these, which need neither.
-namespace FipsFrontend.EndToEnd.ConfigurationTests;
+namespace FipsFrontend.EndToEnd.Rules;
 
 /// <summary>
 /// What a person configuring the suite meets: the rules in ConfigurationSections, applied. These
-/// need no browser and no running application, so the pipeline runs them as a gate of their own
-/// (the category below) and leaves them out of the browser run and its known-green check.
+/// need no browser and no running application, which is why they live in this project and gate the pipeline.
 /// </summary>
-[TestFixture, Category("Configuration")]
+[TestFixture]
 public class SuiteSettingsTests
 {
     private static IConfiguration Configuration(params (string Key, string? Value)[] values) =>
@@ -90,6 +87,31 @@ public class SuiteSettingsTests
         var settings = Load(("Target:ApplicationUrl", "http://localhost:5505/"));
 
         Assert.That((settings.Timeouts.ExpectMs, settings.Timeouts.ActionMs, settings.Timeouts.NavigationMs), Is.EqualTo((5_000, 30_000, 30_000)));
+    }
+
+    // A run's output says which timeouts applied, so a run left at the defaults against a slow target is recognised
+    // from its log rather than diagnosed after the fact.
+    [Test]
+    public void Suite_WhenTimeoutsOmitted_RunReportSaysTheyArePlaywrightsDefaults()
+    {
+        var settings = Load(("Target:ApplicationUrl", "http://localhost:5505/"));
+
+        var report = settings.Timeouts.Describe();
+
+        Assert.That(report, Does.Contain("expect 5000 ms").And.Contain("action 30000 ms").And.Contain("navigation 30000 ms"));
+        Assert.That(report, Does.Contain("Playwright's defaults"));
+    }
+
+    [Test]
+    public void Suite_WhenTimeoutsSet_RunReportNamesEachValueAndNotTheDefaults()
+    {
+        var settings = Load(("Target:ApplicationUrl", "http://localhost:5505/"),
+            ("Timeouts:ExpectMs", "2000"), ("Timeouts:ActionMs", "5000"), ("Timeouts:NavigationMs", "10000"));
+
+        var report = settings.Timeouts.Describe();
+
+        Assert.That(report, Does.Contain("expect 2000 ms").And.Contain("action 5000 ms").And.Contain("navigation 10000 ms"));
+        Assert.That(report, Does.Not.Contain("defaults"));
     }
 
     [TestCase("0")]

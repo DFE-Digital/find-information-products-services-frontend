@@ -1,0 +1,96 @@
+{
+  "_about": "The category types and values the browser suite names. Every display name and description is asserted by a test (the *CategoryTests fixtures assert each link's text and each type's description verbatim), so a mismatch fails a test rather than hiding in the fixture. Slugs are derived from the names; the tests locate categories by link text, never by url, so a slug only has to agree with the links the site generates from it. Casing is preserved as the tests assert it: Business area values in Title Case, the other types in sentence case. 'Not categorised' is a filter for products carrying no value of a type, not a stored value, and is deliberately absent. Every record must be published and enabled, because the site filters on both and an unpublished or disabled record is invisible exactly as a missing one is. The CMS defines no taxonomy in schema or seed; this file is the only definition.",
+
+  "categoryTypes": [
+    {
+      "name": "Phase",
+      "slug": "phase",
+      "sort_order": 1,
+      "multi_level": false,
+      "description": "The stage a product or service is at in the service delivery lifecycle.",
+      "values": [
+        { "name": "Discovery", "slug": "discovery", "sort_order": 1 },
+        { "name": "Alpha", "slug": "alpha", "sort_order": 2 },
+        { "name": "Private beta", "slug": "private-beta", "sort_order": 3 },
+        { "name": "Public beta", "slug": "public-beta", "sort_order": 4 },
+        { "name": "Live", "slug": "live", "sort_order": 5 },
+        { "name": "Decommissioning", "slug": "decommissioning", "sort_order": 6 },
+        { "name": "Decommissioned", "slug": "decommissioned", "sort_order": 7 },
+        { "name": "Did not progress", "slug": "did-not-progress", "sort_order": 8 }
+      ]
+    },
+    {
+      "name": "Channel",
+      "slug": "channel",
+      "sort_order": 2,
+      "multi_level": false,
+      "description": "The delivery channel through which a product or service is provided to users.",
+      "values": [
+        { "name": "Web", "slug": "web", "sort_order": 1 },
+        { "name": "Native app", "slug": "native-app", "sort_order": 2 },
+        { "name": "Email", "slug": "email", "sort_order": 3 },
+        { "name": "SMS", "slug": "sms", "sort_order": 4 },
+        { "name": "Phone", "slug": "phone", "sort_order": 5 },
+        { "name": "Chat", "slug": "chat", "sort_order": 6 },
+        { "name": "Face-to-face", "slug": "face-to-face", "sort_order": 7 },
+        { "name": "Print media", "slug": "print-media", "sort_order": 8 },
+        { "name": "Other digital media", "slug": "other-digital-media", "sort_order": 9 }
+      ]
+    },
+    {
+      "name": "Type",
+      "slug": "type",
+      "sort_order": 3,
+      "multi_level": false,
+      "description": "The type of service delivery and functionality provided.",
+      "values": [
+        { "name": "Transactional", "slug": "transactional", "sort_order": 1 },
+        { "name": "Information", "slug": "information", "sort_order": 2 },
+        { "name": "Data", "slug": "data", "sort_order": 3 },
+        { "name": "API", "slug": "api", "sort_order": 4 },
+        { "name": "Campaign", "slug": "campaign", "sort_order": 5 }
+      ]
+    },
+    {
+      "name": "Business area",
+      "slug": "business-area",
+      "sort_order": 4,
+      "multi_level": false,
+      "description": "The business area or portfolio responsible for a product or service.",
+      "_slug_note": "The page object names these locators 'group-*' while the route the tests navigate to is categories/business-area. Both appear in the suite; the slug here follows the ROUTE, because that is what CategoriesController.Detail matches against.",
+      "values": [
+        { "name": "Children and Families", "slug": "children-and-families", "sort_order": 1 },
+        { "name": "Commercial", "slug": "commercial", "sort_order": 2 },
+        { "name": "Customer Experience and Design", "slug": "customer-experience-and-design", "sort_order": 3 },
+        { "name": "Enterprise Data", "slug": "enterprise-data", "sort_order": 4 },
+        { "name": "Funding and Financial Oversight", "slug": "funding-and-financial-oversight", "sort_order": 5 },
+        { "name": "Operations and Infrastructure", "slug": "operations-and-infrastructure", "sort_order": 6 },
+        { "name": "Regional Digital Services", "slug": "regional-digital-services", "sort_order": 7 },
+        { "name": "Schools Digital", "slug": "schools-digital", "sort_order": 8 },
+        { "name": "Sector Facing Services", "slug": "sector-facing-services", "sort_order": 9 },
+        { "name": "Skills and Growth", "slug": "skills-and-growth", "sort_order": 10 },
+        { "name": "Strategy", "slug": "strategy", "sort_order": 11 }
+      ]
+    },
+    {
+      "name": "User group",
+      "slug": "user-group",
+      "sort_order": 5,
+      "multi_level": false,
+      "description": "The users of the product or service.",
+      "values": [
+        { "name": "Adult learner (18+)", "slug": "adult-learner-18", "sort_order": 1 },
+        { "name": "Careers adviser or work coach", "slug": "careers-adviser-or-work-coach", "sort_order": 2 },
+        { "name": "Child or young person", "slug": "child-or-young-person", "sort_order": 3 },
+        { "name": "Department for Education workforce", "slug": "department-for-education-workforce", "sort_order": 4 },
+        { "name": "Education provider and early years workforce", "slug": "education-provider-and-early-years-workforce", "sort_order": 5 },
+        { "name": "Employer", "slug": "employer", "sort_order": 6 },
+        { "name": "Local authority workforce", "slug": "local-authority-workforce", "sort_order": 7 },
+        { "name": "NEET or career seeker", "slug": "neet-or-career-seeker", "sort_order": 8 },
+        { "name": "Parent or carer", "slug": "parent-or-carer", "sort_order": 9 },
+        { "name": "Professional external user of DfE data", "slug": "professional-external-user-of-dfe-data", "sort_order": 10 },
+        { "name": "Social care workforce", "slug": "social-care-workforce", "sort_order": 11 }
+      ]
+    }
+  ]
+}

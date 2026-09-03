@@ -91,6 +91,38 @@ summary under the heading, delete its "None" groups, and paste this above it:
   Tests parse responses recorded from a local instance holding synthetic seed data (no real products) through
   the records, and hold the seeded rows to known values, so a change on either side fails as a disagreement.
   Nothing reads the records yet.
+- **Footer:** the accessibility statement's address is the `AccessibilityStatement:Url` setting, with the departmental
+  statement as the default, so an instance can point the link at its own statement; the link itself is never absent.
+- **Feedback:** the feedback store's address is the `Airtable:BaseUrl` setting, defaulting to the Airtable service, so a
+  local or pipeline instance can send the form to a stand-in and the browser suite can see it succeed.
+- **Request limiter:** a caller refused for its pace now gets 429 Too Many Requests with a Retry-After header;
+  previously the limiter answered its default 503, which read as the service being down. The limit and window are
+  the `RateLimiting` settings, defaulting to what the constant was, so the pipeline's copy can admit the browser
+  suite's pace and a deployed instance admits exactly what it did before.
+- **Browser suite:** pagination assertions check the route and query a click produced, not which host served it,
+  so they pass against any environment; the comparison parses the url and treats query order as irrelevant, and
+  holds those decisions in fifteen browser-free tests.
+- **Browser suite:** link locators that a longer link name could also satisfy now match exactly, so strict mode
+  reports a real ambiguity rather than a substring. One test file is converted from Windows-1252 to UTF-8, which is
+  what every other file and the compiler on Linux expect.
+- **Browser suite:** tests that followed a link out to another site (the accessibility statement, the privacy
+  charter, the feedback survey, a product's own website) now assert the link and its destination, which is what
+  FIPS provides; the survey test waited for a new window, which issue 226 removed, and now asserts the link in the
+  same tab. Tests that named a particular mailbox or a person now assert the configured address or the seeded contact.
+- **Browser suite:** a trx summariser under `tests/FipsFrontend.EndToEnd/tools` groups a run's failures by cause and
+  reads them against the known-green list. Against a seeded local copy every test passes; in the pipeline the
+  known-green list still gates, and gains the 21 tests this branch brings to green there.
+- **Browser suite:** the tests that need no browser (the suite's settings rules and its url comparison) live in
+  `tests/FipsFrontend.EndToEnd.Rules`, so `dotnet test` on the browser project runs browser tests and nothing else,
+  and the one category that still splits a run is `Integration`: the tests that name seeded content.
+- **Browser suite:** the pipeline seeds its content source. The data set the suite names lives as text under
+  `tests/FipsFrontend.EndToEnd/seed`, with one entry point that starts the CMS at a pinned commit, seeds it, and
+  stops it; the seeded database is cached by the hash of that folder and the commit. The inputs that are derived
+  rather than written carry `.generated.json` in their names and sit beside the generators that reproduce them,
+  so a hand edit to one has nowhere to hide. Every test can now be green in the pipeline, and the product-detail
+  tests reach their product by its title rather than by a content id that only one database ever held.
+- **Browser suite:** a run's output names the timeouts it uses and says when they are Playwright's defaults, so a run
+  left at the defaults against a slow target is recognised from its log rather than diagnosed afterwards.
 
 ## [v2026.08.28-0001]
 

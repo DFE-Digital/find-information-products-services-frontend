@@ -23,7 +23,9 @@ namespace FiPSAutomation.Pages
 
         public async Task VerifySubcategoryLinkAsync(string linkName)
         {
-            await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { NameString = linkName })).ToBeVisibleAsync();
+            // Exact: a value's name can be the prefix of a sibling's ("Employer", "Employer (1-249 employees)"), and a
+            // substring match then resolves to several links, which strict mode rightly refuses.
+            await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = linkName, Exact = true })).ToBeVisibleAsync();
         }
 
         public async Task VerifySubcategoryDescriptionAsync(string locator, string expectedText)

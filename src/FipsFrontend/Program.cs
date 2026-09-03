@@ -107,6 +107,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IAirtableService, AirtableService>();
 builder.Services.Configure<AirtableConfiguration>(builder.Configuration.GetSection("Airtable"));
 
+builder.Services.AddOptions<AccessibilityStatementOptions>()
+    .Bind(builder.Configuration.GetSection(AccessibilityStatementOptions.SectionName));
+
 builder.Services.AddOptions<FeedbackOptions>()
     .Bind(builder.Configuration.GetSection(FeedbackOptions.SectionName))
     .Validate(options => options.IsValid(), "Feedback:SurveyUrl must be an absolute http or https URL, or left empty.")
@@ -171,17 +174,37 @@ else
 // Add response caching
 builder.Services.AddResponseCaching();
 
-// Add rate limiting
+// The request limiter. Its size is configuration (RateLimitingOptions says why); read and validated once, here.
+var rateLimiting = RateLimitingOptions.Read(builder.Configuration);
+builder.Services.AddSingleton(rateLimiting);
 builder.Services.AddRateLimiter(options =>
 {
+    // The middleware's default refusal is 503, which reads in a log or a dashboard as the service being down and
+    // invites a hunt for a server fault that does not exist. The condition is the caller's pace: 429, with a
+    // Retry-After taken from the limiter's own lease, so a well-behaved caller knows when the window opens.
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = (context, _) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter = Math.Ceiling(retryAfter.TotalSeconds).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+        return ValueTask.CompletedTask;
+    };
+    // PARTITION KEY, TO BE RESOLVED; a known limitation stated only here. The intent is one budget per caller, but
+    // nothing at this layer populates a principal (sign-in is enforced by the hosting platform), so the key falls
+    // through to the Host header, which every visitor of a site shares: one budget of PermitLimitPerWindow per window for the
+    // whole site, static files excluded. Kept while traffic is low. The correct key needs the platform's forwarded
+    // client address honoured first (forwarded-headers middleware is not configured), then the platform principal's
+    // name, else that address, else Host.
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: httpContext.User.Identity?.Name ?? httpContext.Request.Headers.Host.ToString(),
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 100,
-                Window = TimeSpan.FromMinutes(1)
+                PermitLimit = rateLimiting.PermitLimitPerWindow,
+                Window = rateLimiting.Window
             }));
 });
 

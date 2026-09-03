@@ -8,7 +8,7 @@ using static find_information_products_services_tests.utilities.ExcelReader;
 namespace FiPSAutomation
 {
     [TestFixture, Order(5)]
-    [Category("Functional")]
+    [Category("Functional"), Category("Integration")]
     public class BusinessAreaCategoryTests : BaseTest
     {
         private CategoryDetailPage categoryDetailPage = null!;

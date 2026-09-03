@@ -1,11 +1,11 @@
 # Browser-driven tests
 
-The suite that used to live in its own repository, copied here as it stood so that the application
-and the tests that describe it change in the same commits. It drives a real browser (Playwright)
-against a running instance of the application, so it is not part of the pipeline's test run, and it
-does not yet pass in full: many of its tests expect the products, categories, and user groups of one
-hosted environment (see `testdata.xlsx`), and it was last maintained against pages this repository
-is changing. Each change to the application now shows exactly which of these tests it moves.
+The suite that used to live in its own repository, copied here so that the application and the
+tests that describe it change in the same commits. It drives a real browser (Playwright) against a
+running instance of the application: on this machine, one you start; in the pipeline, a copy the
+job starts and seeds itself (see "Seed data"). Its tests name the products, categories, and user
+groups of one seeded data set, so each change to the application or to that data shows exactly
+which of these tests it moves.
 
 ## Run it against the application on this machine
 
@@ -32,9 +32,15 @@ application on this machine with no sign-in:
 ```
 
 The timeouts are how long an assertion, an action, or a navigation waits before failing; the
-template carries Playwright's defaults (5, 30, and 30 seconds), which suit a hosted environment. An
+template carries Playwright's defaults, which suit a hosted environment. An
 application on the same machine answers in milliseconds, and every failing test waits the whole
 timeout, so set them low there or a run is mostly waiting.
+
+At that pace the suite exceeds the application's request limiter at its default, and every page
+after that is a 429 that a test reports as a missing heading or filter. Start the
+application with `RateLimiting__PermitLimitPerWindow=1000` (the pipeline's `appsettings.ci.json` does), and
+read a run's trx with `dotnet run tests/FipsFrontend.EndToEnd/tools/summarise-trx.cs -- <trx>
+--app-log <application log>`, which names the tests that ran while the limiter was refusing.
 
 Start the application (see the repository README). To run it exactly as the pipeline does - the
 `ci` environment, whose settings are the committed `src/FipsFrontend/appsettings.ci.json` and whose
@@ -49,14 +55,19 @@ ASPNETCORE_ENVIRONMENT=ci dotnet out/FipsFrontend.dll --urls http://localhost:55
 Then:
 
 ```
-dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Configuration"
-dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=functional"
+dotnet test tests/FipsFrontend.EndToEnd --logger "console;verbosity=normal"
 ```
 
-A report is written to `tests/FipsFrontend.EndToEnd/playwright-report/`, with a screenshot of each
-failing test. The `Configuration` category is the suite's own tests of its settings rules; they need
-no browser, run in seconds, and the pipeline gates on them - hence the filter that leaves them out of
-a browser run, where the known-green check would otherwise list them.
+The console logger at normal verbosity shows the suite's start-up line, which names the timeouts
+the run uses and says when they are Playwright's defaults, and each test as it finishes; the same
+line is in the trx and the report either way. A report is written to `tests/FipsFrontend.EndToEnd/playwright-report/`, with a screenshot of each
+failing test. The suite's own rules - its settings rules and the url comparison behind its pagination
+assertions - are tests in `tests/FipsFrontend.EndToEnd.Rules`, a project with no browser in it: they
+run in seconds anywhere, and the pipeline gates on them before it starts a browser.
+
+```
+dotnet test tests/FipsFrontend.EndToEnd.Rules
+```
 
 The pipeline also measures which of the application's code the browser suite reaches: it starts the
 published application under `dotnet-coverage`, stops it gracefully after the run so the collector can
@@ -75,6 +86,50 @@ dotnet run --project tests/FipsFrontend.Tests.StubCmsApi --urls http://127.0.0.1
 and point the application at it with `CmsApi__BaseUrl=http://127.0.0.1:1338/api`. The application
 then renders every page with no data and answers quickly, so every failure the suite reports is
 about the pages.
+
+## Seed data
+
+The page objects and tests under `FIPSAutomation/` name the products, categories, user groups,
+search terms, and contacts of one seeded data set: the hosted environment's (`testdata.xlsx`), which
+the local composition's seed reproduces with visibly synthetic contact names such as "Alpha
+Testcontact". Every such literal depends on that seed, so a change to the seed and to the tests
+that name the changed value must land together.
+
+Tests that need that content carry the `Integration` category, on the class where every test in it
+does and on the test otherwise. Against an instance with no content they are red by design, and the
+rest must be green, so the two are run apart:
+
+```
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory!=Integration"   # expected green anywhere
+dotnet test tests/FipsFrontend.EndToEnd --filter "TestCategory=Integration"    # green only against the seed
+```
+
+The pipeline seeds its content source (below), so it runs the whole suite as one step, gated by the
+known-green check (which ignores the tests listed as flaky, so one timing flake does not fail the
+job). The category is for a run against an instance with no content. A test that starts naming a
+seeded value gets the category with it; a test that passes against the empty content stub without
+it is wrongly tagged.
+
+### The seed itself
+
+`seed/` holds the data set as text and the scripts that load it into a Strapi content source, with
+one entry point. Its README says which files are hand-authored and which are generated (named
+`*.generated.json`, regenerated by a script beside them rather than edited), and where a new
+seeded value goes:
+
+```
+cd tests/FipsFrontend.EndToEnd/seed
+npm run cms:start -- --cms <checkout of the CMS>     # runs Strapi on 1337 in this terminal; prints TOKEN=... once ready
+npm run cms:seed -- --fips http://localhost:5506      # from another terminal; the url is an application reading that Strapi
+npm run cms:stop                                      # or Ctrl+C where it runs
+```
+
+The pipeline runs exactly those, with the CMS checked out at the commit `CMS_REF` in the workflow
+pins and the seeded database cached by the hash of `seed/` and that commit, so a run regenerates it
+only when one of them changes and otherwise pays a Strapi start, which the cache does not cover; the
+run's own timings say what each costs. Each test opens the page it needs itself: a filtered run selects tests out of their
+fixture's order, so a test that relies on the one before it having navigated somewhere fails for
+that reason alone.
 
 ## The tests known to pass
 

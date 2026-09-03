@@ -13,7 +13,8 @@ namespace FiPSAutomation.Components
 
         public async Task ClickProductsLinkAsync()
         {
-            await page.GetByRole(AriaRole.Link, new() { NameString = "Products" }).ClickAsync();
+            // Exact: the service name link "Find information about products and services" also contains "Products".
+            await page.GetByRole(AriaRole.Link, new() { Name = "Products", Exact = true }).ClickAsync();
         }
 
         public async Task ClickServiceNameLinkAsync()

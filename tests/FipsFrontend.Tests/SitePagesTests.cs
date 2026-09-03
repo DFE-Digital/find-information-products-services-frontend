@@ -37,7 +37,7 @@ public class SitePagesTests
         var html = await response.Content.ReadAsStringAsync();
 
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), $"{path}: {Html.Excerpt(html)}");
-        Assert.That(Html.Headings(html), Is.EqualTo(new[] { heading }), $"{path} carries exactly one h1, its own title");
+        Assert.That(Html.H1Headings(html), Is.EqualTo(new[] { heading }), $"{path} carries exactly one h1, its own title");
         Assert.That(Html.MainColumnText(html), Has.Length.GreaterThan(heading.Length + 40), $"{path} carries body copy, not just its heading");
     }
 

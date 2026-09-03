@@ -80,8 +80,8 @@ namespace FiPSAutomation.Components
         public string CrmAcronym_FilterTag => "a.filter-badge:has(span:text-is('CRM'))";
         public string NationalCareer_FilterTag => "a.filter-badge:has(span:text-is('National career'))";
         public string AI_FilterTag => "a.filter-badge:has(span:text-is('AI'))";
-        public string AndyJones_FilterTag => "a.filter-badge:has(span:text-is('Andy Jones'))";
-        public string SamBarton_FilterTag => "a.filter-badge:has(span:text-is('Sam Barton'))";
+        public string AlphaTestcontact_FilterTag => "a.filter-badge:has(span:text-is('Alpha Testcontact'))";
+        public string BetaTestcontact_FilterTag => "a.filter-badge:has(span:text-is('Beta Testcontact'))";
         public string PrivateBetaSearch_FilterTag => "a.filter-badge:has(span:text-is('private beta'))";
         public string CustExpAndDesignSearch_FilterTag => "a.filter-badge:has(span:text-is('customer experience and design'))";
 
