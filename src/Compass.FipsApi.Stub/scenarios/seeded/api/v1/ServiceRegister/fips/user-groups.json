@@ -1,10 +1,178 @@
 {
   "data": [
     {
+      "id": 1002,
+      "name": "Adult learner (18+)",
+      "description": null,
+      "displayOrder": 1,
+      "active": true,
+      "children": [
+        "Adult in work based learning or training",
+        "Adult learner in non-work based learning or training",
+        "Student (further education)",
+        "Student (higher education)"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1003,
+      "name": "Careers adviser or work coach",
+      "description": null,
+      "displayOrder": 2,
+      "active": true,
+      "children": [
+        "Independent careers adviser",
+        "National careers service careers adviser",
+        "Work coach"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1004,
+      "name": "Child or young person",
+      "description": null,
+      "displayOrder": 3,
+      "active": true,
+      "children": [
+        "Child (early years age)",
+        "Child (primary age)",
+        "Child (secondary age up to 16)",
+        "Young person (16-18)",
+        "Young person with SEND (16-25)"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1005,
+      "name": "Department for Education workforce",
+      "description": null,
+      "displayOrder": 4,
+      "active": true,
+      "children": [
+        "Colleague supporting DfE users",
+        "Colleague supporting external stakeholders",
+        "Colleague using data",
+        "Colleague using digital to deliver services"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1006,
+      "name": "Education provider and early years workforce",
+      "description": null,
+      "displayOrder": 5,
+      "active": true,
+      "children": [
+        "Academy and trust workforce",
+        "Alternative provision setting workforce",
+        "Early years workforce",
+        "Further education workforce",
+        "Higher education workforce",
+        "School workforce",
+        "SEND professional"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1007,
+      "name": "Employer",
+      "description": null,
+      "displayOrder": 6,
+      "active": true,
+      "children": [
+        "Employer (1-249 employees)",
+        "Employer (250 or more employees)",
+        "Self-employed person"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1008,
+      "name": "Local authority workforce",
+      "description": null,
+      "displayOrder": 7,
+      "active": true,
+      "children": [
+        "Business support officer (local authority)",
+        "Digital professional (local authority)",
+        "Finance support officer (local authority)",
+        "Senior leader (local authority)",
+        "Technology professional (local authority)"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1009,
+      "name": "NEET or career seeker",
+      "description": null,
+      "displayOrder": 8,
+      "active": true,
+      "children": [
+        "Adult (19-25) (NEET)",
+        "Adult career seeker (starter or changer)",
+        "Young person (16-18) (career seeker)",
+        "Young person (16-18) (NEET)",
+        "Young person with SEND (16-25) (career seeker)"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1010,
+      "name": "Parent or carer",
+      "description": null,
+      "displayOrder": 9,
+      "active": true,
+      "children": [
+        "Expectant parent",
+        "Parent or carer of adult learner",
+        "Parent or carer of career seeker",
+        "Parent or carer of child (early years age)",
+        "Parent or carer of child (primary age)",
+        "Parent or carer of child (secondary age)",
+        "Parent or carer of child (SEND)",
+        "Parent or carer of young person (16-18)"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1011,
+      "name": "Professional external user of DfE data",
+      "description": null,
+      "displayOrder": 10,
+      "active": true,
+      "children": [
+        "Colleague in another part of government (data user)",
+        "Journalist (data user)",
+        "Member of a professional network (data user)",
+        "Professional representative bodies workforce (data user)",
+        "Researcher (data user)",
+        "Trade union bodies workforce (data user)"
+      ],
+      "synonyms": []
+    },
+    {
+      "id": 1012,
+      "name": "Social care workforce",
+      "description": null,
+      "displayOrder": 11,
+      "active": true,
+      "children": [
+        "Children's care home workforce",
+        "Children's centre staff member",
+        "Early intervention practitioner",
+        "Early intervention support worker",
+        "Family hub practitioner",
+        "Family support worker",
+        "Personal adviser (social care workforce)",
+        "Social worker"
+      ],
+      "synonyms": []
+    },
+    {
       "id": 1,
       "name": "Teachers",
       "description": "School teaching staff",
-      "displayOrder": 1,
+      "displayOrder": 12,
       "active": true,
       "children": [
         "Classroom teachers",
@@ -18,7 +186,7 @@
       "id": 2,
       "name": "Parents and carers",
       "description": "Adults responsible for a child",
-      "displayOrder": 2,
+      "displayOrder": 13,
       "active": true,
       "children": [],
       "synonyms": []
@@ -27,7 +195,7 @@
       "id": 3,
       "name": "Employers",
       "description": "Retired group, kept for history",
-      "displayOrder": 3,
+      "displayOrder": 14,
       "active": false,
       "children": [],
       "synonyms": []

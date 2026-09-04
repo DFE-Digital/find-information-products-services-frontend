@@ -67,7 +67,9 @@ public class CompassContractTests
         var products = ParseFixture<ServiceRegisterGetProductsResponse>("products.json").Data!;
         var product = products.Single(p => p.ProductName!.StartsWith("Apply for Teacher Training", StringComparison.Ordinal));
 
-        Assert.That(product.Categories!.Select(c => $"{c.GroupName}/{c.Name}"), Is.EqualTo(new[] { "Channel/Web", "Type/Transactional" }));
+        // The assignment rule's picks for this product, in COMPASS's group order, ending with the user group.
+        Assert.That(product.Categories!.Select(c => $"{c.GroupName}/{c.Name}"),
+            Is.EqualTo(new[] { "Phase/Private beta", "Channel/Phone", "Type/Transactional", "Business area/Strategy", "User group/Chief Social Worker for Children and Families" }));
         Assert.That(products.Where(p => p.Contacts is { Count: > 0 }).SelectMany(p => p.Contacts!),
             Has.All.Matches<ServiceRegisterGetProductsResponseDataItemContact>(c => c.Role is not null && c.RoleId is not null && c.Email is not null && c.CanManage is not null),
             "every recorded contact carries the members the pages read");

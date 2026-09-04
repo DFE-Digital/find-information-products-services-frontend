@@ -2,17 +2,58 @@
   "data": {
     "id": "00000000-0000-0000-0002-000000000014",
     "uniqueId": 2016,
-    "lastUpdated": "2026-08-15T18:25:24.9718207",
+    "lastUpdated": "2026-01-01T00:00:00",
     "productName": "Admissions Appeals Manager",
-    "phase": "Public Beta",
-    "businessArea": "",
-    "productUrl": "https://example.education.gov.uk/appeals",
+    "phase": null,
+    "businessArea": "Funding and Financial Oversight",
+    "productUrl": "https://example.org/appeals",
     "status": "Active",
     "isEnterpriseService": false,
     "longDescription": "Case management for admissions appeals. Itaque earum rerum hic tenetur. (AISS URL is retired: WD-10.)",
-    "channels": [],
-    "types": [],
-    "categories": [],
+    "channels": [
+      {
+        "id": 1008,
+        "name": "SMS"
+      }
+    ],
+    "types": [
+      {
+        "id": 3,
+        "name": "Data"
+      }
+    ],
+    "categories": [
+      {
+        "id": 7,
+        "name": "Decommissioned",
+        "groupId": 1,
+        "groupName": "Phase"
+      },
+      {
+        "id": 12,
+        "name": "SMS",
+        "groupId": 2,
+        "groupName": "Channel"
+      },
+      {
+        "id": 20,
+        "name": "Data",
+        "groupId": 3,
+        "groupName": "Type"
+      },
+      {
+        "id": 27,
+        "name": "Funding and Financial Oversight",
+        "groupId": 4,
+        "groupName": "Business area"
+      },
+      {
+        "id": 69,
+        "name": "Employer (250 or more employees)",
+        "groupId": 5,
+        "groupName": "User group"
+      }
+    ],
     "contacts": [
       {
         "role": "Service Owner",

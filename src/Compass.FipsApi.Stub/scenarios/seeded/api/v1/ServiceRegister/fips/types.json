@@ -10,7 +10,7 @@
     {
       "id": 2,
       "name": "Information",
-      "description": "The user reads or looks up",
+      "description": "Provide guidance, policy content, or structured information to help people make decisions or understand their responsibilities.",
       "displayOrder": 2,
       "active": true
     },
@@ -20,6 +20,20 @@
       "description": "Retired type, kept for history",
       "displayOrder": 3,
       "active": false
+    },
+    {
+      "id": 1002,
+      "name": "API",
+      "description": null,
+      "displayOrder": 4,
+      "active": true
+    },
+    {
+      "id": 1003,
+      "name": "Campaign",
+      "description": null,
+      "displayOrder": 5,
+      "active": true
     }
   ]
 }

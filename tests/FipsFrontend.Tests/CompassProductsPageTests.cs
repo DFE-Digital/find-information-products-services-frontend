@@ -65,7 +65,7 @@ public class CompassProductsPageTests
         // Phase comes from COMPASS's categorisation bundle; a seeded product carries its phase and business area tags.
         Assert.That(page.QuerySelectorAll("input[name='phase']").Select(i => i.GetAttribute("value")), Does.Contain("Public beta"));
         Assert.That(page.QuerySelectorAll(TitleLinks).Select(Html.Text), Does.Contain("Apply for Teacher Training"));
-        Assert.That(page.QuerySelectorAll(".govuk-tag").Select(Html.Text), Does.Contain("Digital Services"));
+        Assert.That(page.QuerySelectorAll(".govuk-tag").Select(Html.Text), Does.Contain("Strategy"));
     }
 
     [Test]
@@ -132,11 +132,11 @@ public class CompassProductsPageTests
         using var app = new FipsApplication(settings: Configured);
         app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
 
-        // The seed links this product to two channels and two types; the recording is its own file in the scenario.
+        // The assignment rule links this product to a channel, a type, and a business area; the recording is its own file in the scenario.
         var page = Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories"));
 
         Assert.That(Html.H1Headings(page), Is.EqualTo(new[] { "Apply for Teacher Training" }));
-        Assert.That(CategoryRows(page), Is.SupersetOf(new[] { ("Web", "Channel"), ("Native app", "Channel"), ("Transactional", "Type"), ("Information", "Type") }));
+        Assert.That(CategoryRows(page), Is.SupersetOf(new[] { ("Phone", "Channel"), ("Transactional", "Type"), ("Strategy", "Business area") }));
         Assert.That(Html.Hrefs(page, ".govuk-grid-column-three-quarters table.govuk-table a"), Has.All.StartWith("/compass/products?"), "a category's link filters this listing by that value");
     }
 
@@ -160,11 +160,11 @@ public class CompassProductsPageTests
         using var app = new FipsApplication(settings: Configured);
         app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
 
-        // The seed both links this product to the Web channel and Transactional type and tags it "Channel: Web" and "Type: Transactional".
+        // The seed both links this product to the Phone channel and Transactional type and tags it "Channel: Phone" and "Type: Transactional".
         var rows = CategoryRows(Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories")));
 
-        Assert.That(rows.Where(r => r.Type == "Channel"), Is.EqualTo(new[] { ("Web", "Channel"), ("Native app", "Channel") }));
-        Assert.That(rows.Where(r => r.Type == "Type"), Is.EqualTo(new[] { ("Transactional", "Type"), ("Information", "Type") }));
+        Assert.That(rows.Where(r => r.Type == "Channel"), Is.EqualTo(new[] { ("Phone", "Channel") }));
+        Assert.That(rows.Where(r => r.Type == "Type"), Is.EqualTo(new[] { ("Transactional", "Type") }));
     }
 
     [Test]

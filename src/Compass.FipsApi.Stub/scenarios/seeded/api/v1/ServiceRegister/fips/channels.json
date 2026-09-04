@@ -3,7 +3,7 @@
     {
       "id": 1,
       "name": "Web",
-      "description": "Browser-based service",
+      "description": "Real-time text-based communication delivered through web or mobile interfaces, often supporting automated and human interactions.",
       "displayOrder": 1,
       "active": true
     },
@@ -15,17 +15,66 @@
       "active": true
     },
     {
+      "id": 1003,
+      "name": "Email",
+      "description": null,
+      "displayOrder": 3,
+      "active": true
+    },
+    {
+      "id": 1008,
+      "name": "SMS",
+      "description": null,
+      "displayOrder": 4,
+      "active": true
+    },
+    {
+      "id": 1006,
+      "name": "Phone",
+      "description": null,
+      "displayOrder": 5,
+      "active": true
+    },
+    {
+      "id": 1002,
+      "name": "Chat",
+      "description": null,
+      "displayOrder": 6,
+      "active": true
+    },
+    {
+      "id": 1004,
+      "name": "Face-to-face",
+      "description": null,
+      "displayOrder": 7,
+      "active": true
+    },
+    {
+      "id": 1007,
+      "name": "Print media",
+      "description": null,
+      "displayOrder": 8,
+      "active": true
+    },
+    {
+      "id": 1005,
+      "name": "Other digital media",
+      "description": null,
+      "displayOrder": 9,
+      "active": true
+    },
+    {
       "id": 3,
       "name": "Telephone",
       "description": "Call centre or helpline",
-      "displayOrder": 3,
+      "displayOrder": 12,
       "active": true
     },
     {
       "id": 4,
       "name": "Post",
       "description": "Retired channel, kept for history",
-      "displayOrder": 4,
+      "displayOrder": 13,
       "active": false
     }
   ]

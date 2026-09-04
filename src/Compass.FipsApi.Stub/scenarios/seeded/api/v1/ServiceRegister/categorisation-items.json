@@ -39,7 +39,7 @@
     {
       "id": 5,
       "name": "Live",
-      "description": "",
+      "description": "Continously improving.",
       "groupId": 1,
       "groupName": "Phase",
       "groupDescription": "The stage a product or service is at in the service delivery lifecycle.",
@@ -75,7 +75,7 @@
     {
       "id": 9,
       "name": "Web",
-      "description": "",
+      "description": "Real-time text-based communication delivered through web or mobile interfaces, often supporting automated and human interactions.",
       "groupId": 2,
       "groupName": "Channel",
       "groupDescription": "The delivery channel through which a product or service is provided to users.",
@@ -165,7 +165,7 @@
     {
       "id": 19,
       "name": "Information",
-      "description": "",
+      "description": "Provide guidance, policy content, or structured information to help people make decisions or understand their responsibilities.",
       "groupId": 3,
       "groupName": "Type",
       "groupDescription": "The type of service delivery and functionality provided.",
@@ -219,7 +219,7 @@
     {
       "id": 25,
       "name": "Customer Experience and Design",
-      "description": "",
+      "description": "Partner with DfE teams to champion user needs and connect, improve and simplify services.",
       "groupId": 4,
       "groupName": "Business area",
       "groupDescription": "The business area or portfolio responsible for a product or service.",
@@ -395,6 +395,879 @@
       "groupName": "User group",
       "groupDescription": "The users of the product or service.",
       "displayOrder": 11
+    },
+    {
+      "id": 45,
+      "name": "Adult in work based learning or training",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 12
+    },
+    {
+      "id": 46,
+      "name": "Adult learner in non-work based learning or training",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 13
+    },
+    {
+      "id": 47,
+      "name": "Student (further education)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 14
+    },
+    {
+      "id": 48,
+      "name": "Student (higher education)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 15
+    },
+    {
+      "id": 49,
+      "name": "Independent careers adviser",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 16
+    },
+    {
+      "id": 50,
+      "name": "National careers service careers adviser",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 17
+    },
+    {
+      "id": 51,
+      "name": "Work coach",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 18
+    },
+    {
+      "id": 52,
+      "name": "Child (early years age)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 19
+    },
+    {
+      "id": 53,
+      "name": "Child (primary age)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 20
+    },
+    {
+      "id": 54,
+      "name": "Child (secondary age up to 16)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 21
+    },
+    {
+      "id": 55,
+      "name": "Young person (16-18)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 22
+    },
+    {
+      "id": 56,
+      "name": "Young person with SEND (16-25)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 23
+    },
+    {
+      "id": 57,
+      "name": "Colleague supporting DfE users",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 24
+    },
+    {
+      "id": 58,
+      "name": "Colleague supporting external stakeholders",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 25
+    },
+    {
+      "id": 59,
+      "name": "Colleague using data",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 26
+    },
+    {
+      "id": 60,
+      "name": "Colleague using digital to deliver services",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 27
+    },
+    {
+      "id": 61,
+      "name": "Academy and trust workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 28
+    },
+    {
+      "id": 62,
+      "name": "Alternative provision setting workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 29
+    },
+    {
+      "id": 63,
+      "name": "Early years workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 30
+    },
+    {
+      "id": 64,
+      "name": "Further education workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 31
+    },
+    {
+      "id": 65,
+      "name": "Higher education workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 32
+    },
+    {
+      "id": 66,
+      "name": "School workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 33
+    },
+    {
+      "id": 67,
+      "name": "SEND professional",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 34
+    },
+    {
+      "id": 68,
+      "name": "Employer (1-249 employees)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 35
+    },
+    {
+      "id": 69,
+      "name": "Employer (250 or more employees)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 36
+    },
+    {
+      "id": 70,
+      "name": "Self-employed person",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 37
+    },
+    {
+      "id": 71,
+      "name": "Business support officer (local authority)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 38
+    },
+    {
+      "id": 72,
+      "name": "Digital professional (local authority)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 39
+    },
+    {
+      "id": 73,
+      "name": "Finance support officer (local authority)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 40
+    },
+    {
+      "id": 74,
+      "name": "Senior leader (local authority)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 41
+    },
+    {
+      "id": 75,
+      "name": "Technology professional (local authority)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 42
+    },
+    {
+      "id": 76,
+      "name": "Adult (19-25) (NEET)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 43
+    },
+    {
+      "id": 77,
+      "name": "Adult career seeker (starter or changer)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 44
+    },
+    {
+      "id": 78,
+      "name": "Young person (16-18) (career seeker)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 45
+    },
+    {
+      "id": 79,
+      "name": "Young person (16-18) (NEET)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 46
+    },
+    {
+      "id": 80,
+      "name": "Young person with SEND (16-25) (career seeker)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 47
+    },
+    {
+      "id": 81,
+      "name": "Expectant parent",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 48
+    },
+    {
+      "id": 82,
+      "name": "Parent or carer of adult learner",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 49
+    },
+    {
+      "id": 83,
+      "name": "Parent or carer of career seeker",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 50
+    },
+    {
+      "id": 84,
+      "name": "Parent or carer of child (early years age)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 51
+    },
+    {
+      "id": 85,
+      "name": "Parent or carer of child (primary age)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 52
+    },
+    {
+      "id": 86,
+      "name": "Parent or carer of child (secondary age)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 53
+    },
+    {
+      "id": 87,
+      "name": "Parent or carer of child (SEND)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 54
+    },
+    {
+      "id": 88,
+      "name": "Parent or carer of young person (16-18)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 55
+    },
+    {
+      "id": 89,
+      "name": "Colleague in another part of government (data user)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 56
+    },
+    {
+      "id": 90,
+      "name": "Journalist (data user)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 57
+    },
+    {
+      "id": 91,
+      "name": "Member of a professional network (data user)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 58
+    },
+    {
+      "id": 92,
+      "name": "Professional representative bodies workforce (data user)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 59
+    },
+    {
+      "id": 93,
+      "name": "Researcher (data user)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 60
+    },
+    {
+      "id": 94,
+      "name": "Trade union bodies workforce (data user)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 61
+    },
+    {
+      "id": 95,
+      "name": "Children's care home workforce",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 62
+    },
+    {
+      "id": 96,
+      "name": "Children's centre staff member",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 63
+    },
+    {
+      "id": 97,
+      "name": "Early intervention practitioner",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 64
+    },
+    {
+      "id": 98,
+      "name": "Early intervention support worker",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 65
+    },
+    {
+      "id": 99,
+      "name": "Family hub practitioner",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 66
+    },
+    {
+      "id": 100,
+      "name": "Family support worker",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 67
+    },
+    {
+      "id": 101,
+      "name": "Personal adviser (social care workforce)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 68
+    },
+    {
+      "id": 102,
+      "name": "Social worker",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 69
+    },
+    {
+      "id": 103,
+      "name": "Chief Social Worker for Children and Families",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 70
+    },
+    {
+      "id": 104,
+      "name": "Child Protection Lead Practitioner",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 71
+    },
+    {
+      "id": 105,
+      "name": "Practice leader (social worker)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 72
+    },
+    {
+      "id": 106,
+      "name": "Practice supervisor (social worker)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 73
+    },
+    {
+      "id": 107,
+      "name": "Principal Child and Family Social Worker",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 74
+    },
+    {
+      "id": 108,
+      "name": "Academy governor",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 75
+    },
+    {
+      "id": 109,
+      "name": "Academy headteacher (primary)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 76
+    },
+    {
+      "id": 110,
+      "name": "Academy headteacher (secondary)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 77
+    },
+    {
+      "id": 111,
+      "name": "Academy higher level teaching assistant",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 78
+    },
+    {
+      "id": 112,
+      "name": "Academy school business professional",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 79
+    },
+    {
+      "id": 113,
+      "name": "Academy support staff",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 80
+    },
+    {
+      "id": 114,
+      "name": "Academy teacher (primary)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 81
+    },
+    {
+      "id": 115,
+      "name": "Academy teacher (secondary)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 82
+    },
+    {
+      "id": 116,
+      "name": "Academy teaching assistant",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 83
+    },
+    {
+      "id": 117,
+      "name": "Academy trustee",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 84
+    },
+    {
+      "id": 118,
+      "name": "Alternative provision setting mentor",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 85
+    },
+    {
+      "id": 119,
+      "name": "Alternative provision setting support assistant",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 86
+    },
+    {
+      "id": 120,
+      "name": "Alternative provision setting teacher",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 87
+    },
+    {
+      "id": 121,
+      "name": "Early years teacher",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 88
+    },
+    {
+      "id": 122,
+      "name": "College leader",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 89
+    },
+    {
+      "id": 123,
+      "name": "College support staff",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 90
+    },
+    {
+      "id": 124,
+      "name": "Lecturer (further education)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 91
+    },
+    {
+      "id": 125,
+      "name": "Lecturer (higher education)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 92
+    },
+    {
+      "id": 126,
+      "name": "University leader",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 93
+    },
+    {
+      "id": 127,
+      "name": "University support staff",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 94
+    },
+    {
+      "id": 128,
+      "name": "ECHP coordinator",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 95
+    },
+    {
+      "id": 129,
+      "name": "SEN coordinator",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 96
+    },
+    {
+      "id": 130,
+      "name": "SEND speech and language therapist",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 97
+    },
+    {
+      "id": 131,
+      "name": "SEND teacher",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 98
+    },
+    {
+      "id": 132,
+      "name": "SEND teaching assistant",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 99
+    },
+    {
+      "id": 133,
+      "name": "Headteacher (primary school)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 100
+    },
+    {
+      "id": 134,
+      "name": "Headteacher (secondary school)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 101
+    },
+    {
+      "id": 135,
+      "name": "Higher level teaching assistant",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 102
+    },
+    {
+      "id": 136,
+      "name": "School business professional",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 103
+    },
+    {
+      "id": 137,
+      "name": "School governor",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 104
+    },
+    {
+      "id": 138,
+      "name": "School support staff",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 105
+    },
+    {
+      "id": 139,
+      "name": "Teacher (primary school)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 106
+    },
+    {
+      "id": 140,
+      "name": "Teacher (secondary school)",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 107
+    },
+    {
+      "id": 141,
+      "name": "Teaching assistant",
+      "description": null,
+      "groupId": 5,
+      "groupName": "User group",
+      "groupDescription": "The users of the product or service.",
+      "displayOrder": 108
     }
   ]
 }

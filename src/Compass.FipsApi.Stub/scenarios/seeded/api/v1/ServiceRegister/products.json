@@ -3,17 +3,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000014",
       "uniqueId": 2016,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Admissions Appeals Manager",
-      "phase": "Public Beta",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/appeals",
+      "phase": null,
+      "businessArea": "Funding and Financial Oversight",
+      "productUrl": "https://example.org/appeals",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Case management for admissions appeals. Itaque earum rerum hic tenetur. (AISS URL is retired: WD-10.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1008,
+          "name": "SMS"
+        }
+      ],
+      "types": [
+        {
+          "id": 3,
+          "name": "Data"
+        }
+      ],
+      "categories": [
+        {
+          "id": 7,
+          "name": "Decommissioned",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 12,
+          "name": "SMS",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 27,
+          "name": "Funding and Financial Oversight",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 69,
+          "name": "Employer (250 or more employees)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -27,33 +68,115 @@
     {
       "id": "00000000-0000-0000-0001-000000000004",
       "uniqueId": 4,
-      "lastUpdated": "2026-08-13T08:27:22.1313825",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Alpha Assessment Tracker (seeded)",
-      "phase": "Alpha",
-      "businessArea": "",
+      "phase": "Live",
+      "businessArea": "Customer Experience and Design",
       "productUrl": null,
-      "status": "New",
+      "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "New in the register, not yet triaged.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1005,
+          "name": "Other digital media"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        }
+      ],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Live",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 17,
+          "name": "Other digital media",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 18,
+          "name": "Transactional",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 25,
+          "name": "Customer Experience and Design",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 124,
+          "name": "Lecturer (further education)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": []
     },
     {
       "id": "00000000-0000-0000-0002-000000000015",
       "uniqueId": 2017,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Alternative Provision Directory",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/ap-directory",
+      "phase": "Private Beta",
+      "businessArea": "Strategy",
+      "productUrl": "https://example.org/ap-directory",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Registered alternative provision settings and capacity. Nam libero tempore, cum soluta nobis.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1002,
+          "name": "Chat"
+        }
+      ],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 14,
+          "name": "Chat",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 33,
+          "name": "Strategy",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 120,
+          "name": "Alternative provision setting teacher",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -67,38 +190,36 @@
     {
       "id": "00000000-0000-0000-0001-000000000001",
       "uniqueId": 1,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Apply for Teacher Training",
-      "phase": "Live",
-      "businessArea": "Digital Services",
-      "productUrl": "https://example.education.gov.uk/att",
+      "phase": "Private Beta",
+      "businessArea": "Strategy",
+      "productUrl": "https://example.org/att",
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "A live enterprise service used to demo the full house.",
       "channels": [
         {
-          "id": 1,
-          "name": "Web"
-        },
-        {
-          "id": 2,
-          "name": "Native app"
+          "id": 1006,
+          "name": "Phone"
         }
       ],
       "types": [
         {
           "id": 1,
           "name": "Transactional"
-        },
-        {
-          "id": 2,
-          "name": "Information"
         }
       ],
       "categories": [
         {
-          "id": 9,
-          "name": "Web",
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 13,
+          "name": "Phone",
           "groupId": 2,
           "groupName": "Channel"
         },
@@ -107,6 +228,18 @@
           "name": "Transactional",
           "groupId": 3,
           "groupName": "Type"
+        },
+        {
+          "id": 33,
+          "name": "Strategy",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 103,
+          "name": "Chief Social Worker for Children and Families",
+          "groupId": 5,
+          "groupName": "User group"
         }
       ],
       "contacts": [
@@ -129,17 +262,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000016",
       "uniqueId": 2018,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Behaviour Support Toolkit",
-      "phase": "Alpha",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/behaviour",
+      "phase": null,
+      "businessArea": "Operations and Infrastructure",
+      "productUrl": "https://example.org/behaviour",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Evidence-based behaviour interventions for schools. Omnis voluptas assumenda est.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1004,
+          "name": "Face-to-face"
+        }
+      ],
+      "types": [
+        {
+          "id": 2,
+          "name": "Information"
+        }
+      ],
+      "categories": [
+        {
+          "id": 8,
+          "name": "Did not progress",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 15,
+          "name": "Face-to-face",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 19,
+          "name": "Information",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 28,
+          "name": "Operations and Infrastructure",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 141,
+          "name": "Teaching assistant",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -153,33 +327,109 @@
     {
       "id": "00000000-0000-0000-0002-000000000017",
       "uniqueId": 2019,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Careers Guidance Tracker",
-      "phase": "Public Beta",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/careers",
+      "phase": null,
+      "businessArea": "Children and Families",
+      "productUrl": "https://example.org/careers",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Gatsby benchmark tracking for secondary schools. Ut aut reiciendis voluptatibus. (owned_by dangles on purpose: WD-12.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1005,
+          "name": "Other digital media"
+        }
+      ],
+      "types": [
+        {
+          "id": 1003,
+          "name": "Campaign"
+        }
+      ],
+      "categories": [
+        {
+          "id": 17,
+          "name": "Other digital media",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 23,
+          "name": "Children and Families",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 84,
+          "name": "Parent or carer of child (early years age)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": []
     },
     {
       "id": "00000000-0000-0000-0002-000000000012",
       "uniqueId": 2013,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Classroom Technology Grants",
-      "phase": "Discovery",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/tech-grants",
+      "phase": "Public Beta",
+      "businessArea": "Enterprise Data",
+      "productUrl": "https://example.org/tech-grants",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Grant applications for classroom technology. Et harum quidem rerum facilis est.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 2,
+          "name": "Native app"
+        }
+      ],
+      "types": [
+        {
+          "id": 1003,
+          "name": "Campaign"
+        }
+      ],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Public beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 10,
+          "name": "Native app",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 26,
+          "name": "Enterprise Data",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 79,
+          "name": "Young person (16-18) (NEET)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -193,17 +443,52 @@
     {
       "id": "00000000-0000-0000-0001-000000000003",
       "uniqueId": 3,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Curriculum Content Store",
-      "phase": "Public Beta",
-      "businessArea": "Operations",
+      "phase": null,
+      "businessArea": "Children and Families",
       "productUrl": null,
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Public beta service, Priya is SRO.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1002,
+          "name": "Chat"
+        }
+      ],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 14,
+          "name": "Chat",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 23,
+          "name": "Children and Families",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 88,
+          "name": "Parent or carer of young person (16-18)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Senior Responsible Officer",
@@ -217,17 +502,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000009",
       "uniqueId": 2010,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Curriculum Resource Library",
       "phase": "Public Beta",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/resources",
+      "businessArea": "Customer Experience and Design",
+      "productUrl": "https://example.org/resources",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Curated teaching resources by key stage. Neque porro quisquam est qui dolorem. (Phase disagrees with SAS: WD-05.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1005,
+          "name": "Other digital media"
+        }
+      ],
+      "types": [
+        {
+          "id": 1003,
+          "name": "Campaign"
+        }
+      ],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Public beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 17,
+          "name": "Other digital media",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 25,
+          "name": "Customer Experience and Design",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 121,
+          "name": "Early years teacher",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -241,33 +567,115 @@
     {
       "id": "00000000-0000-0000-0001-000000000006",
       "uniqueId": 6,
-      "lastUpdated": "2026-08-13T08:27:22.1396066",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Discovery: Family Support Finder (seeded)",
-      "phase": "Discovery",
-      "businessArea": "",
+      "phase": "Public Beta",
+      "businessArea": "Enterprise Data",
       "productUrl": null,
-      "status": "New",
+      "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Pre-beta discovery work.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1,
+          "name": "Web"
+        }
+      ],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Public beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 9,
+          "name": "Web",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 26,
+          "name": "Enterprise Data",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 108,
+          "name": "Academy governor",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": []
     },
     {
       "id": "8d52bcb5-eb8d-4e78-9fe2-a5cee7e4efcf",
       "uniqueId": 1002,
-      "lastUpdated": "2026-08-21T08:14:40.5348019",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Early Years Funding Checker",
-      "phase": null,
-      "businessArea": "",
+      "phase": "Private Beta",
+      "businessArea": "Regional Digital Services",
       "productUrl": null,
-      "status": "New",
+      "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Offering first seen in the cmdb-minimal era; part of the world's steady state now.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1008,
+          "name": "SMS"
+        }
+      ],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 12,
+          "name": "SMS",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 29,
+          "name": "Regional Digital Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 72,
+          "name": "Digital professional (local authority)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -281,17 +689,52 @@
     {
       "id": "00000000-0000-0000-0002-000000000004",
       "uniqueId": 2005,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Early Years Provider Register",
-      "phase": "Live",
+      "phase": "Alpha",
       "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/ey-register",
+      "productUrl": "https://example.org/ey-register",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Registration and inspection history for early years providers. Duis aute irure dolor in reprehenderit.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 2,
+          "name": "Native app"
+        }
+      ],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 2,
+          "name": "Alpha",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 10,
+          "name": "Native app",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 140,
+          "name": "Teacher (secondary school)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Information Asset Owner",
@@ -312,33 +755,115 @@
     {
       "id": "00000000-0000-0000-0002-000000000113",
       "uniqueId": 2015,
-      "lastUpdated": "2026-08-13T16:27:05.6222222",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Estate Condition Survey (Schools)",
-      "phase": "Live",
-      "businessArea": "",
+      "phase": "Private Beta",
+      "businessArea": "Regional Digital Services",
       "productUrl": null,
       "status": "Active",
       "isEnterpriseService": false,
-      "longDescription": "\u26a0 WD-11: near-duplicate of School Estate Condition Survey, hand-created with NO CMDBID \u2014 permanently unmatchable by any sync.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "longDescription": "⚠ WD-11: near-duplicate of School Estate Condition Survey, hand-created with NO CMDBID — permanently unmatchable by any sync.",
+      "channels": [
+        {
+          "id": 1,
+          "name": "Web"
+        }
+      ],
+      "types": [
+        {
+          "id": 1003,
+          "name": "Campaign"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 9,
+          "name": "Web",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 29,
+          "name": "Regional Digital Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 68,
+          "name": "Employer (1-249 employees)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": []
     },
     {
       "id": "00000000-0000-0000-0002-000000000005",
       "uniqueId": 2006,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Exam Results Analyser",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/results",
+      "phase": null,
+      "businessArea": "Sector Facing Services",
+      "productUrl": "https://example.org/results",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": null,
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1003,
+          "name": "Email"
+        }
+      ],
+      "types": [
+        {
+          "id": 3,
+          "name": "Data"
+        }
+      ],
+      "categories": [
+        {
+          "id": 8,
+          "name": "Did not progress",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 11,
+          "name": "Email",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 31,
+          "name": "Sector Facing Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 119,
+          "name": "Alternative provision setting support assistant",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -352,17 +877,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000018",
       "uniqueId": 2020,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Free School Applications",
       "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/free-schools",
+      "businessArea": "Skills and Growth",
+      "productUrl": "https://example.org/free-schools",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Application workflow for free school proposals. Maiores alias consequatur aut perferendis.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1003,
+          "name": "Email"
+        }
+      ],
+      "types": [
+        {
+          "id": 1003,
+          "name": "Campaign"
+        }
+      ],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Live",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 11,
+          "name": "Email",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 32,
+          "name": "Skills and Growth",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 87,
+          "name": "Parent or carer of child (SEND)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -376,17 +942,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000007",
       "uniqueId": 2008,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Governor Training Hub",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/governors",
+      "phase": null,
+      "businessArea": "Schools Digital",
+      "productUrl": "https://example.org/governors",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Training modules and completion tracking for governors. Sed ut perspiciatis unde omnis. (COMPASS contact carries WD-04: typo'd email.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1007,
+          "name": "Print media"
+        }
+      ],
+      "types": [
+        {
+          "id": 1003,
+          "name": "Campaign"
+        }
+      ],
+      "categories": [
+        {
+          "id": 7,
+          "name": "Decommissioned",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 16,
+          "name": "Print media",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 22,
+          "name": "Campaign",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 30,
+          "name": "Schools Digital",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 106,
+          "name": "Practice supervisor (social worker)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Product manager",
@@ -407,33 +1014,104 @@
     {
       "id": "00000000-0000-0000-0001-000000000005",
       "uniqueId": 5,
-      "lastUpdated": "2026-08-13T08:27:22.1354944",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Legacy Grants Portal (seeded)",
-      "phase": "Live",
-      "businessArea": "",
+      "phase": null,
+      "businessArea": "Sector Facing Services",
       "productUrl": null,
-      "status": "Inactive",
+      "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Inactive/retired product for the inactive tab.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1007,
+          "name": "Print media"
+        }
+      ],
+      "types": [
+        {
+          "id": 3,
+          "name": "Data"
+        }
+      ],
+      "categories": [
+        {
+          "id": 6,
+          "name": "Decommissioning",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 16,
+          "name": "Print media",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 31,
+          "name": "Sector Facing Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 89,
+          "name": "Colleague in another part of government (data user)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": []
     },
     {
       "id": "00000000-0000-0000-0002-000000000001",
       "uniqueId": 2002,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Pupil Attendnace Tracker",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/attendance",
+      "phase": "Public Beta",
+      "businessArea": "Regional Digital Services",
+      "productUrl": "https://example.org/attendance",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Daily attendance capture for schools. Lorem ipsum dolor sit amet, consectetur adipiscing elit. (COMPASS copy carries WD-02: transposed title.)",
-      "channels": [],
+      "channels": [
+        {
+          "id": 1004,
+          "name": "Face-to-face"
+        }
+      ],
       "types": [],
-      "categories": [],
+      "categories": [
+        {
+          "id": 4,
+          "name": "Public beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 15,
+          "name": "Face-to-face",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 29,
+          "name": "Regional Digital Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 53,
+          "name": "Child (primary age)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Product manager",
@@ -454,17 +1132,47 @@
     {
       "id": "00000000-0000-0000-0002-000000000010",
       "uniqueId": 2011,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Safeguarding Concern Reporter",
       "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/safeguarding",
+      "businessArea": "Customer Experience and Design",
+      "productUrl": "https://example.org/safeguarding",
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Structured reporting route for safeguarding concerns. Quis autem vel eum iure reprehenderit.",
       "channels": [],
-      "types": [],
-      "categories": [],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Live",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 25,
+          "name": "Customer Experience and Design",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 65,
+          "name": "Higher education workforce",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -478,17 +1186,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000019",
       "uniqueId": 2021,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "School Census Validator",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/census",
+      "phase": null,
+      "businessArea": "Funding and Financial Oversight",
+      "productUrl": "https://example.org/census",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Pre-submission validation for census returns. Doloribus asperiores repellat.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 2,
+          "name": "Native app"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        }
+      ],
+      "categories": [
+        {
+          "id": 6,
+          "name": "Decommissioning",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 10,
+          "name": "Native app",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 18,
+          "name": "Transactional",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 27,
+          "name": "Funding and Financial Oversight",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 63,
+          "name": "Early years workforce",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -502,17 +1251,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000013",
       "uniqueId": 2014,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "School Estate Condition Survey",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/estate-survey",
+      "phase": "Discovery",
+      "businessArea": "Skills and Growth",
+      "productUrl": "https://example.org/estate-survey",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Condition data collection across the school estate. Temporibus autem quibusdam. (COMPASS holds a near-duplicate twin: WD-11.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1006,
+          "name": "Phone"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        }
+      ],
+      "categories": [
+        {
+          "id": 1,
+          "name": "Discovery",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 13,
+          "name": "Phone",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 18,
+          "name": "Transactional",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 32,
+          "name": "Skills and Growth",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 107,
+          "name": "Principal Child and Family Social Worker",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -526,17 +1316,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000003",
       "uniqueId": 2004,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "School Meals Standards Portal",
-      "phase": "Public Beta",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/meals",
+      "phase": "Live",
+      "businessArea": "Operations and Infrastructure",
+      "productUrl": "https://example.org/meals",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Nutrition standards guidance and compliance returns. Ut enim ad minim veniam.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1008,
+          "name": "SMS"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        }
+      ],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Live",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 12,
+          "name": "SMS",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 18,
+          "name": "Transactional",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 28,
+          "name": "Operations and Infrastructure",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 66,
+          "name": "School workforce",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -550,32 +1381,45 @@
     {
       "id": "00000000-0000-0000-0001-000000000002",
       "uniqueId": 2,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "School Places Dashboard",
-      "phase": "Live",
-      "businessArea": "Digital Services",
-      "productUrl": "https://example.education.gov.uk/spd",
+      "phase": null,
+      "businessArea": "Operations and Infrastructure",
+      "productUrl": "https://example.org/spd",
       "status": "Active",
       "isEnterpriseService": false,
-      "longDescription": "Live reporting service \u2014 CMDB copy updated 2026-08: now covers independent settings too.",
+      "longDescription": "Live reporting service — CMDB copy updated 2026-08: now covers independent settings too.",
       "channels": [
         {
-          "id": 1,
-          "name": "Web"
+          "id": 1008,
+          "name": "SMS"
         }
       ],
-      "types": [
-        {
-          "id": 2,
-          "name": "Information"
-        }
-      ],
+      "types": [],
       "categories": [
         {
-          "id": 19,
-          "name": "Information",
-          "groupId": 3,
-          "groupName": "Type"
+          "id": 8,
+          "name": "Did not progress",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 12,
+          "name": "SMS",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 28,
+          "name": "Operations and Infrastructure",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 127,
+          "name": "University support staff",
+          "groupId": 5,
+          "groupName": "User group"
         }
       ],
       "contacts": [
@@ -591,17 +1435,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000008",
       "uniqueId": 2009,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "School Transport Planner",
-      "phase": "Alpha",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/transport",
+      "phase": "Discovery",
+      "businessArea": "Sector Facing Services",
+      "productUrl": "https://example.org/transport",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Route planning and eligibility checks for home-to-school transport. Nemo enim ipsam voluptatem.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1007,
+          "name": "Print media"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        }
+      ],
+      "categories": [
+        {
+          "id": 1,
+          "name": "Discovery",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 16,
+          "name": "Print media",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 18,
+          "name": "Transactional",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 31,
+          "name": "Sector Facing Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 77,
+          "name": "Adult career seeker (starter or changer)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -615,17 +1500,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000006",
       "uniqueId": 2007,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "SEND Support Gateway",
-      "phase": "Public Beta",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/send",
+      "phase": "Private Beta",
+      "businessArea": "Customer Experience and Design",
+      "productUrl": "https://example.org/send",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Signposting and plans for special educational needs support. Lorem ipsum dolor sit amet. (AISS copy carries WD-09: case drift.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1,
+          "name": "Web"
+        }
+      ],
+      "types": [
+        {
+          "id": 1,
+          "name": "Transactional"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 9,
+          "name": "Web",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 18,
+          "name": "Transactional",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 25,
+          "name": "Customer Experience and Design",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 68,
+          "name": "Employer (1-249 employees)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -639,17 +1565,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000011",
       "uniqueId": 2012,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Teacher Pension Estimator",
-      "phase": "Live",
-      "businessArea": "",
+      "phase": null,
+      "businessArea": "Sector Facing Services",
       "productUrl": null,
       "status": "Active",
       "isEnterpriseService": false,
-      "longDescription": "Retirement estimate calculator for the teachers' scheme. At vero eos et accusamus. Service URL: https://example.education.gov.uk/pension-estimator (COMPASS copy carries WD-06: URL missing there.)",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "longDescription": "Retirement estimate calculator for the teachers' scheme. At vero eos et accusamus. Service URL: https://example.org/pension-estimator (COMPASS copy carries WD-06: URL missing there.)",
+      "channels": [
+        {
+          "id": 1003,
+          "name": "Email"
+        }
+      ],
+      "types": [
+        {
+          "id": 2,
+          "name": "Information"
+        }
+      ],
+      "categories": [
+        {
+          "id": 6,
+          "name": "Decommissioning",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 11,
+          "name": "Email",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 19,
+          "name": "Information",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 31,
+          "name": "Sector Facing Services",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 104,
+          "name": "Child Protection Lead Practitioner",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -663,17 +1630,52 @@
     {
       "id": "00000000-0000-0000-0002-000000000002",
       "uniqueId": 2003,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Teacher Vacancy Finder",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/vacancies",
+      "phase": null,
+      "businessArea": "Children and Families",
+      "productUrl": "https://example.org/vacancies",
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Search and list teaching vacancies nationally. Sed do eiusmod tempor incididunt ut labore.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1002,
+          "name": "Chat"
+        }
+      ],
+      "types": [
+        {
+          "id": 3,
+          "name": "Data"
+        }
+      ],
+      "categories": [
+        {
+          "id": 14,
+          "name": "Chat",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 23,
+          "name": "Children and Families",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 134,
+          "name": "Headteacher (secondary school)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Delivery Manager",
@@ -694,17 +1696,58 @@
     {
       "id": "00000000-0000-0000-0002-000000000020",
       "uniqueId": 2022,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Tutoring Programme Portal",
-      "phase": "Discovery",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/tutoring",
+      "phase": "Private Beta",
+      "businessArea": "Enterprise Data",
+      "productUrl": "https://example.org/tutoring",
       "status": "Active",
       "isEnterpriseService": false,
       "longDescription": "Tutoring provider enrolment and session logging. Lorem ipsum dolor sit amet, consectetur.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 2,
+          "name": "Native app"
+        }
+      ],
+      "types": [
+        {
+          "id": 3,
+          "name": "Data"
+        }
+      ],
+      "categories": [
+        {
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 10,
+          "name": "Native app",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 26,
+          "name": "Enterprise Data",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 113,
+          "name": "Academy support staff",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",

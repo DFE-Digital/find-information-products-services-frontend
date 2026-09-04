@@ -3,38 +3,36 @@
     {
       "id": "00000000-0000-0000-0001-000000000001",
       "uniqueId": 1,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Apply for Teacher Training",
-      "phase": "Live",
-      "businessArea": "Digital Services",
-      "productUrl": "https://example.education.gov.uk/att",
+      "phase": "Private Beta",
+      "businessArea": "Strategy",
+      "productUrl": "https://example.org/att",
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "A live enterprise service used to demo the full house.",
       "channels": [
         {
-          "id": 1,
-          "name": "Web"
-        },
-        {
-          "id": 2,
-          "name": "Native app"
+          "id": 1006,
+          "name": "Phone"
         }
       ],
       "types": [
         {
           "id": 1,
           "name": "Transactional"
-        },
-        {
-          "id": 2,
-          "name": "Information"
         }
       ],
       "categories": [
         {
-          "id": 9,
-          "name": "Web",
+          "id": 3,
+          "name": "Private beta",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 13,
+          "name": "Phone",
           "groupId": 2,
           "groupName": "Channel"
         },
@@ -43,6 +41,18 @@
           "name": "Transactional",
           "groupId": 3,
           "groupName": "Type"
+        },
+        {
+          "id": 33,
+          "name": "Strategy",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 103,
+          "name": "Chief Social Worker for Children and Families",
+          "groupId": 5,
+          "groupName": "User group"
         }
       ],
       "contacts": [
@@ -65,17 +75,47 @@
     {
       "id": "00000000-0000-0000-0002-000000000010",
       "uniqueId": 2011,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Safeguarding Concern Reporter",
       "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/safeguarding",
+      "businessArea": "Customer Experience and Design",
+      "productUrl": "https://example.org/safeguarding",
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Structured reporting route for safeguarding concerns. Quis autem vel eum iure reprehenderit.",
       "channels": [],
-      "types": [],
-      "categories": [],
+      "types": [
+        {
+          "id": 1002,
+          "name": "API"
+        }
+      ],
+      "categories": [
+        {
+          "id": 5,
+          "name": "Live",
+          "groupId": 1,
+          "groupName": "Phase"
+        },
+        {
+          "id": 21,
+          "name": "API",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 25,
+          "name": "Customer Experience and Design",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 65,
+          "name": "Higher education workforce",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Service Owner",
@@ -89,17 +129,52 @@
     {
       "id": "00000000-0000-0000-0002-000000000002",
       "uniqueId": 2003,
-      "lastUpdated": "2026-08-15T18:25:24.9718207",
+      "lastUpdated": "2026-01-01T00:00:00",
       "productName": "Teacher Vacancy Finder",
-      "phase": "Live",
-      "businessArea": "",
-      "productUrl": "https://example.education.gov.uk/vacancies",
+      "phase": null,
+      "businessArea": "Children and Families",
+      "productUrl": "https://example.org/vacancies",
       "status": "Active",
       "isEnterpriseService": true,
       "longDescription": "Search and list teaching vacancies nationally. Sed do eiusmod tempor incididunt ut labore.",
-      "channels": [],
-      "types": [],
-      "categories": [],
+      "channels": [
+        {
+          "id": 1002,
+          "name": "Chat"
+        }
+      ],
+      "types": [
+        {
+          "id": 3,
+          "name": "Data"
+        }
+      ],
+      "categories": [
+        {
+          "id": 14,
+          "name": "Chat",
+          "groupId": 2,
+          "groupName": "Channel"
+        },
+        {
+          "id": 20,
+          "name": "Data",
+          "groupId": 3,
+          "groupName": "Type"
+        },
+        {
+          "id": 23,
+          "name": "Children and Families",
+          "groupId": 4,
+          "groupName": "Business area"
+        },
+        {
+          "id": 134,
+          "name": "Headteacher (secondary school)",
+          "groupId": 5,
+          "groupName": "User group"
+        }
+      ],
       "contacts": [
         {
           "role": "Delivery Manager",

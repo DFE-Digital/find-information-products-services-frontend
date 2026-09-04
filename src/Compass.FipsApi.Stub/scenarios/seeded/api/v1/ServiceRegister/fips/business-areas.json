@@ -1,11 +1,99 @@
 {
   "data": [
     {
+      "id": 1002,
+      "businessAreaLookupId": null,
+      "name": "Children and Families",
+      "description": null,
+      "displayOrder": 1,
+      "active": true
+    },
+    {
+      "id": 1003,
+      "businessAreaLookupId": null,
+      "name": "Commercial",
+      "description": null,
+      "displayOrder": 2,
+      "active": true
+    },
+    {
+      "id": 1004,
+      "businessAreaLookupId": null,
+      "name": "Customer Experience and Design",
+      "description": "Partner with DfE teams to champion user needs and connect, improve and simplify services.",
+      "displayOrder": 3,
+      "active": true
+    },
+    {
+      "id": 1005,
+      "businessAreaLookupId": null,
+      "name": "Enterprise Data",
+      "description": null,
+      "displayOrder": 4,
+      "active": true
+    },
+    {
+      "id": 1006,
+      "businessAreaLookupId": null,
+      "name": "Funding and Financial Oversight",
+      "description": null,
+      "displayOrder": 5,
+      "active": true
+    },
+    {
+      "id": 1007,
+      "businessAreaLookupId": null,
+      "name": "Operations and Infrastructure",
+      "description": null,
+      "displayOrder": 6,
+      "active": true
+    },
+    {
+      "id": 1008,
+      "businessAreaLookupId": null,
+      "name": "Regional Digital Services",
+      "description": null,
+      "displayOrder": 7,
+      "active": true
+    },
+    {
+      "id": 1009,
+      "businessAreaLookupId": null,
+      "name": "Schools Digital",
+      "description": null,
+      "displayOrder": 8,
+      "active": true
+    },
+    {
+      "id": 1010,
+      "businessAreaLookupId": null,
+      "name": "Sector Facing Services",
+      "description": null,
+      "displayOrder": 9,
+      "active": true
+    },
+    {
+      "id": 1011,
+      "businessAreaLookupId": null,
+      "name": "Skills and Growth",
+      "description": null,
+      "displayOrder": 10,
+      "active": true
+    },
+    {
+      "id": 1012,
+      "businessAreaLookupId": null,
+      "name": "Strategy",
+      "description": null,
+      "displayOrder": 11,
+      "active": true
+    },
+    {
       "id": 5,
       "businessAreaLookupId": 3,
       "name": "Digital Services",
       "description": null,
-      "displayOrder": 1,
+      "displayOrder": 12,
       "active": true
     },
     {
@@ -13,7 +101,7 @@
       "businessAreaLookupId": 4,
       "name": "Operations",
       "description": null,
-      "displayOrder": 2,
+      "displayOrder": 13,
       "active": true
     }
   ]

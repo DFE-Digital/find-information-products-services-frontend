@@ -42,7 +42,7 @@
         {
           "id": 5,
           "name": "Live",
-          "description": "",
+          "description": "Continously improving.",
           "displayOrder": 5,
           "active": true,
           "categorisationGroupId": 1
@@ -83,7 +83,7 @@
         {
           "id": 9,
           "name": "Web",
-          "description": "",
+          "description": "Real-time text-based communication delivered through web or mobile interfaces, often supporting automated and human interactions.",
           "displayOrder": 1,
           "active": true,
           "categorisationGroupId": 2
@@ -172,7 +172,7 @@
         {
           "id": 19,
           "name": "Information",
-          "description": "",
+          "description": "Provide guidance, policy content, or structured information to help people make decisions or understand their responsibilities.",
           "displayOrder": 2,
           "active": true,
           "categorisationGroupId": 3
@@ -229,7 +229,7 @@
         {
           "id": 25,
           "name": "Customer Experience and Design",
-          "description": "",
+          "description": "Partner with DfE teams to champion user needs and connect, improve and simplify services.",
           "displayOrder": 3,
           "active": true,
           "categorisationGroupId": 4
@@ -392,6 +392,782 @@
           "name": "Social care workforce",
           "description": "",
           "displayOrder": 11,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 45,
+          "name": "Adult in work based learning or training",
+          "description": null,
+          "displayOrder": 12,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 46,
+          "name": "Adult learner in non-work based learning or training",
+          "description": null,
+          "displayOrder": 13,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 47,
+          "name": "Student (further education)",
+          "description": null,
+          "displayOrder": 14,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 48,
+          "name": "Student (higher education)",
+          "description": null,
+          "displayOrder": 15,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 49,
+          "name": "Independent careers adviser",
+          "description": null,
+          "displayOrder": 16,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 50,
+          "name": "National careers service careers adviser",
+          "description": null,
+          "displayOrder": 17,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 51,
+          "name": "Work coach",
+          "description": null,
+          "displayOrder": 18,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 52,
+          "name": "Child (early years age)",
+          "description": null,
+          "displayOrder": 19,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 53,
+          "name": "Child (primary age)",
+          "description": null,
+          "displayOrder": 20,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 54,
+          "name": "Child (secondary age up to 16)",
+          "description": null,
+          "displayOrder": 21,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 55,
+          "name": "Young person (16-18)",
+          "description": null,
+          "displayOrder": 22,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 56,
+          "name": "Young person with SEND (16-25)",
+          "description": null,
+          "displayOrder": 23,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 57,
+          "name": "Colleague supporting DfE users",
+          "description": null,
+          "displayOrder": 24,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 58,
+          "name": "Colleague supporting external stakeholders",
+          "description": null,
+          "displayOrder": 25,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 59,
+          "name": "Colleague using data",
+          "description": null,
+          "displayOrder": 26,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 60,
+          "name": "Colleague using digital to deliver services",
+          "description": null,
+          "displayOrder": 27,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 61,
+          "name": "Academy and trust workforce",
+          "description": null,
+          "displayOrder": 28,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 62,
+          "name": "Alternative provision setting workforce",
+          "description": null,
+          "displayOrder": 29,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 63,
+          "name": "Early years workforce",
+          "description": null,
+          "displayOrder": 30,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 64,
+          "name": "Further education workforce",
+          "description": null,
+          "displayOrder": 31,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 65,
+          "name": "Higher education workforce",
+          "description": null,
+          "displayOrder": 32,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 66,
+          "name": "School workforce",
+          "description": null,
+          "displayOrder": 33,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 67,
+          "name": "SEND professional",
+          "description": null,
+          "displayOrder": 34,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 68,
+          "name": "Employer (1-249 employees)",
+          "description": null,
+          "displayOrder": 35,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 69,
+          "name": "Employer (250 or more employees)",
+          "description": null,
+          "displayOrder": 36,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 70,
+          "name": "Self-employed person",
+          "description": null,
+          "displayOrder": 37,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 71,
+          "name": "Business support officer (local authority)",
+          "description": null,
+          "displayOrder": 38,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 72,
+          "name": "Digital professional (local authority)",
+          "description": null,
+          "displayOrder": 39,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 73,
+          "name": "Finance support officer (local authority)",
+          "description": null,
+          "displayOrder": 40,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 74,
+          "name": "Senior leader (local authority)",
+          "description": null,
+          "displayOrder": 41,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 75,
+          "name": "Technology professional (local authority)",
+          "description": null,
+          "displayOrder": 42,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 76,
+          "name": "Adult (19-25) (NEET)",
+          "description": null,
+          "displayOrder": 43,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 77,
+          "name": "Adult career seeker (starter or changer)",
+          "description": null,
+          "displayOrder": 44,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 78,
+          "name": "Young person (16-18) (career seeker)",
+          "description": null,
+          "displayOrder": 45,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 79,
+          "name": "Young person (16-18) (NEET)",
+          "description": null,
+          "displayOrder": 46,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 80,
+          "name": "Young person with SEND (16-25) (career seeker)",
+          "description": null,
+          "displayOrder": 47,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 81,
+          "name": "Expectant parent",
+          "description": null,
+          "displayOrder": 48,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 82,
+          "name": "Parent or carer of adult learner",
+          "description": null,
+          "displayOrder": 49,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 83,
+          "name": "Parent or carer of career seeker",
+          "description": null,
+          "displayOrder": 50,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 84,
+          "name": "Parent or carer of child (early years age)",
+          "description": null,
+          "displayOrder": 51,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 85,
+          "name": "Parent or carer of child (primary age)",
+          "description": null,
+          "displayOrder": 52,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 86,
+          "name": "Parent or carer of child (secondary age)",
+          "description": null,
+          "displayOrder": 53,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 87,
+          "name": "Parent or carer of child (SEND)",
+          "description": null,
+          "displayOrder": 54,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 88,
+          "name": "Parent or carer of young person (16-18)",
+          "description": null,
+          "displayOrder": 55,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 89,
+          "name": "Colleague in another part of government (data user)",
+          "description": null,
+          "displayOrder": 56,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 90,
+          "name": "Journalist (data user)",
+          "description": null,
+          "displayOrder": 57,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 91,
+          "name": "Member of a professional network (data user)",
+          "description": null,
+          "displayOrder": 58,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 92,
+          "name": "Professional representative bodies workforce (data user)",
+          "description": null,
+          "displayOrder": 59,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 93,
+          "name": "Researcher (data user)",
+          "description": null,
+          "displayOrder": 60,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 94,
+          "name": "Trade union bodies workforce (data user)",
+          "description": null,
+          "displayOrder": 61,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 95,
+          "name": "Children's care home workforce",
+          "description": null,
+          "displayOrder": 62,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 96,
+          "name": "Children's centre staff member",
+          "description": null,
+          "displayOrder": 63,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 97,
+          "name": "Early intervention practitioner",
+          "description": null,
+          "displayOrder": 64,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 98,
+          "name": "Early intervention support worker",
+          "description": null,
+          "displayOrder": 65,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 99,
+          "name": "Family hub practitioner",
+          "description": null,
+          "displayOrder": 66,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 100,
+          "name": "Family support worker",
+          "description": null,
+          "displayOrder": 67,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 101,
+          "name": "Personal adviser (social care workforce)",
+          "description": null,
+          "displayOrder": 68,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 102,
+          "name": "Social worker",
+          "description": null,
+          "displayOrder": 69,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 103,
+          "name": "Chief Social Worker for Children and Families",
+          "description": null,
+          "displayOrder": 70,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 104,
+          "name": "Child Protection Lead Practitioner",
+          "description": null,
+          "displayOrder": 71,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 105,
+          "name": "Practice leader (social worker)",
+          "description": null,
+          "displayOrder": 72,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 106,
+          "name": "Practice supervisor (social worker)",
+          "description": null,
+          "displayOrder": 73,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 107,
+          "name": "Principal Child and Family Social Worker",
+          "description": null,
+          "displayOrder": 74,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 108,
+          "name": "Academy governor",
+          "description": null,
+          "displayOrder": 75,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 109,
+          "name": "Academy headteacher (primary)",
+          "description": null,
+          "displayOrder": 76,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 110,
+          "name": "Academy headteacher (secondary)",
+          "description": null,
+          "displayOrder": 77,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 111,
+          "name": "Academy higher level teaching assistant",
+          "description": null,
+          "displayOrder": 78,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 112,
+          "name": "Academy school business professional",
+          "description": null,
+          "displayOrder": 79,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 113,
+          "name": "Academy support staff",
+          "description": null,
+          "displayOrder": 80,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 114,
+          "name": "Academy teacher (primary)",
+          "description": null,
+          "displayOrder": 81,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 115,
+          "name": "Academy teacher (secondary)",
+          "description": null,
+          "displayOrder": 82,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 116,
+          "name": "Academy teaching assistant",
+          "description": null,
+          "displayOrder": 83,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 117,
+          "name": "Academy trustee",
+          "description": null,
+          "displayOrder": 84,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 118,
+          "name": "Alternative provision setting mentor",
+          "description": null,
+          "displayOrder": 85,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 119,
+          "name": "Alternative provision setting support assistant",
+          "description": null,
+          "displayOrder": 86,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 120,
+          "name": "Alternative provision setting teacher",
+          "description": null,
+          "displayOrder": 87,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 121,
+          "name": "Early years teacher",
+          "description": null,
+          "displayOrder": 88,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 122,
+          "name": "College leader",
+          "description": null,
+          "displayOrder": 89,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 123,
+          "name": "College support staff",
+          "description": null,
+          "displayOrder": 90,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 124,
+          "name": "Lecturer (further education)",
+          "description": null,
+          "displayOrder": 91,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 125,
+          "name": "Lecturer (higher education)",
+          "description": null,
+          "displayOrder": 92,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 126,
+          "name": "University leader",
+          "description": null,
+          "displayOrder": 93,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 127,
+          "name": "University support staff",
+          "description": null,
+          "displayOrder": 94,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 128,
+          "name": "ECHP coordinator",
+          "description": null,
+          "displayOrder": 95,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 129,
+          "name": "SEN coordinator",
+          "description": null,
+          "displayOrder": 96,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 130,
+          "name": "SEND speech and language therapist",
+          "description": null,
+          "displayOrder": 97,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 131,
+          "name": "SEND teacher",
+          "description": null,
+          "displayOrder": 98,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 132,
+          "name": "SEND teaching assistant",
+          "description": null,
+          "displayOrder": 99,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 133,
+          "name": "Headteacher (primary school)",
+          "description": null,
+          "displayOrder": 100,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 134,
+          "name": "Headteacher (secondary school)",
+          "description": null,
+          "displayOrder": 101,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 135,
+          "name": "Higher level teaching assistant",
+          "description": null,
+          "displayOrder": 102,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 136,
+          "name": "School business professional",
+          "description": null,
+          "displayOrder": 103,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 137,
+          "name": "School governor",
+          "description": null,
+          "displayOrder": 104,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 138,
+          "name": "School support staff",
+          "description": null,
+          "displayOrder": 105,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 139,
+          "name": "Teacher (primary school)",
+          "description": null,
+          "displayOrder": 106,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 140,
+          "name": "Teacher (secondary school)",
+          "description": null,
+          "displayOrder": 107,
+          "active": true,
+          "categorisationGroupId": 5
+        },
+        {
+          "id": 141,
+          "name": "Teaching assistant",
+          "description": null,
+          "displayOrder": 108,
           "active": true,
           "categorisationGroupId": 5
         }

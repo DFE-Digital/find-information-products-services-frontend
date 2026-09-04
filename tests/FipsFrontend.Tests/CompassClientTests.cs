@@ -62,7 +62,7 @@ public class CompassClientTests
 
         var bundle = await client.GetFipsConfigurationAsync();
 
-        Assert.That(bundle.Channels!.Select(c => c.Name), Is.EquivalentTo(new[] { "Web", "Native app", "Telephone", "Post" }));
+        Assert.That(bundle.Channels!.Select(c => c.Name), Is.SupersetOf(new[] { "Web", "Native app", "Telephone", "Post" }), "the seed's own channels, beside the taxonomy fixture's");
         Assert.That(bundle.UserGroups!.Single(g => g.Name == "Teachers").Children, Has.Count.EqualTo(2));
         Assert.That(bundle.CategorisationGroups!.Select(g => g.Name), Does.Contain("Phase"));
         Assert.That(app.Outbound.Snapshot(), Has.One.EndsWith("/seeded/api/v1/ServiceRegister/fips/configuration"), "the request carries the scenario prefix from the base address");
