@@ -140,6 +140,54 @@ public class CompassProductsPageTests
         Assert.That(Html.Hrefs(page, ".govuk-grid-column-three-quarters table.govuk-table a"), Has.All.StartWith("/compass/products?"), "a category's link filters this listing by that value");
     }
 
+    /// <summary>The categories tab's rows as (name, description), from the table that has a description column.</summary>
+    private static IReadOnlyList<(string Name, string Description)> CategoryDescriptions(AngleSharp.Html.Dom.IHtmlDocument page) =>
+        page.QuerySelectorAll("table.govuk-table tbody tr")
+            .Select(row => row.QuerySelectorAll("td").Select(Html.Text).ToList())
+            .Where(cells => cells.Count == 3)
+            .Select(cells => (cells[0], cells[2]))
+            .ToList();
+
+    [Test]
+    public async Task CompassProduct_CategoriesTab_ShowsTheDescriptionCompassHoldsForAValue()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // The seed describes the Transactional type; the description lives in COMPASS's configuration bundle, not on the product.
+        var rows = CategoryDescriptions(Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories")));
+
+        Assert.That(rows.Single(r => r.Name == "Transactional").Description, Does.StartWith("The user completes a task"));
+    }
+
+    [Test]
+    public async Task CompassProduct_CategoriesTab_SaysWhenCompassHoldsNoDescriptionForAValue()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // The seed describes four values only; the Private Beta phase (the row's spelling, which its tag folds into) is not one of
+        // them, and the cell says so rather than staying blank.
+        var rows = CategoryDescriptions(Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories")));
+
+        Assert.That(rows.Single(r => r.Name == "Private Beta").Description, Is.EqualTo("Not available: COMPASS holds no description for this value"));
+    }
+
+    [Test]
+    public async Task CompassProduct_CategoriesTab_ListsTheUsersOfTheProduct_LinkingIntoThisListing()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        // The assignment rule gives every seeded product a user group, carried as a categorisation tag.
+        var page = Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories"));
+
+        Assert.That(page.QuerySelectorAll("h2").Select(Html.Text), Does.Contain("Users of this product"));
+        var userGroupLinks = page.QuerySelectorAll("table.govuk-table a").Where(a => Html.Text(a) == "Chief Social Worker for Children and Families").ToList();
+        Assert.That(userGroupLinks, Has.Count.EqualTo(1));
+        Assert.That(userGroupLinks[0].GetAttribute("href"), Does.StartWith("/compass/products?keywords="));
+    }
+
     [Test]
     public async Task CompassProduct_WhenPhaseAndBusinessAreaAreBothTaggedAndNamedOnTheRow_EachShowsOnce()
     {

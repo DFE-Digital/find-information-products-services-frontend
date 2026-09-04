@@ -139,6 +139,8 @@ public class CompassProductsController(ICompassClient compass, CompassOptions op
             var product = await compass.GetProductAsync(id, cancellationToken);
             if (product is null) return NotFound();
             var page = PageProduct(product);
+            // A value's description lives in COMPASS's configuration bundle, not on the product row.
+            Describe(page, await compass.GetFipsConfigurationAsync(cancellationToken));
             var model = new ProductCategoriesViewModel
             {
                 Product = page,
@@ -195,6 +197,35 @@ public class CompassProductsController(ICompassClient compass, CompassOptions op
         "SENIOR RESPONSIBLE OFFICER" or "SENIOR RESPONSIBLE OWNER" => p => p.SeniorResponsibleOfficer ??= [],
         _ => null,
     };
+
+    private const string NoDescription = "Not available: COMPASS holds no description for this value";
+
+    /// <summary>
+    /// Fills each category value's description from COMPASS's configuration bundle: the categorisation item of the
+    /// same group and name first, then the dedicated lookup row of the same name, and a plain statement when neither
+    /// holds one, so an empty cell on the page is never an unknown.
+    /// </summary>
+    private static void Describe(Product product, ServiceRegisterGetFipsConfigurationBundleResponse bundle)
+    {
+        var items = (bundle.CategorisationGroups ?? [])
+            .SelectMany(g => (g.Items ?? []).Select(i => (Group: g.Name ?? "", i.Name, i.Description)))
+            .ToList();
+        List<(string? Name, string? Description)> Lookup(string type) => type.ToUpperInvariant() switch
+        {
+            "CHANNEL" => (bundle.Channels ?? []).Select(c => (c.Name, c.Description)).ToList(),
+            "TYPE" => (bundle.Types ?? []).Select(t => (t.Name, t.Description)).ToList(),
+            "BUSINESS AREA" => (bundle.BusinessAreas ?? []).Select(b => (b.Name, b.Description)).ToList(),
+            "USER GROUP" => (bundle.UserGroups ?? []).Select(u => (u.Name, u.Description)).ToList(),
+            _ => [],
+        };
+        foreach (var value in product.CategoryValues ?? [])
+        {
+            var type = value.CategoryType?.Name ?? "";
+            var fromItem = items.FirstOrDefault(i => Is(i.Group, type) && Is(i.Name, value.Slug)).Description;
+            var fromLookup = Lookup(type).FirstOrDefault(l => Is(l.Name, value.Slug)).Description;
+            value.ShortDescription = new[] { fromItem, fromLookup }.FirstOrDefault(d => !string.IsNullOrWhiteSpace(d)) ?? NoDescription;
+        }
+    }
 
     /// <summary>The categories tab's rows, grouped by type as the CMS-backed page groups them; a value's link filters this listing by its name.</summary>
     private static List<ProductCategoryInfo> CategoryInfo(Product product) =>

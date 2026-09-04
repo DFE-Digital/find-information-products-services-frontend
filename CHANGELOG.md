@@ -60,13 +60,14 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ### Added
 
-- The products listing, product page, and its categories tab read from COMPASS (#309, #312, #313), at `/compass/products`,
-  `/compass/product/{id}`, and `/compass/product/{id}/categories`, rendered by the CMS-backed pages' own views so the two
-  look the same: COMPASS's vocabularies are the filters, its products the results, with filtering and paging done by COMPASS,
-  and only the products COMPASS holds as Active listed, as the CMS-backed listing lists Active products.
-  What COMPASS does not supply (FIPS IDs, short descriptions, sub-group and CMDB filters) is marked as such on the page,
-  which also says plainly when COMPASS is not configured or cannot be reached (#316). A COMPASS product's page says in its identifiers
-  that it has no FIPS ID and why, rather than omitting the row.
+- A second copy of the products listing, the product page, and its categories tab, reading from COMPASS instead of
+  the CMS (#309, #312, #313). They live at `/compass/products`, `/compass/product/{id}`, and
+  `/compass/product/{id}/categories`, and use the same page templates as the CMS-backed pages, so they look the same.
+  The filters are COMPASS's own categories, the results are its products, and COMPASS does the filtering and paging.
+  Only products that COMPASS marks as Active are listed, which is what the CMS-backed listing does too.
+  Where COMPASS has no equivalent of something the CMS page shows (FIPS IDs, short descriptions, the sub-group and
+  CMDB filters, a category description), the page says so in that place instead of leaving a gap. It also says plainly
+  when COMPASS is not set up or cannot be reached (#316).
 
 ### Changed
 
