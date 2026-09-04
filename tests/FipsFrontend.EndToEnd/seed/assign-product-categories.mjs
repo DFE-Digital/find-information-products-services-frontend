@@ -95,15 +95,26 @@ const run = async () => {
         picks: picksFor(productIndex(p.cmdb_sys_id, p.title), byType).map((k) => k.value),
     }));
 
-    console.log(`\nWould assign ${plan.reduce((n, x) => n + x.picks.length, 0)} value(s) across ${plan.length} products`);
+    console.log(`\nThe rule assigns ${plan.reduce((n, x) => n + x.picks.length, 0)} value(s) across ${plan.length} products`);
     for (const x of plan.slice(0, 3)) {
         console.log(`  ${x.product.title?.slice(0, 40).padEnd(40)} → ${x.picks.map((v) => v.name).join(', ')}`);
     }
+
+    // Only a product whose values or state differ from the rule's is written: a PUT moves the product's updatedAt
+    // whether or not anything in it changed, so a run that changes nothing must send nothing.
+    const same = (a, b) => a.length === b.length && a.every((id) => b.includes(id));
+    const differing = plan.filter((x) => {
+        const current = (x.product.category_values ?? []).map((v) => v.documentId);
+        const wanted = x.picks.map((v) => v.documentId);
+        return !same(current, wanted) || (activate && x.product.state !== 'Active');
+    });
+    console.log(`Differs from the rule: ${differing.length} product(s)`);
+    if (!differing.length) { console.log('Nothing to do.'); return; }
     if (!confirm) { console.log('\nDRY RUN — nothing written. Re-run with --confirm.'); return; }
 
     let done = 0;
     const failed = [];
-    for (const x of plan) {
+    for (const x of differing) {
         const payload = { category_values: x.picks.map((v) => v.documentId) };
         if (activate) payload.state = 'Active';
         const res = await api(`/products/${x.product.documentId}`, {
@@ -113,7 +124,7 @@ const run = async () => {
         if (res.ok) done += 1; else failed.push(`${x.product.title}: ${res.status}`);
     }
     if (activate) console.log('  --activate: state set to Active. This is a fixture choice; the ingest produces New.');
-    console.log(`\nAssigned ${done}/${plan.length}`);
+    console.log(`\nAssigned ${done}/${differing.length}`);
     if (failed.length) console.log(`FAILED (${failed.length}): ${failed.slice(0, 5).join('; ')}`);
 
     // Verify by re-reading, and check coverage PER TYPE — a product carrying one value looks assigned
