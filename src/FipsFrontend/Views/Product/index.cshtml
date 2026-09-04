@@ -95,15 +95,15 @@
             </button>
             <ul class="dfe-vertical-nav__section" id="side-navigation">
                 <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Overview</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="@Model.ProductPath/@Model.Product.LinkIdentifier@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Overview</a>
                 </li>
                 <li class="dfe-vertical-nav__section-item">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/categories@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Categories</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="@Model.ProductPath/@Model.Product.LinkIdentifier/categories@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Categories</a>
                 </li>
                 @if (ViewData["AssuranceEnabled"] as bool? == true)
                 {
                     <li class="dfe-vertical-nav__section-item">
-                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(string.IsNullOrWhiteSpace(Model.Product.FipsId) ? Model.Product.DocumentId : Model.Product.FipsId)/assurance@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Assurance</a>
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="@Model.ProductPath/@Model.Product.LinkIdentifier/assurance@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Assurance</a>
                     </li>
                 }
             </ul>
@@ -251,21 +251,36 @@
   <div class="govuk-details__text">
         @if (!string.IsNullOrEmpty(Model.Product.FipsId) ||
              !string.IsNullOrEmpty(Model.Product.CmdbSysId) ||
-             !string.IsNullOrEmpty(Model.Product.DocumentId))
+             !string.IsNullOrEmpty(Model.Product.DocumentId) ||
+             Model.Product.CompassId is not null)
         {
             <dl class="govuk-summary-list">
-                @if (!string.IsNullOrEmpty(Model.Product.FipsId))
-                {
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key">FIPS ID</dt>
-                        <dd class="govuk-summary-list__value">@Model.Product.FipsId</dd>
-                    </div>
-                }
+                <div class="govuk-summary-list__row">
+                    <dt class="govuk-summary-list__key">FIPS ID</dt>
+                    <dd class="govuk-summary-list__value">
+                        @if (!string.IsNullOrEmpty(Model.Product.FipsId))
+                        {
+                            @Model.Product.FipsId
+                        }
+                        else
+                        {
+                            @* Every CMS product carries a generated FIPS ID, so a product without one came from COMPASS, which identifies products by its own id. *@
+                            <span class="govuk-body-s govuk-!-font-weight-normal">Not available: COMPASS identifies products by its own id</span>
+                        }
+                    </dd>
+                </div>
                 @if (!string.IsNullOrEmpty(Model.Product.DocumentId))
                 {
                     <div class="govuk-summary-list__row">
                         <dt class="govuk-summary-list__key">Document ID</dt>
                         <dd class="govuk-summary-list__value">@Model.Product.DocumentId</dd>
+                    </div>
+                }
+                @if (Model.Product.CompassId is { } compassId)
+                {
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">COMPASS ID</dt>
+                        <dd class="govuk-summary-list__value">@compassId</dd>
                     </div>
                 }
                 <div class="govuk-summary-list__row">
@@ -309,8 +324,8 @@
             return referrer;
         }
         
-        // Default back to products page
-        return "/products";
+        // Default back to the listing this page belongs to
+        return Model.ListingPath;
     }
     
     public string GetBackLinkText(string? returnUrl)

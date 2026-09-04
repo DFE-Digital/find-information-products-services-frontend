@@ -1161,7 +1161,7 @@
     // The product page's address: by FIPS id where there is one, else by the source's own identifier.
     // Both links on a card use it, so the card body opens the same product as the title.
     private string ProductUrl(FipsFrontend.Models.Product product) =>
-        $"{Model.ProductPath}/{(string.IsNullOrWhiteSpace(product.FipsId) ? product.DocumentId : product.FipsId)}";
+        $"{Model.ProductPath}/{product.LinkIdentifier}";
 
     // Paging links are built from the listing path, not generated from the controller name.
     // Link generation rejects an attribute-routed action when a route value is named "page", the name MVC reserves for Razor Pages,

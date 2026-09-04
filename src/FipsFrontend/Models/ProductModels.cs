@@ -36,6 +36,14 @@ public class Product
     public int Id { get; set; }
     [JsonPropertyName("documentId")]
     public string? DocumentId { get; set; }
+
+    /// <summary>COMPASS's identifier for the product, when the product came from COMPASS; the CMS's document id is not reused for it.</summary>
+    [JsonIgnore]
+    public Guid? CompassId { get; set; }
+
+    /// <summary>The identifier a link to this product carries: its FIPS ID when it has one, else COMPASS's identifier, else the CMS's document id.</summary>
+    [JsonIgnore]
+    public string? LinkIdentifier => !string.IsNullOrWhiteSpace(FipsId) ? FipsId : CompassId?.ToString() ?? DocumentId;
     public string Title { get; set; } = string.Empty;
     [JsonPropertyName("cmdb_sys_id")]
     public string? CmdbSysId { get; set; }

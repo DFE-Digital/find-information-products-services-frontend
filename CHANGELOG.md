@@ -60,11 +60,13 @@ summary under the heading, delete its "None" groups, and paste this above it:
 
 ### Added
 
-- The products listing and product page read from COMPASS, at `/compass/products` and `/compass/product/{id}`, looking as
-  they do from the CMS: COMPASS's vocabularies are the filters, its products the results, with filtering and paging done by COMPASS,
+- The products listing, product page, and its categories tab read from COMPASS (#309, #312, #313), at `/compass/products`,
+  `/compass/product/{id}`, and `/compass/product/{id}/categories`, rendered by the CMS-backed pages' own views so the two
+  look the same: COMPASS's vocabularies are the filters, its products the results, with filtering and paging done by COMPASS,
   and only the products COMPASS holds as Active listed, as the CMS-backed listing lists Active products.
   What COMPASS does not supply (FIPS IDs, short descriptions, sub-group and CMDB filters) is marked as such on the page,
-  which also says plainly when COMPASS is not configured or cannot be reached.
+  which also says plainly when COMPASS is not configured or cannot be reached (#316). A COMPASS product's page says in its identifiers
+  that it has no FIPS ID and why, rather than omitting the row.
 
 ### Changed
 
@@ -120,13 +122,13 @@ summary under the heading, delete its "None" groups, and paste this above it:
   tests reach their product by its title rather than by a content id that only one database ever held.
 - **Browser suite:** a run's output names the timeouts it uses and says when they are Playwright's defaults, so a run
   left at the defaults against a slow target is recognised from its log rather than diagnosed afterwards.
-- **Content source:** the records for the COMPASS service-register API, generated from its controllers' source
+- **Content source:** the records for the COMPASS service-register API (#309), generated from its controllers' source
   (it publishes no API specification and returns anonymous objects), with tests over responses recorded from a locally seeded copy.
   Generated from and recorded against COMPASS `main` at `e6657ad`, which names each product's channels and types;
   the recordings say which commit they came from.
 - **Tests:** rendered pages are parsed and queried as a document rather than pattern-matched, so a test names the element
   it means and does not break on attribute order or whitespace.
-- **Content source:** a stand-in COMPASS, `src/Compass.FipsApi.Stub`, serves those recordings and three more scenarios
+- **Content source:** a stand-in COMPASS, `src/Compass.FipsApi.Stub` (#309, #316), serves those recordings and three more scenarios
   (empty, drifted, unavailable) by URL prefix, so the application and its tests read COMPASS without one running.
   The `Compass` settings section is optional: absent means off.
 

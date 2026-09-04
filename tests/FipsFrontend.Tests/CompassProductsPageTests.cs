@@ -82,29 +82,62 @@ public class CompassProductsPageTests
         Assert.That(page.QuerySelectorAll(".filter-badge"), Is.Not.Empty, "the chosen filters are shown as removable badges");
     }
 
+    // The product page is the CMS-backed product's own view fed from COMPASS, so it is recognised by that page's
+    // furniture: the masthead strip, the Overview and Categories navigation, and the three sections of the overview.
+    private const string ProductId = "00000000-0000-0000-0002-000000000014";
+    private const string ProductWithChannelsAndTypes = "00000000-0000-0000-0001-000000000001";
+
+    private static IReadOnlyList<string> TableHeaders(AngleSharp.Html.Dom.IHtmlDocument page) =>
+        page.QuerySelectorAll("table.govuk-table th").Select(Html.Text).ToList();
+
+    /// <summary>The categories tab's rows as (name, type), across every table on the page.</summary>
+    private static IReadOnlyList<(string Name, string Type)> CategoryRows(AngleSharp.Html.Dom.IHtmlDocument page) =>
+        page.QuerySelectorAll("table.govuk-table tbody tr")
+            .Select(row => row.QuerySelectorAll("td").Select(Html.Text).ToList())
+            .Where(cells => cells.Count >= 2)
+            .Select(cells => (cells[0], cells[1]))
+            .ToList();
+
     [Test]
-    public async Task CompassProduct_WhenSeeded_ShowsTheProductFromCompass()
+    public async Task CompassProduct_WhenSeeded_IsTheCmsBackedProductPage_FedFromCompass()
     {
         using var app = new FipsApplication(settings: Configured);
         app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
 
-        var html = await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000014");
+        var page = Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductId}"));
 
-        Assert.That(html, Does.Contain("from COMPASS").And.Contain("govuk-summary-list"));
-        Assert.That(app.Outbound.Snapshot(), Has.One.EndsWith("/products/00000000-0000-0000-0002-000000000014"));
+        Assert.That(TableHeaders(page), Is.EqualTo(new[] { "Phase", "Business area", "Contacts", "View product" }), "the masthead strip of the CMS-backed product page");
+        Assert.That(Html.Hrefs(page, "nav.dfe-vertical-nav a"), Is.EqualTo(new[] { $"/compass/product/{ProductId}", $"/compass/product/{ProductId}/categories" }), "Overview and Categories, pointing at this product's own pages");
+        Assert.That(page.QuerySelectorAll("h2").Select(Html.Text), Is.SupersetOf(new[] { "Description", "Responsibilities and contacts" }));
+        Assert.That(page.QuerySelector("details .govuk-details__summary-text") is { } identifiers && Html.Text(identifiers) == "Product identifiers");
+        Assert.That(Html.Hrefs(page, "a.govuk-back-link"), Is.EqualTo(new[] { "/compass/products" }), "back goes to this listing, not the CMS-backed one");
+        Assert.That(app.Outbound.Snapshot(), Has.One.EndsWith($"/products/{ProductId}"));
     }
 
     [Test]
-    public async Task CompassProduct_WhenCompassLinksItToChannelsAndTypes_TheProductPageShowsThem()
+    public async Task CompassProduct_WhatCompassCannotSupply_ShowsAsNotAvailable_AndItsOwnIdShowsAsCompassId()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
+
+        var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductId}")));
+
+        Assert.That(rows, Is.SupersetOf(new[] { ("FIPS ID", "Not available: COMPASS identifies products by its own id"), ("COMPASS ID", ProductId), ("CMDB System ID", "No CMDB entry found") }));
+        Assert.That(rows.Select(r => r.Key), Does.Not.Contain("Document ID"), "the CMS's document id is not reused for COMPASS's identifier");
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenCompassLinksItToChannelsAndTypes_TheCategoriesTabShowsThem_LinkingIntoThisListing()
     {
         using var app = new FipsApplication(settings: Configured);
         app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
 
         // The seed links this product to two channels and two types; the recording is its own file in the scenario.
-        var page = Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0001-000000000001"));
+        var page = Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories"));
 
         Assert.That(Html.H1Headings(page), Is.EqualTo(new[] { "Apply for Teacher Training" }));
-        Assert.That(Html.SummaryRows(page), Is.SupersetOf(new[] { ("Channel", "Web"), ("Channel", "Native app"), ("Type", "Transactional"), ("Type", "Information") }));
+        Assert.That(CategoryRows(page), Is.SupersetOf(new[] { ("Web", "Channel"), ("Native app", "Channel"), ("Transactional", "Type"), ("Information", "Type") }));
+        Assert.That(Html.Hrefs(page, ".govuk-grid-column-three-quarters table.govuk-table a"), Has.All.StartWith("/compass/products?"), "a category's link filters this listing by that value");
     }
 
     [Test]
@@ -114,11 +147,11 @@ public class CompassProductsPageTests
         app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
 
         // The drift scenario's product carries Live and Digital Services both as categorisation tags and as the row's own phase and business area.
-        var page = Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000001"));
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000001/categories"));
 
-        var rows = Html.SummaryRows(page);
-        Assert.That(rows.Where(r => r.Key == "Phase"), Is.EqualTo(new[] { ("Phase", "Live") }));
-        Assert.That(rows.Where(r => r.Key == "Business area"), Is.EqualTo(new[] { ("Business area", "Digital Services") }));
+        var rows = CategoryRows(page);
+        Assert.That(rows.Where(r => r.Type == "Phase"), Is.EqualTo(new[] { ("Live", "Phase") }));
+        Assert.That(rows.Where(r => r.Type == "Business area"), Is.EqualTo(new[] { ("Digital Services", "Business area") }));
     }
 
     [Test]
@@ -128,10 +161,10 @@ public class CompassProductsPageTests
         app.Outbound.Respond = r => Serve(r, Scenarios.Seeded);
 
         // The seed both links this product to the Web channel and Transactional type and tags it "Channel: Web" and "Type: Transactional".
-        var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0001-000000000001")));
+        var rows = CategoryRows(Html.Parse(await app.Client.GetStringAsync($"/compass/product/{ProductWithChannelsAndTypes}/categories")));
 
-        Assert.That(rows.Where(r => r.Key == "Channel"), Is.EqualTo(new[] { ("Channel", "Web"), ("Channel", "Native app") }));
-        Assert.That(rows.Where(r => r.Key == "Type"), Is.EqualTo(new[] { ("Type", "Transactional"), ("Type", "Information") }));
+        Assert.That(rows.Where(r => r.Type == "Channel"), Is.EqualTo(new[] { ("Web", "Channel"), ("Native app", "Channel") }));
+        Assert.That(rows.Where(r => r.Type == "Type"), Is.EqualTo(new[] { ("Transactional", "Type"), ("Information", "Type") }));
     }
 
     [Test]
@@ -141,9 +174,21 @@ public class CompassProductsPageTests
         app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
 
         // The drift scenario's second product is tagged "Phase: Live" while its own phase field says "Public beta".
-        var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000002")));
+        var rows = CategoryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000002/categories")));
 
-        Assert.That(rows.Where(r => r.Key == "Phase"), Is.EqualTo(new[] { ("Phase", "Live"), ("Phase", "Public beta") }), "a conflict in COMPASS's data is shown, not resolved here");
+        Assert.That(rows.Where(r => r.Type == "Phase"), Is.EqualTo(new[] { ("Public beta", "Phase"), ("Live (from COMPASS's categorisation group, not its phase field)", "Phase") }),
+            "a conflict in COMPASS's data is shown with its sources, not resolved here");
+    }
+
+    [Test]
+    public async Task CompassProduct_WhenTheRowAndItsTagDisagreeOnThePhase_TheMastheadShowsTheRowsPhase()
+    {
+        using var app = new FipsApplication(settings: Configured);
+        app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
+
+        var page = Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000002"));
+
+        Assert.That(Html.Text(page.QuerySelector(".dfe-masthead .govuk-tag")), Is.EqualTo("Public beta"), "the row's own phase field, the direct source, is what the strip shows");
     }
 
     [Test]
@@ -153,10 +198,10 @@ public class CompassProductsPageTests
         app.Outbound.Respond = r => Serve(r, Scenarios.Drift);
 
         // The drift scenario's third product names the same person as product manager and as service owner. COMPASS
-        // sends one contact row per role, and the page shows each role with its person, not one person once.
+        // sends one contact row per role, and the page shows each role with its person, in the order the view lists roles.
         var rows = Html.SummaryRows(Html.Parse(await app.Client.GetStringAsync("/compass/product/00000000-0000-0000-0002-000000000003")));
 
-        Assert.That(rows.Where(r => r.Value.Contains("One Person")), Is.EqualTo(new[] { ("Product manager", "One Person"), ("Service Owner", "One Person") }));
+        Assert.That(rows.Where(r => r.Value.Contains("One Person")), Is.EqualTo(new[] { ("Service Owner", "One Person"), ("Product Manager", "One Person") }));
     }
 
     [Test]

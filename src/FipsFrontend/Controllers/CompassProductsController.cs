@@ -98,18 +98,30 @@ public class CompassProductsController(ICompassClient compass, CompassOptions op
         return View("~/Views/Products/Index.cshtml", model);
     }
 
+    // The product page and its categories tab are the CMS-backed product's own views, fed from COMPASS: one markup,
+    // two data sources, so replacing the CMS-backed pages later is a change of controller and nothing else. What
+    // COMPASS has and the CMS does not (its own id) is a field of its own that the views show when it is there.
     [HttpGet("product/{id:guid}")]
-    public async Task<IActionResult> Product(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Product(Guid id, string? returnUrl = null, CancellationToken cancellationToken = default)
     {
         if (!options.IsConfigured) return View("State", CompassState.NotConfigured);
         try
         {
             // Any product COMPASS knows renders, whatever its status: the listing shows Active products only, but the
             // CMS-backed product page renders any product found by id, and this page follows it. A product that has
-            // left the listing stays reachable by its link, with its status shown on the page.
+            // left the listing stays reachable by its link.
             var product = await compass.GetProductAsync(id, cancellationToken);
             if (product is null) return NotFound();
-            return View("Product", new CompassProductViewModel(Product(product), product.Contacts ?? [], product.LastUpdated) { PageTitle = product.ProductName });
+            var model = new ProductViewModel
+            {
+                Product = PageProduct(product),
+                ListingPath = ListingPath,
+                ProductPath = ProductPath,
+                PageTitle = product.ProductName ?? "",
+                PageDescription = $"View detailed information about {product.ProductName}",
+            };
+            ProductPageViewData(returnUrl);
+            return View("~/Views/Product/index.cshtml", model);
         }
         catch (CompassUnavailableException e)
         {
@@ -117,6 +129,90 @@ public class CompassProductsController(ICompassClient compass, CompassOptions op
             return View("State", CompassState.Unavailable);
         }
     }
+
+    [HttpGet("product/{id:guid}/categories")]
+    public async Task<IActionResult> Categories(Guid id, string? returnUrl = null, CancellationToken cancellationToken = default)
+    {
+        if (!options.IsConfigured) return View("State", CompassState.NotConfigured);
+        try
+        {
+            var product = await compass.GetProductAsync(id, cancellationToken);
+            if (product is null) return NotFound();
+            var page = PageProduct(product);
+            var model = new ProductCategoriesViewModel
+            {
+                Product = page,
+                CategoryInfo = CategoryInfo(page),
+                ListingPath = ListingPath,
+                ProductPath = ProductPath,
+                PageTitle = $"{page.Title} - Categories",
+                PageDescription = $"View all categories and values assigned to {page.Title}",
+            };
+            ProductPageViewData(returnUrl);
+            return View("~/Views/Product/categories.cshtml", model);
+        }
+        catch (CompassUnavailableException e)
+        {
+            logger.LogError(e, "COMPASS could not serve product {Id}: {Endpoint}", id, e.Endpoint);
+            return View("State", CompassState.Unavailable);
+        }
+    }
+
+    /// <summary>What the product views read from ViewData: a return link only back into this listing, and no assurance tab.</summary>
+    private void ProductPageViewData(string? returnUrl)
+    {
+        ViewData["ActiveNav"] = "products";
+        ViewData["AssuranceEnabled"] = false;
+        ViewData["ReturnUrl"] = returnUrl is not null && returnUrl.StartsWith(ListingPath, StringComparison.Ordinal) ? returnUrl : null;
+    }
+
+    /// <summary>The listing's product row plus what only the product page shows: the contacts, in the roles the view renders.</summary>
+    private Product PageProduct(ServiceRegisterGetProductsResponseDataItem p)
+    {
+        var product = Product(p);
+        foreach (var contact in p.Contacts ?? [])
+        {
+            var person = new EntraUser { DisplayName = contact.Name, EmailAddress = contact.Email };
+            var list = Role(contact.Role);
+            if (list is null)
+            {
+                // The view renders five roles; a role outside them has nowhere to show, and hiding it silently would
+                // misstate the contact count, so it is said here and left out.
+                logger.LogWarning("COMPASS product {Id} names a contact with a role the product page does not show: {Role}", p.Id, contact.Role);
+                continue;
+            }
+            list(product).Add(person);
+        }
+        return product;
+    }
+
+    private static Func<Product, List<EntraUser>>? Role(string? role) => role?.Trim().ToUpperInvariant() switch
+    {
+        "SERVICE OWNER" => p => p.ServiceOwner ??= [],
+        "PRODUCT MANAGER" => p => p.ProductManager ??= [],
+        "DELIVERY MANAGER" => p => p.DeliveryManager ??= [],
+        "INFORMATION ASSET OWNER" => p => p.InformationAssetOwner ??= [],
+        "SENIOR RESPONSIBLE OFFICER" or "SENIOR RESPONSIBLE OWNER" => p => p.SeniorResponsibleOfficer ??= [],
+        _ => null,
+    };
+
+    /// <summary>The categories tab's rows, grouped by type as the CMS-backed page groups them; a value's link filters this listing by its name.</summary>
+    private static List<ProductCategoryInfo> CategoryInfo(Product product) =>
+        (product.CategoryValues ?? [])
+            .GroupBy(v => v.CategoryType?.Name ?? "")
+            .Where(g => g.Key.Length > 0)
+            .OrderBy(g => g.Key)
+            .Select(g => new ProductCategoryInfo
+            {
+                CategoryTypeName = g.Key,
+                CategoryTypeSlug = g.First().CategoryType?.Slug ?? "",
+                CategoryValueNames = g.Select(v => v.Name).ToList(),
+                CategoryValueSlugs = g.Select(v => v.Slug).ToList(),
+                CategoryValueDescriptions = g.Select(v => v.ShortDescription ?? "").ToList(),
+                CategoryValueDocumentIds = g.Select(v => v.DocumentId ?? "").ToList(),
+                CategoryValueSearchTexts = g.Select(v => v.SearchText ?? "").ToList(),
+            })
+            .ToList();
 
     private static bool Is(string? a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
     private static List<string> List(string[]? values) => (values ?? []).Where(v => !string.IsNullOrWhiteSpace(v)).Distinct().ToList();
@@ -169,10 +265,10 @@ public class CompassProductsController(ICompassClient compass, CompassOptions op
         }
     }
 
-    /// <summary>A COMPASS row as the views' product: the id is COMPASS's, carried in DocumentId so the product link uses it.</summary>
+    /// <summary>A COMPASS row as the views' product: COMPASS's id in its own field, which the views' links use for a product with no FIPS ID.</summary>
     private static Product Product(ServiceRegisterGetProductsResponseDataItem p) => new()
     {
-        DocumentId = p.Id?.ToString(),
+        CompassId = p.Id,
         Title = p.ProductName ?? "(unnamed)",
         LongDescription = p.LongDescription,
         ShortDescription = p.LongDescription ?? "",
@@ -187,31 +283,46 @@ public class CompassProductsController(ICompassClient compass, CompassOptions op
     /// type lookups it is linked to, and the phase and business area named on the row itself. COMPASS can say the
     /// same thing twice (a "Channel: Web" tag and a link to the Web channel; a "Phase: Live" tag and phase "Live" on
     /// the row), and that shows once. Where two sources disagree (the row says one phase, the tag another) both
-    /// show, because hiding either would decide a conflict in COMPASS's data silently on its behalf.
+    /// show, the tag's value saying where it came from, because hiding either would decide a conflict in COMPASS's
+    /// data silently on its behalf.
     /// </summary>
     private static List<CategoryValue> Categories(ServiceRegisterGetProductsResponseDataItem p)
     {
-        var values = (p.Categories ?? [])
-            .Select(c => new CategoryValue { Id = c.Id ?? 0, Name = c.Name ?? "", CategoryType = new CategoryType { Name = c.GroupName ?? "" } })
-            .ToList();
-        values.AddRange((p.Channels ?? []).Select(c => new CategoryValue { Id = c.Id ?? 0, Name = c.Name ?? "", CategoryType = new CategoryType { Name = "Channel" } }));
-        values.AddRange((p.Types ?? []).Select(t => new CategoryValue { Id = t.Id ?? 0, Name = t.Name ?? "", CategoryType = new CategoryType { Name = "Type" } }));
-        if (!string.IsNullOrWhiteSpace(p.Phase))
-            values.Add(new CategoryValue { Name = p.Phase, CategoryType = new CategoryType { Name = "Phase" } });
-        if (!string.IsNullOrWhiteSpace(p.BusinessArea))
-            values.Add(new CategoryValue { Name = p.BusinessArea, CategoryType = new CategoryType { Name = "Business area" } });
+        // A value's slug is its plain name: this listing filters by name, so the categories tab's links carry it. The
+        // direct sources come first (the row's own phase and business area, the channel and type lookups it is linked
+        // to), then the categorisation tags; a tag that only repeats a direct value drops out, and a tag with no direct
+        // counterpart shows with its source named, so a reader can tell "Live" the row says from "Live" a tag says.
+        var values = new List<CategoryValue>();
+        if (!string.IsNullOrWhiteSpace(p.Phase)) values.Add(Value(null, p.Phase, "Phase"));
+        if (!string.IsNullOrWhiteSpace(p.BusinessArea)) values.Add(Value(null, p.BusinessArea, "Business area"));
+        values.AddRange((p.Channels ?? []).Select(c => Value(c.Id, c.Name, "Channel")));
+        values.AddRange((p.Types ?? []).Select(t => Value(t.Id, t.Name, "Type")));
+        values.AddRange((p.Categories ?? []).Select(c => Value(c.Id, c.Name, c.GroupName, fromTag: true)));
         return values
-            .Where(v => !string.IsNullOrWhiteSpace(v.Name))
-            .DistinctBy(v => (Type: (v.CategoryType?.Name ?? "").ToUpperInvariant(), Name: v.Name.ToUpperInvariant()))
+            .Where(v => !string.IsNullOrWhiteSpace(v.Slug))
+            .DistinctBy(v => (Type: (v.CategoryType?.Name ?? "").ToUpperInvariant(), Name: v.Slug.ToUpperInvariant()))
             .ToList();
+
+        static CategoryValue Value(int? id, string? name, string? type, bool fromTag = false)
+        {
+            var directSource = (type ?? "").ToUpperInvariant() switch
+            {
+                "PHASE" => "phase field",
+                "BUSINESS AREA" => "business area field",
+                "CHANNEL" => "channels",
+                "TYPE" => "types",
+                _ => null,
+            };
+            var shown = fromTag && directSource is not null ? $"{name} (from COMPASS's categorisation group, not its {directSource})" : name ?? "";
+            return new CategoryValue
+            {
+                Id = id ?? 0,
+                Name = shown,
+                Slug = name ?? "",
+                CategoryType = new CategoryType { Name = type ?? "", Slug = (type ?? "").ToLowerInvariant().Replace(' ', '-') },
+            };
+        }
     }
 }
 
 public enum CompassState { NotConfigured, Unavailable }
-
-public sealed class CompassProductViewModel(Product product, List<ServiceRegisterGetProductsResponseDataItemContact> contacts, DateTime? lastUpdated) : BaseViewModel
-{
-    public Product Product { get; } = product;
-    public List<ServiceRegisterGetProductsResponseDataItemContact> Contacts { get; } = contacts;
-    public DateTime? LastUpdated { get; } = lastUpdated;
-}

@@ -57,7 +57,7 @@
                                     }
                                     @if (totalContacts > 0)
                                     {
-                                        <a href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)#contacts" class="govuk-link" rel="noopener noreferrer">@totalContacts contacts</a>
+                                        <a href="@Model.ProductPath/@Model.Product.LinkIdentifier#contacts" class="govuk-link" rel="noopener noreferrer">@totalContacts contacts</a>
                                     }
                                     else
                                     {
@@ -92,15 +92,15 @@
             </button>
             <ul class="dfe-vertical-nav__section" id="side-navigation">
                 <li class="dfe-vertical-nav__section-item">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Overview</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="@Model.ProductPath/@Model.Product.LinkIdentifier@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Overview</a>
                 </li>
                 <li class="dfe-vertical-nav__section-item dfe-vertical-nav__section-item--current">
-                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)/categories@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Categories</a>
+                    <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="@Model.ProductPath/@Model.Product.LinkIdentifier/categories@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Categories</a>
                 </li>
                 @if (ViewData["AssuranceEnabled"] as bool? == true)
                 {
                     <li class="dfe-vertical-nav__section-item">
-                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="/product/@(Model.Product.FipsId ?? Model.Product.DocumentId)/assurance@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Assurance</a>
+                        <a class="dfe-vertical-nav__link govuk-link govuk-link--no-visited-state govuk-link--no-underline" href="@Model.ProductPath/@Model.Product.LinkIdentifier/assurance@(GetReturnUrlQueryString(ViewData["ReturnUrl"]?.ToString()))">Assurance</a>
                     </li>
                 }
             </ul>
@@ -135,7 +135,7 @@
                         {
                             <tr class="govuk-table__row">
                                 <td class="govuk-table__cell">
-                                    <a href="/products?@GetFilterParameter(categoryInfo.CategoryTypeName, categoryInfo.CategoryValueSlugs[i])" class="govuk-link govuk-link--no-visited-state">
+                                    <a href="@Model.ListingPath?@GetFilterParameter(categoryInfo.CategoryTypeName, categoryInfo.CategoryValueSlugs[i])" class="govuk-link govuk-link--no-visited-state">
                                         @categoryInfo.CategoryValueNames[i]
                                     </a>
                                 </td>
@@ -212,7 +212,7 @@
                         <tr class="govuk-table__row">
                             <td class="govuk-table__cell">
                                 <div>
-                                    <a href="/products?keywords=@Uri.EscapeDataString(userGroup.Name)" class="govuk-link govuk-link--no-visited-state">
+                                    <a href="@Model.ListingPath?keywords=@Uri.EscapeDataString(userGroup.Name)" class="govuk-link govuk-link--no-visited-state">
                                         @userGroup.Name
                                     </a>
                                     @if (searchTextCount > 0)
@@ -263,8 +263,8 @@
             return referrer;
         }
         
-        // Default back to products page
-        return "/products";
+        // Default back to the listing this page belongs to
+        return Model.ListingPath;
     }
     
     public string GetBackLinkText(string? returnUrl)
